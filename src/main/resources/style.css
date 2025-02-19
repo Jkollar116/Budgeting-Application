@@ -1,46 +1,165 @@
 body {
     font-family: Arial, sans-serif;
-    background-color: #f2f2f2;
+    margin: 0;
+    padding: 0;
+    background: linear-gradient(135deg, #2C003E, #4A1D5A);
+    color: #F5F5F5;
+}
+header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background-color: #3E1F5B;
+    padding: 15px 20px;
+    border-bottom: 2px solid #FF8C00;
+}
+header .logo {
+    font-size: 1.8rem;
+    font-weight: bold;
+}
+header nav ul {
+    list-style: none;
+    display: flex;
+    gap: 20px;
     margin: 0;
     padding: 0;
 }
-
-.login-container, .home-container {
-    width: 300px;
-    margin: 100px auto;
-    background: #fff;
-    padding: 30px;
-    border-radius: 5px;
-    box-shadow: 0px 0px 10px rgba(0,0,0,0.1);
-    text-align: center;
+header nav ul li a {
+    color: #FF8C00;
+    text-decoration: none;
+    font-weight: bold;
 }
-
-.login-container h2, .home-container h1 {
+header nav ul li a:hover {
+    text-decoration: underline;
+}
+.hero {
+    position: relative;
+    text-align: center;
+    padding: 80px 20px;
+    background-color: #3E1F5B;
+}
+.hero .hero-content {
+    position: relative;
+    z-index: 1;
+}
+.hero h1 {
+    font-size: 3rem;
     margin-bottom: 20px;
 }
-
+.hero p {
+    font-size: 1.2rem;
+    margin-bottom: 30px;
+}
+.dashboard {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 20px;
+    padding: 20px;
+}
+.card {
+    background-color: #3E1F5B;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.4);
+    transition: transform 0.3s, box-shadow 0.3s;
+    text-align: center;
+    margin-bottom: 15px;
+}
+.card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 6px 8px rgba(0,0,0,0.6);
+}
+.card h2 {
+    margin-top: 0;
+    font-size: 1.4rem;
+    margin-bottom: 10px;
+}
+.card p {
+    font-size: 0.95rem;
+    line-height: 1.4;
+    margin-bottom: 15px;
+}
+#chartContainer, #expensesPieChart, #netWorthChart, #incomeChart {
+    margin-top: 10px;
+    overflow: hidden;
+}
+#billRemindersDisplay {
+    font-size: 2.5rem;
+    font-weight: bold;
+}
+footer {
+    background-color: #3E1F5B;
+    text-align: center;
+    padding: 15px;
+    border-top: 2px solid #FF8C00;
+    font-size: 0.9rem;
+}
+.login-container {
+    width: 100%;
+    max-width: 400px;
+    margin: 80px auto;
+    background-color: #3E1F5B;
+    padding: 30px;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.4);
+    text-align: center;
+}
+.login-container h2 {
+    margin-bottom: 20px;
+    font-size: 1.8rem;
+}
+.login-container form {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
 .login-container input {
     width: 100%;
-    padding: 10px;
-    margin: 10px 0;
-    box-sizing: border-box;
+    padding: 12px;
+    border: 1px solid #FF8C00;
+    border-radius: 10px;
+    background-color: #4A1D5A;
+    color: #fff;
+    font-size: 1rem;
 }
-
 .login-container button {
     width: 100%;
-    padding: 10px;
-    background: #4285F4;
-    color: white;
+    padding: 12px;
+    background-color: #FF8C00;
     border: none;
-    border-radius: 3px;
+    border-radius: 10px;
+    color: #fff;
     cursor: pointer;
+    font-weight: bold;
+    transition: background-color 0.3s;
 }
-
-a {
-    color: #4285F4;
+.login-container button:hover {
+    background-color: #e07a00;
+}
+.login-container p {
+    font-size: 0.9rem;
+    margin-top: 15px;
+}
+.login-container a {
+    color: #FF8C00;
     text-decoration: none;
 }
-
-a:hover {
+.login-container a:hover {
     text-decoration: underline;
+}
+@media (max-width: 768px) {
+    .hero h1 {
+        font-size: 2.5rem;
+    }
+    .hero p {
+        font-size: 1rem;
+    }
+    header {
+        flex-direction: column;
+        gap: 10px;
+    }
+    header nav ul {
+        flex-direction: column;
+        align-items: center;
+    }
 }
