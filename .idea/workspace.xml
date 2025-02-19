@@ -4,16 +4,8 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="e72c0420-fe48-4af3-a363-18d6d8618447" name="Changes" comment="First Commit of login">
-      <change afterPath="$PROJECT_DIR$/src/main/java/org/example/HomeDataHandler.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/resources/app.js" afterDir="false" />
+    <list default="true" id="e72c0420-fe48-4af3-a363-18d6d8618447" name="Changes" comment="Home page as well as updated colores">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/example/Login.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/example/Login.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/forgot.html" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/forgot.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/home.html" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/home.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/index.html" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/index.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/register.html" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/register.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/style.css" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/style.css" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -109,7 +101,7 @@
       <workItem from="1739377683848" duration="349000" />
       <workItem from="1739499786601" duration="18000" />
       <workItem from="1739547287123" duration="415000" />
-      <workItem from="1739940993013" duration="5965000" />
+      <workItem from="1739940993013" duration="6613000" />
     </task>
     <task id="LOCAL-00001" summary="First Commit of login">
       <option name="closed" value="true" />
@@ -119,14 +111,34 @@
       <option name="project" value="LOCAL" />
       <updated>1739547379317</updated>
     </task>
-    <option name="localTasksCounter" value="2" />
+    <task id="LOCAL-00002" summary="Home page as well as updated colores">
+      <option name="closed" value="true" />
+      <created>1739947127113</created>
+      <option name="number" value="00002" />
+      <option name="presentableId" value="LOCAL-00002" />
+      <option name="project" value="LOCAL" />
+      <updated>1739947127113</updated>
+    </task>
+    <option name="localTasksCounter" value="3" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
     <option name="version" value="3" />
   </component>
+  <component name="Vcs.Log.Tabs.Properties">
+    <option name="TAB_STATES">
+      <map>
+        <entry key="MAIN">
+          <value>
+            <State />
+          </value>
+        </entry>
+      </map>
+    </option>
+  </component>
   <component name="VcsManagerConfiguration">
     <MESSAGE value="First Commit of login" />
-    <option name="LAST_COMMIT_MESSAGE" value="First Commit of login" />
+    <MESSAGE value="Home page as well as updated colores" />
+    <option name="LAST_COMMIT_MESSAGE" value="Home page as well as updated colores" />
   </component>
 </project>
