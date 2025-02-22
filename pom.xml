@@ -25,13 +25,11 @@
     </dependencyManagement>
 
     <dependencies>
-        <!-- Spring Boot Starter Web for REST and static resource serving -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-web</artifactId>
         </dependency>
 
-        <!-- Firebase Admin SDK for backend tasks (such as verifying ID tokens) -->
         <dependency>
             <groupId>com.google.firebase</groupId>
             <artifactId>firebase-admin</artifactId>
@@ -41,7 +39,6 @@
 
     <build>
         <plugins>
-            <!-- Spring Boot Maven Plugin -->
             <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>

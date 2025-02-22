@@ -1,10 +1,14 @@
 version: 1
 frontend:
   phases:
+    preBuild:
+      commands:
+        - echo "No pre-build step needed"
     build:
-      commands: []
+      commands:
+        - echo "No build step needed"
   artifacts:
-    baseDirectory: /
+    baseDirectory: src/main/resources
     files:
       - '**/*'
   cache:
