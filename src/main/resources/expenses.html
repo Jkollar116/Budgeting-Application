@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Expense Tracker</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<h1>Expense Tracker</h1>
+<form id="expense-form">
+  <input type="number" id="amount" placeholder="Amount" required>
+  <input type="text" id="category" placeholder="Category" required>
+  <button type="button" onclick="addExpense()">Add Expense</button>
+</form>
+<button onclick="showTotalSpending()">Show Total Spending</button>
+<button onclick="showSpendingByCategory()">Show Spending by Category</button>
+
+<h2>Total Spending: <span id="total-display">0</span></h2>
+<h3>Spending by Category:</h3>
+<ul id="category-display"></ul>
+</body>
+<script src="script.js"></script>
+</html>
