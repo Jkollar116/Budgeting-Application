@@ -4,7 +4,8 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="e72c0420-fe48-4af3-a363-18d6d8618447" name="Changes" comment="chatbot feature">
+    <list default="true" id="e72c0420-fe48-4af3-a363-18d6d8618447" name="Changes" comment="commit for aws">
+      <change beforePath="$PROJECT_DIR$/pom.xml" beforeDir="false" afterPath="$PROJECT_DIR$/pom.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/org/example/ChatHandler.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/example/ChatHandler.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -106,7 +107,7 @@
       <workItem from="1739547287123" duration="415000" />
       <workItem from="1739940993013" duration="7291000" />
       <workItem from="1739980582226" duration="3394000" />
-      <workItem from="1740173774270" duration="4426000" />
+      <workItem from="1740173774270" duration="5313000" />
     </task>
     <task id="LOCAL-00001" summary="First Commit of login">
       <option name="closed" value="true" />
@@ -148,7 +149,15 @@
       <option name="project" value="LOCAL" />
       <updated>1740202215081</updated>
     </task>
-    <option name="localTasksCounter" value="6" />
+    <task id="LOCAL-00006" summary="commit for aws">
+      <option name="closed" value="true" />
+      <created>1740202528054</created>
+      <option name="number" value="00006" />
+      <option name="presentableId" value="LOCAL-00006" />
+      <option name="project" value="LOCAL" />
+      <updated>1740202528054</updated>
+    </task>
+    <option name="localTasksCounter" value="7" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -170,6 +179,7 @@
     <MESSAGE value="Home page as well as updated colores" />
     <MESSAGE value="workspace.xml" />
     <MESSAGE value="chatbot feature" />
-    <option name="LAST_COMMIT_MESSAGE" value="chatbot feature" />
+    <MESSAGE value="commit for aws" />
+    <option name="LAST_COMMIT_MESSAGE" value="commit for aws" />
   </component>
 </project>
