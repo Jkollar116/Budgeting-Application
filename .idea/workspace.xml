@@ -4,7 +4,7 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="e72c0420-fe48-4af3-a363-18d6d8618447" name="Changes" comment="Updated for AWS implementation" />
+    <list default="true" id="e72c0420-fe48-4af3-a363-18d6d8618447" name="Changes" comment="Made a change to the amplify.yml to clarify the base directory" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -127,7 +127,7 @@
       <workItem from="1739940993013" duration="6613000" />
       <workItem from="1739976485954" duration="36000" />
       <workItem from="1739976548647" duration="458000" />
-      <workItem from="1740196310388" duration="1028000" />
+      <workItem from="1740196310388" duration="1537000" />
     </task>
     <task id="LOCAL-00001" summary="First Commit of login">
       <option name="closed" value="true" />
@@ -169,7 +169,31 @@
       <option name="project" value="LOCAL" />
       <updated>1740197459906</updated>
     </task>
-    <option name="localTasksCounter" value="6" />
+    <task id="LOCAL-00006" summary="Updated for AWS implementation">
+      <option name="closed" value="true" />
+      <created>1740197679454</created>
+      <option name="number" value="00006" />
+      <option name="presentableId" value="LOCAL-00006" />
+      <option name="project" value="LOCAL" />
+      <updated>1740197679454</updated>
+    </task>
+    <task id="LOCAL-00007" summary="Made a change to the amplify.yml to clarify the base directory">
+      <option name="closed" value="true" />
+      <created>1740197901676</created>
+      <option name="number" value="00007" />
+      <option name="presentableId" value="LOCAL-00007" />
+      <option name="project" value="LOCAL" />
+      <updated>1740197901676</updated>
+    </task>
+    <task id="LOCAL-00008" summary="Made a change to the amplify.yml to clarify the base directory">
+      <option name="closed" value="true" />
+      <created>1740198093887</created>
+      <option name="number" value="00008" />
+      <option name="presentableId" value="LOCAL-00008" />
+      <option name="project" value="LOCAL" />
+      <updated>1740198093887</updated>
+    </task>
+    <option name="localTasksCounter" value="9" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -190,6 +214,7 @@
     <MESSAGE value="First Commit of login" />
     <MESSAGE value="Home page as well as updated colores" />
     <MESSAGE value="Updated for AWS implementation" />
-    <option name="LAST_COMMIT_MESSAGE" value="Updated for AWS implementation" />
+    <MESSAGE value="Made a change to the amplify.yml to clarify the base directory" />
+    <option name="LAST_COMMIT_MESSAGE" value="Made a change to the amplify.yml to clarify the base directory" />
   </component>
 </project>
