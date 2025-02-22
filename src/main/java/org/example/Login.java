@@ -1,5 +1,8 @@
 package org.example;
 
+import com.sun.net.httpserver.HttpServer;
+import com.sun.net.httpserver.HttpHandler;
+import com.sun.net.httpserver.HttpExchange;
 import java.io.*;
 import java.net.*;
 import java.nio.charset.*;
@@ -16,7 +19,8 @@ public class Login {
         server.createContext("/login", new LoginHandler());
         server.createContext("/register", new RegisterHandler());
         server.createContext("/forgot", new ForgotPasswordHandler());
-        server.createContext("/api/getData", new HomeDataHandler()); // Added API endpoint
+        server.createContext("/api/getData", new HomeDataHandler());
+        server.createContext("/api/chat", new ChatHandler());
         server.setExecutor(null);
         server.start();
         if (Desktop.isDesktopSupported()) {
