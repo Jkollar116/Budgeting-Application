@@ -60,7 +60,7 @@
   <component name="RunManager" selected="Application.Login">
     <configuration name="Login" type="Application" factoryName="Application" temporary="true" nameIsGenerated="true">
       <option name="MAIN_CLASS_NAME" value="org.example.Login" />
-      <module name="Budgeting_Application" />
+      <module name="firebase-login-app" />
       <extension name="coverage">
         <pattern>
           <option name="PATTERN" value="org.example.*" />
@@ -87,6 +87,9 @@
     </list>
     <recent_temporary>
       <list>
+        <item itemvalue="Application.Login" />
+        <item itemvalue="JavaScript Debug.index.html" />
+        <item itemvalue="JavaScript Debug.index.html" />
         <item itemvalue="Application.Login" />
         <item itemvalue="JavaScript Debug.index.html" />
       </list>
