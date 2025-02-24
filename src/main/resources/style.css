@@ -165,77 +165,248 @@ footer {
 }
 
 /* Crypto Wallet */
-.wallet-card {
-    background-color: #3E1F5B;
-    padding: 20px;
-    margin: 15px 0;
-    border-radius: 8px;
-    box-shadow: 0 4px 6px rgba(0,0,0,0.4);
+/* =============== Market Overview Section =============== */
+.market-overview {
+    grid-column: span 2;
 }
 
-.wallet-card h3 {
+.market-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 25px;
+}
+
+.market-card {
+    background: rgba(255,255,255,0.1);
+    padding: 25px;
+    border-radius: 15px;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+}
+
+.market-card h3 {
+    margin-bottom: 20px;
+    font-size: 20px;
     color: #FF8C00;
-    margin-bottom: 10px;
 }
 
-.transaction-list {
-    margin-top: 15px;
-    padding: 10px;
-    background-color: rgba(0,0,0,0.2);
-    border-radius: 4px;
-}
-
-.transaction-list ul {
-    list-style: none;
-    padding: 0;
-}
-
-.transaction-list li {
-    padding: 5px 0;
-    border-bottom: 1px solid rgba(255,255,255,0.1);
-}
-
-.modal {
-    display: none;
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background-color: rgba(0,0,0,0.7);
-    z-index: 1000;
-}
-
-.modal-content {
-    background-color: #3E1F5B;
-    margin: 15% auto;
-    padding: 20px;
-    width: 80%;
-    max-width: 500px;
-    border-radius: 8px;
-    box-shadow: 0 4px 6px rgba(0,0,0,0.4);
-}
-
-.modal-content form {
-    display: flex;
-    flex-direction: column;
+.market-stats {
+    display: grid;
     gap: 15px;
 }
 
-.modal-content input,
-.modal-content select {
-    padding: 10px;
-    border: 1px solid #FF8C00;
-    border-radius: 4px;
-    background-color: #4A1D5A;
-    color: white;
+.market-stat {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 0;
+    border-bottom: 1px solid rgba(255,255,255,0.1);
 }
 
-.button-group {
+.market-stat:last-child {
+    border-bottom: none;
+}
+
+/* =============== Portfolio Summary Section =============== */
+.portfolio-summary {
+    grid-column: span 2;
+    background: rgba(255,255,255,0.1);
+    border-radius: 15px;
+    padding: 30px;
+}
+
+.portfolio-stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 25px;
+    margin-bottom: 40px;
+}
+
+.stat {
+    background: rgba(255,140,0,0.1);
+    padding: 25px;
+    border-radius: 15px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.stat-label {
+    color: rgba(255,255,255,0.7);
+    font-size: 0.9em;
+}
+
+.stat-value {
+    font-size: 1.4em;
+    font-weight: bold;
+}
+
+/* =============== Wallet Management Section =============== */
+.add-wallet-form {
+    margin: 30px;
+    padding: 30px;
+    background: #3E1F5B;
+    border-radius: 8px;
+}
+
+.add-wallet-form input,
+.add-wallet-form select {
+    width: 100%;
+    padding: 12px;
+    margin: 15px 0;
+    border: 1px solid #FF8C00;
+    border-radius: 4px;
+    background: white;
+    color: black;
+}
+
+.test-buttons {
+    margin: 30px;
+    padding: 30px;
+    background: #3E1F5B;
+    border-radius: 8px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.test-wallet {
+    margin: 20px 0;
+    padding: 25px;
+    background: rgba(255,255,255,0.1);
+    border-radius: 15px;
+}
+
+.wallet-buttons {
     display: flex;
     gap: 10px;
-    justify-content: flex-end;
-    margin-top: 20px;
+    margin-top: 15px;
+}
+
+/* =============== Chart Containers =============== */
+.chart-container {
+    background: rgba(255,255,255,0.1);
+    padding: 25px;
+    border-radius: 30px 0;
+    margin-top: 30px;
+    height: 300px;
+}
+
+.portfolio-chart {
+    background: rgba(255,255,255,0.1);
+    padding: 25px;
+    border-radius: 15px;
+    margin-top: 30px;
+    height: 300px;
+}
+
+/* =============== Buttons and Interactive Elements =============== */
+.btn {
+    background: #FF8C00;
+    color: white;
+    border: none;
+    padding: 12px 24px;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background 0.3s ease;
+    font-weight: bold;
+}
+
+.btn:hover {
+    background: #FFA500;
+}
+
+/* =============== Status and Alert Styles =============== */
+.error-message {
+    color: #ff4444;
+    padding: 10px;
+    margin: 10px 0;
+    background: rgba(255,0,0,0.1);
+    border-radius: 4px;
+}
+
+.positive {
+    color: #32CD32;
+}
+
+.negative {
+    color: #FF4444;
+}
+
+/* =============== QR Code Modal =============== */
+.qr-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0,0,0,0.8);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+.qr-content {
+    background: #3E1F5B;
+    padding: 20px;
+    border-radius: 8px;
+    text-align: center;
+}
+
+.qr-code img {
+    margin: 20px 0;
+}
+
+/* =============== Responsive Design =============== */
+@media (min-width: 1200px) {
+    .dashboard {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .market-overview,
+    .portfolio-summary {
+        grid-column: span 2;
+    }
+}
+
+@media (max-width: 1199px) {
+    .dashboard {
+        grid-template-columns: 1fr;
+    }
+
+    .card {
+        margin: 15px 0;
+    }
+
+    .market-cards {
+        grid-template-columns: 1fr;
+    }
+
+    .portfolio-stats {
+        grid-template-columns: 1fr;
+    }
+
+    .wallet-buttons {
+        flex-direction: column;
+    }
+}
+
+@media (max-width: 768px) {
+    header {
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    header nav ul {
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .add-wallet-form,
+    .test-buttons {
+        margin: 15px;
+        padding: 15px;
+    }
 }
 /* Crypto Wallet */
 
