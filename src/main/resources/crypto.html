@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Crypto Wallet Tester</title>
+    <title>Crypto Wallet Manager</title>
     <link rel="stylesheet" href="style.css">
     <style>
         .test-buttons {
@@ -24,6 +24,24 @@
             background: rgba(255,0,0,0.1);
             border-radius: 4px;
         }
+        .add-wallet-form {
+            margin: 20px;
+            padding: 20px;
+            background: #3E1F5B;
+            border-radius: 8px;
+        }
+        .add-wallet-form input, .add-wallet-form select {
+            width: 100%;
+            padding: 8px;
+            margin: 5px 0;
+            border: 1px solid #FF8C00;
+            border-radius: 4px;
+            background: white;
+            color: black;
+        }
+        .add-wallet-form button {
+            margin-top: 10px;
+        }
     </style>
 </head>
 <body>
@@ -41,32 +59,76 @@
 
 <div class="dashboard">
     <div class="card">
-        <h2>Test Wallets</h2>
+        <h2>Crypto Wallets</h2>
         <div id="error-container"></div>
+
+        <!-- Add Custom Wallet Form -->
+        <div class="add-wallet-form">
+            <h3>Add Custom Wallet</h3>
+            <form id="custom-wallet-form">
+                <input type="text" id="wallet-label" placeholder="Wallet Label" required>
+                <input type="text" id="wallet-address" placeholder="Wallet Address" required>
+                <select id="crypto-type" required>
+                    <option value="">Select Cryptocurrency</option>
+                    <option value="BTC">Bitcoin (BTC)</option>
+                    <option value="ETH">Ethereum (ETH)</option>
+                </select>
+                <button type="submit" class="btn">Add Wallet</button>
+            </form>
+        </div>
+
+        <!-- Test Buttons -->
         <div class="test-buttons">
+            <h3>Test Wallets</h3>
             <button id="add-btc-btn" class="btn">Add Test Bitcoin Wallet</button>
             <button id="add-eth-btn" class="btn">Add Test Ethereum Wallet</button>
             <button id="refresh-all-btn" class="btn">Refresh All Wallets</button>
         </div>
+
         <div id="wallets-container"></div>
     </div>
 </div>
 
 <script>
     document.addEventListener('DOMContentLoaded', function() {
-        // Get button elements
+        // Existing event listeners
         const btcButton = document.getElementById('add-btc-btn');
         const ethButton = document.getElementById('add-eth-btn');
         const refreshButton = document.getElementById('refresh-all-btn');
+        const customWalletForm = document.getElementById('custom-wallet-form');
 
-        // Add click event listeners
         btcButton.addEventListener('click', addTestBitcoinWallet);
         ethButton.addEventListener('click', addTestEthereumWallet);
         refreshButton.addEventListener('click', refreshAllWallets);
 
+        // Add custom wallet form handler
+        customWalletForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            const label = document.getElementById('wallet-label').value;
+            const address = document.getElementById('wallet-address').value;
+            const cryptoType = document.getElementById('crypto-type').value;
+
+            addWallet(label, address, cryptoType);
+
+            // Reset form
+            customWalletForm.reset();
+        });
+
         // Initial load
         loadWallets();
     });
+
+    function addTestBitcoinWallet() {
+        const wallet = TEST_WALLETS.BTC[currentBTCIndex % TEST_WALLETS.BTC.length];
+        currentBTCIndex++;
+        addWallet(wallet.label, wallet.address, "BTC");
+    }
+
+    function addTestEthereumWallet() {
+        const wallet = TEST_WALLETS.ETH[currentETHIndex % TEST_WALLETS.ETH.length];
+        currentETHIndex++;
+        addWallet(wallet.label, wallet.address, "ETH");
+    }
 
     const TEST_WALLETS = {
         BTC: [
@@ -161,12 +223,27 @@
     function createWalletCard(wallet) {
         const div = document.createElement('div');
         div.className = 'test-wallet';
+
+        // Format the value with commas and currency symbol
+        const formattedValue = new Intl.NumberFormat('en-US', {
+            style: 'currency',
+            currency: 'USD',
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2
+        }).format(wallet.value);
+
+        // Format the balance with commas and 8 decimal places
+        const formattedBalance = new Intl.NumberFormat('en-US', {
+            minimumFractionDigits: 8,
+            maximumFractionDigits: 8
+        }).format(wallet.balance);
+
         div.innerHTML = `
         <h3>${wallet.label}</h3>
         <p>Address: ${wallet.address}</p>
         <p>Type: ${wallet.cryptoType}</p>
-        <p>Balance: ${wallet.balance} ${wallet.cryptoType}</p>
-        <p>Value: $${wallet.value?.toFixed(2) || '0.00'}</p>
+        <p>Balance: ${formattedBalance} ${wallet.cryptoType}</p>
+        <p>Value: ${formattedValue}</p>
         <p>24h Change: ${wallet.change24h?.toFixed(2) || '0.00'}%</p>
         <button onclick="refreshWallet('${wallet.address}')" class="btn">Refresh</button>
     `;
