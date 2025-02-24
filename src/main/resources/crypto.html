@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Crypto Wallet Tester</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        .test-buttons {
+            margin: 20px;
+            padding: 20px;
+            background: #3E1F5B;
+            border-radius: 8px;
+        }
+        .test-wallet {
+            margin: 10px 0;
+            padding: 15px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 4px;
+        }
+        .error-message {
+            color: #ff4444;
+            padding: 10px;
+            margin: 10px 0;
+            background: rgba(255,0,0,0.1);
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body>
+<header>
+    <div class="logo">CashClimb</div>
+    <nav>
+        <ul>
+            <li><a href="home.html">Dashboard</a></li>
+            <li><a href="crypto.html">Crypto</a></li>
+            <li><a href="chat.html">Chat</a></li>
+            <li><a href="index.html">Log Out</a></li>
+        </ul>
+    </nav>
+</header>
+
+<div class="dashboard">
+    <div class="card">
+        <h2>Test Wallets</h2>
+        <div id="error-container"></div>
+        <div class="test-buttons">
+            <button id="add-btc-btn" class="btn">Add Test Bitcoin Wallet</button>
+            <button id="add-eth-btn" class="btn">Add Test Ethereum Wallet</button>
+            <button id="refresh-all-btn" class="btn">Refresh All Wallets</button>
+        </div>
+        <div id="wallets-container"></div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Get button elements
+        const btcButton = document.getElementById('add-btc-btn');
+        const ethButton = document.getElementById('add-eth-btn');
+        const refreshButton = document.getElementById('refresh-all-btn');
+
+        // Add click event listeners
+        btcButton.addEventListener('click', addTestBitcoinWallet);
+        ethButton.addEventListener('click', addTestEthereumWallet);
+        refreshButton.addEventListener('click', refreshAllWallets);
+
+        // Initial load
+        loadWallets();
+    });
+
+    const TEST_WALLETS = {
+        BTC: [
+            { address: "1GrwDkr33gT6LuumniYjKEGjTLhsL5kmqC", label: "Test BTC Wallet 1" },
+            { address: "1F3bs9gGZcZHHnWQq1EtuqoVBLnTaD9k1A", label: "Test BTC Wallet 2" }
+        ],
+        ETH: [
+            { address: "0xde0b295669a9fd93d5f28d9ec85e40f4cb697bae", label: "Test ETH Wallet 1" },
+            { address: "0x742d35Cc6634C0532925a3b844Bc454e4438f44e", label: "Test ETH Wallet 2" }
+        ]
+    };
+
+    let currentBTCIndex = 0;
+    let currentETHIndex = 0;
+
+    function showError(message) {
+        const errorContainer = document.getElementById('error-container');
+        const errorDiv = document.createElement('div');
+        errorDiv.className = 'error-message';
+        errorDiv.textContent = message;
+        errorContainer.appendChild(errorDiv);
+        setTimeout(() => errorDiv.remove(), 5000); // Remove after 5 seconds
+    }
+
+    function addTestBitcoinWallet() {
+        console.log("Adding Bitcoin wallet...");
+        const wallet = TEST_WALLETS.BTC[currentBTCIndex % TEST_WALLETS.BTC.length];
+        currentBTCIndex++;
+        addWallet(wallet.label, wallet.address, "BTC");
+    }
+
+    function addTestEthereumWallet() {
+        console.log("Adding Ethereum wallet...");
+        const wallet = TEST_WALLETS.ETH[currentETHIndex % TEST_WALLETS.ETH.length];
+        currentETHIndex++;
+        addWallet(wallet.label, wallet.address, "ETH");
+    }
+
+    function addWallet(label, address, cryptoType) {
+        console.log(`Adding wallet: ${label}, ${address}, ${cryptoType}`);
+        fetch('/api/wallets', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                label: label,
+                address: address,
+                cryptoType: cryptoType
+            })
+        })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                return response.json();
+            })
+            .then(data => {
+                console.log('Success:', data);
+                loadWallets();
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                showError(`Failed to add wallet: ${error.message}`);
+            });
+    }
+
+    function loadWallets() {
+        console.log("Loading wallets...");
+        fetch('/api/wallets')
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                return response.json();
+            })
+            .then(wallets => {
+                console.log('Loaded wallets:', wallets);
+                const container = document.getElementById('wallets-container');
+                container.innerHTML = '';
+                wallets.forEach(wallet => {
+                    const card = createWalletCard(wallet);
+                    container.appendChild(card);
+                });
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                showError(`Failed to load wallets: ${error.message}`);
+            });
+    }
+
+    function createWalletCard(wallet) {
+        const div = document.createElement('div');
+        div.className = 'test-wallet';
+        div.innerHTML = `
+        <h3>${wallet.label}</h3>
+        <p>Address: ${wallet.address}</p>
+        <p>Type: ${wallet.cryptoType}</p>
+        <p>Balance: ${wallet.balance} ${wallet.cryptoType}</p>
+        <p>Value: $${wallet.value?.toFixed(2) || '0.00'}</p>
+        <p>24h Change: ${wallet.change24h?.toFixed(2) || '0.00'}%</p>
+        <button onclick="refreshWallet('${wallet.address}')" class="btn">Refresh</button>
+    `;
+        return div;
+    }
+
+    function refreshWallet(address) {
+        console.log(`Refreshing wallet: ${address}`);
+        fetch(`/api/wallets/${address}/refresh`, {
+            method: 'POST'
+        })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                return response.json();
+            })
+            .then(data => {
+                console.log('Refreshed:', data);
+                loadWallets();
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                showError(`Failed to refresh wallet: ${error.message}`);
+            });
+    }
+
+    function refreshAllWallets() {
+        console.log("Refreshing all wallets...");
+        loadWallets();
+    }
+</script>
+</body>
+</html>

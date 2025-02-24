@@ -164,4 +164,78 @@ footer {
     }
 }
 
+/* Crypto Wallet */
+.wallet-card {
+    background-color: #3E1F5B;
+    padding: 20px;
+    margin: 15px 0;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.4);
+}
+
+.wallet-card h3 {
+    color: #FF8C00;
+    margin-bottom: 10px;
+}
+
+.transaction-list {
+    margin-top: 15px;
+    padding: 10px;
+    background-color: rgba(0,0,0,0.2);
+    border-radius: 4px;
+}
+
+.transaction-list ul {
+    list-style: none;
+    padding: 0;
+}
+
+.transaction-list li {
+    padding: 5px 0;
+    border-bottom: 1px solid rgba(255,255,255,0.1);
+}
+
+.modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0,0,0,0.7);
+    z-index: 1000;
+}
+
+.modal-content {
+    background-color: #3E1F5B;
+    margin: 15% auto;
+    padding: 20px;
+    width: 80%;
+    max-width: 500px;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.4);
+}
+
+.modal-content form {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.modal-content input,
+.modal-content select {
+    padding: 10px;
+    border: 1px solid #FF8C00;
+    border-radius: 4px;
+    background-color: #4A1D5A;
+    color: white;
+}
+
+.button-group {
+    display: flex;
+    gap: 10px;
+    justify-content: flex-end;
+    margin-top: 20px;
+}
+/* Crypto Wallet */
 
