@@ -11,9 +11,9 @@ import java.awt.*;
 import com.sun.net.httpserver.*;
 
 public class Login {
-    private static final String FIREBASE_API_KEY = System.getenv("FIREBASE_API_KEY");
+    private static final String FIREBASE_API_KEY = ("AIzaSyCMA1F8Xd4rCxGXssXIs8Da80qqP6jien8");
     public static void main(String[] args) throws Exception {
-        HttpServer server = HttpServer.create(new InetSocketAddress(8000), 0);
+        HttpServer server = HttpServer.create(new InetSocketAddress(80), 0);
         server.createContext("/", new StaticFileHandler());
         server.createContext("/login", new LoginHandler());
         server.createContext("/register", new RegisterHandler());
