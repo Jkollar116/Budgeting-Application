@@ -4,8 +4,9 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="e72c0420-fe48-4af3-a363-18d6d8618447" name="Changes" comment="gitgnore key.json and have firestore key uploaded">
+    <list default="true" id="e72c0420-fe48-4af3-a363-18d6d8618447" name="Changes" comment="edited line to have correct firebase api key">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/example/ChatHandler.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/example/ChatHandler.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/org/example/Login.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/example/Login.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -54,6 +55,7 @@
     "SHARE_PROJECT_CONFIGURATION_FILES": "true",
     "WebServerToolWindowFactoryState": "false",
     "git-widget-placeholder": "Ian",
+    "kotlin-language-version-configured": "true",
     "node.js.detected.package.eslint": "true",
     "node.js.detected.package.tslint": "true",
     "node.js.selected.package.eslint": "(autodetect)",
@@ -124,6 +126,7 @@
       <workItem from="1739940993013" duration="7291000" />
       <workItem from="1739980582226" duration="3394000" />
       <workItem from="1740173774270" duration="5313000" />
+      <workItem from="1740532796341" duration="1011000" />
     </task>
     <task id="LOCAL-00001" summary="First Commit of login">
       <option name="closed" value="true" />
@@ -181,7 +184,15 @@
       <option name="project" value="LOCAL" />
       <updated>1740246734806</updated>
     </task>
-    <option name="localTasksCounter" value="8" />
+    <task id="LOCAL-00008" summary="edited line to have correct firebase api key">
+      <option name="closed" value="true" />
+      <created>1740250963677</created>
+      <option name="number" value="00008" />
+      <option name="presentableId" value="LOCAL-00008" />
+      <option name="project" value="LOCAL" />
+      <updated>1740250963677</updated>
+    </task>
+    <option name="localTasksCounter" value="9" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -205,6 +216,7 @@
     <MESSAGE value="chatbot feature" />
     <MESSAGE value="commit for aws" />
     <MESSAGE value="gitgnore key.json and have firestore key uploaded" />
-    <option name="LAST_COMMIT_MESSAGE" value="gitgnore key.json and have firestore key uploaded" />
+    <MESSAGE value="edited line to have correct firebase api key" />
+    <option name="LAST_COMMIT_MESSAGE" value="edited line to have correct firebase api key" />
   </component>
 </project>
