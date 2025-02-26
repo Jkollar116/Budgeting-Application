@@ -13,7 +13,15 @@ import com.sun.net.httpserver.*;
 public class Login {
     private static final String FIREBASE_API_KEY = ("AIzaSyCMA1F8Xd4rCxGXssXIs8Da80qqP6jien8");
     public static void main(String[] args) throws Exception {
-        HttpServer server = HttpServer.create(new InetSocketAddress(80), 0);
+        int port = 8000;
+        if (args.length > 0) {
+            try {
+                port = Integer.parseInt(args[0]);
+            } catch (NumberFormatException e) {
+                System.err.println("Invalid port specified. Using default port " + port);
+            }
+        }
+        HttpServer server = HttpServer.create(new InetSocketAddress(port), 0);
         server.createContext("/", new StaticFileHandler());
         server.createContext("/login", new LoginHandler());
         server.createContext("/register", new RegisterHandler());
@@ -24,7 +32,7 @@ public class Login {
         server.setExecutor(null);
         server.start();
         if (Desktop.isDesktopSupported()) {
-            Desktop.getDesktop().browse(new URI("http://localhost:8000"));
+            Desktop.getDesktop().browse(new URI("http://localhost:" + port));
         }
     }
 
