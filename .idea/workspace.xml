@@ -4,9 +4,8 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="e72c0420-fe48-4af3-a363-18d6d8618447" name="Changes" comment="Home page as well as updated colores">
-      <change afterPath="$PROJECT_DIR$/.idea/expense.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+    <list default="true" id="e72c0420-fe48-4af3-a363-18d6d8618447" name="Changes" comment="Expences category">
+      <change afterPath="$PROJECT_DIR$/src/main/resources/DailyExpences.html" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -33,18 +32,39 @@
     </option>
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
-  <component name="GitHubPullRequestSearchHistory"><![CDATA[{
-  "lastFilter": {
-    "state": "OPEN",
-    "assignee": "aabdullahatif"
+  <component name="GitHubPullRequestSearchHistory">{
+  &quot;lastFilter&quot;: {
+    &quot;state&quot;: &quot;OPEN&quot;,
+    &quot;assignee&quot;: &quot;aabdullahatif&quot;
   }
-}]]></component>
-  <component name="GithubPullRequestsUISettings"><![CDATA[{
-  "selectedUrlAndAccountId": {
-    "url": "https://github.com/Jkollar116/Budgeting-Application.git",
-    "accountId": "14d2fd84-2954-47f7-aeb6-569664526d44"
+}</component>
+  <component name="GitHubPullRequestState">{
+  &quot;prStates&quot;: [
+    {
+      &quot;id&quot;: {
+        &quot;id&quot;: &quot;PR_kwDON1pk9s6Mj11k&quot;,
+        &quot;number&quot;: 3
+      },
+      &quot;lastSeen&quot;: 1740540817199
+    }
+  ]
+}</component>
+  <component name="GithubPullRequestsUISettings">{
+  &quot;selectedUrlAndAccountId&quot;: {
+    &quot;url&quot;: &quot;https://github.com/Jkollar116/Budgeting-Application.git&quot;,
+    &quot;accountId&quot;: &quot;14d2fd84-2954-47f7-aeb6-569664526d44&quot;
+  },
+  &quot;recentNewPullRequestHead&quot;: {
+    &quot;server&quot;: {
+      &quot;useHttp&quot;: false,
+      &quot;host&quot;: &quot;github.com&quot;,
+      &quot;port&quot;: null,
+      &quot;suffix&quot;: null
+    },
+    &quot;owner&quot;: &quot;Jkollar116&quot;,
+    &quot;repository&quot;: &quot;Budgeting-Application&quot;
   }
-}]]></component>
+}</component>
   <component name="ProjectColorInfo">{
   &quot;associatedIndex&quot;: 0
 }</component>
@@ -146,7 +166,23 @@
       <option name="project" value="LOCAL" />
       <updated>1739947127113</updated>
     </task>
-    <option name="localTasksCounter" value="3" />
+    <task id="LOCAL-00003" summary="Expences category">
+      <option name="closed" value="true" />
+      <created>1740540595779</created>
+      <option name="number" value="00003" />
+      <option name="presentableId" value="LOCAL-00003" />
+      <option name="project" value="LOCAL" />
+      <updated>1740540595779</updated>
+    </task>
+    <task id="LOCAL-00004" summary="Expences category">
+      <option name="closed" value="true" />
+      <created>1740540746564</created>
+      <option name="number" value="00004" />
+      <option name="presentableId" value="LOCAL-00004" />
+      <option name="project" value="LOCAL" />
+      <updated>1740540746564</updated>
+    </task>
+    <option name="localTasksCounter" value="5" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -166,6 +202,7 @@
   <component name="VcsManagerConfiguration">
     <MESSAGE value="First Commit of login" />
     <MESSAGE value="Home page as well as updated colores" />
-    <option name="LAST_COMMIT_MESSAGE" value="Home page as well as updated colores" />
+    <MESSAGE value="Expences category" />
+    <option name="LAST_COMMIT_MESSAGE" value="Expences category" />
   </component>
 </project>
