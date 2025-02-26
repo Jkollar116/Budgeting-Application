@@ -18,7 +18,6 @@ fetch("/api/getData")
             "Bills Due: " + data.billsDue;
     })
     .catch(error => {
-
         financialDataMessage = "Financial data is not available.";
     });
 
