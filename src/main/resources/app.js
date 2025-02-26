@@ -167,5 +167,5 @@ document.addEventListener("DOMContentLoaded", function() {
             expensesPieContainer.innerHTML = "";
             expensesPieContainer.appendChild(pieSvg);
         })
-        .catch(function(error) { console.error(error); });
+
 });

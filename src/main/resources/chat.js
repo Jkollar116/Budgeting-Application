@@ -18,7 +18,7 @@ fetch("/api/getData")
             "Bills Due: " + data.billsDue;
     })
     .catch(error => {
-        console.error("Error fetching financial data:", error);
+
         financialDataMessage = "Financial data is not available.";
     });
 
@@ -75,7 +75,6 @@ document.addEventListener("DOMContentLoaded", function() {
                 }
             })
             .catch(error => {
-                console.error("Error:", error);
                 appendMessage("Error: " + JSON.stringify(error), "bot");
             });
     }
