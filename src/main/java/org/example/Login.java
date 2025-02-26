@@ -11,7 +11,8 @@ import java.awt.*;
 import com.sun.net.httpserver.*;
 
 public class Login {
-    private static final String FIREBASE_API_KEY = ("AIzaSyCMA1F8Xd4rCxGXssXIs8Da80qqP6jien8");
+    private static final String FIREBASE_API_KEY = "AIzaSyCMA1F8Xd4rCxGXssXIs8Da80qqP6jien8";
+
     public static void main(String[] args) throws Exception {
         int port = 8000;
         if (args.length > 0) {
@@ -21,16 +22,21 @@ public class Login {
                 System.err.println("Invalid port specified. Using default port " + port);
             }
         }
-        HttpServer server = HttpServer.create(new InetSocketAddress(port), 0);
+
+
+        HttpServer server = HttpServer.create(new InetSocketAddress("0.0.0.0", port), 0);
         server.createContext("/", new StaticFileHandler());
         server.createContext("/login", new LoginHandler());
         server.createContext("/register", new RegisterHandler());
         server.createContext("/forgot", new ForgotPasswordHandler());
+
         server.createContext("/api/getData", new HomeDataHandler());
         server.createContext("/api/chat", new ChatHandler());
         server.createContext("/api/wallets", new CryptoApiHandler());
         server.setExecutor(null);
         server.start();
+
+
         if (Desktop.isDesktopSupported()) {
             Desktop.getDesktop().browse(new URI("http://localhost:" + port));
         }
