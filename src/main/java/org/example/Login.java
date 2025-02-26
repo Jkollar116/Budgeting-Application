@@ -21,6 +21,7 @@ public class Login {
         server.createContext("/forgot", new ForgotPasswordHandler());
         server.createContext("/api/getData", new HomeDataHandler());
         server.createContext("/api/chat", new ChatHandler());
+        server.createContext("/api/wallets", new CryptoApiHandler());
         server.setExecutor(null);
         server.start();
         if (Desktop.isDesktopSupported()) {
