@@ -1,0 +1,1230 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Crypto Wallet Manager</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        /* Main Layout */
+        .dashboard {
+            display: grid;
+            gap: 20px;
+            padding: 20px;
+            max-width: 1600px;
+            margin: 0 auto;
+            grid-template-columns: 1fr 1fr 1fr;
+            grid-template-areas:
+                "portfolio portfolio market"
+                "wallets wallets market"
+                "walletlist walletlist analytics";
+        }
+
+        /* Cards */
+        .card {
+            background: #3E1F5B;
+            border-radius: 12px;
+            padding: 20px;
+            color: white;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .card h2 {
+            margin-top: 0;
+            color: #FF8C00;
+            font-size: 1.5em;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        /* Portfolio Section */
+        .portfolio-section {
+            grid-area: portfolio;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .portfolio-stats {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+        }
+
+        .portfolio-chart {
+            flex: 1;
+            max-height: 220px;
+            margin-top: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* Stats */
+        .stat {
+            background: rgba(62, 31, 91, 0.7);
+            border-radius: 10px;
+            padding: 15px;
+            text-align: center;
+            transition: transform 0.2s;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .stat:hover {
+            transform: translateY(-5px);
+        }
+
+        .stat-label {
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 0.9em;
+            margin-bottom: 5px;
+            display: block;
+        }
+
+        .stat-value {
+            font-size: 1.6em;
+            font-weight: bold;
+            display: block;
+        }
+
+        /* Market Overview */
+        .market-section {
+            grid-area: market;
+        }
+
+        .market-card {
+            background: rgba(62, 31, 91, 0.7);
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 15px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .market-card h3 {
+            color: #FF8C00;
+            margin-top: 0;
+            margin-bottom: 10px;
+            font-size: 1.2em;
+        }
+
+        .market-stat {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .market-stat:last-child {
+            border-bottom: none;
+        }
+
+        /* Wallet Management */
+        .wallet-section {
+            grid-area: wallets;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        .add-wallet-form {
+            background: rgba(62, 31, 91, 0.7);
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .add-wallet-form h3 {
+            color: #FF8C00;
+            margin-top: 0;
+            margin-bottom: 15px;
+            font-size: 1.2em;
+        }
+
+        .add-wallet-form input,
+        .add-wallet-form select {
+            width: 100%;
+            padding: 10px;
+            margin: 8px 0;
+            border: 1px solid #FF8C00;
+            border-radius: 6px;
+            background: rgba(255, 255, 255, 0.9);
+            color: #222;
+            font-size: 0.9em;
+        }
+
+        .test-buttons {
+            background: rgba(62, 31, 91, 0.7);
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .test-buttons h3 {
+            color: #FF8C00;
+            margin-top: 0;
+            margin-bottom: 15px;
+            font-size: 1.2em;
+        }
+
+        .btn-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+
+        /* Wallet List */
+        .wallets-list-section {
+            grid-area: walletlist;
+        }
+
+        .wallet-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 15px;
+            margin-top: 15px;
+        }
+
+        .wallet-card {
+            background: rgba(62, 31, 91, 0.7);
+            border-radius: 10px;
+            padding: 15px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s;
+        }
+
+        .wallet-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .wallet-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .wallet-header h3 {
+            color: #FF8C00;
+            margin: 0;
+            font-size: 1.2em;
+        }
+
+        .wallet-type {
+            background: #FF8C00;
+            color: white;
+            padding: 3px 8px;
+            border-radius: 20px;
+            font-size: 0.8em;
+            font-weight: bold;
+        }
+
+        .wallet-info {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .wallet-info-item {
+            margin: 5px 0;
+            font-size: 0.9em;
+        }
+
+        .wallet-info-item .label {
+            color: rgba(255, 255, 255, 0.7);
+            display: block;
+            margin-bottom: 3px;
+        }
+
+        .wallet-info-item .value {
+            font-weight: bold;
+        }
+
+        .wallet-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 8px;
+        }
+
+        /* Analytics Section */
+        .analytics-section {
+            grid-area: analytics;
+        }
+
+        .chart-container {
+            height: 200px;
+            margin-top: 15px;
+            background: rgba(62, 31, 91, 0.7);
+            border-radius: 10px;
+            padding: 15px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Buttons */
+        .btn {
+            background: #FF8C00;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: background 0.3s ease, transform 0.1s;
+            font-weight: bold;
+            font-size: 0.9em;
+            text-align: center;
+        }
+
+        .btn:hover {
+            background: #FFA500;
+            transform: translateY(-2px);
+        }
+
+        .btn:active {
+            transform: translateY(0);
+        }
+
+        .btn-small {
+            padding: 5px 10px;
+            font-size: 0.8em;
+        }
+
+        /* Status Colors */
+        .positive {
+            color: #32CD32;
+        }
+
+        .negative {
+            color: #FF4444;
+        }
+
+        /* QR Code Modal */
+        .qr-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.85);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .qr-content {
+            background: #3E1F5B;
+            padding: 25px;
+            border-radius: 10px;
+            box-shadow: 0 4px 25px rgba(0, 0, 0, 0.4);
+            text-align: center;
+            max-width: 350px;
+            width: 100%;
+        }
+
+        .qr-code img {
+            margin: 20px auto;
+            padding: 15px;
+            background: white;
+            border-radius: 5px;
+            display: block;
+        }
+
+        /* Messages */
+        .error-message {
+            color: #ff4444;
+            padding: 10px;
+            margin: 10px 0;
+            background: rgba(255,0,0,0.1);
+            border-radius: 6px;
+            text-align: center;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 1200px) {
+            .dashboard {
+                grid-template-columns: 1fr 1fr;
+                grid-template-areas:
+                    "portfolio market"
+                    "wallets wallets"
+                    "walletlist walletlist"
+                    "analytics analytics";
+            }
+        }
+
+        @media (max-width: 768px) {
+            .dashboard {
+                grid-template-columns: 1fr;
+                grid-template-areas:
+                    "portfolio"
+                    "market"
+                    "wallets"
+                    "walletlist"
+                    "analytics";
+            }
+
+            .wallet-section {
+                grid-template-columns: 1fr;
+            }
+
+            .portfolio-stats {
+                grid-template-columns: 1fr;
+            }
+
+            .wallet-info {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+<header>
+    <div class="logo">CashClimb</div>
+    <nav>
+        <ul>
+            <li><a href="home.html">Dashboard</a></li>
+            <li><a href="crypto.html">Crypto</a></li>
+            <li><a href="chat.html">Chat</a></li>
+            <li><a href="index.html">Log Out</a></li>
+        </ul>
+    </nav>
+</header>
+
+<div class="dashboard">
+    <!-- Portfolio Summary Section - More Compact -->
+    <div class="card portfolio-section">
+        <h2>Portfolio Summary</h2>
+        <div class="portfolio-stats">
+            <div class="stat">
+                <span class="stat-label">Total Value</span>
+                <span class="stat-value" id="total-value">$0.00</span>
+            </div>
+            <div class="stat">
+                <span class="stat-label">24h Change</span>
+                <span class="stat-value" id="total-change">0.00%</span>
+            </div>
+            <div class="stat">
+                <span class="stat-label">Number of Wallets</span>
+                <span class="stat-value" id="wallet-count">0</span>
+            </div>
+        </div>
+        <div class="portfolio-chart">
+            <canvas id="portfolio-chart"></canvas>
+        </div>
+    </div>
+
+    <!-- Market Overview Section - Enhanced -->
+    <div class="card market-section">
+        <h2>Market Overview</h2>
+        <div id="market-data">
+            <!-- Market data will be inserted here via JavaScript -->
+        </div>
+    </div>
+
+    <!-- Wallet Management Section - Side by Side -->
+    <div class="card wallet-section">
+        <div class="add-wallet-form">
+            <h3>Add Custom Wallet</h3>
+            <form id="custom-wallet-form">
+                <input type="text" id="wallet-label" placeholder="Wallet Label" required>
+                <input type="text" id="wallet-address" placeholder="Wallet Address" required>
+                <select id="crypto-type" required>
+                    <option value="">Select Cryptocurrency</option>
+                    <option value="BTC">Bitcoin (BTC)</option>
+                    <option value="ETH">Ethereum (ETH)</option>
+                </select>
+                <button type="submit" class="btn">Add Wallet</button>
+            </form>
+        </div>
+        <div class="test-buttons">
+            <h3>Test Wallets</h3>
+            <div class="btn-grid">
+                <button id="add-btc-btn" class="btn">Add Test BTC</button>
+                <button id="add-eth-btn" class="btn">Add Test ETH</button>
+                <button id="refresh-all-btn" class="btn">Refresh All</button>
+                <button id="clear-all-btn" class="btn">Clear All</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Wallet List Section - Bigger & More Prominent -->
+    <div class="card wallets-list-section">
+        <h2>Your Crypto Wallets</h2>
+        <div id="error-container"></div>
+        <div class="wallet-list" id="wallets-container">
+            <!-- Wallet cards will be inserted here via JavaScript -->
+        </div>
+    </div>
+
+    <!-- Analytics Section -->
+    <div class="card analytics-section">
+        <h2>Performance Analytics</h2>
+        <select id="timeframe-selector" style="padding: 8px; border-radius: 5px; background: rgba(62, 31, 91, 0.7); color: white; border: 1px solid #FF8C00; margin-bottom: 10px;">
+            <option value="24h">24 Hours</option>
+            <option value="7d">7 Days</option>
+            <option value="30d">30 Days</option>
+            <option value="1y">1 Year</option>
+        </select>
+        <div class="chart-container">
+            <canvas id="performance-chart"></canvas>
+        </div>
+        <div class="chart-container" style="margin-top: 15px;">
+            <canvas id="distribution-chart"></canvas>
+        </div>
+    </div>
+</div>
+
+<!-- Scripts -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.min.js"></script>
+
+<script>
+    // Constants and Variables
+    const TEST_WALLETS = {
+        BTC: [
+            { address: "1GrwDkr33gT6LuumniYjKEGjTLhsL5kmqC", label: "Bitcoin Wallet 1" },
+            { address: "1F3bs9gGZcZHHnWQq1EtuqoVBLnTaD9k1A", label: "Bitcoin Wallet 2" }
+        ],
+        ETH: [
+            { address: "0xde0b295669a9fd93d5f28d9ec85e40f4cb697bae", label: "Ethereum Foundation" },
+            { address: "0x742d35Cc6634C0532925a3b844Bc454e4438f44e", label: "Ethereum Whale" }
+        ]
+    };
+
+    let currentBTCIndex = 0;
+    let currentETHIndex = 0;
+    let portfolioChart = null;
+    let performanceChart = null;
+    let distributionChart = null;
+
+    // Initialize when document loads
+    document.addEventListener('DOMContentLoaded', function() {
+        const btcButton = document.getElementById('add-btc-btn');
+        const ethButton = document.getElementById('add-eth-btn');
+        const refreshButton = document.getElementById('refresh-all-btn');
+        const clearButton = document.getElementById('clear-all-btn');
+        const customWalletForm = document.getElementById('custom-wallet-form');
+
+        btcButton.addEventListener('click', addTestBitcoinWallet);
+        ethButton.addEventListener('click', addTestEthereumWallet);
+        refreshButton.addEventListener('click', refreshAllWallets);
+        clearButton.addEventListener('click', clearAllWallets);
+
+        customWalletForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            const label = document.getElementById('wallet-label').value;
+            const address = document.getElementById('wallet-address').value;
+            const cryptoType = document.getElementById('crypto-type').value;
+
+            addWallet(label, address, cryptoType);
+            customWalletForm.reset();
+        });
+
+        // Initial loads
+        loadWallets();
+        loadMarketData();
+        initializeAnalytics();
+    });
+
+    // Wallet Management Functions
+    function addWallet(label, address, cryptoType) {
+        console.log(`Adding wallet: ${label}, ${address}, ${cryptoType}`);
+
+        const newWallet = {
+            id: Date.now().toString(), // Add unique ID for each wallet
+            label: label,
+            address: address,
+            cryptoType: cryptoType,
+            balance: cryptoType === 'BTC' ? 3084.31624354 : 150.45678912,
+            value: cryptoType === 'BTC' ? 290852227.31 : 450678.23,
+            change24h: cryptoType === 'BTC' ? -1.38 : 2.45,
+            lastUpdated: new Date().toISOString()
+        };
+
+        let wallets = JSON.parse(localStorage.getItem('wallets') || '[]');
+
+        // Check for duplicate address
+        if (wallets.some(w => w.address === address)) {
+            showError('Wallet with this address already exists');
+            return;
+        }
+
+        wallets.push(newWallet);
+        localStorage.setItem('wallets', JSON.stringify(wallets));
+        loadWallets();
+
+        // Show success message
+        showMessage(`Added ${cryptoType} wallet: ${label}`);
+    }
+
+    function loadWallets() {
+        const wallets = JSON.parse(localStorage.getItem('wallets') || '[]');
+        updatePortfolioSummary(wallets);
+        updateWalletsDisplay(wallets);
+        updateAnalytics(wallets);
+    }
+
+    function updateWalletsDisplay(wallets) {
+        const container = document.getElementById('wallets-container');
+        container.innerHTML = '';
+
+        if (wallets.length === 0) {
+            container.innerHTML = '<div style="text-align: center; padding: 30px; color: rgba(255,255,255,0.7);">No wallets added. Add a wallet to get started.</div>';
+            return;
+        }
+
+        wallets.forEach(wallet => {
+            const card = createWalletCard(wallet);
+            container.appendChild(card);
+        });
+    }
+
+    function createWalletCard(wallet) {
+        const div = document.createElement('div');
+        div.className = 'wallet-card';
+
+        const formattedValue = new Intl.NumberFormat('en-US', {
+            style: 'currency',
+            currency: 'USD'
+        }).format(wallet.value);
+
+        const formattedBalance = new Intl.NumberFormat('en-US', {
+            minimumFractionDigits: 8,
+            maximumFractionDigits: 8
+        }).format(wallet.balance);
+
+        const changeClass = wallet.change24h >= 0 ? 'positive' : 'negative';
+
+        div.innerHTML = `
+            <div class="wallet-header">
+                <h3>${wallet.label}</h3>
+                <span class="wallet-type">${wallet.cryptoType}</span>
+            </div>
+            <div class="wallet-info">
+                <div class="wallet-info-item">
+                    <span class="label">Balance</span>
+                    <span class="value">${formattedBalance} ${wallet.cryptoType}</span>
+                </div>
+                <div class="wallet-info-item">
+                    <span class="label">Value</span>
+                    <span class="value">${formattedValue}</span>
+                </div>
+                <div class="wallet-info-item">
+                    <span class="label">Address</span>
+                    <span class="value" style="font-size: 0.85em;">${formatAddress(wallet.address)}</span>
+                </div>
+                <div class="wallet-info-item">
+                    <span class="label">24h Change</span>
+                    <span class="value ${changeClass}">${wallet.change24h.toFixed(2)}%</span>
+                </div>
+            </div>
+            <div class="wallet-actions">
+                <button onclick="refreshWallet('${wallet.id}')" class="btn btn-small">Refresh</button>
+                <button onclick="showQRCode('${wallet.address}')" class="btn btn-small">QR Code</button>
+                <button onclick="deleteWallet('${wallet.id}')" class="btn btn-small">Delete</button>
+            </div>
+        `;
+        return div;
+    }
+
+    function formatAddress(address) {
+        if (!address) return '';
+        if (address.length <= 15) return address;
+        return address.substring(0, 8) + '...' + address.substring(address.length - 8);
+    }
+
+    function refreshWallet(id) {
+        let wallets = JSON.parse(localStorage.getItem('wallets') || '[]');
+
+        wallets = wallets.map(wallet => {
+            if (wallet.id === id) {
+                const changePercent = (Math.random() * 4) - 2; // Random change between -2% and 2%
+                wallet.value = wallet.value * (1 + (changePercent / 100));
+                wallet.change24h = changePercent;
+                wallet.lastUpdated = new Date().toISOString();
+            }
+            return wallet;
+        });
+
+        localStorage.setItem('wallets', JSON.stringify(wallets));
+        loadWallets();
+
+        // Show a quick notification
+        showMessage("Wallet refreshed");
+    }
+
+    function deleteWallet(id) {
+        if (!confirm('Are you sure you want to delete this wallet?')) return;
+
+        let wallets = JSON.parse(localStorage.getItem('wallets') || '[]');
+        const walletToDelete = wallets.find(w => w.id === id);
+        wallets = wallets.filter(w => w.id !== id);
+        localStorage.setItem('wallets', JSON.stringify(wallets));
+        loadWallets();
+
+        // Show a quick notification
+        showMessage(`${walletToDelete.cryptoType} wallet deleted`);
+    }
+
+    // Portfolio Summary Functions
+    function updatePortfolioSummary(wallets) {
+        const totalValue = wallets.reduce((sum, wallet) => sum + (wallet.value || 0), 0);
+        let avgChange = 0;
+
+        if (wallets.length > 0) {
+            // Weighted average change based on value
+            avgChange = wallets.reduce((sum, wallet) => {
+                return sum + (wallet.change24h || 0) * (wallet.value / totalValue);
+            }, 0);
+        }
+
+        const totalValueElem = document.getElementById('total-value');
+        const totalChangeElem = document.getElementById('total-change');
+        const walletCountElem = document.getElementById('wallet-count');
+
+        totalValueElem.textContent = new Intl.NumberFormat('en-US', {
+            style: 'currency',
+            currency: 'USD'
+        }).format(totalValue);
+
+        totalChangeElem.textContent = `${avgChange.toFixed(2)}%`;
+        totalChangeElem.className = 'stat-value ' + (avgChange >= 0 ? 'positive' : 'negative');
+
+        walletCountElem.textContent = wallets.length;
+
+        updatePortfolioChart(wallets);
+    }
+
+    function updatePortfolioChart(wallets) {
+        const ctx = document.getElementById('portfolio-chart').getContext('2d');
+
+        if (portfolioChart) {
+            portfolioChart.destroy();
+        }
+
+        if (wallets.length === 0) {
+            ctx.font = '14px Arial';
+            ctx.fillStyle = 'rgba(255,255,255,0.7)';
+            ctx.textAlign = 'center';
+            ctx.fillText('No wallet data to display', ctx.canvas.width/2, ctx.canvas.height/2);
+            return;
+        }
+
+        portfolioChart = new Chart(ctx, {
+            type: 'doughnut',
+            data: {
+                labels: wallets.map(w => `${w.label} (${w.cryptoType})`),
+                datasets: [{
+                    data: wallets.map(w => w.value),
+                    backgroundColor: [
+                        '#FF8C00', '#1E90FF', '#32CD32', '#FF69B4', '#9370DB',
+                        '#20B2AA', '#F08080', '#DEB887', '#87CEEB', '#DDA0DD'
+                    ],
+                    borderWidth: 2,
+                    borderColor: '#3E1F5B'
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        display: false  // Hide legend to save space
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                const label = context.label || '';
+                                const value = context.formattedValue;
+                                return `${label}: ${value}`;
+                            }
+                        }
+                    }
+                },
+                cutout: '70%',
+                radius: '90%'
+            }
+        });
+    }
+
+    // Helper Functions
+    function showError(message) {
+        const errorContainer = document.getElementById('error-container');
+        const errorDiv = document.createElement('div');
+        errorDiv.className = 'error-message';
+        errorDiv.textContent = message;
+        errorContainer.appendChild(errorDiv);
+
+        setTimeout(() => {
+            errorDiv.style.opacity = '0';
+            errorDiv.style.transition = 'opacity 0.5s ease';
+            setTimeout(() => {
+                errorDiv.remove();
+            }, 500);
+        }, 4000);
+    }
+
+    function showMessage(message) {
+        const msgDiv = document.createElement('div');
+        msgDiv.style.position = 'fixed';
+        msgDiv.style.top = '20px';
+        msgDiv.style.right = '20px';
+        msgDiv.style.backgroundColor = 'rgba(50, 205, 50, 0.9)';
+        msgDiv.style.color = 'white';
+        msgDiv.style.padding = '10px 20px';
+        msgDiv.style.borderRadius = '5px';
+        msgDiv.style.boxShadow = '0 2px 10px rgba(0,0,0,0.3)';
+        msgDiv.style.zIndex = '1000';
+        msgDiv.textContent = message;
+
+        document.body.appendChild(msgDiv);
+
+        setTimeout(() => {
+            msgDiv.style.opacity = '0';
+            msgDiv.style.transition = 'opacity 0.5s ease';
+            setTimeout(() => msgDiv.remove(), 500);
+        }, 2000);
+    }
+
+    function clearAllWallets() {
+        if (confirm('Are you sure you want to clear all wallets?')) {
+            localStorage.removeItem('wallets');
+            loadWallets();
+            showMessage("All wallets were cleared");
+        }
+    }
+
+    // Test Wallet Functions
+    function addTestBitcoinWallet() {
+        const wallet = TEST_WALLETS.BTC[currentBTCIndex % TEST_WALLETS.BTC.length];
+        currentBTCIndex++;
+        addWallet(wallet.label, wallet.address, "BTC");
+    }
+
+    function addTestEthereumWallet() {
+        const wallet = TEST_WALLETS.ETH[currentETHIndex % TEST_WALLETS.ETH.length];
+        currentETHIndex++;
+        addWallet(wallet.label, wallet.address, "ETH");
+    }
+
+    function refreshAllWallets() {
+        let wallets = JSON.parse(localStorage.getItem('wallets') || '[]');
+
+        if (wallets.length === 0) {
+            showError("No wallets to refresh");
+            return;
+        }
+
+        wallets.forEach(wallet => {
+            const changePercent = (Math.random() * 4) - 2; // Random change between -2% and 2%
+            wallet.value = wallet.value * (1 + (changePercent / 100));
+            wallet.change24h = changePercent;
+            wallet.lastUpdated = new Date().toISOString();
+        });
+
+        localStorage.setItem('wallets', JSON.stringify(wallets));
+        loadWallets();
+        showMessage(`Refreshed ${wallets.length} wallets`);
+    }
+
+    // Market Data Implementation
+    function loadMarketData() {
+        const marketDataDiv = document.getElementById('market-data');
+
+        const mockMarketData = {
+            BTC: {
+                price: 43250.75,
+                change24h: 2.45,
+                marketCap: 834567890123,
+                volume24h: 28456789012
+            },
+            ETH: {
+                price: 2284.50,
+                change24h: -1.23,
+                marketCap: 274567890123,
+                volume24h: 15456789012
+            }
+        };
+
+        // Bitcoin Card
+        const btcCard = document.createElement('div');
+        btcCard.className = 'market-card';
+        btcCard.innerHTML = `
+            <h3>Bitcoin (BTC)</h3>
+            <div class="market-stat">
+                <span>Price</span>
+                <span>${formatCurrency(mockMarketData.BTC.price)}</span>
+            </div>
+            <div class="market-stat">
+                <span>24h Change</span>
+                <span class="${mockMarketData.BTC.change24h >= 0 ? 'positive' : 'negative'}">${mockMarketData.BTC.change24h.toFixed(2)}%</span>
+            </div>
+            <div class="market-stat">
+                <span>Market Cap</span>
+                <span>${formatLargeNumber(mockMarketData.BTC.marketCap)}</span>
+            </div>
+            <div class="market-stat">
+                <span>24h Volume</span>
+                <span>${formatLargeNumber(mockMarketData.BTC.volume24h)}</span>
+            </div>
+        `;
+        marketDataDiv.appendChild(btcCard);
+
+        // Ethereum Card
+        const ethCard = document.createElement('div');
+        ethCard.className = 'market-card';
+        ethCard.innerHTML = `
+            <h3>Ethereum (ETH)</h3>
+            <div class="market-stat">
+                <span>Price</span>
+                <span>${formatCurrency(mockMarketData.ETH.price)}</span>
+            </div>
+            <div class="market-stat">
+                <span>24h Change</span>
+                <span class="${mockMarketData.ETH.change24h >= 0 ? 'positive' : 'negative'}">${mockMarketData.ETH.change24h.toFixed(2)}%</span>
+            </div>
+            <div class="market-stat">
+                <span>Market Cap</span>
+                <span>${formatLargeNumber(mockMarketData.ETH.marketCap)}</span>
+            </div>
+            <div class="market-stat">
+                <span>24h Volume</span>
+                <span>${formatLargeNumber(mockMarketData.ETH.volume24h)}</span>
+            </div>
+        `;
+        marketDataDiv.appendChild(ethCard);
+
+        // Market trend mini chart
+        const trendContainer = document.createElement('div');
+        trendContainer.style.marginTop = '15px';
+        trendContainer.style.height = '120px';
+        trendContainer.innerHTML = '<canvas id="trend-chart"></canvas>';
+        marketDataDiv.appendChild(trendContainer);
+
+        // Create mini trend chart
+        const trendCtx = document.getElementById('trend-chart').getContext('2d');
+        const hours = Array.from({length: 24}, (_, i) => `${i}h`);
+        const btcTrend = Array.from({length: 24}, () =>
+            mockMarketData.BTC.price * (1 + (Math.random() * 0.05 - 0.025))
+        );
+        const ethTrend = Array.from({length: 24}, () =>
+            mockMarketData.ETH.price * (1 + (Math.random() * 0.05 - 0.025))
+        );
+
+        new Chart(trendCtx, {
+            type: 'line',
+            data: {
+                labels: hours,
+                datasets: [
+                    {
+                        label: 'BTC',
+                        data: btcTrend,
+                        borderColor: '#FF8C00',
+                        backgroundColor: 'rgba(255, 140, 0, 0.1)',
+                        borderWidth: 2,
+                        tension: 0.4,
+                        yAxisID: 'y-btc'
+                    },
+                    {
+                        label: 'ETH',
+                        data: ethTrend,
+                        borderColor: '#1E90FF',
+                        backgroundColor: 'rgba(30, 144, 255, 0.1)',
+                        borderWidth: 2,
+                        tension: 0.4,
+                        yAxisID: 'y-eth'
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                interaction: {
+                    mode: 'index',
+                    intersect: false,
+                },
+                plugins: {
+                    legend: {
+                        position: 'top',
+                        labels: {
+                            color: 'white',
+                            boxWidth: 15,
+                            padding: 10
+                        }
+                    },
+                    title: {
+                        display: true,
+                        text: '24h Price Trends',
+                        color: 'white',
+                        font: {
+                            size: 14
+                        }
+                    }
+                },
+                scales: {
+                    x: {
+                        display: false
+                    },
+                    'y-btc': {
+                        type: 'linear',
+                        display: true,
+                        position: 'left',
+                        ticks: {
+                            callback: function(value) {
+                                return '$' + parseInt(value).toLocaleString();
+                            },
+                            color: '#FF8C00'
+                        },
+                        grid: {
+                            display: false
+                        }
+                    },
+                    'y-eth': {
+                        type: 'linear',
+                        display: true,
+                        position: 'right',
+                        ticks: {
+                            callback: function(value) {
+                                return '$' + parseInt(value).toLocaleString();
+                            },
+                            color: '#1E90FF'
+                        },
+                        grid: {
+                            display: false
+                        }
+                    }
+                }
+            }
+        });
+    }
+
+    // Analytics Implementation
+    function initializeAnalytics() {
+        document.getElementById('timeframe-selector').addEventListener('change', updateAnalytics);
+        updateAnalytics();
+    }
+
+    function updateAnalytics() {
+        const wallets = JSON.parse(localStorage.getItem('wallets') || '[]');
+        updatePerformanceChart(wallets);
+        updateDistributionChart(wallets);
+    }
+
+    function updatePerformanceChart(wallets) {
+        const ctx = document.getElementById('performance-chart').getContext('2d');
+
+        if (performanceChart) {
+            performanceChart.destroy();
+        }
+
+        if (wallets.length === 0) {
+            ctx.font = '14px Arial';
+            ctx.fillStyle = 'rgba(255,255,255,0.7)';
+            ctx.textAlign = 'center';
+            ctx.fillText('No wallet data to display', ctx.canvas.width/2, ctx.canvas.height/2);
+            return;
+        }
+
+        // Generate mock historical data
+        const timeframe = document.getElementById('timeframe-selector').value;
+        const dataPoints = timeframe === '24h' ? 24 : timeframe === '7d' ? 7 : timeframe === '30d' ? 30 : 12;
+        const labels = Array.from({length: dataPoints}, (_, i) => {
+            if (timeframe === '24h') return `${23-i}h ago`;
+            if (timeframe === '7d') return `${6-i}d ago`;
+            if (timeframe === '30d') return `${29-i}d ago`;
+            return `${11-i}mo ago`;
+        }).reverse();
+
+        const totalValue = wallets.reduce((sum, wallet) => sum + wallet.value, 0);
+        const values = [];
+
+        // Create more realistic trend data
+        let currentValue = totalValue * 0.85; // Start lower than current
+        for (let i = 0; i < dataPoints; i++) {
+            // Gradual uptrend with random noise
+            const growthFactor = 1 + (Math.random() * 0.03);
+            currentValue *= growthFactor;
+
+            // Add some realistic volatility
+            const volatility = Math.random() * 0.05 - 0.025;
+            values.push(currentValue * (1 + volatility));
+        }
+
+        performanceChart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: 'Portfolio Value',
+                    data: values,
+                    borderColor: '#FF8C00',
+                    backgroundColor: 'rgba(255, 140, 0, 0.1)',
+                    fill: true,
+                    tension: 0.4
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        display: false
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                return 'Value: ' + formatCurrency(context.parsed.y);
+                            }
+                        }
+                    }
+                },
+                scales: {
+                    y: {
+                        ticks: {
+                            callback: function(value) {
+                                return formatCurrency(value);
+                            },
+                            color: 'rgba(255, 255, 255, 0.7)'
+                        },
+                        grid: {
+                            color: 'rgba(255, 255, 255, 0.05)'
+                        }
+                    },
+                    x: {
+                        ticks: {
+                            color: 'rgba(255, 255, 255, 0.7)',
+                            maxRotation: 45,
+                            minRotation: 45,
+                            font: {
+                                size: 10
+                            }
+                        },
+                        grid: {
+                            display: false
+                        }
+                    }
+                }
+            }
+        });
+    }
+
+    function updateDistributionChart(wallets) {
+        const ctx = document.getElementById('distribution-chart').getContext('2d');
+
+        if (distributionChart) {
+            distributionChart.destroy();
+        }
+
+        if (wallets.length === 0) {
+            ctx.font = '14px Arial';
+            ctx.fillStyle = 'rgba(255,255,255,0.7)';
+            ctx.textAlign = 'center';
+            ctx.fillText('No wallet data to display', ctx.canvas.width/2, ctx.canvas.height/2);
+            return;
+        }
+
+        // Group by crypto type
+        const btcValue = wallets.filter(w => w.cryptoType === 'BTC').reduce((sum, w) => sum + w.value, 0);
+        const ethValue = wallets.filter(w => w.cryptoType === 'ETH').reduce((sum, w) => sum + w.value, 0);
+
+        const totalValue = btcValue + ethValue;
+        const btcPercent = totalValue > 0 ? ((btcValue / totalValue) * 100).toFixed(1) : 0;
+        const ethPercent = totalValue > 0 ? ((ethValue / totalValue) * 100).toFixed(1) : 0;
+
+        distributionChart = new Chart(ctx, {
+            type: 'pie',
+            data: {
+                labels: [`BTC (${btcPercent}%)`, `ETH (${ethPercent}%)`],
+                datasets: [{
+                    data: [btcValue, ethValue],
+                    backgroundColor: ['#FF8C00', '#1E90FF'],
+                    borderWidth: 2,
+                    borderColor: '#3E1F5B'
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'right',
+                        labels: {
+                            color: '#fff',
+                            font: {
+                                size: 12
+                            },
+                            padding: 15
+                        }
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                return `${context.label}: ${formatCurrency(context.raw)}`;
+                            }
+                        }
+                    }
+                }
+            }
+        });
+    }
+
+    // QR Code Implementation
+    function showQRCode(address) {
+        // Generate QR code
+        const qr = qrcode(0, 'L');
+        qr.addData(address);
+        qr.make();
+
+        // Create modal
+        const modal = document.createElement('div');
+        modal.className = 'qr-modal';
+
+        // Create content
+        modal.innerHTML = `
+            <div class="qr-content">
+                <h3>Wallet QR Code</h3>
+                <div class="qr-code">${qr.createImgTag(5)}</div>
+                <p style="word-break: break-all; font-size: 0.9em; margin-bottom: 15px;">${address}</p>
+                <button class="btn">Close</button>
+            </div>
+        `;
+
+        // Add click event to close modal
+        modal.querySelector('button').addEventListener('click', () => {
+            modal.style.opacity = '0';
+            modal.style.transition = 'opacity 0.3s ease';
+            setTimeout(() => modal.remove(), 300);
+        });
+
+        // Add modal to the page
+        document.body.appendChild(modal);
+
+        // Close when clicking outside content
+        modal.addEventListener('click', (e) => {
+            if (e.target === modal) {
+                modal.style.opacity = '0';
+                modal.style.transition = 'opacity 0.3s ease';
+                setTimeout(() => modal.remove(), 300);
+            }
+        });
+    }
+
+    // Utility Functions
+    function formatCurrency(value) {
+        return new Intl.NumberFormat('en-US', {
+            style: 'currency',
+            currency: 'USD',
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2
+        }).format(value);
+    }
+
+    function formatLargeNumber(value) {
+        if (value >= 1e12) return (value / 1e12).toFixed(2) + 'T';
+        if (value >= 1e9) return (value / 1e9).toFixed(2) + 'B';
+        if (value >= 1e6) return (value / 1e6).toFixed(2) + 'M';
+        return value.toLocaleString();
+    }
+</script>
+
+</body>
+</html>
