@@ -12,6 +12,8 @@ import com.sun.net.httpserver.*;
 
 public class Login {
 
+    int i = 1;
+
     private static final String FIREBASE_API_KEY = System.getenv("FIREBASE_API_KEY");
     //private static final String FIREBASE_API_KEY = "AIzaSyCMA1F8Xd4rCxGXssXIs8Da80qqP6jien8";
 
