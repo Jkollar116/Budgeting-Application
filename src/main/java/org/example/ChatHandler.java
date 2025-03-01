@@ -12,7 +12,7 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 
 public class ChatHandler implements HttpHandler {
-    private static final String API_KEY = "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";
+    private static final String API_KEY = System.getenv("OPENAI_APIKEY");
     private static final String OPENAI_ENDPOINT = "https://api.openai.com/v1/chat/completions";
 
     @Override
