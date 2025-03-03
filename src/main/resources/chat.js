@@ -1,6 +1,6 @@
 let financialDataMessage = "";
 
-fetch("/api/getData")
+fetch(window.API_ENDPOINT + '/api/getData')
     .then(response => response.json())
     .then(data => {
         financialDataMessage =

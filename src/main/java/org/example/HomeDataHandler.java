@@ -7,7 +7,9 @@ import java.io.IOException;
 
 public class HomeDataHandler implements HttpHandler {
     public void handle(HttpExchange exchange) throws IOException {
-        exchange.getResponseHeaders().set("Access-Control-Allow-Origin", "*");
+        exchange.getResponseHeaders().add("Access-Control-Allow-Origin", "https://cashclimb.net");
+        exchange.getResponseHeaders().add("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
+        exchange.getResponseHeaders().add("Access-Control-Allow-Headers", "Content-Type, Authorization");
         int netWorth = 100000;
         int cash = 30000, equity = 50000, investments = 20000;
         int totalIncome = 5000;
@@ -37,6 +39,10 @@ public class HomeDataHandler implements HttpHandler {
             if (i < monthlyExpenses.length - 1) {
                 json.append(",");
             }
+        }
+        if (exchange.getRequestMethod().equalsIgnoreCase("OPTIONS")) {
+            exchange.sendResponseHeaders(204, -1);
+            return;
         }
         json.append("]}");
         byte[] responseBytes = json.toString().getBytes("UTF-8");

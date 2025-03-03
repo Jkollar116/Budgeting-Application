@@ -1,5 +1,5 @@
 document.addEventListener("DOMContentLoaded", function() {
-    fetch('/api/getData')
+    fetch(window.API_ENDPOINT + '/api/getData')
         .then(function(response) {
             return response.json();
         })

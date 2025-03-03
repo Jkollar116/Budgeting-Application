@@ -1,0 +1,1 @@
+window.API_ENDPOINT = 'https://backend-url-will-go-here.com';
