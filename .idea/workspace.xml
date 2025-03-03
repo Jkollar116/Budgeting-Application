@@ -5,13 +5,18 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="e72c0420-fe48-4af3-a363-18d6d8618447" name="Changes" comment="Attempting to fix the API key issue by storing it in aws instead">
-      <change afterPath="$PROJECT_DIR$/.ebextensions/ebextensions/options.config" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/trust-policy.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.ebextensions/ava-options.config" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.ebextensions/env.config" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.ebextensions/options.config" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.ebignore" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/org/example/UserProfileService.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/resources/profile.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/resources/profile.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Dockerfile" beforeDir="false" afterPath="$PROJECT_DIR$/Dockerfile" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/example/AwsConfigHandler.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/example/AwsConfigHandler.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/example/AwsS3Service.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/example/AwsS3Service.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/example/Login.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/example/Login.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/aws-config.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/aws-config.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/crypto.html" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/crypto.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/style.css" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/style.css" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -21,10 +26,10 @@
   <component name="FileTemplateManagerImpl">
     <option name="RECENT_TEMPLATES">
       <list>
-        <option value="HTML File" />
-        <option value="Class" />
-        <option value="JavaScript File" />
         <option value="Dockerfile" />
+        <option value="Class" />
+        <option value="HTML File" />
+        <option value="JavaScript File" />
       </list>
     </option>
   </component>
@@ -153,7 +158,7 @@
       <workItem from="1740610373474" duration="31000" />
       <workItem from="1740962921176" duration="1716000" />
       <workItem from="1740971417087" duration="1331000" />
-      <workItem from="1741035229741" duration="2697000" />
+      <workItem from="1741035229741" duration="6815000" />
     </task>
     <task id="LOCAL-00001" summary="First Commit of login">
       <option name="closed" value="true" />
@@ -235,7 +240,39 @@
       <option name="project" value="LOCAL" />
       <updated>1741037199030</updated>
     </task>
-    <option name="localTasksCounter" value="11" />
+    <task id="LOCAL-00011" summary="Attempting to fix the API key issue by storing it in aws instead">
+      <option name="closed" value="true" />
+      <created>1741038617016</created>
+      <option name="number" value="00011" />
+      <option name="presentableId" value="LOCAL-00011" />
+      <option name="project" value="LOCAL" />
+      <updated>1741038617016</updated>
+    </task>
+    <task id="LOCAL-00012" summary="Attempting to fix the API key issue by storing it in aws instead">
+      <option name="closed" value="true" />
+      <created>1741038655782</created>
+      <option name="number" value="00012" />
+      <option name="presentableId" value="LOCAL-00012" />
+      <option name="project" value="LOCAL" />
+      <updated>1741038655782</updated>
+    </task>
+    <task id="LOCAL-00013" summary="Attempting to fix the API key issue by storing it in aws instead">
+      <option name="closed" value="true" />
+      <created>1741038741234</created>
+      <option name="number" value="00013" />
+      <option name="presentableId" value="LOCAL-00013" />
+      <option name="project" value="LOCAL" />
+      <updated>1741038741234</updated>
+    </task>
+    <task id="LOCAL-00014" summary="Attempting to fix the API key issue by storing it in aws instead">
+      <option name="closed" value="true" />
+      <created>1741038748763</created>
+      <option name="number" value="00014" />
+      <option name="presentableId" value="LOCAL-00014" />
+      <option name="project" value="LOCAL" />
+      <updated>1741038748763</updated>
+    </task>
+    <option name="localTasksCounter" value="15" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">

@@ -1,30 +1,31 @@
-// AWS Configuration and Initialization
-const initializeAWS = async () => {
+// Initialize AWS configuration
+(async function() {
     try {
-        // Fetch AWS configuration from backend
-        const response = await fetch('/aws-config');
+        // Update path to match the new context
+        const response = await fetch('/api/aws-config');
         if (!response.ok) {
-            throw new Error(`Failed to load AWS config: ${response.status}`);
+            console.error(`Failed to fetch AWS config: ${response.status}`);
+            return;
         }
 
-        const awsConfig = await response.json();
+        const config = await response.json();
+        console.log('AWS Config loaded:', config);
 
-        // Check if AWS SDK is loaded
-        if (typeof AWS !== 'undefined') {
-            // Configure AWS SDK
-            AWS.config.region = awsConfig.region;
+        // Initialize AWS SDK with the configuration
+        AWS.config.region = config.region || 'us-east-2';
 
-            // Return configuration for use in application
-            return awsConfig;
-        } else {
-            console.warn('AWS SDK not loaded. Make sure to include the AWS SDK script.');
-            return null;
-        }
+        // Make config globally available
+        window.awsConfig = config;
+
+        // Log initialization success
+        console.log('AWS SDK initialized successfully');
     } catch (error) {
-        console.error('Error initializing AWS:', error);
-        return null;
+        console.error('Error initializing AWS config:', error);
     }
-};
+})();
 
-// Export the initialize function and configuration
-window.awsInitialize = initializeAWS;
+// Function for the storage provider dropdown
+function getStorageProvider() {
+    const storageSelect = document.getElementById('storage-provider');
+    return storageSelect ? storageSelect.value : 'firebase';
+}

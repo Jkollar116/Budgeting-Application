@@ -3,7 +3,7 @@ const awsWalletService = {
     // List all wallets
     async listWallets(userId) {
         try {
-            const response = await fetch(`/aws-wallets?userId=${userId}`);
+            const response = await fetch(`/api/aws-wallets?userId=${userId}`);
             if (!response.ok) {
                 throw new Error(`HTTP error! status: ${response.status}`);
             }
@@ -17,7 +17,7 @@ const awsWalletService = {
     // Get a single wallet
     async getWallet(userId, walletId) {
         try {
-            const response = await fetch(`/aws-wallets/${walletId}?userId=${userId}`);
+            const response = await fetch(`/api/aws-wallets/${walletId}?userId=${userId}`);
             if (!response.ok) {
                 throw new Error(`HTTP error! status: ${response.status}`);
             }
@@ -31,7 +31,7 @@ const awsWalletService = {
     // Add a new wallet
     async addWallet(userId, walletData) {
         try {
-            const response = await fetch(`/aws-wallets?userId=${userId}`, {
+            const response = await fetch(`/api/aws-wallets?userId=${userId}`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
@@ -52,7 +52,7 @@ const awsWalletService = {
     // Refresh wallet data
     async refreshWallet(userId, walletId) {
         try {
-            const response = await fetch(`/aws-wallets/${walletId}/refresh?userId=${userId}`, {
+            const response = await fetch(`/api/aws-wallets/${walletId}/refresh?userId=${userId}`, {
                 method: 'POST'
             });
 
@@ -69,7 +69,7 @@ const awsWalletService = {
     // Delete a wallet
     async deleteWallet(userId, walletId) {
         try {
-            const response = await fetch(`/aws-wallets/${walletId}?userId=${userId}`, {
+            const response = await fetch(`/api/aws-wallets/${walletId}?userId=${userId}`, {
                 method: 'DELETE'
             });
 

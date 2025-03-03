@@ -15,51 +15,57 @@ public class Login {
     private static final String FIREBASE_API_KEY = "AIzaSyCMA1F8Xd4rCxGXssXIs8Da80qqP6jien8";
 
     public static void main(String[] args) throws Exception {
-        int port = 8000;
-        String portEnv = System.getenv("PORT");
-        if (portEnv != null && !portEnv.isEmpty()) {
-            try {
-                port = Integer.parseInt(portEnv);
-            } catch (NumberFormatException e) {
-                System.err.println("Invalid PORT environment variable. Using default port " + port);
+            int port = 8000;
+            if (args.length > 0) {
+                try {
+                    port = Integer.parseInt(args[0]);
+                } catch (NumberFormatException e) {
+                    System.err.println("Invalid port specified. Using default port " + port);
+                }
+            }
+
+            // Print environment variables for debugging (redacted to avoid showing sensitive info)
+            String awsRegion = System.getenv("AWS_REGION");
+            System.out.println("AWS Region: " + (awsRegion != null ? awsRegion : "Not set"));
+            System.out.println("AWS S3 Bucket: " + (System.getenv("AWS_S3_BUCKET") != null ? System.getenv("AWS_S3_BUCKET") : "Not set"));
+            System.out.println("AWS Access Key: " + (System.getenv("AWS_ACCESS_KEY_ID") != null ? "Set" : "Not set"));
+            System.out.println("AWS Secret Key: " + (System.getenv("AWS_SECRET_ACCESS_KEY") != null ? "Set" : "Not set"));
+
+            HttpServer server = HttpServer.create(new InetSocketAddress("0.0.0.0", port), 0);
+
+            // Static file and basic authentication handlers
+            server.createContext("/", new StaticFileHandler());
+            server.createContext("/login", new LoginHandler());
+            server.createContext("/register", new RegisterHandler());
+            server.createContext("/forgot", new ForgotPasswordHandler());
+
+            // API handlers
+            server.createContext("/api/getData", new HomeDataHandler());
+            server.createContext("/api/chat", new ChatHandler());
+            server.createContext("/api/wallets", new CryptoApiHandler());
+            server.createContext("/api/crypto/prices", new CryptoPriceHandler());
+
+            // AWS configuration endpoint - make sure this path is unique
+            server.createContext("/api/aws-config", new AwsConfigHandler());
+
+            // AWS wallet handler - make sure this path doesn't conflict with any other path
+            // The context path must be unique, so we're using /api/aws-wallets to avoid conflicts
+            server.createContext("/api/aws-wallets", new AwsWalletHandler());
+
+            server.setExecutor(null);
+            server.start();
+
+            System.out.println("Server started on port " + port);
+            System.out.println("Open http://localhost:" + port + " in your browser");
+
+            if (Desktop.isDesktopSupported()) {
+                Desktop.getDesktop().browse(new URI("http://localhost:" + port));
             }
         }
 
-        initializeFirebase();
-
-        if (args.length > 0) {
-            try {
-                port = Integer.parseInt(args[0]);
-            } catch (NumberFormatException e) {
-                System.err.println("Invalid port specified. Using default port " + port);
-            }
-        }
 
 
-        HttpServer server = HttpServer.create(new InetSocketAddress("0.0.0.0", port), 0);
-        server.createContext("/", new StaticFileHandler());
-        server.createContext("/health", new HealthCheckHandler());
-        server.createContext("/aws-config", new AwsConfigHandler());
-        server.createContext("/login", new LoginHandler());
-        server.createContext("/register", new RegisterHandler());
-        server.createContext("/forgot", new ForgotPasswordHandler());
-
-        server.createContext("/api/getData", new HomeDataHandler());
-        server.createContext("/api/chat", new ChatHandler());
-        server.createContext("/aws-wallets", new AwsWalletHandler());
-        server.createContext("/api/wallets", new CryptoApiHandler());
-        server.createContext("/api/crypto/prices", new CryptoPriceHandler());
-        server.setExecutor(null);
-        server.start();
-
-
-        if (Desktop.isDesktopSupported()) {
-            Desktop.getDesktop().browse(new URI("http://localhost:" + port));
-        }
-    }
-
-
-    static class StaticFileHandler implements HttpHandler {
+        static class StaticFileHandler implements HttpHandler {
         private final String basePath = "src/main/resources";
 
         public void handle(HttpExchange exchange) throws IOException {
@@ -133,10 +139,46 @@ public class Login {
                 os.close();
                 int responseCode = conn.getResponseCode();
                 if (responseCode == 200) {
-                    exchange.getResponseHeaders().set("Location", "/home.html");
-                    exchange.sendResponseHeaders(302, -1);
+                    // Parse the response to get the localId (the Firebase user ID)
+                    InputStream inputStream = conn.getInputStream();
+                    InputStreamReader isrSuc = new InputStreamReader(inputStream, StandardCharsets.UTF_8);
+                    BufferedReader brSuc = new BufferedReader(isrSuc);
+                    StringBuilder responseSuc = new StringBuilder();
+                    String lineSuc;
+                    while ((lineSuc = brSuc.readLine()) != null) {
+                        responseSuc.append(lineSuc);
+                    }
+                    brSuc.close();
+
+                    JSONObject responseJson = new JSONObject(responseSuc.toString());
+                    String userId = responseJson.getString("localId");
+                    String userEmail = responseJson.getString("email");
+
+                    // Create an HTML response with JavaScript that stores the user ID
+                    String successHtml = "<!DOCTYPE html><html lang=\"en\"><head><meta charset=\"UTF-8\">"
+                            + "<title>Login Success</title>"
+                            + "<link rel=\"stylesheet\" href=\"style.css\">"
+                            + "<script src=\"profile.js\"></script>"
+                            + "</head><body>"
+                            + "<div class=\"login-container\"><h2>Login Successful</h2>"
+                            + "<p>Redirecting you to the dashboard...</p></div>"
+                            + "<script>"
+                            + "document.addEventListener('DOMContentLoaded', function() {"
+                            + "  storeUserSession('" + userId + "', '" + userEmail + "');"
+                            + "  setTimeout(function() { window.location.href = '/home.html'; }, 1000);"
+                            + "});"
+                            + "</script>"
+                            + "</body></html>";
+
+                    exchange.getResponseHeaders().set("Content-Type", "text/html; charset=UTF-8");
+                    byte[] successBytes = successHtml.getBytes(StandardCharsets.UTF_8);
+                    exchange.sendResponseHeaders(200, successBytes.length);
+                    OutputStream osResp = exchange.getResponseBody();
+                    osResp.write(successBytes);
+                    osResp.close();
                     return;
-                } else {
+                }
+                else {
                     InputStream errorStream = conn.getErrorStream();
                     InputStreamReader isrError = new InputStreamReader(errorStream, StandardCharsets.UTF_8);
                     BufferedReader in = new BufferedReader(isrError);
@@ -145,6 +187,7 @@ public class Login {
                         response.append(line);
                     }
                     in.close();
+                    String errorResponse = response.toString();
                     String userMessage = "Invalid email or password. Please try again.";
                     String errorHtml = "<!DOCTYPE html><html lang=\"en\"><head><meta charset=\"UTF-8\"><title>Login Error</title>"
                             + "<link rel=\"stylesheet\" href=\"style.css\"></head><body>"
@@ -412,6 +455,116 @@ public class Login {
             }
         }
     }
+    public static class UserProfileHandler implements HttpHandler {
+        private final String profilesDirectory = "profiles";
+
+        public UserProfileHandler() {
+            // Create profiles directory if it doesn't exist
+            File directory = new File(profilesDirectory);
+            if (!directory.exists()) {
+                directory.mkdirs();
+            }
+        }
+
+        @Override
+        public void handle(HttpExchange exchange) throws IOException {
+            // Add CORS headers
+            exchange.getResponseHeaders().add("Access-Control-Allow-Origin", "*");
+            exchange.getResponseHeaders().add("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
+            exchange.getResponseHeaders().add("Access-Control-Allow-Headers", "Content-Type, Authorization");
+
+            // Handle preflight OPTIONS request
+            if (exchange.getRequestMethod().equalsIgnoreCase("OPTIONS")) {
+                exchange.sendResponseHeaders(204, -1);
+                return;
+            }
+
+            try {
+                String query = exchange.getRequestURI().getQuery();
+                String userId = null;
+                if (query != null && query.startsWith("userId=")) {
+                    userId = query.substring(7); // Extract userId from query string
+                }
+
+                if (userId == null || userId.isEmpty()) {
+                    sendResponse(exchange, 400, createErrorJson("User ID is required"));
+                    return;
+                }
+
+                String method = exchange.getRequestMethod();
+                if (method.equals("GET")) {
+                    handleGetProfile(exchange, userId);
+                } else if (method.equals("POST")) {
+                    handleSaveProfile(exchange, userId);
+                } else if (method.equals("DELETE")) {
+                    handleDeleteProfile(exchange, userId);
+                } else {
+                    sendResponse(exchange, 405, createErrorJson("Method not allowed"));
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+                sendResponse(exchange, 500, createErrorJson("Server error: " + e.getMessage()));
+            }
+        }
+
+        private void handleGetProfile(HttpExchange exchange, String userId) throws IOException {
+            File profileFile = new File(profilesDirectory + "/" + userId + ".json");
+            if (!profileFile.exists()) {
+                // Return empty profile if file doesn't exist
+                sendResponse(exchange, 200, "{}");
+                return;
+            }
+
+            String profileJson = new String(Files.readAllBytes(profileFile.toPath()), StandardCharsets.UTF_8);
+            sendResponse(exchange, 200, profileJson);
+        }
+
+        private void handleSaveProfile(HttpExchange exchange, String userId) throws IOException {
+            StringBuilder requestBody = new StringBuilder();
+            try (BufferedReader br = new BufferedReader(new InputStreamReader(exchange.getRequestBody(), StandardCharsets.UTF_8))) {
+                String line;
+                while ((line = br.readLine()) != null) {
+                    requestBody.append(line);
+                }
+            }
+
+            // Validate JSON
+            String profileJson = requestBody.toString();
+            try {
+                new JSONObject(profileJson);
+            } catch (Exception e) {
+                sendResponse(exchange, 400, createErrorJson("Invalid JSON"));
+                return;
+            }
+
+            // Save profile to file
+            Files.write(Paths.get(profilesDirectory + "/" + userId + ".json"), profileJson.getBytes(StandardCharsets.UTF_8));
+            sendResponse(exchange, 200, "{\"success\": true}");
+        }
+
+        private void handleDeleteProfile(HttpExchange exchange, String userId) throws IOException {
+            File profileFile = new File(profilesDirectory + "/" + userId + ".json");
+            if (profileFile.exists()) {
+                profileFile.delete();
+            }
+            sendResponse(exchange, 200, "{\"success\": true}");
+        }
+
+        private String createErrorJson(String message) {
+            return "{\"error\": \"" + message.replace("\"", "\\\"") + "\"}";
+        }
+
+        private void sendResponse(HttpExchange exchange, int code, String response) throws IOException {
+            exchange.getResponseHeaders().set("Content-Type", "application/json");
+            byte[] responseBytes = response.getBytes(StandardCharsets.UTF_8);
+            exchange.sendResponseHeaders(code, responseBytes.length);
+            try (OutputStream os = exchange.getResponseBody()) {
+                os.write(responseBytes);
+            }
+        }
+    }
+
+
 
     private static void initializeFirebase() {
         String apiKey = System.getenv("FIREBASE_API_KEY");

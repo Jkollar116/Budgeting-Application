@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>CashClimb - User Profile</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="profile.js"></script>
+</head>
+<body>
+<header>
+    <div class="logo">CashClimb</div>
+    <nav>
+        <ul>
+            <li><a href="home.html">Dashboard</a></li>
+            <li><a href="crypto.html">Crypto</a></li>
+            <li><a href="profile.html">Profile</a></li>
+            <li><a href="chat.html">Chat</a></li>
+            <li><a href="#" id="logout-link">Log Out</a></li>
+        </ul>
+    </nav>
+</header>
+
+<div class="profile-container" style="max-width: 600px; margin: 50px auto; padding: 20px; background-color: #3E1F5B; border-radius: 10px;">
+    <h2>Your Profile</h2>
+    <div id="profile-status" style="margin: 10px 0; padding: 10px; text-align: center;">Loading profile...</div>
+
+    <form id="profile-form" style="display: none;">
+        <div style="margin-bottom: 15px;">
+            <label for="fullName" style="display: block; margin-bottom: 5px;">Full Name</label>
+            <input type="text" id="fullName" name="fullName" style="width: 100%; padding: 10px; border-radius: 5px; border: 1px solid #FF8C00; background-color: rgba(255,255,255,0.1); color: white;">
+        </div>
+
+        <div style="margin-bottom: 15px;">
+            <label for="phone" style="display: block; margin-bottom: 5px;">Phone</label>
+            <input type="tel" id="phone" name="phone" style="width: 100%; padding: 10px; border-radius: 5px; border: 1px solid #FF8C00; background-color: rgba(255,255,255,0.1); color: white;">
+        </div>
+
+        <div style="margin-bottom: 15px;">
+            <label for="address" style="display: block; margin-bottom: 5px;">Address</label>
+            <textarea id="address" name="address" rows="3" style="width: 100%; padding: 10px; border-radius: 5px; border: 1px solid #FF8C00; background-color: rgba(255,255,255,0.1); color: white;"></textarea>
+        </div>
+
+        <div style="margin-bottom: 15px;">
+            <label for="monthlyIncome" style="display: block; margin-bottom: 5px;">Monthly Income</label>
+            <input type="number" id="monthlyIncome" name="monthlyIncome" style="width: 100%; padding: 10px; border-radius: 5px; border: 1px solid #FF8C00; background-color: rgba(255,255,255,0.1); color: white;">
+        </div>
+
+        <div style="margin-bottom: 15px;">
+            <label for="financialGoals" style="display: block; margin-bottom: 5px;">Financial Goals</label>
+            <textarea id="financialGoals" name="financialGoals" rows="3" style="width: 100%; padding: 10px; border-radius: 5px; border: 1px solid #FF8C00; background-color: rgba(255,255,255,0.1); color: white;"></textarea>
+        </div>
+
+        <div>
+            <button type="submit" style="background-color: #FF8C00; border: none; color: white; padding: 12px 20px; border-radius: 5px; cursor: pointer; font-weight: bold;">Save Profile</button>
+        </div>
+    </form>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const session = getUserSession();
+        if (!session.userId) {
+            window.location.href = 'index.html';
+            return;
+        }
+
+        const profileStatus = document.getElementById('profile-status');
+        const profileForm = document.getElementById('profile-form');
+
+        // Load user profile
+        userProfileService.getProfile(session.userId)
+            .then(profile => {
+                document.getElementById('fullName').value = profile.fullName || '';
+                document.getElementById('phone').value = profile.phone || '';
+                document.getElementById('address').value = profile.address || '';
+                document.getElementById('monthlyIncome').value = profile.monthlyIncome || '';
+                document.getElementById('financialGoals').value = profile.financialGoals || '';
+
+                profileStatus.style.display = 'none';
+                profileForm.style.display = 'block';
+            })
+            .catch(error => {
+                profileStatus.textContent = 'Error loading profile: ' + error.message;
+                profileStatus.style.color = 'red';
+            });
+
+        // Save user profile
+        profileForm.addEventListener('submit', function(event) {
+            event.preventDefault();
+
+            const profileData = {
+                fullName: document.getElementById('fullName').value,
+                phone: document.getElementById('phone').value,
+                address: document.getElementById('address').value,
+                monthlyIncome: document.getElementById('monthlyIncome').value,
+                financialGoals: document.getElementById('financialGoals').value,
+                lastUpdated: new Date().toISOString()
+            };
+
+            profileStatus.textContent = 'Saving profile...';
+            profileStatus.style.display = 'block';
+            profileStatus.style.color = 'white';
+
+            userProfileService.saveProfile(session.userId, profileData)
+                .then(result => {
+                    profileStatus.textContent = 'Profile saved successfully!';
+                    profileStatus.style.color = 'green';
+                    setTimeout(() => {
+                        profileStatus.style.display = 'none';
+                    }, 3000);
+                })
+                .catch(error => {
+                    profileStatus.textContent = 'Error saving profile: ' + error.message;
+                    profileStatus.style.color = 'red';
+                });
+        });
+
+        // Handle logout
+        document.getElementById('logout-link').addEventListener('click', function(event) {
+            event.preventDefault();
+            clearUserSession();
+            window.location.href = 'index.html';
+        });
+    });
+</script>
+</body>
+</html>

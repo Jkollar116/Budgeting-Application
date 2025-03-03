@@ -37,18 +37,9 @@ public class AwsConfigHandler implements HttpHandler {
             // Region
             config.put("region", getEnvWithDefault("AWS_REGION", "us-east-2"));
 
-            // User Pool configuration if using Cognito
-            JSONObject cognito = new JSONObject();
-            cognito.put("userPoolId", getEnvWithDefault("AWS_COGNITO_USER_POOL_ID", ""));
-            cognito.put("userPoolWebClientId", getEnvWithDefault("AWS_COGNITO_CLIENT_ID", ""));
-            config.put("cognito", cognito);
-
-            // API Gateway endpoint if applicable
-            config.put("apiEndpoint", getEnvWithDefault("AWS_API_ENDPOINT", ""));
-
             // S3 configuration if using S3 for storage
             JSONObject s3 = new JSONObject();
-            s3.put("bucket", getEnvWithDefault("AWS_S3_BUCKET", ""));
+            s3.put("bucket", getEnvWithDefault("AWS_S3_BUCKET", "cashclimb-app-bucket"));
             config.put("s3", s3);
 
             // Send the response

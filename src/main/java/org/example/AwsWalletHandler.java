@@ -31,46 +31,48 @@ public class AwsWalletHandler implements HttpHandler {
             exchange.sendResponseHeaders(204, -1);
             return;
         }
-
-        try {
-            // Get userId from request parameter (normally would come from authentication)
-            String userId = exchange.getRequestURI().getQuery();
-            if (userId == null || !userId.startsWith("userId=")) {
-                sendErrorResponse(exchange, 400, "Missing userId parameter");
-                return;
-            }
-            userId = userId.substring(7); // Remove "userId=" prefix
-
-            String path = exchange.getRequestURI().getPath();
-            String method = exchange.getRequestMethod();
-
-            if (path.equals("/aws-wallets") && method.equals("GET")) {
-                handleListWallets(exchange, userId);
-            } else if (path.equals("/aws-wallets") && method.equals("POST")) {
-                handleAddWallet(exchange, userId);
-            } else if (path.startsWith("/aws-wallets/") && method.equals("GET")) {
-                String walletId = path.substring("/aws-wallets/".length());
-                handleGetWallet(exchange, userId, walletId);
-            } else if (path.startsWith("/aws-wallets/") && method.equals("POST")) {
-                String walletId = path.substring("/aws-wallets/".length());
-                if (path.endsWith("/refresh")) {
-                    handleRefreshWallet(exchange, userId, walletId);
-                } else {
-                    sendErrorResponse(exchange, 400, "Invalid operation");
+            try {
+                // Get userId from request parameter (normally would come from authentication)
+                String userId = exchange.getRequestURI().getQuery();
+                if (userId == null || !userId.startsWith("userId=")) {
+                    sendErrorResponse(exchange, 400, "Missing userId parameter");
+                    return;
                 }
-            } else if (path.startsWith("/aws-wallets/") && method.equals("DELETE")) {
-                String walletId = path.substring("/aws-wallets/".length());
-                handleDeleteWallet(exchange, userId, walletId);
-            } else {
-                sendErrorResponse(exchange, 404, "Not Found");
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-            sendErrorResponse(exchange, 500, "Internal Server Error: " + e.getMessage());
-        }
-    }
+                userId = userId.substring(7); // Remove "userId=" prefix
 
-    private void handleListWallets(HttpExchange exchange, String userId) throws IOException {
+                String path = exchange.getRequestURI().getPath();
+                String method = exchange.getRequestMethod();
+
+                // Update these paths to match our new context structure
+                if (path.equals("/api/aws-wallets") && method.equals("GET")) {
+                    handleListWallets(exchange, userId);
+                } else if (path.equals("/api/aws-wallets") && method.equals("POST")) {
+                    handleAddWallet(exchange, userId);
+                } else if (path.startsWith("/api/aws-wallets/") && method.equals("GET")) {
+                    String walletId = path.substring("/api/aws-wallets/".length());
+                    handleGetWallet(exchange, userId, walletId);
+                } else if (path.startsWith("/api/aws-wallets/") && method.equals("POST")) {
+                    String walletId = path.substring("/api/aws-wallets/".length());
+                    if (walletId.endsWith("/refresh")) {
+                        walletId = walletId.substring(0, walletId.length() - 8); // remove "/refresh"
+                        handleRefreshWallet(exchange, userId, walletId);
+                    } else {
+                        sendErrorResponse(exchange, 400, "Invalid operation");
+                    }
+                } else if (path.startsWith("/api/aws-wallets/") && method.equals("DELETE")) {
+                    String walletId = path.substring("/api/aws-wallets/".length());
+                    handleDeleteWallet(exchange, userId, walletId);
+                } else {
+                    sendErrorResponse(exchange, 404, "Not Found");
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+                sendErrorResponse(exchange, 500, "Internal Server Error: " + e.getMessage());
+            }
+        }
+
+
+        private void handleListWallets(HttpExchange exchange, String userId) throws IOException {
         try {
             JSONObject walletList = s3Service.listObjects(userId, "wallets");
             JSONArray walletsArray = new JSONArray();

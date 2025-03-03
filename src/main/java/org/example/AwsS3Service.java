@@ -9,6 +9,9 @@ import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.amazonaws.services.s3.model.S3Object;
 import com.amazonaws.services.s3.model.S3ObjectInputStream;
 import com.amazonaws.services.s3.model.PutObjectRequest;
+import com.amazonaws.services.s3.model.ListObjectsV2Request;
+import com.amazonaws.services.s3.model.ListObjectsV2Result;
+import com.amazonaws.services.s3.model.S3ObjectSummary;
 
 import org.json.JSONObject;
 
@@ -18,9 +21,6 @@ import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.UUID;
 
-/**
- * Service for interacting with AWS S3 storage
- */
 public class AwsS3Service {
     private AmazonS3 s3Client;
     private String bucketName;
@@ -47,7 +47,14 @@ public class AwsS3Service {
                     .withRegion(Regions.fromName(region))
                     .build();
 
-            System.out.println("AWS S3 service initialized successfully.");
+            System.out.println("AWS S3 service initialized successfully for bucket: " + bucketName + " in region: " + region);
+
+            // Check if bucket exists
+            if (!s3Client.doesBucketExistV2(bucketName)) {
+                System.out.println("Bucket does not exist: " + bucketName);
+            } else {
+                System.out.println("Bucket exists and is accessible: " + bucketName);
+            }
         } catch (Exception e) {
             System.err.println("Failed to initialize AWS S3 service: " + e.getMessage());
             e.printStackTrace();
@@ -56,6 +63,7 @@ public class AwsS3Service {
 
     /**
      * Stores a JSON object in S3
+     * @return the generated object ID
      */
     public String storeObject(String userId, String objectType, JSONObject data) throws IOException {
         if (s3Client == null) {
@@ -89,6 +97,10 @@ public class AwsS3Service {
         String key = String.format("users/%s/%s/%s.json", userId, objectType, objectId);
 
         try {
+            if (!s3Client.doesObjectExist(bucketName, key)) {
+                throw new IOException("Object does not exist: " + key);
+            }
+
             S3Object object = s3Client.getObject(bucketName, key);
             S3ObjectInputStream stream = object.getObjectContent();
 
@@ -117,6 +129,11 @@ public class AwsS3Service {
 
         String key = String.format("users/%s/%s/%s.json", userId, objectType, objectId);
 
+        // Check if object exists
+        if (!s3Client.doesObjectExist(bucketName, key)) {
+            throw new IOException("Object does not exist: " + key);
+        }
+
         byte[] contentBytes = data.toString().getBytes(StandardCharsets.UTF_8);
         InputStream contentStream = new ByteArrayInputStream(contentBytes);
 
@@ -131,17 +148,24 @@ public class AwsS3Service {
     /**
      * Deletes an object from S3
      */
-    public void deleteObject(String userId, String objectType, String objectId) {
+    public void deleteObject(String userId, String objectType, String objectId) throws IOException {
         if (s3Client == null) {
-            return;
+            throw new IOException("S3 client not initialized");
         }
 
         String key = String.format("users/%s/%s/%s.json", userId, objectType, objectId);
+
+        // Check if object exists
+        if (!s3Client.doesObjectExist(bucketName, key)) {
+            throw new IOException("Object does not exist: " + key);
+        }
+
         s3Client.deleteObject(bucketName, key);
     }
 
     /**
-     * Lists all objects of a specific type for a user
+     * Lists objects of a specific type for a user
+     * @return a JSONObject with object IDs as keys and lastModified timestamps as values
      */
     public JSONObject listObjects(String userId, String objectType) throws IOException {
         if (s3Client == null) {
@@ -149,14 +173,21 @@ public class AwsS3Service {
         }
 
         String prefix = String.format("users/%s/%s/", userId, objectType);
+        JSONObject result = new JSONObject();
 
         try {
-            JSONObject result = new JSONObject();
-            s3Client.listObjects(bucketName, prefix).getObjectSummaries().forEach(summary -> {
+            ListObjectsV2Request request = new ListObjectsV2Request()
+                    .withBucketName(bucketName)
+                    .withPrefix(prefix);
+
+            ListObjectsV2Result listing = s3Client.listObjectsV2(request);
+
+            for (S3ObjectSummary summary : listing.getObjectSummaries()) {
                 String key = summary.getKey();
+                // Extract the object ID from the key (e.g., users/123/wallets/abc.json -> abc)
                 String id = key.substring(key.lastIndexOf('/') + 1, key.lastIndexOf('.'));
                 result.put(id, summary.getLastModified().toString());
-            });
+            }
 
             return result;
         } catch (Exception e) {
