@@ -30,7 +30,6 @@ public class CoinMarketCapService {
                 String jsonData = response.body().string();
                 JSONObject jsonObject = new JSONObject(jsonData);
 
-                // Navigate through the JSON structure
                 JSONObject data = jsonObject.getJSONObject("data");
                 JSONObject symbolData = data.getJSONObject(symbol.toUpperCase());
                 JSONObject quote = symbolData.getJSONObject("quote");
@@ -46,5 +45,47 @@ public class CoinMarketCapService {
             return new CoinPrice(0.0, 0.0); // Return default values on error
         }
     }
+    public CoinMarketDetails getFullDetails(String symbol) throws IOException {
+        try {
+            String url = String.format("%s?symbol=%s&convert=USD", API_URL, symbol.toUpperCase());
+
+            Request request = new Request.Builder()
+                    .url(url)
+                    .addHeader("X-CMC_PRO_API_KEY", API_KEY)
+                    .addHeader("Accept", "application/json")
+                    .build();
+
+            try (Response response = client.newCall(request).execute()) {
+                if (!response.isSuccessful()) {
+                    throw new IOException("API call failed: " + response.code());
+                }
+
+                String jsonData = response.body().string();
+                JSONObject jsonObject = new JSONObject(jsonData);
+
+                JSONObject data = jsonObject.getJSONObject("data");
+                JSONObject symbolData = data.getJSONObject(symbol.toUpperCase());
+                JSONObject quote = symbolData.getJSONObject("quote");
+                JSONObject usd = quote.getJSONObject("USD");
+
+                return new CoinMarketDetails(
+                        usd.getDouble("price"),
+                        usd.getDouble("percent_change_24h"),
+                        symbolData.getLong("circulating_supply"),
+                        usd.getDouble("market_cap"),
+                        usd.getDouble("volume_24h")
+                );
+            }
+        } catch (Exception e) {
+            System.err.println("Error fetching details from CoinMarketCap: " + e.getMessage());
+            return new CoinMarketDetails(0.0, 0.0, 0, 0.0, 0.0);
+        }
+    }
 }
+
+record CoinMarketDetails(double currentPrice, double priceChangePercentage24h,
+
+                         long circulatingSupply, double marketCap, double volume24h) {}
+
 record CoinPrice(double currentPrice, double priceChangePercentage24h) {}
+

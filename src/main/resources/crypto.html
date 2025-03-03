@@ -414,9 +414,8 @@
 
     <!-- Market Overview Section - Enhanced -->
     <div class="card market-section">
-        <h2>Market Overview</h2>
+        <h2>Market Overview <button id="refresh-market" class="btn btn-small" style="float:right;margin-top:2px;">Refresh</button></h2>
         <div id="market-data">
-            <!-- Market data will be inserted here via JavaScript -->
         </div>
     </div>
 
@@ -829,8 +828,391 @@
     // Market Data Implementation
     function loadMarketData() {
         const marketDataDiv = document.getElementById('market-data');
+        marketDataDiv.innerHTML = '<div style="text-align:center;padding:20px;">Loading real market data...</div>';
 
+        // Fetch real-time crypto prices from our backend
+        fetch('/api/crypto/prices')
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok: ' + response.status);
+                }
+                return response.json();
+            })
+            .then(cryptoData => {
+                console.log("Received crypto data:", cryptoData);
+                marketDataDiv.innerHTML = '';
+
+                // Display cryptocurrency cards
+                if (Object.keys(cryptoData).length === 0) {
+                    marketDataDiv.innerHTML = '<div style="text-align:center;padding:20px;">No cryptocurrency data available</div>';
+                    return;
+                }
+
+                // Create cards for each cryptocurrency
+                for (const [symbol, data] of Object.entries(cryptoData)) {
+                    const card = document.createElement('div');
+                    card.className = 'market-card';
+
+                    // Get friendly name
+                    const friendlyNames = {
+                        'BTC': 'Bitcoin',
+                        'ETH': 'Ethereum'
+                    };
+
+                    const name = friendlyNames[symbol] || symbol;
+
+                    card.innerHTML = `
+                    <h3>${name} (${symbol})</h3>
+                    <div class="market-stat">
+                        <span>Price</span>
+                        <span>${formatCurrency(data.price)}</span>
+                    </div>
+                    <div class="market-stat">
+                        <span>24h Change</span>
+                        <span class="${data.change24h >= 0 ? 'positive' : 'negative'}">${data.change24h.toFixed(2)}%</span>
+                    </div>
+                    <div class="market-stat">
+                        <span>Market Cap</span>
+                        <span>${formatLargeNumber(data.marketCap)}</span>
+                    </div>
+                    <div class="market-stat">
+                        <span>24h Volume</span>
+                        <span>${formatLargeNumber(data.volume24h)}</span>
+                    </div>
+                `;
+                    marketDataDiv.appendChild(card);
+                }
+
+                // Create price trend chart
+                const trendContainer = document.createElement('div');
+                trendContainer.style.marginTop = '15px';
+                trendContainer.style.height = '120px';
+                trendContainer.innerHTML = '<canvas id="trend-chart"></canvas>';
+                marketDataDiv.appendChild(trendContainer);
+
+                // Get BTC and ETH prices as base for the chart
+                const btcPrice = cryptoData.BTC?.price || 0;
+                const ethPrice = cryptoData.ETH?.price || 0;
+
+                // Create historical price trend based on current price with random fluctuations
+                const createPriceTrend = (basePrice) => {
+                    // Start with the current price and work backwards with random fluctuations
+                    const trend = [];
+                    let price = basePrice;
+
+                    for (let i = 0; i < 24; i++) {
+                        // Add current price
+                        trend.unshift(price);
+
+                        // Adjust price for the "previous" hour with random fluctuation
+                        const volatility = 0.005 + (i / 24) * 0.005;
+                        const change = (Math.random() * 2 - 1) * volatility;
+                        price = price * (1 + change);
+                    }
+
+                    return trend;
+                };
+
+                const trendCtx = document.getElementById('trend-chart').getContext('2d');
+                const hours = Array.from({length: 24}, (_, i) => `${i}h`);
+
+                new Chart(trendCtx, {
+                    type: 'line',
+                    data: {
+                        labels: hours,
+                        datasets: [
+                            {
+                                label: 'BTC',
+                                data: createPriceTrend(btcPrice),
+                                borderColor: '#FF8C00',
+                                backgroundColor: 'rgba(255, 140, 0, 0.1)',
+                                borderWidth: 2,
+                                tension: 0.4,
+                                yAxisID: 'y-btc'
+                            },
+                            {
+                                label: 'ETH',
+                                data: createPriceTrend(ethPrice),
+                                borderColor: '#1E90FF',
+                                backgroundColor: 'rgba(30, 144, 255, 0.1)',
+                                borderWidth: 2,
+                                tension: 0.4,
+                                yAxisID: 'y-eth'
+                            }
+                        ]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        interaction: {
+                            mode: 'index',
+                            intersect: false,
+                        },
+                        plugins: {
+                            legend: {
+                                position: 'top',
+                                labels: {
+                                    color: 'white',
+                                    boxWidth: 15,
+                                    padding: 10
+                                }
+                            },
+                            title: {
+                                display: true,
+                                text: '24h Price Trends (Simulated)',
+                                color: 'white',
+                                font: {
+                                    size: 14
+                                }
+                            }
+                        },
+                        scales: {
+                            x: {
+                                display: false
+                            },
+                            'y-btc': {
+                                type: 'linear',
+                                display: true,
+                                position: 'left',
+                                ticks: {
+                                    callback: function(value) {
+                                        return '$' + parseInt(value).toLocaleString();
+                                    },
+                                    color: '#FF8C00'
+                                },
+                                grid: {
+                                    display: false
+                                }
+                            },
+                            'y-eth': {
+                                type: 'linear',
+                                display: true,
+                                position: 'right',
+                                ticks: {
+                                    callback: function(value) {
+                                        return '$' + parseInt(value).toLocaleString();
+                                    },
+                                    color: '#1E90FF'
+                                },
+                                grid: {
+                                    display: false
+                                }
+                            }
+                        }
+                    }
+                });
+
+                showMessage("Market data loaded with real prices");
+            })
+            .catch(error => {
+                console.error('Error fetching crypto prices:', error);
+                marketDataDiv.innerHTML = `
+                <div style="color: #FF4444; padding: 20px; text-align: center;">
+                    <p>Error loading market data: ${error.message}</p>
+                    <button id="retry-btn" class="btn">Retry</button>
+                </div>
+            `;
+
+                // Add retry button functionality
+                document.getElementById('retry-btn').addEventListener('click', () => {
+                    loadMarketData();
+                });
+            });
+    }
+
+
+    function createCryptoCard(container, symbol, data) {
+        const card = document.createElement('div');
+        card.className = 'market-card';
+
+        // Get friendly name
+        const friendlyNames = {
+            'BTC': 'Bitcoin',
+            'ETH': 'Ethereum',
+            'SOL': 'Solana',
+            'BNB': 'Binance Coin',
+            'XRP': 'XRP',
+            'ADA': 'Cardano',
+            'DOGE': 'Dogecoin'
+        };
+
+        const name = friendlyNames[symbol] || symbol;
+
+        card.innerHTML = `
+        <h3>${name} (${symbol})</h3>
+        <div class="market-stat">
+            <span>Price</span>
+            <span>${formatCurrency(data.price)}</span>
+        </div>
+        <div class="market-stat">
+            <span>24h Change</span>
+            <span class="${data.change24h >= 0 ? 'positive' : 'negative'}">${data.change24h.toFixed(2)}%</span>
+        </div>
+        <div class="market-stat">
+            <span>Market Cap</span>
+            <span>${formatLargeNumber(data.marketCap)}</span>
+        </div>
+        <div class="market-stat">
+            <span>24h Volume</span>
+            <span>${formatLargeNumber(data.volume24h)}</span>
+        </div>
+    `;
+        container.appendChild(card);
+    }
+
+    function createMarketTrendChart(container, cryptoData) {
+        // Market trend mini chart code (similar to existing implementation)
+        const trendContainer = document.createElement('div');
+        trendContainer.style.marginTop = '15px';
+        trendContainer.style.height = '120px';
+        trendContainer.innerHTML = '<canvas id="trend-chart"></canvas>';
+        container.appendChild(trendContainer);
+
+        // Create mini trend chart with fluctuating data based on real prices
+        const trendCtx = document.getElementById('trend-chart').getContext('2d');
+        const hours = Array.from({length: 24}, (_, i) => `${i}h`);
+
+        // Create datasets for each crypto
+        const datasets = [];
+        const colors = {
+            'BTC': '#FF8C00',
+            'ETH': '#1E90FF',
+            'SOL': '#00FF00',
+            'BNB': '#F3BA2F',
+            'XRP': '#23292F',
+            'ADA': '#0033AD',
+            'DOGE': '#C2A633'
+        };
+
+        // Only show BTC and ETH in the chart to avoid clutter
+        const symbolsToShow = ['BTC', 'ETH'];
+
+        symbolsToShow.forEach((symbol, index) => {
+            if (cryptoData[symbol]) {
+                const basePrice = cryptoData[symbol].price;
+                const priceData = Array.from({length: 24}, () =>
+                    basePrice * (1 + (Math.random() * 0.05 - 0.025))
+                );
+
+                datasets.push({
+                    label: symbol,
+                    data: priceData,
+                    borderColor: colors[symbol] || '#' + Math.floor(Math.random()*16777215).toString(16),
+                    backgroundColor: 'rgba(0, 0, 0, 0.1)',
+                    borderWidth: 2,
+                    tension: 0.4,
+                    yAxisID: 'y-' + symbol.toLowerCase()
+                });
+            }
+        });
+
+        new Chart(trendCtx, {
+            type: 'line',
+            data: {
+                labels: hours,
+                datasets: datasets
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                interaction: {
+                    mode: 'index',
+                    intersect: false,
+                },
+                plugins: {
+                    legend: {
+                        position: 'top',
+                        labels: {
+                            color: 'white',
+                            boxWidth: 15,
+                            padding: 10
+                        }
+                    },
+                    title: {
+                        display: true,
+                        text: '24h Price Trends',
+                        color: 'white',
+                        font: {
+                            size: 14
+                        }
+                    }
+                },
+                scales: {
+                    x: {
+                        display: false
+                    },
+                    'y-btc': {
+                        type: 'linear',
+                        display: true,
+                        position: 'left',
+                        ticks: {
+                            callback: function(value) {
+                                return '$' + parseInt(value).toLocaleString();
+                            },
+                            color: '#FF8C00'
+                        },
+                        grid: {
+                            display: false
+                        }
+                    },
+                    'y-eth': {
+                        type: 'linear',
+                        display: true,
+                        position: 'right',
+                        ticks: {
+                            callback: function(value) {
+                                return '$' + parseInt(value).toLocaleString();
+                            },
+                            color: '#1E90FF'
+                        },
+                        grid: {
+                            display: false
+                        }
+                    }
+                }
+            }
+        });
+    }
+
+    // Fallback function for mock data
+    function useMockMarketData(marketDataDiv) {
         const mockMarketData = {
+            BTC: {
+                price: 43250.75,
+                change24h: 2.45,
+                marketCap: 834567890123,
+                volume24h: 28456789012
+            },
+            ETH: {
+                price: 2284.50,
+                change24h: -1.23,
+                marketCap: 274567890123,
+                volume24h: 15456789012
+            },
+            SOL: {
+                price: 102.35,
+                change24h: 3.76,
+                marketCap: 45678901234,
+                volume24h: 5678901234
+            },
+            BNB: {
+                price: 305.78,
+                change24h: -0.84,
+                marketCap: 52345678901,
+                volume24h: 3456789012
+            }
+        };
+
+        // Display the mock data
+        for (const [symbol, data] of Object.entries(mockMarketData)) {
+            createCryptoCard(marketDataDiv, symbol, data);
+        }
+
+        // Create market trend chart with mock data
+        createMarketTrendChart(marketDataDiv, mockMarketData);
+    }
+
+    const mockMarketData = {
             BTC: {
                 price: 43250.75,
                 change24h: 2.45,
@@ -845,7 +1227,47 @@
             }
         };
 
-        // Bitcoin Card
+    function createCryptoCard(container, symbol, data) {
+        const card = document.createElement('div');
+        card.className = 'market-card';
+
+        // Get friendly name
+        const friendlyNames = {
+            'BTC': 'Bitcoin',
+            'ETH': 'Ethereum',
+            'SOL': 'Solana',
+            'BNB': 'Binance Coin',
+            'XRP': 'XRP',
+            'ADA': 'Cardano',
+            'DOGE': 'Dogecoin'
+        };
+
+        const name = friendlyNames[symbol] || symbol;
+
+        card.innerHTML = `
+        <h3>${name} (${symbol})</h3>
+        <div class="market-stat">
+            <span>Price</span>
+            <span>${formatCurrency(data.price)}</span>
+        </div>
+        <div class="market-stat">
+            <span>24h Change</span>
+            <span class="${data.change24h >= 0 ? 'positive' : 'negative'}">${data.change24h.toFixed(2)}%</span>
+        </div>
+        <div class="market-stat">
+            <span>Market Cap</span>
+            <span>${formatLargeNumber(data.marketCap)}</span>
+        </div>
+        <div class="market-stat">
+            <span>24h Volume</span>
+            <span>${formatLargeNumber(data.volume24h)}</span>
+        </div>
+    `;
+        container.appendChild(card);
+    }
+
+
+    // Bitcoin Card
         const btcCard = document.createElement('div');
         btcCard.className = 'market-card';
         btcCard.innerHTML = `
@@ -995,7 +1417,6 @@
                 }
             }
         });
-    }
 
     // Analytics Implementation
     function initializeAnalytics() {
@@ -1024,7 +1445,6 @@
             return;
         }
 
-        // Generate mock historical data
         const timeframe = document.getElementById('timeframe-selector').value;
         const dataPoints = timeframe === '24h' ? 24 : timeframe === '7d' ? 7 : timeframe === '30d' ? 30 : 12;
         const labels = Array.from({length: dataPoints}, (_, i) => {
@@ -1037,14 +1457,11 @@
         const totalValue = wallets.reduce((sum, wallet) => sum + wallet.value, 0);
         const values = [];
 
-        // Create more realistic trend data
         let currentValue = totalValue * 0.85; // Start lower than current
         for (let i = 0; i < dataPoints; i++) {
-            // Gradual uptrend with random noise
             const growthFactor = 1 + (Math.random() * 0.03);
             currentValue *= growthFactor;
 
-            // Add some realistic volatility
             const volatility = Math.random() * 0.05 - 0.025;
             values.push(currentValue * (1 + volatility));
         }
@@ -1174,7 +1591,6 @@
         qr.addData(address);
         qr.make();
 
-        // Create modal
         const modal = document.createElement('div');
         modal.className = 'qr-modal';
 
@@ -1188,17 +1604,14 @@
             </div>
         `;
 
-        // Add click event to close modal
         modal.querySelector('button').addEventListener('click', () => {
             modal.style.opacity = '0';
             modal.style.transition = 'opacity 0.3s ease';
             setTimeout(() => modal.remove(), 300);
         });
 
-        // Add modal to the page
         document.body.appendChild(modal);
 
-        // Close when clicking outside content
         modal.addEventListener('click', (e) => {
             if (e.target === modal) {
                 modal.style.opacity = '0';
@@ -1224,6 +1637,183 @@
         if (value >= 1e6) return (value / 1e6).toFixed(2) + 'M';
         return value.toLocaleString();
     }
+
+    document.addEventListener('DOMContentLoaded', function() {
+        const refreshMarketBtn = document.getElementById('refresh-market');
+
+        document.getElementById('refresh-market').addEventListener('click', function() {
+            loadMarketData();
+            showMessage("Refreshing market data...");
+        });
+
+        if (refreshMarketBtn) {
+            refreshMarketBtn.addEventListener('click', function() {
+                const marketDataDiv = document.getElementById('market-data');
+                marketDataDiv.innerHTML = '<div style="text-align:center;padding:20px;">Refreshing market data...</div>';
+
+                setTimeout(() => {
+                    marketDataDiv.innerHTML = '';
+
+                    const btcCard = document.createElement('div');
+                    btcCard.className = 'market-card';
+                    btcCard.innerHTML = `
+                    <h3>Bitcoin (BTC)</h3>
+                    <div class="market-stat">
+                        <span>Price</span>
+                        <span>${formatCurrency(mockMarketData.BTC.price)}</span>
+                    </div>
+                    <div class="market-stat">
+                        <span>24h Change</span>
+                        <span class="${mockMarketData.BTC.change24h >= 0 ? 'positive' : 'negative'}">${mockMarketData.BTC.change24h.toFixed(2)}%</span>
+                    </div>
+                    <div class="market-stat">
+                        <span>Market Cap</span>
+                        <span>${formatLargeNumber(mockMarketData.BTC.marketCap)}</span>
+                    </div>
+                    <div class="market-stat">
+                        <span>24h Volume</span>
+                        <span>${formatLargeNumber(mockMarketData.BTC.volume24h)}</span>
+                    </div>
+                `;
+                    marketDataDiv.appendChild(btcCard);
+
+                    // Generate slightly different prices each time to simulate refresh
+                    mockMarketData.BTC.price = mockMarketData.BTC.price * (1 + (Math.random() * 0.02 - 0.01));
+                    mockMarketData.BTC.change24h = mockMarketData.BTC.change24h + (Math.random() * 0.5 - 0.25);
+                    mockMarketData.ETH.price = mockMarketData.ETH.price * (1 + (Math.random() * 0.02 - 0.01));
+                    mockMarketData.ETH.change24h = mockMarketData.ETH.change24h + (Math.random() * 0.5 - 0.25);
+
+                    // Add Ethereum card
+                    const ethCard = document.createElement('div');
+                    ethCard.className = 'market-card';
+                    ethCard.innerHTML = `
+                    <h3>Ethereum (ETH)</h3>
+                    <div class="market-stat">
+                        <span>Price</span>
+                        <span>${formatCurrency(mockMarketData.ETH.price)}</span>
+                    </div>
+                    <div class="market-stat">
+                        <span>24h Change</span>
+                        <span class="${mockMarketData.ETH.change24h >= 0 ? 'positive' : 'negative'}">${mockMarketData.ETH.change24h.toFixed(2)}%</span>
+                    </div>
+                    <div class="market-stat">
+                        <span>Market Cap</span>
+                        <span>${formatLargeNumber(mockMarketData.ETH.marketCap)}</span>
+                    </div>
+                    <div class="market-stat">
+                        <span>24h Volume</span>
+                        <span>${formatLargeNumber(mockMarketData.ETH.volume24h)}</span>
+                    </div>
+                `;
+                    marketDataDiv.appendChild(ethCard);
+
+                    const trendContainer = document.createElement('div');
+                    trendContainer.style.marginTop = '15px';
+                    trendContainer.style.height = '120px';
+                    trendContainer.innerHTML = '<canvas id="trend-chart"></canvas>';
+                    marketDataDiv.appendChild(trendContainer);
+
+                    const trendCtx = document.getElementById('trend-chart').getContext('2d');
+                    const hours = Array.from({length: 24}, (_, i) => `${i}h`);
+                    const btcTrend = Array.from({length: 24}, () =>
+                        mockMarketData.BTC.price * (1 + (Math.random() * 0.05 - 0.025))
+                    );
+                    const ethTrend = Array.from({length: 24}, () =>
+                        mockMarketData.ETH.price * (1 + (Math.random() * 0.05 - 0.025))
+                    );
+
+                    new Chart(trendCtx, {
+                        type: 'line',
+                        data: {
+                            labels: hours,
+                            datasets: [
+                                {
+                                    label: 'BTC',
+                                    data: btcTrend,
+                                    borderColor: '#FF8C00',
+                                    backgroundColor: 'rgba(255, 140, 0, 0.1)',
+                                    borderWidth: 2,
+                                    tension: 0.4,
+                                    yAxisID: 'y-btc'
+                                },
+                                {
+                                    label: 'ETH',
+                                    data: ethTrend,
+                                    borderColor: '#1E90FF',
+                                    backgroundColor: 'rgba(30, 144, 255, 0.1)',
+                                    borderWidth: 2,
+                                    tension: 0.4,
+                                    yAxisID: 'y-eth'
+                                }
+                            ]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            interaction: {
+                                mode: 'index',
+                                intersect: false,
+                            },
+                            plugins: {
+                                legend: {
+                                    position: 'top',
+                                    labels: {
+                                        color: 'white',
+                                        boxWidth: 15,
+                                        padding: 10
+                                    }
+                                },
+                                title: {
+                                    display: true,
+                                    text: '24h Price Trends',
+                                    color: 'white',
+                                    font: {
+                                        size: 14
+                                    }
+                                }
+                            },
+                            scales: {
+                                x: {
+                                    display: false
+                                },
+                                'y-btc': {
+                                    type: 'linear',
+                                    display: true,
+                                    position: 'left',
+                                    ticks: {
+                                        callback: function(value) {
+                                            return '$' + parseInt(value).toLocaleString();
+                                        },
+                                        color: '#FF8C00'
+                                    },
+                                    grid: {
+                                        display: false
+                                    }
+                                },
+                                'y-eth': {
+                                    type: 'linear',
+                                    display: true,
+                                    position: 'right',
+                                    ticks: {
+                                        callback: function(value) {
+                                            return '$' + parseInt(value).toLocaleString();
+                                        },
+                                        color: '#1E90FF'
+                                    },
+                                    grid: {
+                                        display: false
+                                    }
+                                }
+                            }
+                        }
+                    });
+
+                    showMessage("Market data refreshed");
+                }, 500);
+            });
+        }
+    });
+
 </script>
 
 </body>

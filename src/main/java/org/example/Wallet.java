@@ -43,7 +43,6 @@ public class Wallet {
         return json;
     }
 
-    // Getters
     public String getLabel() { return label; }
     public String getAddress() { return address; }
     public String getCryptoType() { return cryptoType; }

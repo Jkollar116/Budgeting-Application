@@ -9,6 +9,7 @@ import java.nio.charset.*;
 import java.nio.file.*;
 import java.awt.*;
 import com.sun.net.httpserver.*;
+import org.json.JSONObject;
 
 public class Login {
     private static final String FIREBASE_API_KEY = "AIzaSyCMA1F8Xd4rCxGXssXIs8Da80qqP6jien8";
@@ -33,6 +34,7 @@ public class Login {
         server.createContext("/api/getData", new HomeDataHandler());
         server.createContext("/api/chat", new ChatHandler());
         server.createContext("/api/wallets", new CryptoApiHandler());
+        server.createContext("/api/crypto/prices", new CryptoPriceHandler());
         server.setExecutor(null);
         server.start();
 
@@ -335,6 +337,60 @@ public class Login {
                 }
             } else {
                 exchange.sendResponseHeaders(405, -1);
+            }
+        }
+    }
+
+    static class CryptoPriceHandler implements HttpHandler {
+        public void handle(HttpExchange exchange) throws IOException {
+            exchange.getResponseHeaders().add("Access-Control-Allow-Origin", "*");
+            exchange.getResponseHeaders().set("Content-Type", "application/json");
+
+            try {
+                JSONObject response = new JSONObject();
+
+                CoinMarketCapService cmcService = new CoinMarketCapService();
+
+                String[] coins = {"BTC", "ETH"};
+
+                for (String coin : coins) {
+                    try {
+                        CoinPrice price = cmcService.getPrice(coin);
+                        JSONObject coinData = new JSONObject();
+                        coinData.put("price", price.currentPrice());
+                        coinData.put("change24h", price.priceChangePercentage24h());
+
+                        if (coin.equals("BTC")) {
+                            double marketCap = price.currentPrice() * 19000000; // ~19M circulating supply
+                            coinData.put("marketCap", marketCap);
+                            coinData.put("volume24h", marketCap * 0.03); // Typical BTC 24h volume is ~3% of market cap
+                        } else if (coin.equals("ETH")) {
+                            double marketCap = price.currentPrice() * 120000000; // ~120M circulating supply
+                            coinData.put("marketCap", marketCap);
+                            coinData.put("volume24h", marketCap * 0.04); // Typical ETH 24h volume is ~4% of market cap
+                        }
+
+                        response.put(coin, coinData);
+                    } catch (Exception e) {
+                        System.err.println("Error fetching price for " + coin + ": " + e.getMessage());
+                    }
+                }
+
+                byte[] responseBytes = response.toString().getBytes("UTF-8");
+                exchange.sendResponseHeaders(200, responseBytes.length);
+                OutputStream os = exchange.getResponseBody();
+                os.write(responseBytes);
+                os.close();
+            } catch (Exception e) {
+                String errorResponse = new JSONObject()
+                        .put("error", "Failed to fetch crypto prices: " + e.getMessage())
+                        .toString();
+
+                byte[] responseBytes = errorResponse.getBytes("UTF-8");
+                exchange.sendResponseHeaders(500, responseBytes.length);
+                OutputStream os = exchange.getResponseBody();
+                os.write(responseBytes);
+                os.close();
             }
         }
     }

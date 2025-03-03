@@ -43,7 +43,6 @@ public class BlockchainApiService {
 
     public WalletInfo getEthereumWalletInfo(String address) throws IOException {
         try {
-            // Get balance
             String balanceUrl = String.format("%s?module=account&action=balance&address=%s&tag=latest&apikey=%s",
                     ETHERSCAN_API, address, ETHERSCAN_API_KEY);
             JSONObject balanceResponse = makeApiCall(balanceUrl, null);
@@ -54,7 +53,6 @@ public class BlockchainApiService {
                         .divide(BigDecimal.valueOf(1000000000000000000L), 18, RoundingMode.HALF_UP);
             }
 
-            // Get transactions
             String txUrl = String.format("%s?module=account&action=txlist&address=%s&startblock=0&endblock=99999999&page=1&offset=10&sort=desc&apikey=%s",
                     ETHERSCAN_API, address, ETHERSCAN_API_KEY);
             JSONObject txResponse = makeApiCall(txUrl, null);
@@ -81,7 +79,6 @@ public class BlockchainApiService {
             JSONObject firstOutput = outputs.getJSONObject(0);
             boolean isReceived = firstOutput.has("addr") && firstOutput.getString("addr").equals(walletAddress);
 
-            // Calculate total value from outputs
             double value = 0;
             for (int i = 0; i < outputs.length(); i++) {
                 JSONObject output = outputs.getJSONObject(i);

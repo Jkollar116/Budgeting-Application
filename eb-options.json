@@ -1,0 +1,27 @@
+[
+  {
+    "Namespace": "aws:elasticbeanstalk:application:environment",
+    "OptionName": "COINMARKETCAP_API_KEY",
+    "Value": "e2fa2fa3-ef84-4e08-8a73-ae43c073ab0d"
+  },
+  {
+    "Namespace": "aws:elasticbeanstalk:application:environment",
+    "OptionName": "ETHERSCAN_API_KEY",
+    "Value": "G6YJ1PGVSDWY8VP11ZKYPQJ78VWIE7YAUQ"
+  },
+  {
+    "Namespace": "aws:elasticbeanstalk:application:environment",
+    "OptionName": "FIREBASE_API_KEY",
+    "Value": "AIzaSyCMA1F8Xd4rCxGXssXIs8Da80qqP6jien8"
+  },
+  {
+    "Namespace": "aws:elasticbeanstalk:application:environment",
+    "OptionName": "OPENAI_APIKEY",
+    "Value": "your-openai-api-key"
+  },
+  {
+    "Namespace": "aws:autoscaling:launchconfiguration",
+    "OptionName": "IamInstanceProfile",
+    "Value": "aws-elasticbeanstalk-ec2-role"
+  }
+]
