@@ -27,12 +27,14 @@ public class Login {
 
         HttpServer server = HttpServer.create(new InetSocketAddress("0.0.0.0", port), 0);
         server.createContext("/", new StaticFileHandler());
+        server.createContext("/aws-config", new AwsConfigHandler());
         server.createContext("/login", new LoginHandler());
         server.createContext("/register", new RegisterHandler());
         server.createContext("/forgot", new ForgotPasswordHandler());
 
         server.createContext("/api/getData", new HomeDataHandler());
         server.createContext("/api/chat", new ChatHandler());
+        server.createContext("/aws-wallets", new AwsWalletHandler());
         server.createContext("/api/wallets", new CryptoApiHandler());
         server.createContext("/api/crypto/prices", new CryptoPriceHandler());
         server.setExecutor(null);

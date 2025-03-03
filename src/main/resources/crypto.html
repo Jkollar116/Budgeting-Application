@@ -443,7 +443,15 @@
                 <button id="clear-all-btn" class="btn">Clear All</button>
             </div>
         </div>
+        <div class="storage-toggle" style="margin: 15px 0;">
+            <label>Storage Provider:</label>
+            <select id="storage-provider" style="padding: 8px; border-radius: 5px; background: rgba(62, 31, 91, 0.7); color: white; border: 1px solid #FF8C00; margin-left: 10px;">
+                <option value="firebase">Firebase (Default)</option>
+                <option value="aws">AWS S3</option>
+            </select>
+        </div>
     </div>
+
 
     <!-- Wallet List Section - Bigger & More Prominent -->
     <div class="card wallets-list-section">
@@ -473,6 +481,9 @@
 </div>
 
 <!-- Scripts -->
+<script src="https://sdk.amazonaws.com/js/aws-sdk-2.1009.0.min.js"></script>
+<script src="aws-config.js"></script>
+<script src="aws-wallet.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.min.js"></script>
 
@@ -494,19 +505,31 @@
     let portfolioChart = null;
     let performanceChart = null;
     let distributionChart = null;
+    let storageProvider = 'firebase';
+    let currentUserId = 'demo-user';
+
 
     // Initialize when document loads
     document.addEventListener('DOMContentLoaded', function() {
+        window.awsInitialize().then(config => {
+            console.log("AWS initialized with config:", config);
+        });
         const btcButton = document.getElementById('add-btc-btn');
         const ethButton = document.getElementById('add-eth-btn');
         const refreshButton = document.getElementById('refresh-all-btn');
         const clearButton = document.getElementById('clear-all-btn');
         const customWalletForm = document.getElementById('custom-wallet-form');
+        const storageSelect = document.getElementById('storage-provider');
 
         btcButton.addEventListener('click', addTestBitcoinWallet);
         ethButton.addEventListener('click', addTestEthereumWallet);
         refreshButton.addEventListener('click', refreshAllWallets);
         clearButton.addEventListener('click', clearAllWallets);
+
+        storageSelect.addEventListener('change', function() {
+            storageProvider = this.value;
+            loadWallets();
+        });
 
         customWalletForm.addEventListener('submit', function(e) {
             e.preventDefault();
@@ -556,10 +579,31 @@
     }
 
     function loadWallets() {
-        const wallets = JSON.parse(localStorage.getItem('wallets') || '[]');
-        updatePortfolioSummary(wallets);
-        updateWalletsDisplay(wallets);
-        updateAnalytics(wallets);
+        if (storageProvider === 'firebase') {
+            // Original Firebase method (unchanged)
+            fetch('/api/wallets')
+                .then(response => response.json())
+                .then(data => {
+                    wallets = data;
+                    updatePortfolioSummary(wallets);
+                    updateWalletsDisplay(wallets);
+                    updateAnalytics(wallets);
+                })
+                .catch(error => console.error('Error:', error));
+        } else {
+            // AWS method
+            awsWalletService.listWallets(currentUserId)
+                .then(data => {
+                    wallets = data;
+                    updatePortfolioSummary(wallets);
+                    updateWalletsDisplay(wallets);
+                    updateAnalytics(wallets);
+                })
+                .catch(error => {
+                    console.error('Error loading wallets from AWS:', error);
+                    showError('Failed to load wallets from AWS. See console for details.');
+                });
+        }
     }
 
     function updateWalletsDisplay(wallets) {

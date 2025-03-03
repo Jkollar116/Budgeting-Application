@@ -51,6 +51,13 @@ jobs:
           region: us-east-2
           cpu: 1
           memory: 2
-          port: 8080
+          port: 8000
           env-vars: |
-            COINMARKETCAP_API_KEY=e2fa2fa3-ef84-4e08-8a73-ae43c073ab0d,ETHERSCAN_API_KEY=G6YJ1PGVSDWY8VP11ZKYPQJ78VWIE7YAUQ,FIREBASE_API_KEY=AIzaSyCMA1F8Xd4rCxGXssXIs8Da80qqP6jien8,OPENAI_APIKEY=${{ secrets.OPENAI_APIKEY }}
+            COINMARKETCAP_API_KEY=${COINMARKETCAP_API_KEY}
+            ETHERSCAN_API_KEY=${ETHERSCAN_API_KEY}
+            FIREBASE_API_KEY=${FIREBASE_API_KEY}
+            OPENAI_APIKEY=${OPENAI_APIKEY}
+            AWS_REGION=us-east-2
+            AWS_S3_BUCKET=cashclimb-wallets
+            AWS_COGNITO_USER_POOL_ID=${{ secrets.AWS_COGNITO_USER_POOL_ID }}
+            AWS_COGNITO_CLIENT_ID=${{ secrets.AWS_COGNITO_CLIENT_ID }}
