@@ -1,0 +1,22 @@
+branch-defaults:
+  main:
+    environment: cashclimb-prod
+    group_suffix: null
+
+deploy:
+  artifact: target/firebase-login-app-1.0.0.jar
+
+global:
+  application_name: cashclimb
+  branch: null
+  default_ec2_keyname: null
+  default_platform: Corretto 11 running on 64bit Amazon Linux 2
+  default_region: us-east-2
+  include_git_submodules: true
+  instance_profile: null
+  platform_name: null
+  platform_version: null
+  profile: eb-cashclimb
+  repository: null
+  sc: git
+  workspace_type: Application

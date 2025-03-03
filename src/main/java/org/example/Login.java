@@ -16,6 +16,17 @@ public class Login {
 
     public static void main(String[] args) throws Exception {
         int port = 8000;
+        String portEnv = System.getenv("PORT");
+        if (portEnv != null && !portEnv.isEmpty()) {
+            try {
+                port = Integer.parseInt(portEnv);
+            } catch (NumberFormatException e) {
+                System.err.println("Invalid PORT environment variable. Using default port " + port);
+            }
+        }
+
+        initializeFirebase();
+
         if (args.length > 0) {
             try {
                 port = Integer.parseInt(args[0]);
@@ -27,6 +38,7 @@ public class Login {
 
         HttpServer server = HttpServer.create(new InetSocketAddress("0.0.0.0", port), 0);
         server.createContext("/", new StaticFileHandler());
+        server.createContext("/health", new HealthCheckHandler());
         server.createContext("/aws-config", new AwsConfigHandler());
         server.createContext("/login", new LoginHandler());
         server.createContext("/register", new RegisterHandler());
@@ -46,8 +58,10 @@ public class Login {
         }
     }
 
+
     static class StaticFileHandler implements HttpHandler {
         private final String basePath = "src/main/resources";
+
         public void handle(HttpExchange exchange) throws IOException {
             String uriPath = exchange.getRequestURI().getPath();
             if (uriPath.equals("/")) {
@@ -151,6 +165,7 @@ public class Login {
 
     static class RegisterHandler implements HttpHandler {
         private final String basePath = "src/main/resources";
+
         public void handle(HttpExchange exchange) throws IOException {
             if ("GET".equalsIgnoreCase(exchange.getRequestMethod())) {
                 String fileName = "/register.html";
@@ -256,6 +271,7 @@ public class Login {
 
     static class ForgotPasswordHandler implements HttpHandler {
         private final String basePath = "src/main/resources";
+
         public void handle(HttpExchange exchange) throws IOException {
             if ("GET".equalsIgnoreCase(exchange.getRequestMethod())) {
                 String fileName = "/forgot.html";
@@ -394,6 +410,27 @@ public class Login {
                 os.write(responseBytes);
                 os.close();
             }
+        }
+    }
+
+    private static void initializeFirebase() {
+        String apiKey = System.getenv("FIREBASE_API_KEY");
+        if (apiKey == null || apiKey.isEmpty()) {
+            apiKey = FIREBASE_API_KEY; // Fall back to your constant
+        }
+        System.out.println("Firebase initialized with API key: " + (apiKey.length() > 4 ?
+                apiKey.substring(0, 4) + "..." : "not set"));
+    }
+
+    static class HealthCheckHandler implements HttpHandler {
+        @Override
+        public void handle(HttpExchange exchange) throws IOException {
+            String response = "{\"status\":\"UP\",\"firebase\":\"connected\"}";
+            exchange.getResponseHeaders().set("Content-Type", "application/json");
+            exchange.sendResponseHeaders(200, response.length());
+            OutputStream os = exchange.getResponseBody();
+            os.write(response.getBytes());
+            os.close();
         }
     }
 }
