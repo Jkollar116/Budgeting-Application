@@ -11,7 +11,7 @@ import java.awt.*;
 import com.sun.net.httpserver.*;
 
 public class Login {
-    private static final String FIREBASE_API_KEY = "AIzaSyCMA1F8Xd4rCxGXssXIs8Da80qqP6jien8";
+    private static final String FIREBASE_API_KEY = System.getenv("FIREBASE_API_KEY");
 
     public static void main(String[] args) throws Exception {
         int port = 8000;
