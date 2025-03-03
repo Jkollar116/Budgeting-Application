@@ -4,7 +4,7 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="e72c0420-fe48-4af3-a363-18d6d8618447" name="Changes" comment="Attempting to fix the API key issue by storing it in aws instead">
+    <list default="true" id="e72c0420-fe48-4af3-a363-18d6d8618447" name="Changes" comment="Removing the API key to get started on fixing the login.">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/org/example/Login.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/example/Login.java" afterDir="false" />
     </list>
@@ -60,6 +60,10 @@
     "node.js.selected.package.tslint": "(autodetect)",
     "nodejs_package_manager_path": "npm",
     "onboarding.tips.debug.path": "C:/Users/Jkoll/source/repos/Calendar-Reservation-System-Project/Budgeting_Application/src/main/java/org/example/Main.java",
+    "project.structure.last.edited": "Project",
+    "project.structure.proportion": "0.0",
+    "project.structure.side.proportion": "0.0",
+    "settings.editor.selected.configurable": "reference.projectsettings.compiler.javacompiler",
     "vue.rearranger.settings.migration": "true"
   }
 }]]></component>
@@ -179,7 +183,15 @@
       <option name="project" value="LOCAL" />
       <updated>1740530775515</updated>
     </task>
-    <option name="localTasksCounter" value="9" />
+    <task id="LOCAL-00009" summary="Removing the API key to get started on fixing the login.">
+      <option name="closed" value="true" />
+      <created>1741026471697</created>
+      <option name="number" value="00009" />
+      <option name="presentableId" value="LOCAL-00009" />
+      <option name="project" value="LOCAL" />
+      <updated>1741026471698</updated>
+    </task>
+    <option name="localTasksCounter" value="10" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -204,6 +216,7 @@
     <MESSAGE value="commit for aws" />
     <MESSAGE value="Fixed an issue where the login button on the forgot password page and register page did not correctly take you back to the login screen." />
     <MESSAGE value="Attempting to fix the API key issue by storing it in aws instead" />
-    <option name="LAST_COMMIT_MESSAGE" value="Attempting to fix the API key issue by storing it in aws instead" />
+    <MESSAGE value="Removing the API key to get started on fixing the login." />
+    <option name="LAST_COMMIT_MESSAGE" value="Removing the API key to get started on fixing the login." />
   </component>
 </project>
