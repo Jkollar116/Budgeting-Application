@@ -11,5 +11,5 @@ COPY src/main/resources /app/src/main/resources
 # Expose the port
 EXPOSE 8000
 
-# Run the application, will use PORT environment variable if set
+# Run the application
 CMD ["java", "-jar", "app.jar"]
