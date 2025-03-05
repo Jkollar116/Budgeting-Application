@@ -4,12 +4,8 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="e72c0420-fe48-4af3-a363-18d6d8618447" name="Changes" comment="updated the log in port">
-      <change afterPath="$PROJECT_DIR$/src/main/resources/keys.json" afterDir="false" />
+    <list default="true" id="e72c0420-fe48-4af3-a363-18d6d8618447" name="Changes" comment="azure commit to jack branch">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/example/ChatHandler.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/example/ChatHandler.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/expenses.html" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/expenses.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/home.html" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/home.html" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -123,6 +119,9 @@
       <workItem from="1740540294185" duration="1109000" />
       <workItem from="1740584627074" duration="4216000" />
       <workItem from="1740759143335" duration="2574000" />
+      <workItem from="1741136665933" duration="164000" />
+      <workItem from="1741136849217" duration="886000" />
+      <workItem from="1741138122965" duration="572000" />
     </task>
     <task id="LOCAL-00001" summary="First Commit of login">
       <option name="closed" value="true" />
@@ -220,7 +219,15 @@
       <option name="project" value="LOCAL" />
       <updated>1740586023873</updated>
     </task>
-    <option name="localTasksCounter" value="13" />
+    <task id="LOCAL-00013" summary="azure commit to jack branch">
+      <option name="closed" value="true" />
+      <created>1741136705584</created>
+      <option name="number" value="00013" />
+      <option name="presentableId" value="LOCAL-00013" />
+      <option name="project" value="LOCAL" />
+      <updated>1741136705584</updated>
+    </task>
+    <option name="localTasksCounter" value="14" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -248,6 +255,7 @@
     <MESSAGE value="updated js for aws" />
     <MESSAGE value="updated tge log in port" />
     <MESSAGE value="updated the log in port" />
-    <option name="LAST_COMMIT_MESSAGE" value="updated the log in port" />
+    <MESSAGE value="azure commit to jack branch" />
+    <option name="LAST_COMMIT_MESSAGE" value="azure commit to jack branch" />
   </component>
 </project>
