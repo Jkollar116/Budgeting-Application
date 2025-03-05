@@ -4,7 +4,7 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="e72c0420-fe48-4af3-a363-18d6d8618447" name="Changes" comment="azure commit to jack branch">
+    <list default="true" id="e72c0420-fe48-4af3-a363-18d6d8618447" name="Changes" comment="updated xml java version">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -121,7 +121,8 @@
       <workItem from="1740759143335" duration="2574000" />
       <workItem from="1741136665933" duration="164000" />
       <workItem from="1741136849217" duration="886000" />
-      <workItem from="1741138122965" duration="572000" />
+      <workItem from="1741138122965" duration="1138000" />
+      <workItem from="1741190699481" duration="595000" />
     </task>
     <task id="LOCAL-00001" summary="First Commit of login">
       <option name="closed" value="true" />
@@ -227,7 +228,15 @@
       <option name="project" value="LOCAL" />
       <updated>1741136705584</updated>
     </task>
-    <option name="localTasksCounter" value="14" />
+    <task id="LOCAL-00014" summary="updated xml java version">
+      <option name="closed" value="true" />
+      <created>1741138951239</created>
+      <option name="number" value="00014" />
+      <option name="presentableId" value="LOCAL-00014" />
+      <option name="project" value="LOCAL" />
+      <updated>1741138951239</updated>
+    </task>
+    <option name="localTasksCounter" value="15" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -256,6 +265,7 @@
     <MESSAGE value="updated tge log in port" />
     <MESSAGE value="updated the log in port" />
     <MESSAGE value="azure commit to jack branch" />
-    <option name="LAST_COMMIT_MESSAGE" value="azure commit to jack branch" />
+    <MESSAGE value="updated xml java version" />
+    <option name="LAST_COMMIT_MESSAGE" value="updated xml java version" />
   </component>
 </project>
