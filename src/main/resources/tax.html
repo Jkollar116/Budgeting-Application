@@ -3,8 +3,47 @@
 <head>
     <meta charset="UTF-8">
     <title>Tax Calculator</title>
+    <link rel="stylesheet" href="tax.css">
 </head>
 <body>
-
+<header>
+    <div class="logo">Cash Climb</div>
+    <nav>
+        <ul>
+            <li><a href="javascript:void(0)">Dashboard</a></li>
+            <li><a href="javascript:void(0)">Profile <span class="icon">👤</span></a></li>
+            <li><a href="javascript:void(0)">Settings <span class="icon">⚙️</span></a></li>
+            <li><a href="javascript:void(0)">Log Out <span class="icon">🚪</span></a></li>
+            <li><a href="chat.html">Chat</a></li>
+            <li><a href="tax.html">Tax</a></li>
+        </ul>
+    </nav>
+</header>
+<div class="header">
+    <div class="header-content">
+        <h1>Tax Calculator</h1>
+        <p>Calculate your taxes based on the information.There is no functionality yet, but there will be some for
+            federal income taxes soon</p>
+    </div>
+</div>
+<div class="container">
+    <label for="income">What was your income for the fiscal year?</label>
+    <input type="number" id="income" placeholder="Enter your total income" required>
+    <label for="filingStatus">What is your filing status?</label>
+    <select id="filingStatus">
+        <option value="blank"></option>
+        <option value="single">Single</option>
+        <option value="married_filing_jointly">Married Filing Jointly</option>
+        <option value="married_filing_separately">Married Filing Separately</option>
+        <option value="qualifying_surviving_spouse">Qualifying Surviving Spouse</option>
+        <option value="head_of_household">Head of the Household</option>
+    </select>
+    <label for="taxCredits">Tax Credits ($):</label>
+    <input type="number" id="taxCredits" placeholder="Enter total credits">
+    <label for="taxesPaid">Taxes Already Paid ($):</label>
+    <input type="number" id="taxesPaid" placeholder="Enter taxes paid">
+    <button onclick="calculateTax()">Calculate Tax</button>
+    <div id="result"></div>
+</div>
 </body>
 </html>
