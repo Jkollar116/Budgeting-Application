@@ -40,7 +40,7 @@ Cash Climb is designed to help users effectively manage their finances, track th
 - **JavaFX**: Utilized for building a smooth and responsive user interface, providing users with an enjoyable experience navigating their financial data.
 - **Regex**: Used extensively to validate input formats like emails, monetary values, and crypto addresses.
 - **Thread Safety**: Critical for ensuring that user interactions with the app remain consistent and error-free across different threads, especially when dealing with financial data.
-- **Crypto API Integration**: Connects with popular crypto platforms to retrieve wallet information and facilitate transactions.
+- **Crypto API Integration**: Connects with popular crypto platforms to retrieve wallet information and facilitate transactions
 
 #### Enhancing User Experience
 
