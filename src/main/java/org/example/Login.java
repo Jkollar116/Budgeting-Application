@@ -15,7 +15,14 @@ public class Login {
 
     public static void main(String[] args) throws Exception {
         int port = 8000;
-        if (args.length > 0) {
+        String portEnv = System.getenv("PORT");
+        if (portEnv != null) {
+            try {
+                port = Integer.parseInt(portEnv);
+            } catch (NumberFormatException e) {
+                System.err.println("Invalid PORT environment variable. Using default port " + port);
+            }
+        } else if (args.length > 0) {
             try {
                 port = Integer.parseInt(args[0]);
             } catch (NumberFormatException e) {
@@ -23,24 +30,22 @@ public class Login {
             }
         }
 
-
         HttpServer server = HttpServer.create(new InetSocketAddress("0.0.0.0", port), 0);
         server.createContext("/", new StaticFileHandler());
         server.createContext("/login", new LoginHandler());
         server.createContext("/register", new RegisterHandler());
         server.createContext("/forgot", new ForgotPasswordHandler());
-
         server.createContext("/api/getData", new HomeDataHandler());
         server.createContext("/api/chat", new ChatHandler());
         server.createContext("/api/wallets", new CryptoApiHandler());
         server.setExecutor(null);
         server.start();
 
-
         if (Desktop.isDesktopSupported()) {
             Desktop.getDesktop().browse(new URI("http://localhost:" + port));
         }
     }
+
 
     static class StaticFileHandler implements HttpHandler {
         private final String basePath = "src/main/resources";
