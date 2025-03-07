@@ -3,14 +3,13 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0
          http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
-
     <groupId>com.example</groupId>
     <artifactId>firebase-login-app</artifactId>
     <version>1.0.0</version>
     <packaging>jar</packaging>
 
     <properties>
-        <!-- Use Java 17 which is supported by Heroku -->
+        <!-- Using Java 17 which is an LTS and supported by Heroku -->
         <java.version>17</java.version>
         <spring-boot.version>2.7.5</spring-boot.version>
     </properties>
@@ -63,7 +62,7 @@
 
     <build>
         <plugins>
-            <!-- Spring Boot Maven Plugin to repackage the JAR with a proper Main-Class -->
+            <!-- Spring Boot Maven Plugin: repackages your jar to be executable -->
             <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
