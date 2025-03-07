@@ -4,7 +4,7 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="e72c0420-fe48-4af3-a363-18d6d8618447" name="Changes" comment="updated xml java version">
+    <list default="true" id="e72c0420-fe48-4af3-a363-18d6d8618447" name="Changes" comment="no jekyell file">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -122,7 +122,7 @@
       <workItem from="1741136665933" duration="164000" />
       <workItem from="1741136849217" duration="886000" />
       <workItem from="1741138122965" duration="1138000" />
-      <workItem from="1741190699481" duration="595000" />
+      <workItem from="1741190699481" duration="1683000" />
     </task>
     <task id="LOCAL-00001" summary="First Commit of login">
       <option name="closed" value="true" />
@@ -236,7 +236,15 @@
       <option name="project" value="LOCAL" />
       <updated>1741138951239</updated>
     </task>
-    <option name="localTasksCounter" value="15" />
+    <task id="LOCAL-00015" summary="no jekyell file">
+      <option name="closed" value="true" />
+      <created>1741191861756</created>
+      <option name="number" value="00015" />
+      <option name="presentableId" value="LOCAL-00015" />
+      <option name="project" value="LOCAL" />
+      <updated>1741191861756</updated>
+    </task>
+    <option name="localTasksCounter" value="16" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -266,6 +274,7 @@
     <MESSAGE value="updated the log in port" />
     <MESSAGE value="azure commit to jack branch" />
     <MESSAGE value="updated xml java version" />
-    <option name="LAST_COMMIT_MESSAGE" value="updated xml java version" />
+    <MESSAGE value="no jekyell file" />
+    <option name="LAST_COMMIT_MESSAGE" value="no jekyell file" />
   </component>
 </project>
