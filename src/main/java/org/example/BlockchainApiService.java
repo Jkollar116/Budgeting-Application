@@ -10,14 +10,43 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
+/**
+ * Service for interacting with blockchain APIs to retrieve wallet information.
+ * Supports Bitcoin and Ethereum blockchains.
+ */
 public class BlockchainApiService {
+    private static final Logger LOGGER = Logger.getLogger(BlockchainApiService.class.getName());
     private final OkHttpClient client = new OkHttpClient();
-    private static final String ETHERSCAN_API_KEY = "G6YJ1PGVSDWY8VP11ZKYPQJ78VWIE7YAUQ";
+    private final String etherscanApiKey;
     private static final String BLOCKCHAIN_INFO_API = "https://blockchain.info";
     private static final String ETHERSCAN_API = "https://api.etherscan.io/api";
+    
+    /**
+     * Constructs a BlockchainApiService with API keys from configuration.
+     */
+    public BlockchainApiService() {
+        ConfigManager configManager = ConfigManager.getInstance();
+        this.etherscanApiKey = configManager.getEtherscanApiKey();
+        if (etherscanApiKey == null || etherscanApiKey.isEmpty()) {
+            LOGGER.severe("Etherscan API key not found in configuration");
+        }
+    }
 
-    public WalletInfo getBitcoinWalletInfo(String address) throws IOException {
+    /**
+     * Retrieves Bitcoin wallet information for a given address.
+     *
+     * @param address Bitcoin wallet address to query
+     * @return WalletInfo containing balance and transaction history
+     * @throws IOException if there's an error communicating with the API
+     * @throws IllegalArgumentException if the address is invalid
+     */
+    public WalletInfo getBitcoinWalletInfo(String address) throws IOException, IllegalArgumentException {
+        if (address == null || address.trim().isEmpty()) {
+            throw new IllegalArgumentException("Bitcoin address cannot be null or empty");
+        }
         try {
             String url = BLOCKCHAIN_INFO_API + "/rawaddr/" + address;
             JSONObject response = makeApiCall(url, null);
@@ -36,16 +65,32 @@ public class BlockchainApiService {
 
             return new WalletInfo(balance.doubleValue(), transactions, 0.0, 0.0);
         } catch (Exception e) {
-            System.err.println("Error fetching Bitcoin wallet info: " + e.getMessage());
+            LOGGER.log(Level.SEVERE, "Error fetching Bitcoin wallet info: " + e.getMessage(), e);
             return new WalletInfo(0.0, new ArrayList<>(), 0.0, 0.0);
         }
     }
 
-    public WalletInfo getEthereumWalletInfo(String address) throws IOException {
+    /**
+     * Retrieves Ethereum wallet information for a given address.
+     *
+     * @param address Ethereum wallet address to query
+     * @return WalletInfo containing balance and transaction history
+     * @throws IOException if there's an error communicating with the API
+     * @throws IllegalArgumentException if the address is invalid or API key is missing
+     */
+    public WalletInfo getEthereumWalletInfo(String address) throws IOException, IllegalArgumentException {
+        if (address == null || address.trim().isEmpty()) {
+            throw new IllegalArgumentException("Ethereum address cannot be null or empty");
+        }
+        
+        if (etherscanApiKey == null || etherscanApiKey.isEmpty()) {
+            throw new IllegalArgumentException("Etherscan API key is not configured");
+        }
+        
         try {
             // Get balance
             String balanceUrl = String.format("%s?module=account&action=balance&address=%s&tag=latest&apikey=%s",
-                    ETHERSCAN_API, address, ETHERSCAN_API_KEY);
+                    ETHERSCAN_API, address, etherscanApiKey);
             JSONObject balanceResponse = makeApiCall(balanceUrl, null);
 
             BigDecimal balance = BigDecimal.ZERO;
@@ -56,7 +101,7 @@ public class BlockchainApiService {
 
             // Get transactions
             String txUrl = String.format("%s?module=account&action=txlist&address=%s&startblock=0&endblock=99999999&page=1&offset=10&sort=desc&apikey=%s",
-                    ETHERSCAN_API, address, ETHERSCAN_API_KEY);
+                    ETHERSCAN_API, address, etherscanApiKey);
             JSONObject txResponse = makeApiCall(txUrl, null);
 
             List<Transaction> transactions = new ArrayList<>();
@@ -70,7 +115,7 @@ public class BlockchainApiService {
 
             return new WalletInfo(balance.doubleValue(), transactions, 0.0, 0.0);
         } catch (Exception e) {
-            System.err.println("Error fetching Ethereum wallet info: " + e.getMessage());
+            LOGGER.log(Level.SEVERE, "Error fetching Ethereum wallet info: " + e.getMessage(), e);
             return new WalletInfo(0.0, new ArrayList<>(), 0.0, 0.0);
         }
     }
@@ -110,7 +155,7 @@ public class BlockchainApiService {
                     tx.has("confirmations") && tx.getInt("confirmations") > 6 ? "CONFIRMED" : "PENDING"
             );
         } catch (Exception e) {
-            System.err.println("Error parsing Bitcoin transaction: " + e.getMessage());
+            LOGGER.log(Level.WARNING, "Error parsing Bitcoin transaction: " + e.getMessage(), e);
             return new Transaction("UNKNOWN", 0.0, "", "", "", "", "UNKNOWN");
         }
     }
@@ -131,7 +176,7 @@ public class BlockchainApiService {
                     tx.has("confirmations") && tx.getInt("confirmations") > 12 ? "CONFIRMED" : "PENDING"
             );
         } catch (Exception e) {
-            System.err.println("Error parsing Ethereum transaction: " + e.getMessage());
+            LOGGER.log(Level.WARNING, "Error parsing Ethereum transaction: " + e.getMessage(), e);
             return new Transaction("UNKNOWN", 0.0, "", "", "", "", "UNKNOWN");
         }
     }
@@ -147,8 +192,11 @@ public class BlockchainApiService {
         Request request = requestBuilder.build();
 
         try (Response response = client.newCall(request).execute()) {
-            if (!response.isSuccessful()) throw new IOException("Unexpected response " + response);
-            return new JSONObject(response.body().string());
+            if (!response.isSuccessful()) {
+                throw new IOException("Unexpected response " + response);
+            }
+            String responseBody = response.body() != null ? response.body().string() : "{}";
+            return new JSONObject(responseBody);
         }
     }
 }
