@@ -36,3 +36,6 @@ build/
 
 ### Mac OS ###
 .DS_Store
+
+### API Keys ###
+src/main/resources/keys.json
