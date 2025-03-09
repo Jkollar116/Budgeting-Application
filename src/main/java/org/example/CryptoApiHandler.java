@@ -85,21 +85,49 @@ public class CryptoApiHandler implements HttpHandler {
                 }
             }
             
-            if (address == null || type == null) {
+            if (type == null) {
                 sendResponse(exchange, new JSONObject()
-                    .put("error", "Missing address or type parameter")
+                    .put("error", "Missing type parameter")
                     .toString(), 400);
                 return;
             }
             
-            // Get real-time wallet info from blockchain API
-            WalletInfo info = walletService.getWalletInfo(address, type);
+            WalletInfo info;
             
-            // Create response JSON with all required fields
+            // If address is not provided, just get price info
+            if (address == null || address.isEmpty()) {
+                // If only type is provided, get just the price information
+                // This is useful for market data display without a specific wallet
+                if (type.equals("BTC")) {
+                    // For BTC, get a minimal wallet info with just price data
+                    info = walletService.getBitcoinPriceInfo();
+                } else if (type.equals("ETH")) {
+                    // For ETH, get a minimal wallet info with just price data
+                    info = walletService.getEthereumPriceInfo();
+                } else {
+                    sendResponse(exchange, new JSONObject()
+                        .put("error", "Unsupported cryptocurrency type")
+                        .toString(), 400);
+                    return;
+                }
+                
+                // Create a simplified response with just price data
+                JSONObject response = new JSONObject();
+                response.put("currentPrice", info.currentPrice());
+                response.put("priceChange24h", info.priceChange24h());
+                sendResponse(exchange, response.toString(), 200);
+                return;
+            }
+            
+            // If we have an address, get the full wallet info
+            info = walletService.getWalletInfo(address, type);
+            
+            // Create response JSON with all wallet fields
             JSONObject response = new JSONObject();
             response.put("balance", info.balance());
             response.put("value", info.balance() * info.currentPrice());
             response.put("change24h", info.priceChange24h());
+            response.put("currentPrice", info.currentPrice());
             
             JSONArray txArray = new JSONArray();
             for (Transaction tx : info.transactions()) {
