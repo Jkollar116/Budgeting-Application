@@ -634,22 +634,58 @@
 
     function refreshWallet(id) {
         let wallets = JSON.parse(localStorage.getItem('wallets') || '[]');
-
-        wallets = wallets.map(wallet => {
-            if (wallet.id === id) {
-                const changePercent = (Math.random() * 4) - 2; // Random change between -2% and 2%
+        const wallet = wallets.find(w => w.id === id);
+        
+        if (!wallet) {
+            showError("Wallet not found");
+            return;
+        }
+        
+        showMessage("Fetching real-time data...");
+        
+        // Create API URL to fetch wallet data from our backend
+        const apiUrl = `/api/wallet?address=${encodeURIComponent(wallet.address)}&type=${encodeURIComponent(wallet.cryptoType)}`;
+        
+        fetch(apiUrl)
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`API call failed: ${response.status}`);
+                }
+                return response.json();
+            })
+            .then(data => {
+                // Update wallet with real data from API
+                wallet.balance = data.balance;
+                wallet.value = data.value;
+                wallet.change24h = data.change24h;
+                wallet.lastUpdated = new Date().toISOString();
+                
+                if (data.transactions && data.transactions.length > 0) {
+                    wallet.transactions = data.transactions;
+                }
+                
+                // Save updated wallets
+                wallets = wallets.map(w => w.id === id ? wallet : w);
+                localStorage.setItem('wallets', JSON.stringify(wallets));
+                loadWallets();
+                
+                showMessage("Wallet updated with real-time data");
+            })
+            .catch(error => {
+                console.error("Error refreshing wallet:", error);
+                
+                // Fallback to simulated update if API fails
+                const changePercent = (Math.random() * 4) - 2;
                 wallet.value = wallet.value * (1 + (changePercent / 100));
                 wallet.change24h = changePercent;
                 wallet.lastUpdated = new Date().toISOString();
-            }
-            return wallet;
-        });
-
-        localStorage.setItem('wallets', JSON.stringify(wallets));
-        loadWallets();
-
-        // Show a quick notification
-        showMessage("Wallet refreshed");
+                
+                wallets = wallets.map(w => w.id === id ? wallet : w);
+                localStorage.setItem('wallets', JSON.stringify(wallets));
+                loadWallets();
+                
+                showMessage("Wallet refreshed (using simulated data)");
+            });
     }
 
     function deleteWallet(id) {
@@ -795,15 +831,23 @@
 
     // Test Wallet Functions
     function addTestBitcoinWallet() {
+        // Generate a different test wallet each time
         const wallet = TEST_WALLETS.BTC[currentBTCIndex % TEST_WALLETS.BTC.length];
         currentBTCIndex++;
-        addWallet(wallet.label, wallet.address, "BTC");
+        
+        // Add unique suffix to make the address unique each time
+        const uniqueAddress = wallet.address + "-" + Date.now().toString().substr(-6);
+        addWallet(wallet.label + " " + currentBTCIndex, uniqueAddress, "BTC");
     }
 
     function addTestEthereumWallet() {
+        // Generate a different test wallet each time
         const wallet = TEST_WALLETS.ETH[currentETHIndex % TEST_WALLETS.ETH.length];
         currentETHIndex++;
-        addWallet(wallet.label, wallet.address, "ETH");
+        
+        // Add unique suffix to make the address unique each time
+        const uniqueAddress = wallet.address + "-" + Date.now().toString().substr(-6);
+        addWallet(wallet.label + " " + currentETHIndex, uniqueAddress, "ETH");
     }
 
     function refreshAllWallets() {
@@ -1167,23 +1211,31 @@
         });
     }
 
-    // QR Code Implementation
+    // QR Code Implementation with uniqueness verification
     function showQRCode(address) {
-        // Generate QR code
+        console.log("Generating QR code for address:", address);
+        
+        // Generate unique QR code based on wallet address
         const qr = qrcode(0, 'L');
         qr.addData(address);
         qr.make();
-
-        // Create modal
+        
+        // Create timestamp to ensure uniqueness
+        const timestamp = new Date().toISOString();
+        
+        // Create modal with unique ID
+        const modalId = `qr-modal-${Date.now()}`;
         const modal = document.createElement('div');
+        modal.id = modalId;
         modal.className = 'qr-modal';
 
-        // Create content
+        // Create content with timestamp to verify uniqueness
         modal.innerHTML = `
             <div class="qr-content">
                 <h3>Wallet QR Code</h3>
                 <div class="qr-code">${qr.createImgTag(5)}</div>
                 <p style="word-break: break-all; font-size: 0.9em; margin-bottom: 15px;">${address}</p>
+                <p style="font-size: 0.7em; color: rgba(255,255,255,0.5);">Generated: ${timestamp}</p>
                 <button class="btn">Close</button>
             </div>
         `;

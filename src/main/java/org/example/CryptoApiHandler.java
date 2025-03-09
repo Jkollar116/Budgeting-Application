@@ -30,11 +30,16 @@ public class CryptoApiHandler implements HttpHandler {
             }
 
             String path = exchange.getRequestURI().getPath();
+            String query = exchange.getRequestURI().getQuery();
             String method = exchange.getRequestMethod();
 
             switch (method) {
                 case "GET":
-                    handleGetWallets(exchange);
+                    if (path.equals("/api/wallet") && query != null) {
+                        handleGetWalletInfo(exchange);
+                    } else {
+                        handleGetWallets(exchange);
+                    }
                     break;
                 case "POST":
                     if (path.contains("/refresh")) {
@@ -52,6 +57,75 @@ public class CryptoApiHandler implements HttpHandler {
         }
     }
 
+    /**
+     * Handles requests to get real-time wallet information by address and crypto type
+     * This endpoint serves the frontend's refreshWallet API call
+     */
+    private void handleGetWalletInfo(HttpExchange exchange) throws IOException {
+        try {
+            String query = exchange.getRequestURI().getQuery();
+            String address = null;
+            String type = null;
+            
+            // Parse query parameters
+            if (query != null) {
+                String[] pairs = query.split("&");
+                for (String pair : pairs) {
+                    String[] keyValue = pair.split("=");
+                    if (keyValue.length == 2) {
+                        String key = keyValue[0];
+                        String value = java.net.URLDecoder.decode(keyValue[1], StandardCharsets.UTF_8);
+                        
+                        if (key.equals("address")) {
+                            address = value;
+                        } else if (key.equals("type")) {
+                            type = value;
+                        }
+                    }
+                }
+            }
+            
+            if (address == null || type == null) {
+                sendResponse(exchange, new JSONObject()
+                    .put("error", "Missing address or type parameter")
+                    .toString(), 400);
+                return;
+            }
+            
+            // Get real-time wallet info from blockchain API
+            WalletInfo info = walletService.getWalletInfo(address, type);
+            
+            // Create response JSON with all required fields
+            JSONObject response = new JSONObject();
+            response.put("balance", info.balance());
+            response.put("value", info.balance() * info.currentPrice());
+            response.put("change24h", info.priceChange24h());
+            
+            JSONArray txArray = new JSONArray();
+            for (Transaction tx : info.transactions()) {
+                // Use the Transaction's built-in toJSON method
+                txArray.put(tx.toJSON());
+            }
+            response.put("transactions", txArray);
+            
+            // Optionally, update the wallet in our in-memory list if it exists
+            for (Wallet wallet : wallets) {
+                if (wallet.getAddress().equals(address) && wallet.getCryptoType().equals(type)) {
+                    wallet.updateInfo(info);
+                    break;
+                }
+            }
+            
+            sendResponse(exchange, response.toString(), 200);
+        } catch (Exception e) {
+            System.err.println("Error getting wallet info: " + e.getMessage());
+            e.printStackTrace();
+            sendResponse(exchange, new JSONObject()
+                .put("error", "Failed to get wallet info: " + e.getMessage())
+                .toString(), 500);
+        }
+    }
+    
     private void handleGetWallets(HttpExchange exchange) throws IOException {
         JSONArray walletsArray = new JSONArray();
         for (Wallet wallet : wallets) {
