@@ -38,6 +38,7 @@ public class Login {
         server.createContext("/api/getData", new HomeDataHandler());
         server.createContext("/api/chat", new ChatHandler());
         server.createContext("/api/wallets", new CryptoApiHandler());
+        server.createContext("/api/wallet", new CryptoApiHandler()); // Add this for the real-time wallet endpoint
         server.setExecutor(null);
         server.start();
 
