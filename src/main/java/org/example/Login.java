@@ -8,13 +8,43 @@ import java.net.*;
 import java.nio.charset.*;
 import java.nio.file.*;
 import java.awt.*;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
+import org.json.JSONObject;
 import com.sun.net.httpserver.*;
 
 public class Login {
-    private static final String FIREBASE_API_KEY = "AIzaSyCMA1F8Xd4rCxGXssXIs8Da80qqP6jien8";
-//test push
+    // API keys - first try environment variables, then fallback to hardcoded values for local development 
+    private static final String FIREBASE_API_KEY = System.getenv("FIREBASE_API_KEY") != null ? 
+                                                  System.getenv("FIREBASE_API_KEY") : 
+                                                  "AIzaSyCMA1F8Xd4rCxGXssXIs8Da80qqP6jien8";
+    
+    private static final String OPENAI_API_KEY = System.getenv("OPENAI_APIKEY") != null ?
+                                                System.getenv("OPENAI_APIKEY") :
+                                                "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";
+    
     public static void main(String[] args) throws Exception {
+        // Initialize Firebase Firestore
+        try {
+            // Initialize Firebase
+            FirestoreService.initialize();
+            System.out.println("Firebase initialized successfully");
+            
+            // Run a debug test to verify Firebase is working
+            FirebaseDebugger.runDebugTest();
+        } catch (Exception e) {
+            System.err.println("Failed to initialize Firebase: " + e.getMessage());
+            e.printStackTrace();
+            // Continue anyway, as we can fall back to local storage
+        }
+        // Try to find an available port, starting with 8000 as default
         int port = 8000;
+        int maxPortAttempts = 10; // Try up to 10 ports
+        boolean serverStarted = false;
+        HttpServer server = null;
+        
+        // Check environment variable for port
         String portEnv = System.getenv("PORT");
         if (portEnv != null) {
             try {
@@ -29,8 +59,24 @@ public class Login {
                 System.err.println("Invalid port specified. Using default port " + port);
             }
         }
-
-        HttpServer server = HttpServer.create(new InetSocketAddress("0.0.0.0", port), 0);
+        
+        // Try to create server on available port
+        for (int attempt = 0; attempt < maxPortAttempts; attempt++) {
+            try {
+                int currentPort = port + attempt;
+                server = HttpServer.create(new InetSocketAddress("0.0.0.0", currentPort), 0);
+                System.out.println("Server started on port " + currentPort);
+                port = currentPort;
+                serverStarted = true;
+                break;
+            } catch (java.net.BindException e) {
+                System.out.println("Port " + (port + attempt) + " is in use, trying next port...");
+            }
+        }
+        
+        if (!serverStarted) {
+            throw new IOException("Could not find an available port after " + maxPortAttempts + " attempts");
+        }
         server.createContext("/", new StaticFileHandler());
         server.createContext("/login", new LoginHandler());
         server.createContext("/register", new RegisterHandler());
@@ -39,6 +85,10 @@ public class Login {
         server.createContext("/api/chat", new ChatHandler());
         server.createContext("/api/wallets", new CryptoApiHandler());
         server.createContext("/api/wallet", new CryptoApiHandler()); // Add this for the real-time wallet endpoint
+        server.createContext("/api/stocks", new StockApiHandler()); // Stock trading endpoint
+        server.createContext("/api/portfolio", new StockApiHandler()); // Portfolio endpoint
+        server.createContext("/api/orders", new StockApiHandler()); // Orders endpoint
+        server.createContext("/api/account", new StockApiHandler()); // Account endpoint
         server.setExecutor(null);
         server.start();
 
@@ -121,6 +171,30 @@ public class Login {
                 os.close();
                 int responseCode = conn.getResponseCode();
                 if (responseCode == 200) {
+                    // Read the response to get user ID and other details
+                    StringBuilder response = new StringBuilder();
+                    BufferedReader in = new BufferedReader(new InputStreamReader(conn.getInputStream(), StandardCharsets.UTF_8));
+                    String responseLine;
+                    while ((responseLine = in.readLine()) != null) {
+                        response.append(responseLine);
+                    }
+                    in.close();
+                    
+                    // Parse the response to get the user ID
+                    JSONObject jsonResponse = new JSONObject(response.toString());
+                    String userId = jsonResponse.getString("localId"); // Firebase UID
+                    
+                    // Create or update user in Firestore
+                    if (FirestoreService.getInstance().isAvailable()) {
+                        Map<String, Object> userData = new HashMap<>();
+                        userData.put("email", email);
+                        userData.put("lastLogin", new Date().toString());
+                        FirestoreService.getInstance().saveUserProfile(userId, userData);
+                        System.out.println("User profile saved to Firestore with ID: " + userId);
+                    }
+                    
+                    // Store user ID in a cookie or session
+                    exchange.getResponseHeaders().set("Set-Cookie", "userId=" + userId + "; Path=/; HttpOnly");
                     exchange.getResponseHeaders().set("Location", "/home.html");
                     exchange.sendResponseHeaders(302, -1);
                     return;
@@ -222,6 +296,29 @@ public class Login {
                 os.close();
                 int responseCode = conn.getResponseCode();
                 if (responseCode == 200) {
+                    // Read the response to get user ID and other details
+                    StringBuilder response = new StringBuilder();
+                    BufferedReader in = new BufferedReader(new InputStreamReader(conn.getInputStream(), StandardCharsets.UTF_8));
+                    String responseLine;
+                    while ((responseLine = in.readLine()) != null) {
+                        response.append(responseLine);
+                    }
+                    in.close();
+                    
+                    // Parse the response to get the user ID
+                    JSONObject jsonResponse = new JSONObject(response.toString());
+                    String userId = jsonResponse.getString("localId"); // Firebase UID
+                    
+                    // Create initial user profile in Firestore
+                    if (FirestoreService.getInstance().isAvailable()) {
+                        Map<String, Object> userData = new HashMap<>();
+                        userData.put("email", email);
+                        userData.put("createdAt", new Date().toString());
+                        userData.put("lastLogin", new Date().toString());
+                        FirestoreService.getInstance().saveUserProfile(userId, userData);
+                        System.out.println("New user profile created in Firestore with ID: " + userId);
+                    }
+                    
                     exchange.getResponseHeaders().set("Location", "/index.html");
                     exchange.sendResponseHeaders(302, -1);
                     return;
