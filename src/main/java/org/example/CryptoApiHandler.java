@@ -7,14 +7,79 @@ import java.nio.charset.StandardCharsets;
 import org.json.JSONObject;
 import org.json.JSONArray;
 import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class CryptoApiHandler implements HttpHandler {
+    // Keep in-memory wallet list for backward compatibility
     private static final List<Wallet> wallets = new ArrayList<>();
+    
+    // Services
     private final WalletService walletService;
+    private final FirestoreService firestoreService;
+    
+    // Default user ID for testing when actual user ID is not available
+    private static final String DEFAULT_USER_ID = "test_user";
+    
+    // Cookie name for user ID
+    private static final String USER_ID_COOKIE = "userId";
 
     public CryptoApiHandler() {
         this.walletService = new WalletService();
+        this.firestoreService = FirestoreService.getInstance();
+        
+        // Load any wallets from Firestore if available
+        loadWalletsFromFirestore();
+    }
+    
+    /**
+     * Get the user ID from cookies or use default if not found
+     */
+    private String getUserId(HttpExchange exchange) {
+        // Get cookies from request headers
+        String cookies = exchange.getRequestHeaders().getFirst("Cookie");
+        if (cookies != null) {
+            for (String cookie : cookies.split(";")) {
+                cookie = cookie.trim();
+                if (cookie.startsWith(USER_ID_COOKIE + "=")) {
+                    return cookie.substring(USER_ID_COOKIE.length() + 1);
+                }
+            }
+        }
+        
+        // Fall back to default user ID if not found
+        System.out.println("User ID not found in cookies, using default: " + DEFAULT_USER_ID);
+        return DEFAULT_USER_ID;
+    }
+    
+    /**
+     * Loads wallets from Firestore database if available
+     */
+    private void loadWalletsFromFirestore() {
+        if (firestoreService.isAvailable()) {
+            try {
+                // For initial loading we'll use the default user ID
+                List<Map<String, Object>> storedWallets = firestoreService.getUserWallets(DEFAULT_USER_ID);
+                
+                if (!storedWallets.isEmpty() && wallets.isEmpty()) {
+                    // Only load from Firestore if in-memory list is empty
+                    for (Map<String, Object> walletData : storedWallets) {
+                        Wallet wallet = FirestoreService.mapToWallet(walletData);
+                        
+                        // Only add if not already in memory
+                        if (wallets.stream().noneMatch(w -> w.getAddress().equals(wallet.getAddress()))) {
+                            wallets.add(wallet);
+                        }
+                    }
+                    System.out.println("Loaded " + storedWallets.size() + " wallets from Firestore");
+                }
+            } catch (Exception e) {
+                System.err.println("Error loading wallets from Firestore: " + e.getMessage());
+                // Continue with in-memory wallets
+            }
+        }
     }
 
     @Override
@@ -155,6 +220,32 @@ public class CryptoApiHandler implements HttpHandler {
     }
     
     private void handleGetWallets(HttpExchange exchange) throws IOException {
+        String userId = getUserId(exchange);
+        
+        // Try to get wallets from Firestore for this specific user
+        if (firestoreService.isAvailable()) {
+            try {
+                List<Map<String, Object>> storedWallets = firestoreService.getUserWallets(userId);
+                
+                if (!storedWallets.isEmpty()) {
+                    JSONArray walletsArray = new JSONArray();
+                    
+                    for (Map<String, Object> walletData : storedWallets) {
+                        Wallet wallet = FirestoreService.mapToWallet(walletData);
+                        // Convert to JSON
+                        walletsArray.put(wallet.toJSON());
+                    }
+                    
+                    sendResponse(exchange, walletsArray.toString(), 200);
+                    return;
+                }
+            } catch (Exception e) {
+                System.err.println("Error getting wallets from Firestore: " + e.getMessage());
+                // Continue with in-memory wallets
+            }
+        }
+        
+        // Fall back to in-memory wallets if Firestore fails or is empty
         JSONArray walletsArray = new JSONArray();
         for (Wallet wallet : wallets) {
             walletsArray.put(wallet.toJSON());
@@ -163,6 +254,7 @@ public class CryptoApiHandler implements HttpHandler {
     }
 
     private void handleAddWallet(HttpExchange exchange) throws IOException {
+        String userId = getUserId(exchange);
         String requestBody = new String(exchange.getRequestBody().readAllBytes(), StandardCharsets.UTF_8);
         JSONObject json = new JSONObject(requestBody);
 
@@ -172,24 +264,65 @@ public class CryptoApiHandler implements HttpHandler {
                 json.getString("cryptoType")
         );
 
-        WalletInfo info = walletService.getWalletInfo(wallet.getAddress(), wallet.getCryptoType());
-        wallet.updateInfo(info);
-        wallets.add(wallet);
-
-        sendResponse(exchange, wallet.toJSON().toString(), 200);
+        try {
+            // Get real-time wallet info from blockchain API
+            WalletInfo info = walletService.getWalletInfo(wallet.getAddress(), wallet.getCryptoType());
+            wallet.updateInfo(info);
+            
+            // Add to in-memory list
+            wallets.add(wallet);
+            
+            // Save to Firestore with the user's actual ID
+            if (firestoreService.isAvailable()) {
+                // Generate a wallet document ID
+                if (wallet.getId() == null || wallet.getId().isEmpty()) {
+                    wallet.setId(java.util.UUID.randomUUID().toString());
+                }
+                
+                // Convert to map and save
+                Map<String, Object> walletData = FirestoreService.walletToMap(wallet);
+                boolean saveSuccess = firestoreService.saveWallet(userId, wallet.getId(), walletData);
+                System.out.println("Wallet saved to Firestore for user " + userId + ": " + wallet.getId() + ", success: " + saveSuccess);
+                System.out.println("Wallet data: " + walletData);
+            }
+            
+            sendResponse(exchange, wallet.toJSON().toString(), 200);
+        } catch (Exception e) {
+            System.err.println("Error adding wallet: " + e.getMessage());
+            sendResponse(exchange, new JSONObject()
+                .put("error", "Failed to add wallet: " + e.getMessage())
+                .toString(), 500);
+        }
     }
 
     private void handleRefreshWallet(HttpExchange exchange) throws IOException {
+        String userId = getUserId(exchange);
         String address = exchange.getRequestURI().getPath().split("/")[3];
-        Wallet wallet = wallets.stream()
-                .filter(w -> w.getAddress().equals(address))
-                .findFirst()
-                .orElseThrow(() -> new IOException("Wallet not found"));
-
-        WalletInfo info = walletService.getWalletInfo(wallet.getAddress(), wallet.getCryptoType());
-        wallet.updateInfo(info);
-
-        sendResponse(exchange, wallet.toJSON().toString(), 200);
+        
+        try {
+            Wallet wallet = wallets.stream()
+                    .filter(w -> w.getAddress().equals(address))
+                    .findFirst()
+                    .orElseThrow(() -> new IOException("Wallet not found"));
+    
+            // Get updated info from blockchain API
+            WalletInfo info = walletService.getWalletInfo(wallet.getAddress(), wallet.getCryptoType());
+            wallet.updateInfo(info);
+            
+            // Also update in Firestore if available
+            if (firestoreService.isAvailable()) {
+                Map<String, Object> walletData = FirestoreService.walletToMap(wallet);
+                firestoreService.saveWallet(userId, wallet.getId(), walletData);
+                System.out.println("Wallet updated in Firestore for user " + userId + ": " + wallet.getId());
+            }
+    
+            sendResponse(exchange, wallet.toJSON().toString(), 200);
+        } catch (Exception e) {
+            System.err.println("Error refreshing wallet: " + e.getMessage());
+            sendResponse(exchange, new JSONObject()
+                .put("error", "Failed to refresh wallet: " + e.getMessage())
+                .toString(), 500);
+        }
     }
 
     private void sendResponse(HttpExchange exchange, String response, int statusCode) throws IOException {

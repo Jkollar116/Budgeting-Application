@@ -431,6 +431,16 @@
                     <option value="">Select Cryptocurrency</option>
                     <option value="BTC">Bitcoin (BTC)</option>
                     <option value="ETH">Ethereum (ETH)</option>
+                    <option value="USDT">Tether (USDT)</option>
+                    <option value="BNB">Binance Coin (BNB)</option>
+                    <option value="XRP">Ripple (XRP)</option>
+                    <option value="ADA">Cardano (ADA)</option>
+                    <option value="DOGE">Dogecoin (DOGE)</option>
+                    <option value="SOL">Solana (SOL)</option>
+                    <option value="DOT">Polkadot (DOT)</option>
+                    <option value="AVAX">Avalanche (AVAX)</option>
+                    <option value="MATIC">Polygon (MATIC)</option>
+                    <option value="LINK">Chainlink (LINK)</option>
                 </select>
                 <button type="submit" class="btn">Add Wallet</button>
             </form>
@@ -1250,31 +1260,40 @@
         });
     }
 
-    // QR Code Implementation with uniqueness verification
+    // QR Code Implementation with real-time uniqueness verification
     function showQRCode(address) {
         console.log("Generating QR code for address:", address);
         
-        // Generate unique QR code based on wallet address
-        const qr = qrcode(0, 'L');
-        qr.addData(address);
+        // Generate a truly unique QR code with multiple uniqueness factors
+        // 1. Address
+        // 2. Current timestamp (milliseconds)
+        // 3. Random nonce
+        const uniqueNonce = Math.random().toString(36).substring(2, 15);
+        const uniqueData = `${address}?timestamp=${Date.now()}&nonce=${uniqueNonce}`;
+        console.log("Generated unique QR data with nonce:", uniqueNonce);
+        
+        // Use a higher error correction level for better scanning
+        const qr = qrcode(0, 'H');
+        qr.addData(uniqueData);
         qr.make();
         
-        // Create timestamp to ensure uniqueness
+        // Create timestamp to display generation time
         const timestamp = new Date().toISOString();
         
-        // Create modal with unique ID
-        const modalId = `qr-modal-${Date.now()}`;
+        // Create modal with unique ID based on timestamp and nonce
+        const modalId = `qr-modal-${Date.now()}-${uniqueNonce}`;
         const modal = document.createElement('div');
         modal.id = modalId;
         modal.className = 'qr-modal';
 
-        // Create content with timestamp to verify uniqueness
+        // Create content with unique data and verification info
         modal.innerHTML = `
             <div class="qr-content">
                 <h3>Wallet QR Code</h3>
                 <div class="qr-code">${qr.createImgTag(5)}</div>
                 <p style="word-break: break-all; font-size: 0.9em; margin-bottom: 15px;">${address}</p>
                 <p style="font-size: 0.7em; color: rgba(255,255,255,0.5);">Generated: ${timestamp}</p>
+                <p style="font-size: 0.7em; color: rgba(255,255,255,0.5);">Unique ID: ${Date.now().toString(36)}</p>
                 <button class="btn">Close</button>
             </div>
         `;
