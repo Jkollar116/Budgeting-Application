@@ -63,15 +63,13 @@ public class CryptoApiHandler implements HttpHandler {
                 // For initial loading we'll use the default user ID
                 List<Map<String, Object>> storedWallets = firestoreService.getUserWallets(DEFAULT_USER_ID);
                 
-                if (!storedWallets.isEmpty() && wallets.isEmpty()) {
-                    // Only load from Firestore if in-memory list is empty
+                if (!storedWallets.isEmpty()) {
+                    // Clear in-memory wallets and reload from Firestore
+                    wallets.clear();
+                    
                     for (Map<String, Object> walletData : storedWallets) {
                         Wallet wallet = FirestoreService.mapToWallet(walletData);
-                        
-                        // Only add if not already in memory
-                        if (wallets.stream().noneMatch(w -> w.getAddress().equals(wallet.getAddress()))) {
-                            wallets.add(wallet);
-                        }
+                        wallets.add(wallet);
                     }
                     System.out.println("Loaded " + storedWallets.size() + " wallets from Firestore");
                 }

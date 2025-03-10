@@ -30,9 +30,6 @@ public class Login {
             // Initialize Firebase
             FirestoreService.initialize();
             System.out.println("Firebase initialized successfully");
-            
-            // Run a debug test to verify Firebase is working
-            FirebaseDebugger.runDebugTest();
         } catch (Exception e) {
             System.err.println("Failed to initialize Firebase: " + e.getMessage());
             e.printStackTrace();
