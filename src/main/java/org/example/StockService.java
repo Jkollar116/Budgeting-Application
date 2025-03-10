@@ -207,64 +207,54 @@ public class StockService {
                 return new JSONObject(quoteCache.get(symbol).toString());
             }
             
-            // Get quote from API
+            // Get quote from API which now handles mock data internally
             JSONObject quote = alpacaApi.getQuote(symbol);
             
-            // If no quote data returned, generate mock data
-            if (quote.isEmpty() || (!quote.has("last") && !quote.has("latestTrade"))) {
-                return generateMockQuote(symbol);
+            // Process the API response into a standardized format for our UI
+            JSONObject processedQuote;
+            if (quote.has("latestTrade")) {
+                // Parse trade data for display
+                JSONObject latestTrade = quote.getJSONObject("latestTrade");
+                double price = latestTrade.getDouble("p");
+                
+                // Use provided values or calculate defaults
+                double dayOpen = quote.has("dayOpen") ? quote.getDouble("dayOpen") : price * 0.995;
+                double dayChange = quote.has("dayChange") ? quote.getDouble("dayChange") : price - dayOpen;
+                double dayChangePercent = quote.has("dayChangePercent") ? quote.getDouble("dayChangePercent") : (dayChange / dayOpen) * 100;
+                
+                processedQuote = new JSONObject()
+                    .put("symbol", symbol)
+                    .put("last", price)
+                    .put("dayOpen", dayOpen)
+                    .put("dayChange", dayChange)
+                    .put("dayChangePercent", dayChangePercent)
+                    .put("volume", quote.optInt("volume", 10000))
+                    .put("name", getStock(symbol, false).getName());
+                
+                // Add all other fields from the original quote
+                for (String key : quote.keySet()) {
+                    if (!processedQuote.has(key)) {
+                        processedQuote.put(key, quote.get(key));
+                    }
+                }
+            } else {
+                // Fallback if the format is different or unexpected
+                processedQuote = quote;
             }
             
-            // Cache the quote
-            quoteCache.put(symbol, quote);
+            // Cache the processed quote
+            quoteCache.put(symbol, processedQuote);
             lastQuoteCacheUpdate = now;
             
-            return quote;
+            return processedQuote;
         } catch (Exception e) {
             System.err.println("Error getting quote for " + symbol + ": " + e.getMessage());
-            return generateMockQuote(symbol);
+            e.printStackTrace();
+            
+            // Use the API's mock generation as a fallback
+            JSONObject mockQuote = alpacaApi.getQuote(symbol);
+            return mockQuote;
         }
-    }
-    
-    /**
-     * Generate mock quote data for testing
-     */
-    private JSONObject generateMockQuote(String symbol) {
-        // Get stock if available
-        Stock stock = null;
-        try {
-            stock = getStock(symbol, false);
-        } catch (Exception ignored) {}
-        
-        // Generate base price based on symbol - similar to the history generator
-        double basePrice = 100.0;
-        for (char c : symbol.toCharArray()) {
-            basePrice += c % 10;
-        }
-        
-        // Add small random variation to price
-        double lastPrice = basePrice * (1 + (Math.random() * 0.1 - 0.05));
-        double bidPrice = lastPrice * 0.999;
-        double askPrice = lastPrice * 1.001;
-        
-        // Create quote object
-        return new JSONObject()
-            .put("symbol", symbol)
-            .put("last", lastPrice)
-            .put("lastSize", (int)(Math.random() * 100) + 1)
-            .put("lastExchange", "MOCK")
-            .put("lastTimestamp", System.currentTimeMillis())
-            .put("bidPrice", bidPrice)
-            .put("bidSize", (int)(Math.random() * 1000) + 100)
-            .put("askPrice", askPrice)
-            .put("askSize", (int)(Math.random() * 1000) + 100)
-            .put("volume", (int)(Math.random() * 1000000) + 10000)
-            .put("dayOpen", lastPrice * (1 - (Math.random() * 0.02 - 0.01)))
-            .put("dayHigh", lastPrice * 1.02)
-            .put("dayLow", lastPrice * 0.98)
-            .put("dayChange", Math.random() * 4 - 2) // -2% to +2%
-            .put("name", stock != null ? stock.getName() : (symbol + " Inc."))
-            .put("mock", true);
     }
     
     /**

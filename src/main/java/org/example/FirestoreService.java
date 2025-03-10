@@ -8,6 +8,7 @@ import com.google.firebase.FirebaseOptions;
 import com.google.firebase.cloud.FirestoreClient;
 import org.json.JSONObject;
 
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.*;
@@ -45,16 +46,12 @@ public class FirestoreService {
                 
                 String projectId = "cashclimb-d162c";
                 String databaseUrl = "https://" + projectId + ".firebaseio.com";
-                System.out.println("Using database URL: " + databaseUrl + " and project ID: " + projectId);
                 
                 FirebaseOptions options = FirebaseOptions.builder()
                         .setCredentials(GoogleCredentials.fromStream(serviceAccount))
                         .setDatabaseUrl(databaseUrl)
                         .setProjectId(projectId)
                         .build();
-                
-                // Print Firebase app count before initialization
-                System.out.println("Firebase apps before initialization: " + FirebaseApp.getApps().size());
                 
                 FirebaseApp app = FirebaseApp.initializeApp(options);
                 System.out.println("Firebase app name: " + app.getName());
@@ -79,7 +76,8 @@ public class FirestoreService {
             }
         } catch (IOException e) {
             System.err.println("Failed to initialize Firebase: " + e.getMessage());
-            // You may want to fall back to in-memory storage in this case
+            e.printStackTrace();
+            throw new RuntimeException("Firebase initialization failed", e);
         }
     }
 
