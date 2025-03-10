@@ -24,6 +24,7 @@ public class FirestoreService {
     private static final String TRANSACTIONS_COLLECTION = "transactions";
     private static final String PORTFOLIOS_COLLECTION = "portfolios";
     private static final String SETTINGS_COLLECTION = "settings";
+    private static final String ACTIVITIES_COLLECTION = "activities";
 
     /**
      * Private constructor to enforce singleton pattern
@@ -424,6 +425,39 @@ public class FirestoreService {
             return true;
         } catch (InterruptedException | ExecutionException e) {
             System.err.println("Error saving user settings: " + e.getMessage());
+            return false;
+        }
+    }
+    
+    /**
+     * Save user activity for analytics and audit purposes
+     * 
+     * @param activityData The activity data to save
+     * @return true if successful, false otherwise
+     */
+    public boolean saveActivity(Map<String, Object> activityData) {
+        if (!isAvailable()) {
+            return false;
+        }
+        
+        try {
+            // Generate a unique ID for the activity
+            DocumentReference docRef = db.collection(ACTIVITIES_COLLECTION).document();
+            
+            // Add the activity ID to the data
+            activityData.put("id", docRef.getId());
+            
+            // Add timestamp if not already present
+            if (!activityData.containsKey("timestamp")) {
+                activityData.put("timestamp", FieldValue.serverTimestamp());
+            }
+            
+            // Save the activity
+            docRef.set(activityData).get();
+            
+            return true;
+        } catch (InterruptedException | ExecutionException e) {
+            System.err.println("Error saving activity: " + e.getMessage());
             return false;
         }
     }
