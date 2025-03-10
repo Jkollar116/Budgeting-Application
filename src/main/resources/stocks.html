@@ -399,8 +399,27 @@
             <h2>Trade Stocks</h2>
             
             <div class="stock-search">
-                <input type="text" id="stock-search-input" placeholder="Search for a stock symbol (e.g., AAPL, MSFT, AMZN)">
+                <select id="stock-dropdown" class="stock-dropdown">
+                    <option value="">Select a stock</option>
+                    <option value="AAPL">AAPL - Apple Inc.</option>
+                    <option value="MSFT">MSFT - Microsoft Corporation</option>
+                    <option value="AMZN">AMZN - Amazon.com Inc.</option>
+                    <option value="GOOGL">GOOGL - Alphabet Inc.</option>
+                    <option value="META">META - Meta Platforms Inc.</option>
+                    <option value="TSLA">TSLA - Tesla Inc.</option>
+                    <option value="NVDA">NVDA - NVIDIA Corporation</option>
+                    <option value="JPM">JPM - JPMorgan Chase & Co.</option>
+                    <option value="V">V - Visa Inc.</option>
+                    <option value="JNJ">JNJ - Johnson & Johnson</option>
+                    <option value="WMT">WMT - Walmart Inc.</option>
+                    <option value="PG">PG - Procter & Gamble Co.</option>
+                    <option value="MA">MA - Mastercard Inc.</option>
+                    <option value="UNH">UNH - UnitedHealth Group Inc.</option>
+                    <option value="HD">HD - Home Depot Inc.</option>
+                </select>
                 <button id="stock-search-button">Search</button>
+                <span class="or-divider">OR</span>
+                <input type="text" id="stock-search-input" placeholder="Enter another stock symbol">
             </div>
             
             <div class="loading" id="stock-search-loading"></div>

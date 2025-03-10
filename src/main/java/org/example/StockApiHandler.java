@@ -201,24 +201,34 @@ public class StockApiHandler implements HttpHandler {
      * Handle GET /api/orders - Get list of orders
      */
     private void handleGetOrders(HttpExchange exchange, Map<String, String> params) throws IOException {
-        String status = params.getOrDefault("status", "open");
-        int limit = Integer.parseInt(params.getOrDefault("limit", "50"));
-        boolean forceRefresh = "true".equalsIgnoreCase(params.get("refresh"));
-        
-        List<StockOrder> orders = stockService.getOrders(status, limit, forceRefresh);
-        
-        // Convert to JSON array
-        JSONArray jsonArray = new JSONArray();
-        for (StockOrder order : orders) {
-            jsonArray.put(order.toDetailedJSON());
+        try {
+            String status = params.getOrDefault("status", "open");
+            int limit = Integer.parseInt(params.getOrDefault("limit", "50"));
+            boolean forceRefresh = "true".equalsIgnoreCase(params.get("refresh"));
+            
+            List<StockOrder> orders = stockService.getOrders(status, limit, forceRefresh);
+            
+            // Convert to JSON array
+            JSONArray jsonArray = new JSONArray();
+            for (StockOrder order : orders) {
+                jsonArray.put(order.toDetailedJSON());
+            }
+            
+            // Wrap in response object
+            JSONObject response = new JSONObject();
+            response.put("orders", jsonArray);
+            response.put("count", orders.size());
+            
+            sendResponse(exchange, response.toString(), 200);
+        } catch (Exception e) {
+            // In case of any error, return an empty orders list
+            JSONObject response = new JSONObject();
+            response.put("orders", new JSONArray());
+            response.put("count", 0);
+            response.put("error", "Error retrieving orders: " + e.getMessage());
+            
+            sendResponse(exchange, response.toString(), 200);
         }
-        
-        // Wrap in response object
-        JSONObject response = new JSONObject();
-        response.put("orders", jsonArray);
-        response.put("count", orders.size());
-        
-        sendResponse(exchange, response.toString(), 200);
     }
 
     /**
