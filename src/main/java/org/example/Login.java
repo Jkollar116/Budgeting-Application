@@ -3,6 +3,7 @@ package org.example;
 import com.sun.net.httpserver.HttpServer;
 import com.sun.net.httpserver.HttpHandler;
 import com.sun.net.httpserver.HttpExchange;
+import com.google.cloud.firestore.FieldValue;
 import java.io.*;
 import java.net.*;
 import java.nio.charset.*;
@@ -30,9 +31,6 @@ public class Login {
             // Initialize Firebase
             FirestoreService.initialize();
             System.out.println("Firebase initialized successfully");
-            
-            // Run a debug test to verify Firebase is working
-            FirebaseDebugger.runDebugTest();
         } catch (Exception e) {
             System.err.println("Failed to initialize Firebase: " + e.getMessage());
             e.printStackTrace();
@@ -189,8 +187,34 @@ public class Login {
                         Map<String, Object> userData = new HashMap<>();
                         userData.put("email", email);
                         userData.put("lastLogin", new Date().toString());
-                        FirestoreService.getInstance().saveUserProfile(userId, userData);
-                        System.out.println("User profile saved to Firestore with ID: " + userId);
+                        userData.put("loginCount", FieldValue.increment(1)); // Track login count
+                        userData.put("lastIp", exchange.getRemoteAddress().getAddress().getHostAddress());
+                        userData.put("active", true);
+                        
+                        // Get existing user data to preserve other fields
+                        Map<String, Object> existingData = FirestoreService.getInstance().getUserProfile(userId);
+                        if (!existingData.isEmpty()) {
+                            // Preserve existing fields that we're not updating
+                            for (Map.Entry<String, Object> entry : existingData.entrySet()) {
+                                if (!userData.containsKey(entry.getKey())) {
+                                    userData.put(entry.getKey(), entry.getValue());
+                                }
+                            }
+                        }
+                        
+                        boolean success = FirestoreService.getInstance().saveUserProfile(userId, userData);
+                        System.out.println("User profile "+(success ? "saved to" : "failed to save to")+" Firestore with ID: " + userId);
+                        
+                        // Also track login activity in a separate collection
+                        Map<String, Object> loginActivity = new HashMap<>();
+                        loginActivity.put("userId", userId);
+                        loginActivity.put("email", email);
+                        loginActivity.put("timestamp", new Date().toString());
+                        loginActivity.put("ip", exchange.getRemoteAddress().getAddress().getHostAddress());
+                        loginActivity.put("userAgent", exchange.getRequestHeaders().getFirst("User-Agent"));
+                        loginActivity.put("type", "login");
+                        
+                        FirestoreService.getInstance().saveActivity(loginActivity);
                     }
                     
                     // Store user ID in a cookie or session
@@ -207,6 +231,20 @@ public class Login {
                         response.append(line);
                     }
                     in.close();
+                    
+                    // Track failed login attempt
+                    if (FirestoreService.getInstance().isAvailable()) {
+                        Map<String, Object> failedLoginActivity = new HashMap<>();
+                        failedLoginActivity.put("email", email);
+                        failedLoginActivity.put("timestamp", new Date().toString());
+                        failedLoginActivity.put("ip", exchange.getRemoteAddress().getAddress().getHostAddress());
+                        failedLoginActivity.put("userAgent", exchange.getRequestHeaders().getFirst("User-Agent"));
+                        failedLoginActivity.put("type", "failed_login");
+                        failedLoginActivity.put("reason", "Invalid credentials");
+                        
+                        FirestoreService.getInstance().saveActivity(failedLoginActivity);
+                    }
+                    
                     String userMessage = "Invalid email or password. Please try again.";
                     String errorHtml = "<!DOCTYPE html><html lang=\"en\"><head><meta charset=\"UTF-8\"><title>Login Error</title>"
                             + "<link rel=\"stylesheet\" href=\"style.css\"></head><body>"
@@ -315,8 +353,24 @@ public class Login {
                         userData.put("email", email);
                         userData.put("createdAt", new Date().toString());
                         userData.put("lastLogin", new Date().toString());
-                        FirestoreService.getInstance().saveUserProfile(userId, userData);
-                        System.out.println("New user profile created in Firestore with ID: " + userId);
+                        userData.put("loginCount", 1);
+                        userData.put("lastIp", exchange.getRemoteAddress().getAddress().getHostAddress());
+                        userData.put("active", true);
+                        userData.put("userAgent", exchange.getRequestHeaders().getFirst("User-Agent"));
+                        
+                        boolean success = FirestoreService.getInstance().saveUserProfile(userId, userData);
+                        System.out.println("New user profile " + (success ? "created in" : "failed to save to") + " Firestore with ID: " + userId);
+                        
+                        // Also track registration activity
+                        Map<String, Object> registrationActivity = new HashMap<>();
+                        registrationActivity.put("userId", userId);
+                        registrationActivity.put("email", email);
+                        registrationActivity.put("timestamp", new Date().toString());
+                        registrationActivity.put("ip", exchange.getRemoteAddress().getAddress().getHostAddress());
+                        registrationActivity.put("userAgent", exchange.getRequestHeaders().getFirst("User-Agent"));
+                        registrationActivity.put("type", "registration");
+                        
+                        FirestoreService.getInstance().saveActivity(registrationActivity);
                     }
                     
                     exchange.getResponseHeaders().set("Location", "/index.html");
@@ -405,6 +459,19 @@ public class Login {
                 os.close();
                 int responseCode = conn.getResponseCode();
                 if (responseCode == 200) {
+                    // Track password reset activity
+                    if (FirestoreService.getInstance().isAvailable()) {
+                        Map<String, Object> resetActivity = new HashMap<>();
+                        resetActivity.put("email", email);
+                        resetActivity.put("timestamp", new Date().toString());
+                        resetActivity.put("ip", exchange.getRemoteAddress().getAddress().getHostAddress());
+                        resetActivity.put("userAgent", exchange.getRequestHeaders().getFirst("User-Agent"));
+                        resetActivity.put("type", "password_reset_request");
+                        resetActivity.put("success", true);
+                        
+                        FirestoreService.getInstance().saveActivity(resetActivity);
+                    }
+                    
                     String successHtml = "<!DOCTYPE html><html lang=\"en\"><head><meta charset=\"UTF-8\"><title>Password Reset</title>"
                             + "<link rel=\"stylesheet\" href=\"style.css\"></head><body>"
                             + "<div class=\"login-container\"><h2>Password Reset</h2><p>A password reset email has been sent. Please check your inbox.</p>"

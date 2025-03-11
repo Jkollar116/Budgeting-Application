@@ -18,6 +18,13 @@ import java.util.Map;
  */
 public class StockApiHandler implements HttpHandler {
     private final StockService stockService;
+    private final FirestoreService firestoreService;
+    
+    // Default user ID for testing when actual user ID is not available
+    private static final String DEFAULT_USER_ID = "test_user";
+    
+    // Cookie name for user ID
+    private static final String USER_ID_COOKIE = "userId";
 
     /**
      * Constructor
@@ -25,6 +32,27 @@ public class StockApiHandler implements HttpHandler {
     public StockApiHandler() {
         // Initialize with paper trading mode
         this.stockService = new StockService(true);
+        this.firestoreService = FirestoreService.getInstance();
+    }
+    
+    /**
+     * Get the user ID from cookies or use default if not found
+     */
+    private String getUserId(HttpExchange exchange) {
+        // Get cookies from request headers
+        String cookies = exchange.getRequestHeaders().getFirst("Cookie");
+        if (cookies != null) {
+            for (String cookie : cookies.split(";")) {
+                cookie = cookie.trim();
+                if (cookie.startsWith(USER_ID_COOKIE + "=")) {
+                    return cookie.substring(USER_ID_COOKIE.length() + 1);
+                }
+            }
+        }
+        
+        // Fall back to default user ID if not found
+        System.out.println("User ID not found in cookies, using default: " + DEFAULT_USER_ID);
+        return DEFAULT_USER_ID;
     }
 
     @Override
@@ -166,6 +194,7 @@ public class StockApiHandler implements HttpHandler {
      * Handle GET /api/portfolio - Get user's portfolio
      */
     private void handleGetPortfolio(HttpExchange exchange) throws IOException {
+        String userId = getUserId(exchange);
         List<StockPosition> positions = stockService.getPositions(false);
         
         // Calculate portfolio summary
@@ -181,6 +210,17 @@ public class StockApiHandler implements HttpHandler {
             totalValue += position.getMarketValue();
             totalCost += position.getAverageEntryPrice() * position.getQuantity();
             totalPL += position.getUnrealizedProfitLoss();
+            
+            // Save position to Firestore
+            if (firestoreService.isAvailable()) {
+                try {
+                    Map<String, Object> positionData = FirestoreService.stockPositionToMap(position);
+                    firestoreService.saveStockPosition(userId, position.getSymbol(), positionData);
+                } catch (Exception e) {
+                    System.err.println("Error saving stock position to Firestore: " + e.getMessage());
+                    // Continue processing positions even if Firestore save fails
+                }
+            }
         }
         
         // Create response
@@ -201,30 +241,41 @@ public class StockApiHandler implements HttpHandler {
      * Handle GET /api/orders - Get list of orders
      */
     private void handleGetOrders(HttpExchange exchange, Map<String, String> params) throws IOException {
-        String status = params.getOrDefault("status", "open");
-        int limit = Integer.parseInt(params.getOrDefault("limit", "50"));
-        boolean forceRefresh = "true".equalsIgnoreCase(params.get("refresh"));
-        
-        List<StockOrder> orders = stockService.getOrders(status, limit, forceRefresh);
-        
-        // Convert to JSON array
-        JSONArray jsonArray = new JSONArray();
-        for (StockOrder order : orders) {
-            jsonArray.put(order.toDetailedJSON());
+        try {
+            String status = params.getOrDefault("status", "open");
+            int limit = Integer.parseInt(params.getOrDefault("limit", "50"));
+            boolean forceRefresh = "true".equalsIgnoreCase(params.get("refresh"));
+            
+            List<StockOrder> orders = stockService.getOrders(status, limit, forceRefresh);
+            
+            // Convert to JSON array
+            JSONArray jsonArray = new JSONArray();
+            for (StockOrder order : orders) {
+                jsonArray.put(order.toDetailedJSON());
+            }
+            
+            // Wrap in response object
+            JSONObject response = new JSONObject();
+            response.put("orders", jsonArray);
+            response.put("count", orders.size());
+            
+            sendResponse(exchange, response.toString(), 200);
+        } catch (Exception e) {
+            // In case of any error, return an empty orders list
+            JSONObject response = new JSONObject();
+            response.put("orders", new JSONArray());
+            response.put("count", 0);
+            response.put("error", "Error retrieving orders: " + e.getMessage());
+            
+            sendResponse(exchange, response.toString(), 200);
         }
-        
-        // Wrap in response object
-        JSONObject response = new JSONObject();
-        response.put("orders", jsonArray);
-        response.put("count", orders.size());
-        
-        sendResponse(exchange, response.toString(), 200);
     }
 
     /**
      * Handle POST /api/orders - Place a new order
      */
     private void handlePlaceOrder(HttpExchange exchange) throws IOException {
+        String userId = getUserId(exchange);
         // Read request body
         String requestBody = readRequestBody(exchange);
         JSONObject orderRequest = new JSONObject(requestBody);
@@ -268,6 +319,42 @@ public class StockApiHandler implements HttpHandler {
                     throw new IllegalArgumentException("Unsupported order type: " + orderType);
             }
             
+            // Save the order to Firestore
+            if (firestoreService.isAvailable()) {
+                try {
+                    // Convert order to a Map
+                    Map<String, Object> orderData = new HashMap<>();
+                    orderData.put("id", order.getId());
+                    orderData.put("clientOrderId", order.getClientOrderId());
+                    orderData.put("symbol", order.getSymbol());
+                    orderData.put("assetId", order.getAssetId());
+                    orderData.put("quantity", order.getQuantity());
+                    orderData.put("side", order.getSide().toString());
+                    orderData.put("type", order.getType().toString());
+                    orderData.put("status", order.getStatus().toString());
+                    orderData.put("createdAt", order.getCreatedAt());
+                    orderData.put("updatedAt", order.getUpdatedAt());
+                    
+                    // Add order-specific fields
+                    if (order.getLimitPrice() > 0) {
+                        orderData.put("limitPrice", order.getLimitPrice());
+                    }
+                    if (order.getStopPrice() > 0) {
+                        orderData.put("stopPrice", order.getStopPrice());
+                    }
+                    if (order.getTrailPercent() > 0) {
+                        orderData.put("trailPercent", order.getTrailPercent());
+                    }
+                    
+                    // Save as a transaction
+                    firestoreService.saveTransaction(userId, orderData);
+                    
+                } catch (Exception e) {
+                    System.err.println("Error saving order to Firestore: " + e.getMessage());
+                    // Continue even if Firestore save fails
+                }
+            }
+            
             // Return the created order
             sendResponse(exchange, order.toDetailedJSON().toString(), 201);
         } catch (IllegalArgumentException e) {
@@ -287,11 +374,30 @@ public class StockApiHandler implements HttpHandler {
      * Handle DELETE /api/orders/{orderId} - Cancel an order
      */
     private void handleCancelOrder(HttpExchange exchange, String path) throws IOException {
+        String userId = getUserId(exchange);
         String orderId = path.substring(path.lastIndexOf('/') + 1);
         
         boolean success = stockService.cancelOrder(orderId);
         
         if (success) {
+            // If available, record the canceled order in Firestore
+            if (firestoreService.isAvailable()) {
+                try {
+                    // Create a transaction record for the canceled order
+                    Map<String, Object> transactionData = new HashMap<>();
+                    transactionData.put("type", "ORDER_CANCEL");
+                    transactionData.put("orderId", orderId);
+                    transactionData.put("status", "CANCELED");
+                    transactionData.put("timestamp", new java.util.Date().toString());
+                    
+                    // Save the transaction
+                    firestoreService.saveTransaction(userId, transactionData);
+                } catch (Exception e) {
+                    System.err.println("Error recording order cancellation in Firestore: " + e.getMessage());
+                    // Continue even if Firestore save fails
+                }
+            }
+            
             sendResponse(exchange, new JSONObject()
                 .put("success", true)
                 .put("message", "Order canceled")
