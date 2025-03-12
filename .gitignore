@@ -39,3 +39,4 @@ build/
 
 ### Security Credentials ###
 src/main/resources/serviceAccountKey.json
+src/main/resources/keys.json
