@@ -48,7 +48,6 @@
 </body>
 <script>
     function calculateTax() {
-        //Gets the values from the tax fields
         let income = parseFloat(document.getElementById("income").value) || 0;
         let taxCredits = parseFloat(document.getElementById("taxCredits").value) || 0;
         let taxesPaid = parseFloat(document.getElementById("taxesPaid").value) || 0;
@@ -67,7 +66,7 @@
             qualifying_surviving_spouse: 29200
         }[filingStatus];
         //Finds the taxable income, uses Math.max to make sure the value doesn't go into the negatives
-        let taxableIncome = Math.max(income - standardDeduction, 0);
+        let taxableIncome = Math.max(income - standardDeduction - taxCredits, 0);
         //These are the tax brackets, and the associated tax rate for that specific bracket for each filing type, they are based on the 2024 brackets
         let taxBrackets = {
             single: [
@@ -135,7 +134,7 @@
             taxOwedBrackets += (taxableIncome - taxBrackets[lastBracket].bracket) * taxBrackets[lastBracket].rate;
         }
         //The tax owed cannot be 0, if it's not 0 is the total tax owed.
-        let taxOwed = Math.max(taxOwedBrackets - taxCredits - taxesPaid, 0);
+        let taxOwed = Math.max(taxOwedBrackets - taxesPaid, 0);
         //Updates the result field to be that of the taxOwed field, the value is formatted to 2 decimal points
         document.getElementById("result").innerHTML = `Estimated Tax Owed: $${taxOwed.toFixed(2)}`;
     }
