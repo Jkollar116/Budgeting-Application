@@ -275,6 +275,22 @@ public class Login {
                         // Get the document reference after the document is successfully added
                         DocumentReference documentReference = future.get(); // This blocks until the operation completes
                         System.out.println("User added to Firestore with ID: " + documentReference.getId());
+
+                        // Create data to be added to the subcollection (userDetails)
+                        Map<String, Object> userDetails = new HashMap<>();
+                        userDetails.put("name", "example"); // You could also capture this from the form data
+
+
+                        // Create a subcollection 'userDetails' under the created user document
+                        CollectionReference userDetailsCollection = documentReference.collection("userDetails");
+
+                        // Add data to the userDetails subcollection synchronously
+                        ApiFuture<DocumentReference> userDetailsFuture = userDetailsCollection.add(userDetails);
+
+                        // Wait for the operation to complete
+                        DocumentReference userDetailsDocRef = userDetailsFuture.get(); // This will block until the operation completes
+                        System.out.println("User details added to subcollection with ID: " + userDetailsDocRef.getId());
+
                     } catch (Exception e) {
                         // Handle any errors that may occur during the Firestore operation
                         System.err.println("Error adding user to Firestore: " + e.getMessage());
