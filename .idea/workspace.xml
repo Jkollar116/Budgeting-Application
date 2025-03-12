@@ -4,8 +4,11 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="e72c0420-fe48-4af3-a363-18d6d8618447" name="Changes" comment="heroku main fix">
+    <list default="true" id="e72c0420-fe48-4af3-a363-18d6d8618447" name="Changes" comment="pluggin for heroku">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/pom.xml" beforeDir="false" afterPath="$PROJECT_DIR$/pom.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/home.html" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/home.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/tax.html" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/tax.html" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -123,7 +126,7 @@
       <workItem from="1741136849217" duration="886000" />
       <workItem from="1741138122965" duration="1138000" />
       <workItem from="1741190699481" duration="1683000" />
-      <workItem from="1741372384188" duration="5110000" />
+      <workItem from="1741372384188" duration="2501000" />
     </task>
     <task id="LOCAL-00001" summary="First Commit of login">
       <option name="closed" value="true" />
@@ -269,31 +272,7 @@
       <option name="project" value="LOCAL" />
       <updated>1741375343720</updated>
     </task>
-    <task id="LOCAL-00019" summary="pluggin for heroku">
-      <option name="closed" value="true" />
-      <created>1741375531380</created>
-      <option name="number" value="00019" />
-      <option name="presentableId" value="LOCAL-00019" />
-      <option name="project" value="LOCAL" />
-      <updated>1741375531380</updated>
-    </task>
-    <task id="LOCAL-00020" summary="heroku main fix">
-      <option name="closed" value="true" />
-      <created>1741375765518</created>
-      <option name="number" value="00020" />
-      <option name="presentableId" value="LOCAL-00020" />
-      <option name="project" value="LOCAL" />
-      <updated>1741375765518</updated>
-    </task>
-    <task id="LOCAL-00021" summary="heroku main fix">
-      <option name="closed" value="true" />
-      <created>1741377734016</created>
-      <option name="number" value="00021" />
-      <option name="presentableId" value="LOCAL-00021" />
-      <option name="project" value="LOCAL" />
-      <updated>1741377734016</updated>
-    </task>
-    <option name="localTasksCounter" value="22" />
+    <option name="localTasksCounter" value="19" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -325,7 +304,6 @@
     <MESSAGE value="updated xml java version" />
     <MESSAGE value="no jekyell file" />
     <MESSAGE value="pluggin for heroku" />
-    <MESSAGE value="heroku main fix" />
-    <option name="LAST_COMMIT_MESSAGE" value="heroku main fix" />
+    <option name="LAST_COMMIT_MESSAGE" value="pluggin for heroku" />
   </component>
 </project>
