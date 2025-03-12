@@ -87,6 +87,16 @@ public class Login {
         server.createContext("/api/portfolio", new StockApiHandler()); // Portfolio endpoint
         server.createContext("/api/orders", new StockApiHandler()); // Orders endpoint
         server.createContext("/api/account", new StockApiHandler()); // Account endpoint
+        
+        // Initialize budgeting features
+        BudgetingDatabaseInitializer.initializeDatabase();
+        
+        // Register budgeting API endpoints
+        server.createContext("/api/budgeting/dashboard", new BudgetingApiHandler());
+        server.createContext("/api/budgeting/accounts", new BudgetingApiHandler());
+        server.createContext("/api/budgeting/budgets", new BudgetingApiHandler());
+        server.createContext("/api/budgeting/transactions", new BudgetingApiHandler());
+        server.createContext("/api/budgeting/goals", new BudgetingApiHandler());
         server.setExecutor(null);
         server.start();
 
@@ -357,10 +367,10 @@ public class Login {
                         userData.put("lastIp", exchange.getRemoteAddress().getAddress().getHostAddress());
                         userData.put("active", true);
                         userData.put("userAgent", exchange.getRequestHeaders().getFirst("User-Agent"));
-                        
+
                         boolean success = FirestoreService.getInstance().saveUserProfile(userId, userData);
                         System.out.println("New user profile " + (success ? "created in" : "failed to save to") + " Firestore with ID: " + userId);
-                        
+
                         // Also track registration activity
                         Map<String, Object> registrationActivity = new HashMap<>();
                         registrationActivity.put("userId", userId);
@@ -369,8 +379,22 @@ public class Login {
                         registrationActivity.put("ip", exchange.getRemoteAddress().getAddress().getHostAddress());
                         registrationActivity.put("userAgent", exchange.getRequestHeaders().getFirst("User-Agent"));
                         registrationActivity.put("type", "registration");
-                        
+
                         FirestoreService.getInstance().saveActivity(registrationActivity);
+                        
+                        // Initialize budgeting data for the new user
+                        try {
+                            // Make sure global data is initialized first
+                            BudgetingDatabaseInitializer.initializeDatabase();
+                            
+                            // Initialize empty user data structure without sample data
+                            BudgetingDatabaseInitializer.initializeEmptyUserData(userId);
+                            
+                            System.out.println("Empty user data structure initialized for new user: " + userId);
+                        } catch (Exception e) {
+                            System.err.println("Failed to initialize budgeting data for user: " + e.getMessage());
+                            e.printStackTrace();
+                        }
                     }
                     
                     exchange.getResponseHeaders().set("Location", "/index.html");

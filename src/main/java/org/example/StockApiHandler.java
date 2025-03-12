@@ -19,6 +19,7 @@ import java.util.Map;
 public class StockApiHandler implements HttpHandler {
     private final StockService stockService;
     private final FirestoreService firestoreService;
+    private final BudgetingDatabaseService budgetingDbService;
     
     // Default user ID for testing when actual user ID is not available
     private static final String DEFAULT_USER_ID = "test_user";
@@ -33,6 +34,7 @@ public class StockApiHandler implements HttpHandler {
         // Initialize with paper trading mode
         this.stockService = new StockService(true);
         this.firestoreService = FirestoreService.getInstance();
+        this.budgetingDbService = BudgetingDatabaseService.getInstance();
     }
     
     /**
@@ -352,6 +354,52 @@ public class StockApiHandler implements HttpHandler {
                 } catch (Exception e) {
                     System.err.println("Error saving order to Firestore: " + e.getMessage());
                     // Continue even if Firestore save fails
+                }
+            }
+            
+            // Also save to the budgeting system for comprehensive financial tracking
+            if (budgetingDbService.isAvailable()) {
+                try {
+                    // Determine the transaction type based on order side (buy/sell)
+                    String transactionType = order.getSide().toString().equalsIgnoreCase("buy") ? "expense" : "income";
+                    
+                    // Calculate approximate order value
+                    double orderValue = quantity;
+                    if (order.getLimitPrice() > 0) {
+                        orderValue *= order.getLimitPrice();
+                    } else {
+                        // For market orders, use an estimate based on current price
+                        JSONObject quote = stockService.getQuote(symbol);
+                        if (quote.has("latestPrice")) {
+                            orderValue *= quote.getDouble("latestPrice");
+                        }
+                    }
+                    
+                    // Build transaction data
+                    Map<String, Object> transaction = new HashMap<>();
+                    transaction.put("description", order.getSide().toString().toUpperCase() + " " + quantity + " " + symbol);
+                    transaction.put("amount", orderValue);
+                    transaction.put("type", transactionType);
+                    transaction.put("category", transactionType.equals("expense") ? "expense-investments" : "income-investments");
+                    transaction.put("accountId", "investment-brokerage"); // Use default investment account
+                    transaction.put("notes", "Stock " + order.getSide().toString() + " order: " + order.getId());
+                    transaction.put("isReconciled", false); // Mark as not reconciled until order is executed
+                    transaction.put("reference", order.getId()); // Store order ID for reference
+                    
+                    // Add custom metadata for stocks
+                    Map<String, Object> metadata = new HashMap<>();
+                    metadata.put("symbol", symbol);
+                    metadata.put("quantity", quantity);
+                    metadata.put("orderType", orderType);
+                    metadata.put("orderId", order.getId());
+                    transaction.put("metadata", metadata);
+                    
+                    // Save the transaction
+                    String transactionId = budgetingDbService.saveTransaction(userId, transaction);
+                    System.out.println("Stock order saved to budgeting system with transaction ID: " + transactionId);
+                } catch (Exception e) {
+                    System.err.println("Error saving order to budgeting system: " + e.getMessage());
+                    // Continue even if budgeting save fails
                 }
             }
             
