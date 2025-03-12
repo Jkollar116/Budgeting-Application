@@ -10,7 +10,7 @@
     <div class="logo">Cash Climb</div>
     <nav>
         <ul>
-            <li><a href="javascript:void(0)">Dashboard</a></li>
+            <li><a href="home.html">Dashboard</a></li>
             <li><a href="javascript:void(0)">Profile <span class="icon">👤</span></a></li>
             <li><a href="javascript:void(0)">Settings <span class="icon">⚙️</span></a></li>
             <li><a href="javascript:void(0)">Log Out <span class="icon">🚪</span></a></li>
@@ -22,8 +22,7 @@
 <div class="header">
     <div class="header-content">
         <h1>Tax Calculator</h1>
-        <p>Calculate your taxes based on the information.There is no functionality yet, but there will be some for
-            federal income taxes soon</p>
+        <p>Calculate your taxes based on the information.</p>
     </div>
 </div>
 <div class="container">
@@ -36,14 +35,112 @@
         <option value="married_filing_jointly">Married Filing Jointly</option>
         <option value="married_filing_separately">Married Filing Separately</option>
         <option value="qualifying_surviving_spouse">Qualifying Surviving Spouse</option>
-        <option value="head_of_household">Head of the Household</option>
+        <option value="head_of_household">Head of Household</option>
     </select>
-    <label for="taxCredits">Tax Credits ($):</label>
-    <input type="number" id="taxCredits" placeholder="Enter total credits">
-    <label for="taxesPaid">Taxes Already Paid ($):</label>
-    <input type="number" id="taxesPaid" placeholder="Enter taxes paid">
+    <label for="taxCredits">Tax Credits and Deductibles Available:</label>
+    <input type="number" id="taxCredits" placeholder="Enter tax credits or deductibles">
+    <label for="taxesPaid">Taxes Paid:</label>
+    <input type="number" id="taxesPaid" placeholder="Enter the taxes that have been paid">
     <button onclick="calculateTax()">Calculate Tax</button>
-    <div id="result"></div>
+    <div id="result" class="result-container"></div>
+    <button onclick="Save()">Save Tax Information</button>
 </div>
 </body>
+<script>
+    function calculateTax() {
+        //Gets the values from the tax fields
+        let income = parseFloat(document.getElementById("income").value) || 0;
+        let taxCredits = parseFloat(document.getElementById("taxCredits").value) || 0;
+        let taxesPaid = parseFloat(document.getElementById("taxesPaid").value) || 0;
+        let filingStatus = document.getElementById("filingStatus").value;
+        //Check to see if there are values for the filing status and income, if not it will prompt you to enter it
+        if (!income || filingStatus === "blank") {
+            document.getElementById("result").innerHTML = "Enter your income and filing status.";
+            return;
+        }
+        //These deductions apply to each status, and are subtracted from the total income,
+        let standardDeduction = {
+            single: 14600,
+            married_filing_jointly: 29200,
+            married_filing_separately: 14600,
+            head_of_household: 21900,
+            qualifying_surviving_spouse: 29200
+        }[filingStatus];
+        //Finds the taxable income, uses Math.max to make sure the value doesn't go into the negatives
+        let taxableIncome = Math.max(income - standardDeduction, 0);
+        //These are the tax brackets, and the associated tax rate for that specific bracket for each filing type, they are based on the 2024 brackets
+        let taxBrackets = {
+            single: [
+                { bracket: 0, rate: 0.10 },
+                { bracket: 11600, rate: 0.12 },
+                { bracket: 47150, rate: 0.22 },
+                { bracket: 100525, rate: 0.24 },
+                { bracket: 191950, rate: 0.32 },
+                { bracket: 243725, rate: 0.35 },
+                { bracket: 609350, rate: 0.37 }
+            ],
+            married_filing_jointly: [
+                { bracket: 0, rate: 0.10 },
+                { bracket: 23200, rate: 0.12 },
+                { bracket: 94300, rate: 0.22 },
+                { bracket: 201050, rate: 0.24 },
+                { bracket: 383900, rate: 0.32 },
+                { bracket: 487450, rate: 0.35 },
+                { bracket: 731200, rate: 0.37 }
+            ],
+            married_filing_separately: [
+                { bracket: 0, rate: 0.10 },
+                { bracket: 11600, rate: 0.12 },
+                { bracket: 47150, rate: 0.22 },
+                { bracket: 100525, rate: 0.24 },
+                { bracket: 191950, rate: 0.32 },
+                { bracket: 243725, rate: 0.35 },
+                { bracket: 609350, rate: 0.37 }
+            ],
+            head_of_household: [
+                { bracket: 0, rate: 0.10 },
+                { bracket: 16450, rate: 0.12 },
+                { bracket: 63100, rate: 0.22 },
+                { bracket: 100500, rate: 0.24 },
+                { bracket: 191950, rate: 0.32 },
+                { bracket: 243700, rate: 0.35 },
+                { bracket: 609350, rate: 0.37 }
+            ],
+            qualifying_surviving_spouse: [
+                { bracket: 0, rate: 0.10 },
+                { bracket: 23200, rate: 0.12 },
+                { bracket: 94300, rate: 0.22 },
+                { bracket: 201050, rate: 0.24 },
+                { bracket: 383900, rate: 0.32 },
+                { bracket: 487450, rate: 0.35 },
+                { bracket: 731200, rate: 0.37 }
+            ]
+        }[filingStatus];
+        //Sets the tax owed to 0
+        let taxOwedBrackets = 0;
+        //Loops through each tax bracket
+        for (let i = 0; i < taxBrackets.length-1; i++) {
+            //Checks if the taxable income is higher than that current bracket
+            if (taxableIncome > taxBrackets[i].bracket) {
+                //Subtracts the value to find the taxable income in this bracket, first it gets the smaller value between
+                //The upper bracket and the income, and then the subtraction occurs
+                let incomeFromBracket = Math.min(taxableIncome, taxBrackets[i + 1].bracket) - taxBrackets[i].bracket;
+                //The owed tax is the income multiplied by the rate
+                taxOwedBrackets += incomeFromBracket * taxBrackets[i].rate;
+            }
+        }
+        //The last bracket is handled differently, because the loop above accounts for the bracket above it for the calculation
+        let lastBracket = taxBrackets.length - 1;
+        if (taxableIncome > taxBrackets[lastBracket].bracket) {
+            taxOwedBrackets += (taxableIncome - taxBrackets[lastBracket].bracket) * taxBrackets[lastBracket].rate;
+        }
+        //The tax owed cannot be 0, if it's not 0 is the total tax owed.
+        let taxOwed = Math.max(taxOwedBrackets - taxCredits - taxesPaid, 0);
+        //Updates the result field to be that of the taxOwed field, the value is formatted to 2 decimal points
+        document.getElementById("result").innerHTML = `Estimated Tax Owed: $${taxOwed.toFixed(2)}`;
+    }
+    function Save(){
+
+    }
+</script>
 </html>
