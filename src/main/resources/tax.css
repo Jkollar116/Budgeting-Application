@@ -76,20 +76,14 @@ button {
     font-size: 16px;
     cursor: pointer;
 }
+.result-container {
+    margin-top: 15px;
+    padding: 10px;
+    background-color: #5A2D74;
+    border-radius: 5px;
+    text-align: center;
+    font-weight: bold;
+}
 button:hover {
     background-color: #e07a00;
-}
-#result {
-    margin-top: 15px;
-    font-weight: bold;
-    text-align: center;
-    padding: 10px;
-    border-radius: 5px;
-}
-footer {
-    background-color: #3E1F5B;
-    text-align: center;
-    padding: 15px;
-    border-top: 2px solid #FF8C00;
-    font-size: 0.9rem;
 }
