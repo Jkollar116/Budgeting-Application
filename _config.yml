@@ -1,0 +1,5 @@
+title: Budgeting Application
+markdown: kramdown
+theme: jekyll-theme-primer
+sass:
+  style: compressed
