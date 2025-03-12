@@ -7,4 +7,4 @@ public record WalletInfo(
         List<Transaction> transactions,
         double currentPrice,
         double priceChange24h
-) {}
+){}

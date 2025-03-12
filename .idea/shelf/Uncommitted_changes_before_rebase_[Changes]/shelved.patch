@@ -1,0 +1,16 @@
+Index: src/main/java/org/example/WalletInfo.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>package org.example;\n\nimport java.util.List;\n\npublic record WalletInfo(\n        double balance,\n        List<Transaction> transactions,\n        double currentPrice,\n        double priceChange24h\n) {}\n
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/src/main/java/org/example/WalletInfo.java b/src/main/java/org/example/WalletInfo.java
+--- a/src/main/java/org/example/WalletInfo.java	(revision e91539aa646db507619c444b7b67032bcfb18685)
++++ b/src/main/java/org/example/WalletInfo.java	(date 1741192306805)
+@@ -7,4 +7,4 @@
+         List<Transaction> transactions,
+         double currentPrice,
+         double priceChange24h
+-) {}
++)

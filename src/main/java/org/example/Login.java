@@ -1,5 +1,14 @@
 package org.example;
 
+import com.google.api.core.ApiFuture;
+import com.google.api.gax.rpc.ApiException;
+import com.google.auth.oauth2.GoogleCredentials;
+import com.google.cloud.firestore.CollectionReference;
+import com.google.cloud.firestore.DocumentReference;
+import com.google.cloud.firestore.Firestore;
+import com.google.firebase.FirebaseApp;
+import com.google.firebase.FirebaseOptions;
+import com.google.firebase.cloud.FirestoreClient;
 import com.sun.net.httpserver.HttpServer;
 import com.sun.net.httpserver.HttpHandler;
 import com.sun.net.httpserver.HttpExchange;
@@ -8,12 +17,32 @@ import java.net.*;
 import java.nio.charset.*;
 import java.nio.file.*;
 import java.awt.*;
+import java.util.HashMap;
+import java.util.Map;
+
 import com.sun.net.httpserver.*;
 
 public class Login {
     private static final String FIREBASE_API_KEY = "AIzaSyCMA1F8Xd4rCxGXssXIs8Da80qqP6jien8";
+    private static Firestore db;
 
     public static void main(String[] args) throws Exception {
+
+        try {
+            // Initialize Firebase with a service account file
+            initializeFirebase();
+            System.out.println("Firebase initialized successfully");
+
+            // Access Firestore
+            Firestore db = FirestoreClient.getFirestore();
+
+            // Your logic here...
+
+        } catch (IOException | ApiException e) {
+            System.err.println("Failed to initialize Firebase: " + e.getMessage());
+            e.printStackTrace();
+        }
+
         int port = 8000;
         if (args.length > 0) {
             try {
@@ -145,8 +174,23 @@ public class Login {
         }
     }
 
+    private static void initializeFirebase() throws IOException {
+        // Path to your Firebase service account key JSON file
+        FileInputStream serviceAccount = new FileInputStream("target/classes/key.json");
+
+        // Initialize Firebase with credentials from the service account
+        FirebaseOptions options = new FirebaseOptions.Builder()
+                .setCredentials(GoogleCredentials.fromStream(serviceAccount))
+                .build();
+
+        // Initialize the FirebaseApp instance
+        FirebaseApp.initializeApp(options);
+    }
+
     static class RegisterHandler implements HttpHandler {
         private final String basePath = "src/main/resources";
+        Firestore db = FirestoreClient.getFirestore();  // Initialize Firestore
+
         public void handle(HttpExchange exchange) throws IOException {
             if ("GET".equalsIgnoreCase(exchange.getRequestMethod())) {
                 String fileName = "/register.html";
@@ -216,6 +260,26 @@ public class Login {
                 os.close();
                 int responseCode = conn.getResponseCode();
                 if (responseCode == 200) {
+
+                    // Create a user map to store user data in Firestore
+                    Map<String, Object> user = new HashMap<>();
+                    user.put("email", email);
+                    user.put("password", password); // In a real-world app, don't store plain text passwords
+
+                    // Reference to the Firestore "users" collection
+                    CollectionReference usersCollection = db.collection("Users");
+
+                    ApiFuture<DocumentReference> future = usersCollection.add(user);
+
+                    try {
+                        // Get the document reference after the document is successfully added
+                        DocumentReference documentReference = future.get(); // This blocks until the operation completes
+                        System.out.println("User added to Firestore with ID: " + documentReference.getId());
+                    } catch (Exception e) {
+                        // Handle any errors that may occur during the Firestore operation
+                        System.err.println("Error adding user to Firestore: " + e.getMessage());
+                    }
+
                     exchange.getResponseHeaders().set("Location", "/index.html");
                     exchange.sendResponseHeaders(302, -1);
                     return;
