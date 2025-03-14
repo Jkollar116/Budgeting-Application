@@ -2,10 +2,12 @@ package org.example;
 
 import com.sun.net.httpserver.HttpHandler;
 import com.sun.net.httpserver.HttpExchange;
-import java.io.OutputStream;
 import java.io.IOException;
+import java.io.OutputStream;
+import java.nio.charset.StandardCharsets;
 
 public class HomeDataHandler implements HttpHandler {
+    @Override
     public void handle(HttpExchange exchange) throws IOException {
         exchange.getResponseHeaders().set("Access-Control-Allow-Origin", "*");
         int netWorth = 100000;
@@ -34,12 +36,10 @@ public class HomeDataHandler implements HttpHandler {
                 .append("\"monthlyExpenses\":[");
         for (int i = 0; i < monthlyExpenses.length; i++) {
             json.append(monthlyExpenses[i]);
-            if (i < monthlyExpenses.length - 1) {
-                json.append(",");
-            }
+            if (i < monthlyExpenses.length - 1) { json.append(","); }
         }
         json.append("]}");
-        byte[] responseBytes = json.toString().getBytes("UTF-8");
+        byte[] responseBytes = json.toString().getBytes(StandardCharsets.UTF_8);
         exchange.getResponseHeaders().set("Content-Type", "application/json; charset=UTF-8");
         exchange.sendResponseHeaders(200, responseBytes.length);
         OutputStream os = exchange.getResponseBody();
