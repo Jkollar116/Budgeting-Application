@@ -280,12 +280,34 @@ public class Login {
                         Map<String, Object> userDetails = new HashMap<>();
                         userDetails.put("name", "example"); // You could also capture this from the form data
 
+                        Map<String, Object> expense = new HashMap<>();
+                        userDetails.put("name", "example"); // You could also capture this from the form data
+
+                        Map<String, Object> categories = new HashMap<>();
+                        userDetails.put("name", "example"); // You could also capture this from the form data
 
                         // Create a subcollection 'userDetails' under the created user document
                         CollectionReference userDetailsCollection = documentReference.collection("userDetails");
 
+                        CollectionReference Bill = documentReference.collection("Bill");
+                        CollectionReference Income = documentReference.collection("Income");
+                        CollectionReference Investment = documentReference.collection("Investment");
+                        CollectionReference Goal = documentReference.collection("Goal");
+                        CollectionReference Liability = documentReference.collection("Liability");
+                        CollectionReference FinancialReport = documentReference.collection("FinancialReport");
+                        CollectionReference Expense = documentReference.collection("Expense");
+                        CollectionReference Asset = documentReference.collection("Asset");
+
+                        ApiFuture<DocumentReference> expenseFuture = Expense.add(expense);
                         // Add data to the userDetails subcollection synchronously
                         ApiFuture<DocumentReference> userDetailsFuture = userDetailsCollection.add(userDetails);
+
+
+
+                        DocumentReference expenseFutureDocRef = expenseFuture.get();
+
+                        CollectionReference categoriesCollection = expenseFutureDocRef.collection("Categories");
+                        ApiFuture<DocumentReference> categoriesFuture = categoriesCollection.add(categories); // Add category
 
                         // Wait for the operation to complete
                         DocumentReference userDetailsDocRef = userDetailsFuture.get(); // This will block until the operation completes
