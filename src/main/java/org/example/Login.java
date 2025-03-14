@@ -275,37 +275,59 @@ public class Login {
                         // Get the document reference after the document is successfully added
                         DocumentReference documentReference = future.get(); // This blocks until the operation completes
                         System.out.println("User added to Firestore with ID: " + documentReference.getId());
-
-                        // Create data to be added to the subcollection (userDetails)
                         Map<String, Object> userDetails = new HashMap<>();
-                        userDetails.put("name", "example"); // You could also capture this from the form data
+                        userDetails.put("name", "example"); // This is for userDetails
 
                         Map<String, Object> expense = new HashMap<>();
-                        userDetails.put("name", "example"); // You could also capture this from the form data
+                        expense.put("amount", 100);  // Example data for expense
+                        expense.put("type", "Food"); // Example category of expense
 
                         Map<String, Object> categories = new HashMap<>();
-                        userDetails.put("name", "example"); // You could also capture this from the form data
+                        categories.put("categoryName", "Groceries");  // Example category data
 
+                        Map<String, Object> bill = new HashMap<>();
+                        bill.put("billAmount", 200); // Example bill amount
+
+                        Map<String, Object> income = new HashMap<>();
+                        income.put("incomeSource", "Job");  // Example income source
+
+                        Map<String, Object> investment = new HashMap<>();
+                        investment.put("investmentType", "Stocks"); // Example investment type
+
+                        Map<String, Object> goal = new HashMap<>();
+                        goal.put("goalName", "Buy House");  // Example financial goal
+
+                        Map<String, Object> liability = new HashMap<>();
+                        liability.put("liabilityType", "Loan");  // Example liability type
+
+                        Map<String, Object> financialReport = new HashMap<>();
+                        financialReport.put("reportYear", "2025"); // Example year for the report
+
+                        Map<String, Object> asset = new HashMap<>();
+                        asset.put("assetType", "Property");  // Example asset type
                         // Create a subcollection 'userDetails' under the created user document
                         CollectionReference userDetailsCollection = documentReference.collection("userDetails");
 
-                        CollectionReference Bill = documentReference.collection("Bill");
-                        CollectionReference Income = documentReference.collection("Income");
-                        CollectionReference Investment = documentReference.collection("Investment");
-                        CollectionReference Goal = documentReference.collection("Goal");
-                        CollectionReference Liability = documentReference.collection("Liability");
-                        CollectionReference FinancialReport = documentReference.collection("FinancialReport");
-                        CollectionReference Expense = documentReference.collection("Expense");
-                        CollectionReference Asset = documentReference.collection("Asset");
+                        CollectionReference billCollection = documentReference.collection("Bill");
+                        CollectionReference incomeCollection = documentReference.collection("Income");
+                        CollectionReference investmentCollection = documentReference.collection("Investment");
+                        CollectionReference goalCollection = documentReference.collection("Goal");
+                        CollectionReference liabilityCollection = documentReference.collection("Liability");
+                        CollectionReference financialReportCollection = documentReference.collection("FinancialReport");
+                        CollectionReference expenseCollection = documentReference.collection("Expense");
+                        CollectionReference assetCollection = documentReference.collection("Asset");
 
-                        ApiFuture<DocumentReference> expenseFuture = Expense.add(expense);
-                        // Add data to the userDetails subcollection synchronously
+                        ApiFuture<DocumentReference> investmentFuture = investmentCollection.add(investment);
+                        ApiFuture<DocumentReference> billFuture = billCollection.add(bill);
+                        ApiFuture<DocumentReference> incomeFuture = incomeCollection.add(income);
+                        ApiFuture<DocumentReference> goalFuture = goalCollection.add(goal);
+                        ApiFuture<DocumentReference> expenseFuture = expenseCollection.add(expense);
                         ApiFuture<DocumentReference> userDetailsFuture = userDetailsCollection.add(userDetails);
-
-
+                        ApiFuture<DocumentReference> liabilityFuture = liabilityCollection.add(liability);
+                        ApiFuture<DocumentReference> assetFuture = assetCollection.add(asset);
+                        ApiFuture<DocumentReference> finacialReportFuture = financialReportCollection.add(financialReport);
 
                         DocumentReference expenseFutureDocRef = expenseFuture.get();
-
                         CollectionReference categoriesCollection = expenseFutureDocRef.collection("Categories");
                         ApiFuture<DocumentReference> categoriesFuture = categoriesCollection.add(categories); // Add category
 
