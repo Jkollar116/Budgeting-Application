@@ -26,8 +26,6 @@ public class Login {
     private static final String FIREBASE_API_KEY = "AIzaSyCMA1F8Xd4rCxGXssXIs8Da80qqP6jien8";
     private static Firestore db;
 
-    public String userID;
-
 
     public static void main(String[] args) throws Exception {
 
@@ -301,34 +299,73 @@ public class Login {
 
                         Map<String, Object> expense = new HashMap<>();
                         expense.put("amount", 100);  // Example data for expense
-                        expense.put("type", "Food"); // Example category of expense
+                        expense.put("dateSpent", 0); // Example category of expense
+                        expense.put("categoryID", 0); // Example category of expense
+                        expense.put("userID", 0); // Example category of expense
+                        expense.put("expenseID", 0); // Example category of expense
 
                         Map<String, Object> categories = new HashMap<>();
-                        categories.put("categoryName", "Groceries");  // Example category data
+                        categories.put("categoryID", 0);  // Example category data
+                        categories.put("name", "Groceries");  // Example category data
 
                         Map<String, Object> bill = new HashMap<>();
-                        bill.put("billAmount", 200); // Example bill amount
+                        bill.put("billID", 0); // Example bill amount
+                        bill.put("userID", 0);
+                        bill.put("amountDue", 0);
+                        bill.put("dueDate", 0);
+                        bill.put("reminderDate", 0);
 
                         Map<String, Object> income = new HashMap<>();
-                        income.put("incomeSource", "Job");  // Example income source
+                        income.put("incomeID", 0);  // Example income source
+                        income.put("userID", 0);  // Example income source
+                        income.put("source", "Job");  // Example income source
+                        income.put("amount", 0);  // Example income source
+                        income.put("dateReceived", 0);  // Example income source
 
                         Map<String, Object> investment = new HashMap<>();
-                        investment.put("investmentType", "Stocks"); // Example investment type
+                        investment.put("investmentID", 0); // Example investment type
+                        investment.put("userID", 0); // Example investment type
+                        investment.put("type", "type"); // Example investment type
+                        investment.put("amount", 0); // Example investment type
+                        investment.put("buyDate", 0); // Example investment type
+                        investment.put("sellDate", 0); // Example investment type
 
                         Map<String, Object> goal = new HashMap<>();
-                        goal.put("goalName", "Buy House");  // Example financial goal
+                        goal.put("goalID", 0);  // Example financial goal
+                        goal.put("userID", 0);  // Example financial goal
+                        goal.put("description", "Buy House");  // Example financial goal
+                        goal.put("targetAmount", 0);  // Example financial goal
+                        goal.put("dueDate", 0);  // Example financial goal
 
                         Map<String, Object> liability = new HashMap<>();
-                        liability.put("liabilityType", "Loan");  // Example liability type
+                        liability.put("liabilityID", 0);  // Example liability type
+                        liability.put("userID", 0);  // Example liability type
+                        liability.put("type", "Loan");  // Example liability type
+                        liability.put("amount", 0);  // Example liability type
 
                         Map<String, Object> financialReport = new HashMap<>();
-                        financialReport.put("reportYear", "2025"); // Example year for the report
+                        financialReport.put("reportID", 0); // Example year for the report
+                        financialReport.put("userID", 0); // Example year for the report
+                        financialReport.put("type", "example"); // Example year for the report
+                        financialReport.put("generatedDate", 0); // Example year for the report
 
                         Map<String, Object> asset = new HashMap<>();
-                        asset.put("assetType", "Property");  // Example asset type
+                        asset.put("assetID", 0);  // Example asset type
+                        asset.put("userID", 0);  // Example asset type
+                        asset.put("type", "string");  // Example asset type
+                        asset.put("value", 0);  // Example asset typ
                         // Create a subcollection 'userDetails' under the created user document
+
+                        Map<String, Object> bankAccount = new HashMap<>();
+                        bankAccount.put("accountID", 0);  // Example asset type
+                        bankAccount.put("userID", 0);  // Example asset type
+                        bankAccount.put("bankName", "example");  // Example asset type
+                        bankAccount.put("lastSyncDate", 0);  // Example asset type
+
+
                         CollectionReference userDetailsCollection = documentReference.collection("userDetails");
 
+                        CollectionReference bankAccountCollection = documentReference.collection("bankAccount");
                         CollectionReference billCollection = documentReference.collection("bill");
                         CollectionReference incomeCollection = documentReference.collection("income");
                         CollectionReference investmentCollection = documentReference.collection("investment");
@@ -347,6 +384,7 @@ public class Login {
                         ApiFuture<DocumentReference> liabilityFuture = liabilityCollection.add(liability);
                         ApiFuture<DocumentReference> assetFuture = assetCollection.add(asset);
                         ApiFuture<DocumentReference> finacialReportFuture = financialReportCollection.add(financialReport);
+                        ApiFuture<DocumentReference> bankAccountFuture = bankAccountCollection.add(bankAccount);
 
                         DocumentReference expenseFutureDocRef = expenseFuture.get();
                         CollectionReference categoriesCollection = expenseFutureDocRef.collection("Categories");

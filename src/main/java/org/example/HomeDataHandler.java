@@ -14,10 +14,12 @@ import java.io.OutputStream;
 import java.io.IOException;
 
 public class HomeDataHandler implements HttpHandler {
+
+    private Firestore db = FirestoreClient.getFirestore();
+
     public void handle(HttpExchange exchange) throws IOException {
 
-
-
+        /*
         try {
             // Initialize Firebase with a service account file
             initializeFirebase();
@@ -31,8 +33,7 @@ public class HomeDataHandler implements HttpHandler {
             e.printStackTrace();
         }
 
-
-
+         */
 
         exchange.getResponseHeaders().set("Access-Control-Allow-Origin", "*");
         int netWorth = 100000;
@@ -86,4 +87,8 @@ public class HomeDataHandler implements HttpHandler {
         // Initialize the FirebaseApp instance
         FirebaseApp.initializeApp(options);
     }
+
+
+
+
 }
