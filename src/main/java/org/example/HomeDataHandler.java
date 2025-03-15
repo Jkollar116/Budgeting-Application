@@ -1,12 +1,39 @@
 package org.example;
 
+import com.google.api.gax.rpc.ApiException;
+import com.google.auth.oauth2.GoogleCredentials;
+import com.google.cloud.firestore.Firestore;
+import com.google.firebase.FirebaseApp;
+import com.google.firebase.FirebaseOptions;
+import com.google.firebase.cloud.FirestoreClient;
 import com.sun.net.httpserver.HttpHandler;
 import com.sun.net.httpserver.HttpExchange;
+
+import java.io.FileInputStream;
 import java.io.OutputStream;
 import java.io.IOException;
 
 public class HomeDataHandler implements HttpHandler {
     public void handle(HttpExchange exchange) throws IOException {
+
+
+
+        try {
+            // Initialize Firebase with a service account file
+            initializeFirebase();
+            System.out.println("Firebase initialized successfully");
+
+            // Access Firestore
+            Firestore db = FirestoreClient.getFirestore();
+
+        } catch (IOException | ApiException e) {
+            System.err.println("Failed to initialize Firebase: " + e.getMessage());
+            e.printStackTrace();
+        }
+
+
+
+
         exchange.getResponseHeaders().set("Access-Control-Allow-Origin", "*");
         int netWorth = 100000;
         int cash = 30000, equity = 50000, investments = 20000;
@@ -45,5 +72,18 @@ public class HomeDataHandler implements HttpHandler {
         OutputStream os = exchange.getResponseBody();
         os.write(responseBytes);
         os.close();
+    }
+
+    private static void initializeFirebase() throws IOException {
+        // Path to your Firebase service account key JSON file
+        FileInputStream serviceAccount = new FileInputStream("target/classes/key.json");
+
+        // Initialize Firebase with credentials from the service account
+        FirebaseOptions options = new FirebaseOptions.Builder()
+                .setCredentials(GoogleCredentials.fromStream(serviceAccount))
+                .build();
+
+        // Initialize the FirebaseApp instance
+        FirebaseApp.initializeApp(options);
     }
 }

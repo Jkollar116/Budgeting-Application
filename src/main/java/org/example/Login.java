@@ -26,6 +26,9 @@ public class Login {
     private static final String FIREBASE_API_KEY = "AIzaSyCMA1F8Xd4rCxGXssXIs8Da80qqP6jien8";
     private static Firestore db;
 
+    public String userID;
+
+
     public static void main(String[] args) throws Exception {
 
         try {
@@ -132,6 +135,7 @@ public class Login {
                         }
                     }
                 }
+
                 String firebaseUrl = "https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key=" + FIREBASE_API_KEY;
                 URL url = new URL(firebaseUrl);
                 HttpURLConnection conn = (HttpURLConnection) url.openConnection();
@@ -142,20 +146,36 @@ public class Login {
                 OutputStream os = conn.getOutputStream();
                 os.write(jsonPayload.getBytes(StandardCharsets.UTF_8));
                 os.close();
+
                 int responseCode = conn.getResponseCode();
                 if (responseCode == 200) {
+                    // Successfully logged in, extract the userID (UID) from the Firebase response
+                    InputStreamReader isrResponse = new InputStreamReader(conn.getInputStream(), StandardCharsets.UTF_8);
+                    BufferedReader inResponse = new BufferedReader(isrResponse);
+                    StringBuilder response = new StringBuilder();
+                    while ((line = inResponse.readLine()) != null) {
+                        response.append(line);
+                    }
+                    inResponse.close();
+
+                    // Parse JSON response to extract userID (UID)
+                    String userID = parseUserIdFromResponse(response.toString());
+
+                    // Set userID as a cookie for future requests
+                    // Redirect to home page
                     exchange.getResponseHeaders().set("Location", "/home.html");
                     exchange.sendResponseHeaders(302, -1);
                     return;
                 } else {
+                    // Handle error case (invalid login)
                     InputStream errorStream = conn.getErrorStream();
                     InputStreamReader isrError = new InputStreamReader(errorStream, StandardCharsets.UTF_8);
-                    BufferedReader in = new BufferedReader(isrError);
-                    StringBuilder response = new StringBuilder();
-                    while ((line = in.readLine()) != null) {
-                        response.append(line);
+                    BufferedReader inError = new BufferedReader(isrError);
+                    StringBuilder errorResponse = new StringBuilder();
+                    while ((line = inError.readLine()) != null) {
+                        errorResponse.append(line);
                     }
-                    in.close();
+                    inError.close();
                     String userMessage = "Invalid email or password. Please try again.";
                     String errorHtml = "<!DOCTYPE html><html lang=\"en\"><head><meta charset=\"UTF-8\"><title>Login Error</title>"
                             + "<link rel=\"stylesheet\" href=\"style.css\"></head><body>"
@@ -169,7 +189,7 @@ public class Login {
                     osResp.close();
                 }
             } else {
-                exchange.sendResponseHeaders(405, -1);
+                exchange.sendResponseHeaders(405, -1); // Method Not Allowed
             }
         }
     }
@@ -275,6 +295,7 @@ public class Login {
                         // Get the document reference after the document is successfully added
                         DocumentReference documentReference = future.get(); // This blocks until the operation completes
                         System.out.println("User added to Firestore with ID: " + documentReference.getId());
+
                         Map<String, Object> userDetails = new HashMap<>();
                         userDetails.put("name", "example"); // This is for userDetails
 
@@ -308,14 +329,14 @@ public class Login {
                         // Create a subcollection 'userDetails' under the created user document
                         CollectionReference userDetailsCollection = documentReference.collection("userDetails");
 
-                        CollectionReference billCollection = documentReference.collection("Bill");
-                        CollectionReference incomeCollection = documentReference.collection("Income");
-                        CollectionReference investmentCollection = documentReference.collection("Investment");
-                        CollectionReference goalCollection = documentReference.collection("Goal");
-                        CollectionReference liabilityCollection = documentReference.collection("Liability");
-                        CollectionReference financialReportCollection = documentReference.collection("FinancialReport");
-                        CollectionReference expenseCollection = documentReference.collection("Expense");
-                        CollectionReference assetCollection = documentReference.collection("Asset");
+                        CollectionReference billCollection = documentReference.collection("bill");
+                        CollectionReference incomeCollection = documentReference.collection("income");
+                        CollectionReference investmentCollection = documentReference.collection("investment");
+                        CollectionReference goalCollection = documentReference.collection("goal");
+                        CollectionReference liabilityCollection = documentReference.collection("liability");
+                        CollectionReference financialReportCollection = documentReference.collection("financialReport");
+                        CollectionReference expenseCollection = documentReference.collection("expense");
+                        CollectionReference assetCollection = documentReference.collection("asset");
 
                         ApiFuture<DocumentReference> investmentFuture = investmentCollection.add(investment);
                         ApiFuture<DocumentReference> billFuture = billCollection.add(bill);
@@ -462,4 +483,23 @@ public class Login {
             }
         }
     }
+
+    private static String parseUserIdFromResponse(String response) {
+        // Parse the response JSON to get the userID (UID)
+        // You can use a JSON parsing library like Gson or Jackson here
+        // Example: {"idToken":"your_token","email":"user_email","localId":"user_id",...}
+        String userID = "";
+        try {
+            // For simplicity, assuming the response contains "localId": "user_id"
+            int start = response.indexOf("\"localId\":\"") + 11;
+            int end = response.indexOf("\"", start);
+            if (start > -1 && end > -1) {
+                userID = response.substring(start, end);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return userID;
+    }
+
 }

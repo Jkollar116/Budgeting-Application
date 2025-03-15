@@ -4,8 +4,9 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="e72c0420-fe48-4af3-a363-18d6d8618447" name="Changes" comment="Added code for collection references to actually create add subcollections within User to match ERD&#10;- Now going to work on tables to be implemented">
+    <list default="true" id="e72c0420-fe48-4af3-a363-18d6d8618447" name="Changes" comment="Made hashmaps for each collection, just needs to be updated with proper variables">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/example/HomeDataHandler.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/example/HomeDataHandler.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/org/example/Login.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/example/Login.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -127,7 +128,7 @@
       <workItem from="1741138122965" duration="1138000" />
       <workItem from="1741190699481" duration="595000" />
       <workItem from="1741895963352" duration="21000" />
-      <workItem from="1741979081910" duration="3286000" />
+      <workItem from="1741979081910" duration="5337000" />
     </task>
     <task id="LOCAL-00001" summary="First Commit of login">
       <option name="closed" value="true" />
@@ -265,7 +266,15 @@
       <option name="project" value="LOCAL" />
       <updated>1741983196285</updated>
     </task>
-    <option name="localTasksCounter" value="18" />
+    <task id="LOCAL-00018" summary="Made hashmaps for each collection, just needs to be updated with proper variables">
+      <option name="closed" value="true" />
+      <created>1741984554138</created>
+      <option name="number" value="00018" />
+      <option name="presentableId" value="LOCAL-00018" />
+      <option name="project" value="LOCAL" />
+      <updated>1741984554138</updated>
+    </task>
+    <option name="localTasksCounter" value="19" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -298,6 +307,7 @@
     <MESSAGE value="Changed logout to go back to login/index screen&#10;Firebase connectivity now to the database, created collection" />
     <MESSAGE value="Added code to add subcollections to user documents in the user collections&#10;NOTE - will update with all the diagrams from ERD soon and data" />
     <MESSAGE value="Added code for collection references to actually create add subcollections within User to match ERD&#10;- Now going to work on tables to be implemented" />
-    <option name="LAST_COMMIT_MESSAGE" value="Added code for collection references to actually create add subcollections within User to match ERD&#10;- Now going to work on tables to be implemented" />
+    <MESSAGE value="Made hashmaps for each collection, just needs to be updated with proper variables" />
+    <option name="LAST_COMMIT_MESSAGE" value="Made hashmaps for each collection, just needs to be updated with proper variables" />
   </component>
 </project>
