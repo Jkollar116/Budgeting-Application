@@ -4,11 +4,7 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="e72c0420-fe48-4af3-a363-18d6d8618447" name="Changes" comment="Added firebase initialization to HomeDataHandler and made method to save public userID for later use to get information">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/example/HomeDataHandler.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/example/HomeDataHandler.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/example/Login.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/example/Login.java" afterDir="false" />
-    </list>
+    <list default="true" id="e72c0420-fe48-4af3-a363-18d6d8618447" name="Changes" comment="Updated tables to match" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -128,7 +124,7 @@
       <workItem from="1741138122965" duration="1138000" />
       <workItem from="1741190699481" duration="595000" />
       <workItem from="1741895963352" duration="21000" />
-      <workItem from="1741979081910" duration="9377000" />
+      <workItem from="1741979081910" duration="9556000" />
     </task>
     <task id="LOCAL-00001" summary="First Commit of login">
       <option name="closed" value="true" />
@@ -282,7 +278,15 @@
       <option name="project" value="LOCAL" />
       <updated>1742048042017</updated>
     </task>
-    <option name="localTasksCounter" value="20" />
+    <task id="LOCAL-00020" summary="Updated tables to match">
+      <option name="closed" value="true" />
+      <created>1742051912794</created>
+      <option name="number" value="00020" />
+      <option name="presentableId" value="LOCAL-00020" />
+      <option name="project" value="LOCAL" />
+      <updated>1742051912794</updated>
+    </task>
+    <option name="localTasksCounter" value="21" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -317,6 +321,7 @@
     <MESSAGE value="Added code for collection references to actually create add subcollections within User to match ERD&#10;- Now going to work on tables to be implemented" />
     <MESSAGE value="Made hashmaps for each collection, just needs to be updated with proper variables" />
     <MESSAGE value="Added firebase initialization to HomeDataHandler and made method to save public userID for later use to get information" />
-    <option name="LAST_COMMIT_MESSAGE" value="Added firebase initialization to HomeDataHandler and made method to save public userID for later use to get information" />
+    <MESSAGE value="Updated tables to match" />
+    <option name="LAST_COMMIT_MESSAGE" value="Updated tables to match" />
   </component>
 </project>
