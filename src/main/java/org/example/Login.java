@@ -23,7 +23,6 @@ import java.util.Map;
 import com.sun.net.httpserver.*;
 
 public class Login {
-    private static final String FIREBASE_API_KEY = "AIzaSyCMA1F8Xd4rCxGXssXIs8Da80qqP6jien8";
     private static Firestore db;
 
 

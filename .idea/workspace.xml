@@ -4,7 +4,7 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="e72c0420-fe48-4af3-a363-18d6d8618447" name="Changes" comment="test comment" />
+    <list default="true" id="e72c0420-fe48-4af3-a363-18d6d8618447" name="Changes" comment="no more api key" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -125,7 +125,7 @@
       <workItem from="1741190699481" duration="595000" />
       <workItem from="1741895963352" duration="21000" />
       <workItem from="1741979081910" duration="9556000" />
-      <workItem from="1742086760617" duration="176000" />
+      <workItem from="1742086760617" duration="480000" />
     </task>
     <task id="LOCAL-00001" summary="First Commit of login">
       <option name="closed" value="true" />
@@ -303,7 +303,15 @@
       <option name="project" value="LOCAL" />
       <updated>1742086839786</updated>
     </task>
-    <option name="localTasksCounter" value="23" />
+    <task id="LOCAL-00023" summary="no more api key">
+      <option name="closed" value="true" />
+      <created>1742087289496</created>
+      <option name="number" value="00023" />
+      <option name="presentableId" value="LOCAL-00023" />
+      <option name="project" value="LOCAL" />
+      <updated>1742087289496</updated>
+    </task>
+    <option name="localTasksCounter" value="24" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -340,6 +348,7 @@
     <MESSAGE value="Added firebase initialization to HomeDataHandler and made method to save public userID for later use to get information" />
     <MESSAGE value="Updated tables to match" />
     <MESSAGE value="test comment" />
-    <option name="LAST_COMMIT_MESSAGE" value="test comment" />
+    <MESSAGE value="no more api key" />
+    <option name="LAST_COMMIT_MESSAGE" value="no more api key" />
   </component>
 </project>
