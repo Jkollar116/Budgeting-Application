@@ -362,6 +362,7 @@ public class Login {
                         bankAccount.put("bankName", "example");  // Example asset type
                         bankAccount.put("lastSyncDate", 0);  // Example asset type
 
+                        //comment
 
                         CollectionReference userDetailsCollection = documentReference.collection("userDetails");
 
