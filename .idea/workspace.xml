@@ -4,7 +4,7 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="e72c0420-fe48-4af3-a363-18d6d8618447" name="Changes" comment="Updated tables to match" />
+    <list default="true" id="e72c0420-fe48-4af3-a363-18d6d8618447" name="Changes" comment="test comment" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -125,6 +125,7 @@
       <workItem from="1741190699481" duration="595000" />
       <workItem from="1741895963352" duration="21000" />
       <workItem from="1741979081910" duration="9556000" />
+      <workItem from="1742086760617" duration="176000" />
     </task>
     <task id="LOCAL-00001" summary="First Commit of login">
       <option name="closed" value="true" />
@@ -286,7 +287,23 @@
       <option name="project" value="LOCAL" />
       <updated>1742051912794</updated>
     </task>
-    <option name="localTasksCounter" value="21" />
+    <task id="LOCAL-00021" summary="Updated tables to match">
+      <option name="closed" value="true" />
+      <created>1742086809175</created>
+      <option name="number" value="00021" />
+      <option name="presentableId" value="LOCAL-00021" />
+      <option name="project" value="LOCAL" />
+      <updated>1742086809175</updated>
+    </task>
+    <task id="LOCAL-00022" summary="test comment">
+      <option name="closed" value="true" />
+      <created>1742086839786</created>
+      <option name="number" value="00022" />
+      <option name="presentableId" value="LOCAL-00022" />
+      <option name="project" value="LOCAL" />
+      <updated>1742086839786</updated>
+    </task>
+    <option name="localTasksCounter" value="23" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -322,6 +339,7 @@
     <MESSAGE value="Made hashmaps for each collection, just needs to be updated with proper variables" />
     <MESSAGE value="Added firebase initialization to HomeDataHandler and made method to save public userID for later use to get information" />
     <MESSAGE value="Updated tables to match" />
-    <option name="LAST_COMMIT_MESSAGE" value="Updated tables to match" />
+    <MESSAGE value="test comment" />
+    <option name="LAST_COMMIT_MESSAGE" value="test comment" />
   </component>
 </project>
