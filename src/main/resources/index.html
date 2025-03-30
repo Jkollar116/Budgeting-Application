@@ -2,19 +2,139 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>BudgetApp Login</title>
+    <title>Futuristic BudgetApp Home</title>
     <link rel="stylesheet" href="style.css">
+    <style>
+        .home-hero {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, #1C0222, #4A1D5A);
+            text-align: center;
+            padding: 40px 20px;
+            color: #fff;
+        }
+        .home-hero .title {
+            font-size: 3rem;
+            font-weight: bold;
+            margin-bottom: 25px;
+            color: #FF8C00;
+            text-shadow: 0 0 10px rgba(255, 140, 0, 0.7);
+        }
+        .home-hero .subtitle {
+            font-size: 1.3rem;
+            margin-bottom: 40px;
+            max-width: 600px;
+            line-height: 1.6;
+            color: #d2d2d2;
+        }
+        .home-hero .cta-button {
+            padding: 15px 30px;
+            font-size: 1rem;
+            font-weight: bold;
+            color: #fff;
+            background: #FF8C00;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background 0.3s, transform 0.3s;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            text-shadow: 0 0 5px rgba(0,0,0,0.3);
+        }
+        .home-hero .cta-button:hover {
+            background: #d97600;
+            transform: translateY(-2px);
+        }
+        .futuristic-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 25px;
+            margin-top: 60px;
+            max-width: 1200px;
+            width: 100%;
+        }
+        .futuristic-card {
+            background: rgba(62, 31, 91, 0.85);
+            backdrop-filter: blur(5px);
+            border: 1px solid #FF8C00;
+            padding: 20px;
+            border-radius: 12px;
+            text-align: left;
+            transition: transform 0.3s;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.4);
+        }
+        .futuristic-card:hover {
+            transform: translateY(-5px);
+        }
+        .futuristic-card h3 {
+            color: #FF8C00;
+            margin-top: 0;
+            margin-bottom: 10px;
+            text-shadow: 0 0 5px rgba(255,140,0,0.5);
+        }
+        .futuristic-card p {
+            line-height: 1.6;
+            color: #fff;
+            margin-bottom: 10px;
+        }
+        .footer {
+            background: #3E1F5B;
+            text-align: center;
+            padding: 15px;
+            font-size: 0.9rem;
+            color: #FF8C00;
+            border-top: 2px solid #FF8C00;
+        }
+    </style>
 </head>
 <body>
-<div class="login-container">
-    <h2>Login</h2>
-    <form action="/login" method="post">
-        <input type="email" name="email" placeholder="Email" required>
-        <input type="password" name="password" placeholder="Password" required>
-        <button type="submit">Log In</button>
-    </form>
-    <p>Don't have an account? <a href="register.html">Register here</a>.</p>
-    <p><a href="forgot.html">Forgot Password?</a></p>
-</div>
+<section class="home-hero">
+    <h1 class="title">Welcome to CashClimb</h1>
+    <p class="subtitle">
+        Embark on a journey toward financial success.
+        Manage your expenses, plan your budget, and track your
+        investments in a cutting-edge environment.
+    </p>
+    <button class="cta-button" onclick="window.location.href='login.html'">
+        Get Started
+    </button>
+
+    <div class="futuristic-grid">
+        <div class="futuristic-card">
+            <h3>Seamless Budgeting</h3>
+            <p>
+                Organize your expenses with ease. Our advanced tools let
+                you categorize spending and discover trends.
+            </p>
+        </div>
+        <div class="futuristic-card">
+            <h3>Real-time Analysis</h3>
+            <p>
+                Visualize your cash flow with dynamic charts and
+                projections, updated instantly as you log transactions.
+            </p>
+        </div>
+        <div class="futuristic-card">
+            <h3>Crypto & Beyond</h3>
+            <p>
+                Track cryptocurrency portfolios alongside traditional assets
+                for a total financial overview.
+            </p>
+        </div>
+        <div class="futuristic-card">
+            <h3>Security & Privacy</h3>
+            <p>
+                Protected by cutting-edge encryption and secure cloud
+                services, so your data is always safe.
+            </p>
+        </div>
+    </div>
+</section>
+<footer class="footer">
+    &copy; 2025 CashClimb. All rights reserved.
+</footer>
 </body>
 </html>
