@@ -18,6 +18,30 @@
     header nav ul { list-style: none; display: flex; gap: 20px; margin: 0; padding: 0; }
     header nav ul li a { color: #FF8C00; text-decoration: none; font-weight: bold; }
     header nav ul li a:hover { text-decoration: underline; }
+    form#expenseForm {
+      width: 300px;
+      margin: 30px auto;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      background: #3E1F5B;
+      padding: 20px;
+      border: 2px solid #FF8C00;
+    }
+    form#expenseForm input, button {
+      padding: 8px;
+      border: 1px solid #FF8C00;
+    }
+    form#expenseForm label {
+      color: #FF8C00;
+      font-weight: bold;
+    }
+    form#expenseForm button {
+      background-color: #FF8C00;
+      color: #3E1F5B;
+      cursor: pointer;
+      font-weight: bold;
+    }
   </style>
 </head>
 <body>
@@ -34,88 +58,193 @@
   <h1>Upload Your Expenses Excel File(s)</h1>
   <input type="file" id="excelFileInput" accept=".xlsx, .xls" multiple>
   <div id="output"></div>
-</main>
-<script>
-  var globalCombinedData = [];
-  var globalHeaderIndices = null;
-  document.getElementById('excelFileInput').addEventListener('change', function(e) {
-    var files = e.target.files;
-    if (!files.length) return;
-    var promises = [];
-    for (let file of files) {
-      let promise = new Promise((resolve, reject) => {
-        let reader = new FileReader();
-        reader.onload = function(e) {
-          let data = e.target.result;
-          let workbook = XLSX.read(data, {type: 'binary'});
-          let firstSheetName = workbook.SheetNames[0];
-          let worksheet = workbook.Sheets[firstSheetName];
-          let rows = XLSX.utils.sheet_to_json(worksheet, {header:1, defval:""});
-          let headerData = detectHeaderRow(rows);
-          if (headerData) {
-            if (!globalHeaderIndices) globalHeaderIndices = headerData.indices;
-            let dataRows = rows.slice(headerData.index + 1);
-            resolve({dataRows: dataRows});
-          } else {
-            resolve(null);
+
+  <!-- Form to manually add a new expense -->
+  <form id="expenseForm">
+    <label for="date">Date</label>
+    <input type="date" id="date" name="date" required>
+    <label for="name">Expense Name</label>
+    <input type="text" id="name" name="name" required>
+    <label for="category">Category</label>
+    <input type="text" id="category" name="category" required>
+    <label for="total">Amount</label>
+    <input type="number" step="0.01" id="total" name="total" required>
+    <button type="submit">Add Expense</button>
+  </form>
+
+  <!-- Container where the expenses will be displayed -->
+  <div id="expensesList"></div>
+
+  <script>
+    // Global arrays for combined Excel data and header indices
+    var globalCombinedData = [];
+    var globalHeaderIndices = null;
+
+    document.getElementById('excelFileInput').addEventListener('change', function(e) {
+      var files = e.target.files;
+      if (!files.length) return;
+      var promises = [];
+      for (let file of files) {
+        let promise = new Promise((resolve, reject) => {
+          let reader = new FileReader();
+          reader.onload = function(e) {
+            let data = e.target.result;
+            let workbook = XLSX.read(data, {type: 'binary'});
+            let firstSheetName = workbook.SheetNames[0];
+            let worksheet = workbook.Sheets[firstSheetName];
+            let rows = XLSX.utils.sheet_to_json(worksheet, {header:1, defval:""});
+            let headerData = detectHeaderRow(rows);
+            if (headerData) {
+              if (!globalHeaderIndices) globalHeaderIndices = headerData.indices;
+              let dataRows = rows.slice(headerData.index + 1);
+              resolve({dataRows: dataRows});
+            } else {
+              resolve(null);
+            }
+          };
+          reader.onerror = function(e) { reject(e); };
+          reader.readAsBinaryString(file);
+        });
+        promises.push(promise);
+      }
+      Promise.all(promises).then(results => {
+        results.forEach(res => {
+          if (res && res.dataRows) {
+            globalCombinedData = globalCombinedData.concat(res.dataRows);
           }
-        };
-        reader.onerror = function(e) { reject(e); };
-        reader.readAsBinaryString(file);
-      });
-      promises.push(promise);
-    }
-    Promise.all(promises).then(results => {
-      results.forEach(res => {
-        if (res && res.dataRows) {
-          globalCombinedData = globalCombinedData.concat(res.dataRows);
+        });
+        processDataCombined(globalCombinedData, globalHeaderIndices);
+        // Upload every expense from the Excel data to Firebase
+        uploadExpenses(globalCombinedData, globalHeaderIndices);
+      }).catch(err => { console.error("Error processing files:", err); });
+    });
+
+    function processDataCombined(dataRows, indices) {
+      var monthlyTotals = {};
+      var detailsHtml = "<table><thead><tr><th>Date</th><th>Expense</th><th>Category</th><th>Total</th></tr></thead><tbody>";
+      for (var i = 0; i < dataRows.length; i++) {
+        var row = dataRows[i];
+        var dateStr = row[indices.date];
+        var expenseName = row[indices.name];
+        var expenseCategory = row[indices.category];
+        var total = parseFloat(row[indices.total]) || 0;
+        if (expenseName && expenseName.toString().toUpperCase().indexOf("MOBILE PAYMENT - THANK YOU") !== -1) continue;
+        detailsHtml += "<tr><td>" + dateStr + "</td><td>" + expenseName + "</td><td>" + expenseCategory + "</td><td>" + total.toFixed(2) + "</td></tr>";
+        var d = new Date(dateStr);
+        if (!isNaN(d.getTime())) {
+          var monthKey = d.getFullYear() + "-" + ("0" + (d.getMonth() + 1)).slice(-2);
+          if (!monthlyTotals[monthKey]) monthlyTotals[monthKey] = 0;
+          monthlyTotals[monthKey] += total;
         }
-      });
-      processDataCombined(globalCombinedData, globalHeaderIndices);
-    }).catch(err => { console.error("Error processing files:", err); });
-  });
-  function processDataCombined(dataRows, indices) {
-    var monthlyTotals = {};
-    var detailsHtml = "<table><thead><tr><th>Date</th><th>Expense</th><th>Category</th><th>Total</th></tr></thead><tbody>";
-    for (var i = 0; i < dataRows.length; i++) {
-      var row = dataRows[i];
-      var dateStr = row[indices.date];
-      var expenseName = row[indices.name];
-      var expenseCategory = row[indices.category];
-      var total = parseFloat(row[indices.total]) || 0;
-      if (expenseName && expenseName.toString().toUpperCase().indexOf("MOBILE PAYMENT - THANK YOU") !== -1) continue;
-      detailsHtml += "<tr><td>" + dateStr + "</td><td>" + expenseName + "</td><td>" + expenseCategory + "</td><td>" + total.toFixed(2) + "</td></tr>";
-      var d = new Date(dateStr);
-      if (!isNaN(d.getTime())) {
-        var monthKey = d.getFullYear() + "-" + ("0" + (d.getMonth() + 1)).slice(-2);
-        if (!monthlyTotals[monthKey]) monthlyTotals[monthKey] = 0;
-        monthlyTotals[monthKey] += total;
       }
-    }
-    detailsHtml += "</tbody></table>";
-    var totalsHtml = "<h2>Monthly Totals</h2><table><thead><tr><th>Month</th><th>Total Amount</th></tr></thead><tbody>";
-    for (var month in monthlyTotals) {
-      totalsHtml += "<tr><td>" + month + "</td><td>" + monthlyTotals[month].toFixed(2) + "</td></tr>";
-    }
-    totalsHtml += "</tbody></table>";
-    document.getElementById('output').innerHTML = totalsHtml + detailsHtml;
-  }
-  function detectHeaderRow(rows) {
-    for (var i = 0; i < Math.min(rows.length, 10); i++) {
-      var row = rows[i];
-      var lowerRow = row.map(function(cell) { return cell.toString().trim().toLowerCase(); });
-      var dateIdx = lowerRow.findIndex(function(cell) { return cell.indexOf("date") !== -1; });
-      var nameIdx = lowerRow.findIndex(function(cell) {
-        return ((cell.indexOf("name") !== -1 || cell.indexOf("charge") !== -1 || cell.indexOf("expense") !== -1 || cell.indexOf("description") !== -1) && cell.indexOf("category") === -1);
-      });
-      var categoryIdx = lowerRow.findIndex(function(cell) { return cell.indexOf("category") !== -1; });
-      var totalIdx = lowerRow.findIndex(function(cell) { return cell.indexOf("total") !== -1 || cell.indexOf("amount") !== -1 || cell.indexOf("cost") !== -1; });
-      if (dateIdx !== -1 && nameIdx !== -1 && categoryIdx !== -1 && totalIdx !== -1) {
-        return {index: i, indices: {date: dateIdx, name: nameIdx, category: categoryIdx, total: totalIdx}};
+      detailsHtml += "</tbody></table>";
+      var totalsHtml = "<h2>Monthly Totals</h2><table><thead><tr><th>Month</th><th>Total Amount</th></tr></thead><tbody>";
+      for (var month in monthlyTotals) {
+        totalsHtml += "<tr><td>" + month + "</td><td>" + monthlyTotals[month].toFixed(2) + "</td></tr>";
       }
+      totalsHtml += "</tbody></table>";
+      document.getElementById('output').innerHTML = totalsHtml + detailsHtml;
     }
-    return null;
-  }
-</script>
+
+    // Function to upload all expenses from the Excel data to Firebase via POST requests
+    function uploadExpenses(dataRows, indices) {
+      dataRows.forEach(row => {
+        var dateStr = row[indices.date];
+        var expenseName = row[indices.name];
+        var expenseCategory = row[indices.category];
+        var total = row[indices.total];
+        fetch('/api/expenses', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ date: dateStr, name: expenseName, category: expenseCategory, total: total })
+        })
+                .then(response => {
+                  if (!response.ok) {
+                    console.error("Error uploading expense:", row);
+                  } else {
+                    console.log("Expense uploaded:", row);
+                  }
+                })
+                .catch(err => console.error("Error uploading expense:", err));
+      });
+    }
+
+    function detectHeaderRow(rows) {
+      for (var i = 0; i < Math.min(rows.length, 10); i++) {
+        var row = rows[i];
+        var lowerRow = row.map(function(cell) { return cell.toString().trim().toLowerCase(); });
+        var dateIdx = lowerRow.findIndex(function(cell) { return cell.indexOf("date") !== -1; });
+        var nameIdx = lowerRow.findIndex(function(cell) {
+          return ((cell.indexOf("name") !== -1 || cell.indexOf("charge") !== -1 || cell.indexOf("expense") !== -1 || cell.indexOf("description") !== -1) && cell.indexOf("category") === -1);
+        });
+        var categoryIdx = lowerRow.findIndex(function(cell) { return cell.indexOf("category") !== -1; });
+        var totalIdx = lowerRow.findIndex(function(cell) { return cell.indexOf("total") !== -1 || cell.indexOf("amount") !== -1 || cell.indexOf("cost") !== -1; });
+        if (dateIdx !== -1 && nameIdx !== -1 && categoryIdx !== -1 && totalIdx !== -1) {
+          return {index: i, indices: {date: dateIdx, name: nameIdx, category: categoryIdx, total: totalIdx}};
+        }
+      }
+      return null;
+    }
+
+    // Handle manual expense form submission via POST request
+    document.getElementById('expenseForm').addEventListener('submit', function(e) {
+      e.preventDefault();
+      var date = document.getElementById('date').value;
+      var name = document.getElementById('name').value;
+      var category = document.getElementById('category').value;
+      var total = document.getElementById('total').value;
+      fetch('/api/expenses', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ date: date, name: name, category: category, total: total })
+      })
+              .then(response => {
+                if (response.ok) {
+                  alert("Expense added successfully");
+                  document.getElementById('expenseForm').reset();
+                  loadExpenses(); // Reload the expenses list
+                } else {
+                  alert("Error adding expense");
+                }
+              })
+              .catch(err => {
+                console.error(err);
+                alert("Error adding expense");
+              });
+    });
+
+    // Function to load and display expenses from Firebase via GET request
+    function loadExpenses() {
+      fetch('/api/expenses', { method: 'GET' })
+              .then(response => {
+                if (!response.ok) {
+                  throw new Error("Failed to fetch expenses");
+                }
+                return response.json();
+              })
+              .then(data => {
+                const docs = data.documents || [];
+                let html = "<table><thead><tr><th>Date</th><th>Name</th><th>Category</th><th>Total</th></tr></thead><tbody>";
+                docs.forEach(doc => {
+                  const fields = doc.fields;
+                  const date = fields.date.stringValue;
+                  const name = fields.name.stringValue;
+                  const category = fields.category.stringValue;
+                  const total = fields.total.doubleValue;
+                  html += `<tr><td>${date}</td><td>${name}</td><td>${category}</td><td>${total}</td></tr>`;
+                });
+                html += "</tbody></table>";
+                document.getElementById('expensesList').innerHTML = html;
+              })
+              .catch(err => {
+                console.error(err);
+                document.getElementById('expensesList').innerHTML = "<p>Error loading expenses</p>";
+              });
+    }
+
+    // Load expenses on page load
+    window.onload = loadExpenses;
+  </script>
+</main>
 </body>
 </html>
