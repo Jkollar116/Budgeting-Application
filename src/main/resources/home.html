@@ -10,12 +10,15 @@
     <div class="logo">CashClimb</div>
     <nav>
         <ul>
-            <li><a href="javascript:void(0)">Profile</a></li>
-            <li><a href="javascript:void(0)">Settings</a></li>
-            <li><a href="/logout">Log Out</a></li>
-            <li><a href="chat.html">Chat</a></li>
+            <li><a href="home.html">Dashboard</a></li>
+            <li><a href="budgeting.html">Budgeting</a></li>
+            <li><a href="expenses.html">Expenses</a></li>
             <li><a href="crypto.html">Crypto</a></li>
-            <li><a href="tax.html">Tax</a></li>
+            <li><a href="stocks.html">Stocks</a></li>
+            <li><a href="chat.html">Chat</a></li>
+            <li><a href="javascript:void(0)">Profile <span class="icon">👤</span></a></li>
+            <li><a href="javascript:void(0)">Settings <span class="icon">⚙️</span></a></li>
+            <li><a href="javascript:void(0)">Log Out <span class="icon">🚪</span></a></li>
         </ul>
     </nav>
 </header>
@@ -27,26 +30,26 @@
 </section>
 <div class="dashboard">
     <div class="card" id="netWorthCard">
-        <h2>Net Worth</h2>
+        <h2><span class="icon">💰</span> Net Worth</h2>
         <p id="netWorthDisplay"></p>
         <div id="netWorthChart"></div>
     </div>
     <div class="card" id="incomeCard">
-        <h2>Total Income</h2>
+        <h2><span class="icon">💵</span> Total Income</h2>
         <p id="totalIncomeDisplay"></p>
         <div id="incomeChart"></div>
     </div>
-    <div class="card" id="expensesCard" onclick="window.location.href='expenses.html'">
-        <h2>Total Expenses</h2>
+    <div class="card" id="expensesCard">
+        <h2><span class="icon">💸</span> Total Expenses</h2>
         <p id="totalExpensesDisplay"></p>
         <div id="expensesPieChart"></div>
     </div>
     <div class="card" id="billsCard">
-        <h2>Bills Due</h2>
+        <h2><span class="icon">📅</span> Bills Due</h2>
         <div id="billRemindersDisplay"></div>
     </div>
     <div class="card" id="chartCard">
-        <h2>Monthly Expenses</h2>
+        <h2><span class="icon">📊</span> Monthly Expenses</h2>
         <div id="chartContainer"></div>
     </div>
 </div>
