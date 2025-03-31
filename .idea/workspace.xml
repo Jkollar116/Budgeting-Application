@@ -4,16 +4,8 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="e72c0420-fe48-4af3-a363-18d6d8618447" name="Changes" comment="added log out feature with cookies">
-      <change afterPath="$PROJECT_DIR$/src/main/java/org/example/ExpensesHandler.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/resources/login.html" afterDir="false" />
+    <list default="true" id="e72c0420-fe48-4af3-a363-18d6d8618447" name="Changes" comment="added firebase integration as well as home page">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/example/HomeDataHandler.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/example/HomeDataHandler.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/example/Login.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/example/Login.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/app.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/app.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/expenses.html" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/expenses.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/home.html" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/home.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/index.html" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/index.html" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -135,7 +127,7 @@
       <workItem from="1741960849037" duration="2898000" />
       <workItem from="1743168188212" duration="4356000" />
       <workItem from="1743173613206" duration="2561000" />
-      <workItem from="1743358568631" duration="8247000" />
+      <workItem from="1743358568631" duration="9656000" />
     </task>
     <task id="LOCAL-00001" summary="First Commit of login">
       <option name="closed" value="true" />
@@ -289,7 +281,15 @@
       <option name="project" value="LOCAL" />
       <updated>1741963567831</updated>
     </task>
-    <option name="localTasksCounter" value="20" />
+    <task id="LOCAL-00020" summary="added firebase integration as well as home page">
+      <option name="closed" value="true" />
+      <created>1743374170721</created>
+      <option name="number" value="00020" />
+      <option name="presentableId" value="LOCAL-00020" />
+      <option name="project" value="LOCAL" />
+      <updated>1743374170721</updated>
+    </task>
+    <option name="localTasksCounter" value="21" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -322,7 +322,8 @@
     <MESSAGE value="no jekyell file" />
     <MESSAGE value="pluggin for heroku" />
     <MESSAGE value="added log out feature with cookies" />
-    <option name="LAST_COMMIT_MESSAGE" value="added log out feature with cookies" />
+    <MESSAGE value="added firebase integration as well as home page" />
+    <option name="LAST_COMMIT_MESSAGE" value="added firebase integration as well as home page" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
