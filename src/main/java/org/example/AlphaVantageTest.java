@@ -12,6 +12,7 @@ import java.time.Duration;
  * Run this to check if the API key is working properly
  */
 public class AlphaVantageTest {
+    // NOTE: This is a demo API key with known limitations - replace with your own for production use
     private static final String API_KEY = "2470IDOB57MHSDPZ";
     private static final String BASE_URL = "https://www.alphavantage.co/query";
     
