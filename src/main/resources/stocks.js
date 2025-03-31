@@ -43,7 +43,7 @@ document.addEventListener('DOMContentLoaded', function() {
     // API URLs
     const API_BASE = '/api/stocks'; // For account/orders/portfolio data 
     const ALPHA_VANTAGE_API = 'https://www.alphavantage.co/query';
-    const ALPHA_VANTAGE_KEY = '2470IDOB57MHSDPZ';
+    const ALPHA_VANTAGE_KEY = window.alphaVantageKey || '2470IDOB57MHSDPZ'; // Allow key to be provided from server
 
     // Current selected stock
     let currentSymbol = '';

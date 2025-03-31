@@ -12,6 +12,7 @@ import java.time.Duration;
  * This avoids dependency issues with the main application
  */
 public class SimpleStockApiTest {
+    // NOTE: This is a demo API key with known limitations - replace with your own for production use
     private static final String API_KEY = "2470IDOB57MHSDPZ";
     private static final String BASE_URL = "https://www.alphavantage.co/query";
     
