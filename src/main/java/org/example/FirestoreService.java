@@ -520,21 +520,21 @@ public class FirestoreService {
      * @param position The StockPosition object
      * @return Map representation of the position
      */
-    public static Map<String, Object> stockPositionToMap(StockPosition position) {
-        Map<String, Object> map = new HashMap<>();
-        map.put("symbol", position.getSymbol());
-        map.put("qty", position.getQuantity());
-        map.put("avgPrice", position.getAverageEntryPrice());
-        map.put("marketValue", position.getMarketValue());
-        map.put("costBasis", position.getQuantity() * position.getAverageEntryPrice()); // Calculate cost basis
-        map.put("unrealizedPL", position.getUnrealizedProfitLoss());
-        map.put("unrealizedPLPercent", position.getUnrealizedProfitLossPercent());
-        map.put("assetId", position.getAssetId());
-        map.put("lastUpdated", position.getLastUpdated());
-        // Note: Exchange information not available in StockPosition class
-        
-        return map;
-    }
+//    public static Map<String, Object> stockPositionToMap(StockPosition position) {
+//        Map<String, Object> map = new HashMap<>();
+//        map.put("symbol", position.getSymbol());
+//        map.put("qty", position.getQuantity());
+//        map.put("avgPrice", position.getAverageEntryPrice());
+//        map.put("marketValue", position.getMarketValue());
+//        map.put("costBasis", position.getQuantity() * position.getAverageEntryPrice()); // Calculate cost basis
+//        map.put("unrealizedPL", position.getUnrealizedProfitLoss());
+//        map.put("unrealizedPLPercent", position.getUnrealizedProfitLossPercent());
+//        map.put("assetId", position.getAssetId());
+//        map.put("lastUpdated", position.getLastUpdated());
+//        // Note: Exchange information not available in StockPosition class
+//
+//        return map;
+//    }
 
     /**
      * Convert a map to a StockPosition object
@@ -542,9 +542,9 @@ public class FirestoreService {
      * @param map The map representation of the position
      * @return StockPosition object
      */
-    public static StockPosition mapToStockPosition(Map<String, Object> map) {
-        // Create a JSON representation for the constructor
-        JSONObject json = new JSONObject(map);
-        return new StockPosition(json);
-    }
+//    public static StockPosition mapToStockPosition(Map<String, Object> map) {
+//        // Create a JSON representation for the constructor
+//        JSONObject json = new JSONObject(map);
+//        return new StockPosition(json);
+//    }
 }
