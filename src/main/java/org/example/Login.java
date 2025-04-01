@@ -26,7 +26,7 @@ public class Login {
         HttpServer server = HttpServer.create(new InetSocketAddress("0.0.0.0", port), 0);
         // Existing context registrations
         server.createContext("/", new StaticFileHandler());
-        server.createContext("/login", new LoginHandler());
+        server.createContext("/dologin", new LoginHandler());
         server.createContext("/register", new RegisterHandler());
         server.createContext("/forgot", new ForgotPasswordHandler());
         HttpContext homeContext = server.createContext("/home.html", new StaticFileHandler());
