@@ -11,13 +11,19 @@ import org.json.JSONObject;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.*;
 import java.util.concurrent.ExecutionException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Service for interacting with Firebase Firestore
  */
 public class FirestoreService {
+    private static final Logger LOGGER = Logger.getLogger(FirestoreService.class.getName());
     private static Firestore db;
     private static FirestoreService instance;
     private static final String USERS_COLLECTION = "users";
@@ -26,6 +32,8 @@ public class FirestoreService {
     private static final String PORTFOLIOS_COLLECTION = "portfolios";
     private static final String SETTINGS_COLLECTION = "settings";
     private static final String ACTIVITIES_COLLECTION = "activities";
+    private static boolean initializationAttempted = false;
+    private static final String PROJECT_ID = "cashclimb-d162c";
 
     /**
      * Private constructor to enforce singleton pattern
@@ -39,46 +47,279 @@ public class FirestoreService {
      * This method must be called before any other method
      */
     public static void initialize() {
+        if (initializationAttempted) {
+            LOGGER.info("Firebase initialization already attempted, not retrying");
+            return;
+        }
+        
+        initializationAttempted = true;
+        
+        // Run diagnostic checks before initialization
+        System.out.println("\n============ FIREBASE DIAGNOSTIC ============");
+        diagnoseProblem();
+        System.out.println("============================================\n");
+        
         try {
+            // Only initialize if not already initialized
             if (FirebaseApp.getApps().isEmpty()) {
                 System.out.println("Initializing Firebase with service account key");
-                FileInputStream serviceAccount = new FileInputStream("src/main/resources/serviceAccountKey.json");
                 
-                String projectId = "cashclimb-d162c";
-                String databaseUrl = "https://" + projectId + ".firebaseio.com";
+                // Try to load credentials using multiple methods
+                GoogleCredentials credentials = loadCredentials();
+                if (credentials == null) {
+                    System.out.println("Failed to load Firebase credentials from any source");
+                    return;
+                }
                 
+                String databaseUrl = "https://" + PROJECT_ID + ".firebaseio.com";
+                
+                // Create FirebaseOptions with explicit project ID and credentials
                 FirebaseOptions options = FirebaseOptions.builder()
-                        .setCredentials(GoogleCredentials.fromStream(serviceAccount))
+                        .setCredentials(credentials)
                         .setDatabaseUrl(databaseUrl)
-                        .setProjectId(projectId)
+                        .setProjectId(PROJECT_ID)
                         .build();
                 
+                // Initialize the Firebase app
                 FirebaseApp app = FirebaseApp.initializeApp(options);
-                System.out.println("Firebase app name: " + app.getName());
+                LOGGER.info("Firebase app name: " + app.getName());
             } else {
-                System.out.println("Firebase already initialized with " + FirebaseApp.getApps().size() + " apps");
+                LOGGER.info("Firebase already initialized with " + FirebaseApp.getApps().size() + " apps");
             }
             
+            // Get Firestore instance
             db = FirestoreClient.getFirestore();
-            System.out.println("Firebase Firestore initialized successfully!");
+            LOGGER.info("Firebase Firestore initialized successfully!");
             
             // Try a simple write/read to validate the connection
             try {
-                DocumentReference docRef = db.collection("system").document("test");
-                Map<String, Object> testData = new HashMap<>();
-                testData.put("timestamp", FieldValue.serverTimestamp());
-                testData.put("message", "Initialization test at " + new java.util.Date().toString());
-                ApiFuture<WriteResult> result = docRef.set(testData);
-                WriteResult writeResult = result.get();
-                System.out.println("Test document written at: " + writeResult.getUpdateTime());
+                validateFirestoreConnection();
             } catch (Exception e) {
-                System.err.println("Warning: Test write to Firestore failed: " + e.getMessage());
+                LOGGER.warning("Warning: Test write to Firestore failed: " + e.getMessage());
+                // Don't set db to null - the connection might still work for other operations
+            }
+        } catch (Exception e) {
+            LOGGER.severe("Failed to initialize Firebase: " + e.getMessage());
+            e.printStackTrace();
+        }
+    }
+    
+    /**
+     * Validates Firestore connection by writing to a test document
+     */
+    private static void validateFirestoreConnection() throws ExecutionException, InterruptedException {
+        DocumentReference docRef = db.collection("system").document("test");
+        Map<String, Object> testData = new HashMap<>();
+        testData.put("timestamp", FieldValue.serverTimestamp());
+        testData.put("message", "Initialization test at " + new Date().toString());
+        
+        // Execute write and wait for result
+        LOGGER.info("Testing Firestore connection with write operation...");
+        WriteResult writeResult = docRef.set(testData).get();
+        LOGGER.info("Test document written at: " + writeResult.getUpdateTime());
+        
+        // Try to read back the document
+        LOGGER.info("Verifying read capability...");
+        DocumentSnapshot snapshot = docRef.get().get();
+        if (snapshot.exists()) {
+            LOGGER.info("Successfully read test document");
+        } else {
+            LOGGER.warning("Test document not found after writing");
+        }
+    }
+    
+    /**
+     * Load Google credentials using multiple methods, trying each until one succeeds
+     */
+    private static void diagnoseProblem() {
+        System.out.println("DIAGNOSIS: Checking Firebase Authentication Issue");
+        
+        // Check if we have the credentials file
+        System.out.println("Step 1: Checking credential files...");
+        
+        String[] possiblePaths = {
+            "firebase-credentials.json", 
+            "serviceAccountKey.json",
+            "src/main/resources/serviceAccountKey.json",
+            "./serviceAccountKey.json"
+        };
+        
+        boolean found = false;
+        
+        for (String path : possiblePaths) {
+            File file = new File(path);
+            if (file.exists()) {
+                System.out.println("  ✓ Found credential file at: " + file.getAbsolutePath());
+                System.out.println("    File size: " + file.length() + " bytes");
+                System.out.println("    Last modified: " + new java.util.Date(file.lastModified()));
+                found = true;
+                
+                // Try to peek into file content
+                try {
+                    String content = new String(Files.readAllBytes(file.toPath()));
+                    if (content.contains("\"type\": \"service_account\"")) {
+                        System.out.println("  ✓ File contains service account configuration");
+                    } else {
+                        System.out.println("  ✗ File does NOT contain service account configuration");
+                    }
+                } catch (Exception e) {
+                    System.out.println("  ✗ Could not read file contents: " + e.getMessage());
+                }
+            } else {
+                System.out.println("  ✗ No credential file at: " + path);
+            }
+        }
+        
+        if (!found) {
+            System.out.println("PROBLEM: No credential files found!");
+        }
+        
+        // Check environment variable
+        String envPath = System.getenv("GOOGLE_APPLICATION_CREDENTIALS");
+        if (envPath != null) {
+            System.out.println("  GOOGLE_APPLICATION_CREDENTIALS environment variable: " + envPath);
+            File envFile = new File(envPath);
+            if (envFile.exists()) {
+                System.out.println("  ✓ File exists at path specified by environment variable");
+            } else {
+                System.out.println("  ✗ File DOES NOT exist at path specified by environment variable");
+                System.out.println("PROBLEM: Environment variable points to missing file");
+            }
+        } else {
+            System.out.println("  ✗ GOOGLE_APPLICATION_CREDENTIALS environment variable not set");
+        }
+        
+        // Check for API enablement
+        System.out.println("\nStep 2: Checking API enablement...");
+        System.out.println("  • Make sure the Firebase Admin SDK is enabled for project ID: cashclimb-d162c");
+        System.out.println("  • Make sure Firestore API is enabled in Google Cloud Console");
+        System.out.println("  • Make sure the service account has Firebase Admin SDK Administrator role");
+        
+        // Check network connectivity
+        System.out.println("\nStep 3: Checking network connectivity...");
+        try {
+            boolean canReachFirebase = java.net.InetAddress.getByName("firestore.googleapis.com").isReachable(5000);
+            if (canReachFirebase) {
+                System.out.println("  ✓ Can reach Firestore servers");
+            } else {
+                System.out.println("  ✗ Cannot reach Firestore servers");
+                System.out.println("PROBLEM: Network connectivity issues");
+            }
+        } catch (Exception e) {
+            System.out.println("  ✗ Network test failed: " + e.getMessage());
+        }
+        
+        System.out.println("\nStep 4: Summary of potential issues");
+        System.out.println("  1. Service account may not have necessary permissions");
+        System.out.println("  2. Firestore API may not be enabled for the project");
+        System.out.println("  3. Credential file may be corrupted or invalid");
+        System.out.println("  4. Network connectivity issues preventing API access");
+    }
+    
+    private static GoogleCredentials loadCredentials() {
+        GoogleCredentials credentials = null;
+        
+        System.out.println("Attempting to load credentials from various sources...");
+        
+        // Method 1: Try environment variable GOOGLE_APPLICATION_CREDENTIALS
+        try {
+            String credPath = System.getenv("GOOGLE_APPLICATION_CREDENTIALS");
+            if (credPath != null && !credPath.isEmpty()) {
+                LOGGER.info("Trying to load credentials from environment variable: " + credPath);
+                File file = new File(credPath);
+                if (file.exists()) {
+                    try (FileInputStream serviceAccount = new FileInputStream(file)) {
+                        credentials = GoogleCredentials.fromStream(serviceAccount);
+                        LOGGER.info("Successfully loaded credentials from environment variable");
+                        return credentials;
+                    } catch (IOException e) {
+                        LOGGER.warning("Failed to load credentials from environment variable: " + e.getMessage());
+                    }
+                } else {
+                    LOGGER.warning("Credentials file specified in environment variable does not exist: " + credPath);
+                }
+            }
+        } catch (Exception e) {
+            LOGGER.warning("Error checking environment variable: " + e.getMessage());
+        }
+        
+        // Method 2: Try explicit file paths
+        String[] possiblePaths = {
+            "firebase-credentials.json", 
+            "serviceAccountKey.json",
+            "src/main/resources/serviceAccountKey.json",
+            "./serviceAccountKey.json",
+            "../serviceAccountKey.json"
+        };
+        
+        for (String path : possiblePaths) {
+            try {
+                File file = new File(path);
+                if (file.exists()) {
+                    LOGGER.info("Found credentials file at: " + file.getAbsolutePath());
+                    try (FileInputStream serviceAccount = new FileInputStream(file)) {
+                        credentials = GoogleCredentials.fromStream(serviceAccount);
+                        LOGGER.info("Successfully loaded credentials from: " + path);
+                        return credentials;
+                    } catch (IOException e) {
+                        LOGGER.warning("Failed to load credentials from " + path + ": " + e.getMessage());
+                    }
+                }
+            } catch (Exception e) {
+                LOGGER.warning("Error checking path " + path + ": " + e.getMessage());
+            }
+        }
+        
+        // Method 3: Try application default credentials
+        try {
+            LOGGER.info("Trying application default credentials");
+            credentials = GoogleCredentials.getApplicationDefault();
+            LOGGER.info("Successfully loaded application default credentials");
+            return credentials;
+        } catch (IOException e) {
+            LOGGER.warning("Failed to load application default credentials: " + e.getMessage());
+        }
+        
+        // Method 4: Create new service account file from project resources if needed
+        try {
+            LOGGER.info("Trying to create a new service account file from resources");
+            credentials = createAndLoadCredentialsFile();
+            if (credentials != null) {
+                LOGGER.info("Successfully created and loaded credentials from new file");
+                return credentials;
+            }
+        } catch (Exception e) {
+            LOGGER.warning("Failed to create and load new credentials file: " + e.getMessage());
+        }
+        
+        return null;
+    }
+    
+    /**
+     * Create a new credentials file from resources and load it
+     */
+    private static GoogleCredentials createAndLoadCredentialsFile() {
+        try {
+            // Check if we have a template or existing service account key
+            File templateFile = new File("src/main/resources/serviceAccountKey.json");
+            File outputFile = new File("serviceAccountKey.json");
+            
+            if (templateFile.exists() && !outputFile.exists()) {
+                // Copy the template to the output location
+                String content = new String(Files.readAllBytes(templateFile.toPath()));
+                Files.write(outputFile.toPath(), content.getBytes());
+                LOGGER.info("Created new serviceAccountKey.json from template");
+                
+                // Try to load the new file
+                try (FileInputStream serviceAccount = new FileInputStream(outputFile)) {
+                    return GoogleCredentials.fromStream(serviceAccount);
+                }
             }
         } catch (IOException e) {
-            System.err.println("Failed to initialize Firebase: " + e.getMessage());
-            e.printStackTrace();
-            throw new RuntimeException("Firebase initialization failed", e);
+            LOGGER.warning("Error creating credentials file: " + e.getMessage());
         }
+        
+        return null;
     }
 
     /**
@@ -120,14 +361,17 @@ public class FirestoreService {
         }
         
         try {
+            LOGGER.info("Getting user profile for ID: " + userId);
             DocumentSnapshot document = db.collection(USERS_COLLECTION).document(userId).get().get();
             if (document.exists()) {
+                LOGGER.info("Found user profile");
                 return document.getData();
             } else {
+                LOGGER.info("User profile not found, returning empty map");
                 return new HashMap<>();
             }
         } catch (InterruptedException | ExecutionException e) {
-            System.err.println("Error getting user profile: " + e.getMessage());
+            LOGGER.severe("Error getting user profile: " + e.getMessage());
             return new HashMap<>();
         }
     }
@@ -145,10 +389,13 @@ public class FirestoreService {
         }
         
         try {
+            LOGGER.info("Saving user profile for ID: " + userId);
             db.collection(USERS_COLLECTION).document(userId).set(data).get();
+            LOGGER.info("User profile saved to Firestore with ID: " + userId);
             return true;
         } catch (InterruptedException | ExecutionException e) {
-            System.err.println("Error saving user profile: " + e.getMessage());
+            LOGGER.severe("Error saving user profile: " + e.getMessage());
+            LOGGER.severe("User profile failed to save to Firestore with ID: " + userId);
             return false;
         }
     }
@@ -165,6 +412,7 @@ public class FirestoreService {
         }
         
         try {
+            LOGGER.info("Getting wallets for user ID: " + userId);
             QuerySnapshot querySnapshot = db.collection(USERS_COLLECTION)
                     .document(userId)
                     .collection(WALLETS_COLLECTION)
@@ -176,9 +424,10 @@ public class FirestoreService {
                 wallets.add(document.getData());
             }
             
+            LOGGER.info("Found " + wallets.size() + " wallets for user: " + userId);
             return wallets;
         } catch (InterruptedException | ExecutionException e) {
-            System.err.println("Error getting user wallets: " + e.getMessage());
+            LOGGER.severe("Error getting user wallets: " + e.getMessage());
             return new ArrayList<>();
         }
     }
@@ -187,7 +436,7 @@ public class FirestoreService {
      * Save a wallet for a user
      * 
      * @param userId The user ID
-     * @param walletId The wallet ID (address)
+     * @param walletId The wallet ID
      * @param walletData The wallet data
      * @return true if successful, false otherwise
      */
@@ -197,6 +446,7 @@ public class FirestoreService {
         }
         
         try {
+            LOGGER.info("Saving wallet " + walletId + " for user: " + userId);
             db.collection(USERS_COLLECTION)
                     .document(userId)
                     .collection(WALLETS_COLLECTION)
@@ -204,9 +454,10 @@ public class FirestoreService {
                     .set(walletData)
                     .get();
             
+            LOGGER.info("Wallet saved successfully");
             return true;
         } catch (InterruptedException | ExecutionException e) {
-            System.err.println("Error saving wallet: " + e.getMessage());
+            LOGGER.severe("Error saving wallet: " + e.getMessage());
             return false;
         }
     }
@@ -224,6 +475,7 @@ public class FirestoreService {
         }
         
         try {
+            LOGGER.info("Deleting wallet " + walletId + " for user: " + userId);
             db.collection(USERS_COLLECTION)
                     .document(userId)
                     .collection(WALLETS_COLLECTION)
@@ -231,9 +483,10 @@ public class FirestoreService {
                     .delete()
                     .get();
             
+            LOGGER.info("Wallet deleted successfully");
             return true;
         } catch (InterruptedException | ExecutionException e) {
-            System.err.println("Error deleting wallet: " + e.getMessage());
+            LOGGER.severe("Error deleting wallet: " + e.getMessage());
             return false;
         }
     }
@@ -250,6 +503,7 @@ public class FirestoreService {
         }
         
         try {
+            LOGGER.info("Getting portfolio for user ID: " + userId);
             QuerySnapshot querySnapshot = db.collection(USERS_COLLECTION)
                     .document(userId)
                     .collection(PORTFOLIOS_COLLECTION)
@@ -261,9 +515,10 @@ public class FirestoreService {
                 positions.add(document.getData());
             }
             
+            LOGGER.info("Found " + positions.size() + " stock positions for user: " + userId);
             return positions;
         } catch (InterruptedException | ExecutionException e) {
-            System.err.println("Error getting user portfolio: " + e.getMessage());
+            LOGGER.severe("Error getting user portfolio: " + e.getMessage());
             return new ArrayList<>();
         }
     }
@@ -282,6 +537,7 @@ public class FirestoreService {
         }
         
         try {
+            LOGGER.info("Saving stock position " + symbol + " for user: " + userId);
             db.collection(USERS_COLLECTION)
                     .document(userId)
                     .collection(PORTFOLIOS_COLLECTION)
@@ -289,9 +545,10 @@ public class FirestoreService {
                     .set(positionData)
                     .get();
             
+            LOGGER.info("Stock position saved successfully");
             return true;
         } catch (InterruptedException | ExecutionException e) {
-            System.err.println("Error saving stock position: " + e.getMessage());
+            LOGGER.severe("Error saving stock position: " + e.getMessage());
             return false;
         }
     }
@@ -309,6 +566,7 @@ public class FirestoreService {
         }
         
         try {
+            LOGGER.info("Saving transaction for user: " + userId);
             // Generate a unique ID for the transaction
             DocumentReference docRef = db.collection(USERS_COLLECTION)
                     .document(userId)
@@ -326,9 +584,10 @@ public class FirestoreService {
             // Save the transaction
             docRef.set(transactionData).get();
             
+            LOGGER.info("Transaction saved with ID: " + docRef.getId());
             return docRef.getId();
         } catch (InterruptedException | ExecutionException e) {
-            System.err.println("Error saving transaction: " + e.getMessage());
+            LOGGER.severe("Error saving transaction: " + e.getMessage());
             return "";
         }
     }
@@ -346,6 +605,7 @@ public class FirestoreService {
         }
         
         try {
+            LOGGER.info("Getting transactions for user ID: " + userId + " with limit: " + limit);
             // Order by timestamp descending (most recent first) and limit
             Query query = db.collection(USERS_COLLECTION)
                     .document(userId)
@@ -363,9 +623,10 @@ public class FirestoreService {
                 transactions.add(document.getData());
             }
             
+            LOGGER.info("Found " + transactions.size() + " transactions for user: " + userId);
             return transactions;
         } catch (InterruptedException | ExecutionException e) {
-            System.err.println("Error getting user transactions: " + e.getMessage());
+            LOGGER.severe("Error getting user transactions: " + e.getMessage());
             return new ArrayList<>();
         }
     }
@@ -382,6 +643,7 @@ public class FirestoreService {
         }
         
         try {
+            LOGGER.info("Getting settings for user ID: " + userId);
             DocumentSnapshot document = db.collection(USERS_COLLECTION)
                     .document(userId)
                     .collection(SETTINGS_COLLECTION)
@@ -390,12 +652,14 @@ public class FirestoreService {
                     .get();
             
             if (document.exists()) {
+                LOGGER.info("Found user settings");
                 return document.getData();
             } else {
+                LOGGER.info("User settings not found, returning empty map");
                 return new HashMap<>();
             }
         } catch (InterruptedException | ExecutionException e) {
-            System.err.println("Error getting user settings: " + e.getMessage());
+            LOGGER.severe("Error getting user settings: " + e.getMessage());
             return new HashMap<>();
         }
     }
@@ -413,6 +677,7 @@ public class FirestoreService {
         }
         
         try {
+            LOGGER.info("Saving settings for user ID: " + userId);
             db.collection(USERS_COLLECTION)
                     .document(userId)
                     .collection(SETTINGS_COLLECTION)
@@ -420,9 +685,10 @@ public class FirestoreService {
                     .set(settings)
                     .get();
             
+            LOGGER.info("User settings saved successfully");
             return true;
         } catch (InterruptedException | ExecutionException e) {
-            System.err.println("Error saving user settings: " + e.getMessage());
+            LOGGER.severe("Error saving user settings: " + e.getMessage());
             return false;
         }
     }
@@ -439,6 +705,7 @@ public class FirestoreService {
         }
         
         try {
+            LOGGER.info("Saving user activity");
             // Generate a unique ID for the activity
             DocumentReference docRef = db.collection(ACTIVITIES_COLLECTION).document();
             
@@ -453,9 +720,10 @@ public class FirestoreService {
             // Save the activity
             docRef.set(activityData).get();
             
+            LOGGER.info("Activity saved with ID: " + docRef.getId());
             return true;
         } catch (InterruptedException | ExecutionException e) {
-            System.err.println("Error saving activity: " + e.getMessage());
+            LOGGER.severe("Error saving activity: " + e.getMessage());
             return false;
         }
     }
