@@ -5,6 +5,8 @@ import com.sun.net.httpserver.HttpHandler;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpContext;
 import com.sun.net.httpserver.Filter;
+import org.json.JSONObject;
+
 import java.io.*;
 import java.net.*;
 import java.nio.charset.StandardCharsets;
@@ -22,6 +24,7 @@ public class Login {
             try { port = Integer.parseInt(args[0]); } catch (NumberFormatException e) { System.err.println("Invalid port specified. Using default port " + port); }
         }
         HttpServer server = HttpServer.create(new InetSocketAddress("0.0.0.0", port), 0);
+        // Existing context registrations
         server.createContext("/", new StaticFileHandler());
         server.createContext("/dologin", new LoginHandler());
         server.createContext("/register", new RegisterHandler());
@@ -34,7 +37,11 @@ public class Login {
         apiChatContext.getFilters().add(new AuthFilter());
         HttpContext apiWalletContext = server.createContext("/api/wallets", new CryptoApiHandler());
         apiWalletContext.getFilters().add(new AuthFilter());
+// Added context for expenses endpoint
+        HttpContext apiExpensesContext = server.createContext("/api/expenses", new ExpensesHandler());
+        apiExpensesContext.getFilters().add(new AuthFilter());
         server.createContext("/logout", new LogoutHandler());
+
         server.setExecutor(null);
         server.start();
         if (Desktop.isDesktopSupported()) { Desktop.getDesktop().browse(new URI("http://localhost:" + port)); }
@@ -89,11 +96,29 @@ public class Login {
                 os.close();
                 int responseCode = conn.getResponseCode();
                 if (responseCode == 200) {
+                    // Read the Firebase response
+                    BufferedReader in = new BufferedReader(new InputStreamReader(conn.getInputStream(), StandardCharsets.UTF_8));
+                    StringBuilder firebaseResponse = new StringBuilder();
+
+                    while ((line = in.readLine()) != null) {
+                        firebaseResponse.append(line);
+                    }
+                    in.close();
+
+                    // Parse the JSON response (requires org.json library)
+                    JSONObject jsonObject = new JSONObject(firebaseResponse.toString());
+                    String idToken = jsonObject.getString("idToken");
+                    String localId = jsonObject.getString("localId");
+
+                    // Set cookies for session, idToken, and localId
                     exchange.getResponseHeaders().add("Set-Cookie", "session=valid; Path=/");
+                    exchange.getResponseHeaders().add("Set-Cookie", "idToken=" + idToken + "; Path=/; HttpOnly");
+                    exchange.getResponseHeaders().add("Set-Cookie", "localId=" + localId + "; Path=/; HttpOnly");
                     exchange.getResponseHeaders().set("Location", "/home.html");
                     exchange.sendResponseHeaders(302, -1);
                     return;
-                } else {
+                }
+                else {
                     InputStream errorStream = conn.getErrorStream();
                     InputStreamReader isrError = new InputStreamReader(errorStream, StandardCharsets.UTF_8);
                     BufferedReader in = new BufferedReader(isrError);
