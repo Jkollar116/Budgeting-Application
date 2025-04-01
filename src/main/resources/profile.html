@@ -1,12 +1,27 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>User Profile</title>
+  <link rel="stylesheet" href="style/profile.css" />
 </head>
 <body>
-<h1>Welcome, [User's Name]!</h1>
-<p>This is your profile page.</p>
+<div class="profile-container">
+  <h1>User Profile</h1>
+
+  <div class="profile-picture-section">
+    <img id="profile-picture" src="assets/default-profile.png" alt="Profile Picture" />
+    <input type="file" id="upload" accept="image/*"/>
+  </div>
+
+  <form class="profile-form">
+    <input type="text" placeholder="Full Name" />
+    <input type="email" placeholder="Email Address" />
+    <input type="text" placeholder="Phone Number" />
+    <textarea placeholder="Short Bio"></textarea>
+    <button type="submit">Save Profile</button>
+  </form>
+</div>
 </body>
 </html>
