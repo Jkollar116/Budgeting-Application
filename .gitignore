@@ -39,3 +39,12 @@ build/
 
 ### Sensitive files ###
 src/main/resources/serviceAccountKey.json
+serviceAccountKey.json
+firebase-credentials.json
+
+### Backups ###
+backups/
+temp_backup/
+
+### Compiled class files ###
+*.class
