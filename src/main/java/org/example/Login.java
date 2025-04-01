@@ -35,7 +35,12 @@ public class Login {
         apiDataContext.getFilters().add(new AuthFilter());
         HttpContext apiChatContext = server.createContext("/api/chat", new ChatHandler());
         apiChatContext.getFilters().add(new AuthFilter());
-        HttpContext apiWalletContext = server.createContext("/api/wallets", new CryptoApiHandler());
+        // Register CryptoApiHandler at both /api/wallets (original) and /api/wallet (for frontend compatibility)
+        HttpContext apiWalletsContext = server.createContext("/api/wallets", new CryptoApiHandler());
+        apiWalletsContext.getFilters().add(new AuthFilter());
+        
+        // Add an additional endpoint at singular form that the frontend is using
+        HttpContext apiWalletContext = server.createContext("/api/wallet", new CryptoApiHandler());
         apiWalletContext.getFilters().add(new AuthFilter());
         
         // Added context for expenses endpoint
