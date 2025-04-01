@@ -26,7 +26,7 @@ public class Login {
         HttpServer server = HttpServer.create(new InetSocketAddress("0.0.0.0", port), 0);
         // Existing context registrations
         server.createContext("/", new StaticFileHandler());
-        server.createContext("/dologin", new LoginHandler());
+        server.createContext("/login", new LoginHandler());
         server.createContext("/register", new RegisterHandler());
         server.createContext("/forgot", new ForgotPasswordHandler());
         HttpContext homeContext = server.createContext("/home.html", new StaticFileHandler());
@@ -37,9 +37,21 @@ public class Login {
         apiChatContext.getFilters().add(new AuthFilter());
         HttpContext apiWalletContext = server.createContext("/api/wallets", new CryptoApiHandler());
         apiWalletContext.getFilters().add(new AuthFilter());
-// Added context for expenses endpoint
+        
+        // Added context for expenses endpoint
         HttpContext apiExpensesContext = server.createContext("/api/expenses", new ExpensesHandler());
         apiExpensesContext.getFilters().add(new AuthFilter());
+
+        // Register Stock API handler for stock-related endpoints with more specific paths
+        HttpContext apiStockAccountContext = server.createContext("/api/stocks/account", new StockHandler());
+        apiStockAccountContext.getFilters().add(new AuthFilter());
+        HttpContext apiStockPortfolioContext = server.createContext("/api/stocks/portfolio", new StockHandler());
+        apiStockPortfolioContext.getFilters().add(new AuthFilter());
+        HttpContext apiStockOrdersContext = server.createContext("/api/stocks/orders", new StockHandler());
+        apiStockOrdersContext.getFilters().add(new AuthFilter());
+        HttpContext apiStockSymbolContext = server.createContext("/api/stocks/", new StockHandler());
+        apiStockSymbolContext.getFilters().add(new AuthFilter());
+        
         server.createContext("/logout", new LogoutHandler());
 
         server.setExecutor(null);
@@ -110,7 +122,7 @@ public class Login {
                     String idToken = jsonObject.getString("idToken");
                     String localId = jsonObject.getString("localId");
 
-                    // Set cookies for session, idToken, and localId
+                    // Set cookies for session idToken and localId
                     exchange.getResponseHeaders().add("Set-Cookie", "session=valid; Path=/");
                     exchange.getResponseHeaders().add("Set-Cookie", "idToken=" + idToken + "; Path=/; HttpOnly");
                     exchange.getResponseHeaders().add("Set-Cookie", "localId=" + localId + "; Path=/; HttpOnly");
