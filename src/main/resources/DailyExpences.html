@@ -9,11 +9,15 @@
     .container { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
     table { width: 100%; border-collapse: collapse; margin-top: 20px; }
     th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
-    th { background-color: #4c1855; }
-    input[type="text"], input[type="number"], input[type="date"] {
+    th { background-color: #4c1855; color: #ffcc80; }
+    input[type="text"], input[type="number"], input[type="date"], select {
       width: 100%; padding: 10px; margin-top: 5px; box-sizing: border-box;
       border: 2px solid #ffcc80; border-radius: 4px;
       background-color: #fff3e0;
+    }
+    #customCategory {
+      display: none;
+      margin-top: 10px;
     }
     button {
       background-color: #ff9800; color: white; padding: 10px 20px; border: none; border-radius: 4px; cursor: pointer; margin-top: 10px;
@@ -26,10 +30,24 @@
   <h1>Daily Expenses Tracker</h1>
   <form id="expensesForm">
     <label for="expenseDate">Date:</label>
-    <input type="date" id="Dateofexpence" name="date" required>
+    <input type="date" id="expenseDate" name="date" required>
 
     <label for="expenseDescription">Description:</label>
     <input type="text" id="expenseDescription" name="description" placeholder="Description of the expense" required>
+
+    <label for="expenseCategory">Category:</label>
+    <select id="expenseCategory" name="category" required>
+      <option value="">Select a category</option>
+      <option value="Food">Food</option>
+      <option value="Transport">Transport</option>
+      <option value="Entertainment">Entertainment</option>
+      <option value="Utilities">Utilities</option>
+      <option value="Health">Health</option>
+      <option value="Education">Education</option>
+      <option value="Other">Other</option>
+    </select>
+
+    <input type="text" id="customCategory" name="customCategory" placeholder="Enter custom category">
 
     <label for="expenseAmount">Amount ($):</label>
     <input type="number" id="expenseAmount" name="amount" placeholder="Amount spent" required>
@@ -43,28 +61,45 @@
     <tr>
       <th>Date</th>
       <th>Description</th>
+      <th>Category</th>
       <th>Amount</th>
     </tr>
     </thead>
-    <tbody>
-
-    </tbody>
+    <tbody></tbody>
   </table>
 </div>
+
 <script>
+  // Toggle custom category field
+  document.getElementById('expenseCategory').addEventListener('change', function () {
+    const customInput = document.getElementById('customCategory');
+    if (this.value === "Other") {
+      customInput.style.display = "block";
+      customInput.required = true;
+    } else {
+      customInput.style.display = "none";
+      customInput.required = false;
+    }
+  });
+
+  // Handle form submission
   document.getElementById('expensesForm').onsubmit = function(e) {
     e.preventDefault();
     const date = document.getElementById('expenseDate').value;
     const description = document.getElementById('expenseDescription').value;
+    let category = document.getElementById('expenseCategory').value;
+    const customCategory = document.getElementById('customCategory').value;
+    if (category === "Other") {
+      category = customCategory;
+    }
     const amount = document.getElementById('expenseAmount').value;
     const table = document.querySelector('table tbody');
-    const row = `<tr><td>${date}</td><td>${description}</td><td>$${amount}</td></tr>`;
+    const row = `<tr><td>${date}</td><td>${description}</td><td>${category}</td><td>$${amount}</td></tr>`;
     table.innerHTML += row;
 
     // Clear form fields after submission
-    document.getElementById('expenseDate').value = '';
-    document.getElementById('expenseDescription').value = '';
-    document.getElementById('expenseAmount').value = '';
+    document.getElementById('expensesForm').reset();
+    document.getElementById('customCategory').style.display = "none";
   };
 </script>
 </body>
