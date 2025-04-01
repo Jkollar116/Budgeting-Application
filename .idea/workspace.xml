@@ -4,8 +4,8 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="e72c0420-fe48-4af3-a363-18d6d8618447" name="Changes" comment="do login">
-      <change beforePath="$PROJECT_DIR$/src/main/resources/login.html" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/login.html" afterDir="false" />
+    <list default="true" id="e72c0420-fe48-4af3-a363-18d6d8618447" name="Changes" comment="do login home page">
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/example/Login.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/example/Login.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -128,7 +128,7 @@
       <workItem from="1743168188212" duration="4356000" />
       <workItem from="1743173613206" duration="2561000" />
       <workItem from="1743358568631" duration="9656000" />
-      <workItem from="1743465034905" duration="463000" />
+      <workItem from="1743465034905" duration="770000" />
     </task>
     <task id="LOCAL-00001" summary="First Commit of login">
       <option name="closed" value="true" />
@@ -298,7 +298,15 @@
       <option name="project" value="LOCAL" />
       <updated>1743465169950</updated>
     </task>
-    <option name="localTasksCounter" value="22" />
+    <task id="LOCAL-00022" summary="do login home page">
+      <option name="closed" value="true" />
+      <created>1743465562168</created>
+      <option name="number" value="00022" />
+      <option name="presentableId" value="LOCAL-00022" />
+      <option name="project" value="LOCAL" />
+      <updated>1743465562168</updated>
+    </task>
+    <option name="localTasksCounter" value="23" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -333,7 +341,8 @@
     <MESSAGE value="added log out feature with cookies" />
     <MESSAGE value="added firebase integration as well as home page" />
     <MESSAGE value="do login" />
-    <option name="LAST_COMMIT_MESSAGE" value="do login" />
+    <MESSAGE value="do login home page" />
+    <option name="LAST_COMMIT_MESSAGE" value="do login home page" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
