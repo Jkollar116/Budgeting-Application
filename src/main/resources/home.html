@@ -6,22 +6,29 @@
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-<header>
+<div class="topbar">
+    <button class="drawer-toggle" onclick="toggleDrawer()">☰</button>
     <div class="logo">CashClimb</div>
-    <nav>
-        <ul>
-            <li><a href="home.html">Dashboard</a></li>
-            <li><a href="budgeting.html">Budgeting</a></li>
-            <li><a href="expenses.html">Expenses</a></li>
-            <li><a href="crypto.html">Crypto</a></li>
-            <li><a href="stocks.html">Stocks</a></li>
-            <li><a href="chat.html">Chat</a></li>
-            <li><a href="javascript:void(0)">Profile <span class="icon">👤</span></a></li>
-            <li><a href="javascript:void(0)">Settings <span class="icon">⚙️</span></a></li>
-            <li><a href="javascript:void(0)">Log Out <span class="icon">🚪</span></a></li>
-        </ul>
-    </nav>
-</header>
+    <div class="profile">👤Profile</div>
+</div>
+<button class="drawer-toggle" onclick="toggleDrawer()">☰</button>
+<nav class="drawer" id="sideDrawer">
+    <ul>
+        <li><a href=""></a></li>
+        <li><a href=""></a></li>
+        <li><a href="home.html"> Dashboard</a></li>
+        <li><a href="budgeting.html"> Budgeting</a></li>
+        <li><a href="expenses.html"> Expenses</a></li>
+        <li><a href="crypto.html"> Crypto</a></li>
+        <li><a href="stocks.html"> Stocks</a></li>
+        <li><a href="chat.html"> Chat</a></li>
+        <li><a href="tax.html"> Tax</a></li>
+        <li><a href="#">👤 Profile</a></li>
+        <li><a href="#">⚙️ Settings</a></li>
+        <li><a href="#">🚪 Log Out</a></li>
+    </ul>
+</nav>
+<main>
 <section class="hero">
     <div class="hero-content">
         <h1>Dashboard</h1>
@@ -53,7 +60,12 @@
         <div id="chartContainer"></div>
     </div>
 </div>
+</main>
 <script>
+    function toggleDrawer() {
+        const drawer = document.getElementById('sideDrawer');
+        drawer.classList.toggle('collapsed');
+    }
     document.addEventListener("DOMContentLoaded", function() {
         function getInt(field) {
             return field && field.integerValue ? parseInt(field.integerValue) : 0;

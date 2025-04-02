@@ -36,7 +36,7 @@ header nav ul li a:hover {
     position: relative;
     text-align: center;
     padding: 80px 20px;
-    background-color: #3E1F5B;
+    background:linear-gradient(135deg, #2C003E, #4A1D5A);
 }
 .hero .hero-content {
     position: relative;
@@ -57,7 +57,7 @@ header nav ul li a:hover {
     padding: 20px;
 }
 .card {
-    background-color: #3E1F5B;
+    background: linear-gradient(135deg, #2C003E, #4A1D5A);
     padding: 20px;
     border-radius: 8px;
     box-shadow: 0 4px 6px rgba(0,0,0,0.4);
@@ -92,6 +92,7 @@ footer {
     text-align: center;
     padding: 15px;
     border-top: 2px solid #FF8C00;
+    text-shadow: 0 0 5px rgba(255, 140, 0, 0.7);
     font-size: 0.9rem;
 }
 .login-container {
@@ -162,6 +163,94 @@ footer {
         flex-direction: column;
         align-items: center;
     }
+}
+.topbar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 60px;
+    z-index: 10;
+    background: linear-gradient(135deg, #2C003E, #4A1D5A);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 20px;
+    color: #d97600;
+    text-shadow: 0 0 5px rgba(255, 140, 0, 0.7);
+    border-bottom: 2px solid #FF8C00;
+}
+.topbar .logo {
+    font-size: 20px;
+    font-weight: bold;
+}
+.topbar .profile {
+    font-size: 20px;
+    cursor: pointer;
+}
+.layout {
+    margin-left: 250px;
+    transition: margin-left 0.2s ease-in-out;
+    width: 100%;
+    padding-top: 60px;
+}
+.drawer{
+    width: 250px;
+    height: 100vh;
+    color: #d97600;
+    position: fixed;
+    top: 60px;
+    left: 0;
+    z-index: 1000;
+    transition: transform 0.2s ease-in-out;
+    transform: translateX(0);
+}
+.drawer.collapsed{
+    transform: translateX(-250px);
+}
+.drawer ul{
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+.drawer ul li{
+    padding: 10px 15px;
+}
+.drawer ul li a{
+    color: #d97600;
+    text-decoration: none;
+    text-shadow: 0 0 5px rgba(255, 140, 0, 0.7);
+    font-weight: bold;
+    font-size: 16px;
+    display: flex;
+}
+.drawer-toggle {
+    position: fixed;
+    top: 50px;
+    left: 5px;
+    font-size: 40px;
+    font-weight: bold;
+    background: none;
+    border: none;
+    color: #d97600;
+    text-shadow: 0 0 5px rgba(255, 140, 0, 0.7);
+    cursor: pointer;
+    z-index: 1001;
+}
+main{
+    margin-left: 250px;
+    padding: 15px;
+    flex-grow: 1;
+}
+.drawer.collapsed ~ main{
+    margin-left: 0;
+}
+.hero-content h1 {
+    margin: 0 0 10px;
+}
+.hero-content p {
+    margin: 0;
+    font-size: 16px;
 }
 
 
