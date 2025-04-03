@@ -35,17 +35,17 @@ public class Login {
         apiDataContext.getFilters().add(new AuthFilter());
         HttpContext apiChatContext = server.createContext("/api/chat", new ChatHandler());
         apiChatContext.getFilters().add(new AuthFilter());
-        // Register CryptoApiHandler at both /api/wallets (original) and /api/wallet (for frontend compatibility)
-        HttpContext apiWalletsContext = server.createContext("/api/wallets", new CryptoApiHandler());
-        apiWalletsContext.getFilters().add(new AuthFilter());
-        
-        // Add an additional endpoint at singular form that the frontend is using
+        // Register CryptoApiHandler at the correct endpoint used by the frontend
         HttpContext apiWalletContext = server.createContext("/api/wallet", new CryptoApiHandler());
         apiWalletContext.getFilters().add(new AuthFilter());
         
         // Added context for expenses endpoint
         HttpContext apiExpensesContext = server.createContext("/api/expenses", new ExpensesHandler());
         apiExpensesContext.getFilters().add(new AuthFilter());
+        
+        // Add context for goals endpoint
+        HttpContext apiGoalsContext = server.createContext("/api/goals", new GoalsHandler());
+        apiGoalsContext.getFilters().add(new AuthFilter());
 
         // Register Stock API handler for stock-related endpoints with more specific paths
         HttpContext apiStockAccountContext = server.createContext("/api/stocks/account", new StockHandler());

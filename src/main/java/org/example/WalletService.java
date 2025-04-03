@@ -61,11 +61,13 @@ public class WalletService {
                     blockchainInfo.balance(),
                     blockchainInfo.transactions(),
                     coinPrice.currentPrice(),
-                    coinPrice.priceChangePercentage24h()
+                    coinPrice.priceChangePercentage24h(),
+                    blockchainInfo.marketCap(),
+                    blockchainInfo.volume24h()
             );
         } catch (Exception e) {
             LOGGER.log(Level.SEVERE, "Error fetching wallet info: " + e.getMessage(), e);
-            return new WalletInfo(0.0, new ArrayList<>(), 0.0, 0.0);
+            return new WalletInfo(0.0, new ArrayList<>(), 0.0, 0.0, 0.0, 0.0);
         }
     }
     
@@ -83,6 +85,8 @@ public class WalletService {
             // Get price data from API
             double currentPrice = 0.0;
             double priceChange = 0.0;
+            double marketCap = 0.0;
+            double volume24h = 0.0;
             
             try {
                 // Try to get from our custom BlockchainApiService first
@@ -90,19 +94,22 @@ public class WalletService {
                 WalletInfo info = blockchainApi.getBitcoinWalletInfo(dummyAddress);
                 currentPrice = info.currentPrice();
                 priceChange = info.priceChange24h();
+                marketCap = info.marketCap();
+                volume24h = info.volume24h();
             } catch (Exception e) {
                 LOGGER.log(Level.WARNING, "Failed to get Bitcoin price from BlockchainApi, falling back to CoinMarketCap: " + e.getMessage());
                 // Fall back to CoinMarketCap if blockchain.info fails
                 CoinPrice coinPrice = cmcService.getPrice("BTC");
                 currentPrice = coinPrice.currentPrice();
                 priceChange = coinPrice.priceChangePercentage24h();
+                // In fallback mode, we don't have market cap and volume
             }
             
             // Return a wallet info with only price data (balance=0, empty transactions)
-            return new WalletInfo(0.0, new ArrayList<>(), currentPrice, priceChange);
+            return new WalletInfo(0.0, new ArrayList<>(), currentPrice, priceChange, marketCap, volume24h);
         } catch (Exception e) {
             LOGGER.log(Level.SEVERE, "Error fetching Bitcoin price info: " + e.getMessage(), e);
-            return new WalletInfo(0.0, new ArrayList<>(), 0.0, 0.0);
+            return new WalletInfo(0.0, new ArrayList<>(), 0.0, 0.0, 0.0, 0.0);
         }
     }
     
@@ -120,6 +127,8 @@ public class WalletService {
             // Get price data from API
             double currentPrice = 0.0;
             double priceChange = 0.0;
+            double marketCap = 0.0;
+            double volume24h = 0.0;
             
             try {
                 // Try to get from our custom BlockchainApiService first
@@ -127,19 +136,22 @@ public class WalletService {
                 WalletInfo info = blockchainApi.getEthereumWalletInfo(dummyAddress);
                 currentPrice = info.currentPrice();
                 priceChange = info.priceChange24h();
+                marketCap = info.marketCap();
+                volume24h = info.volume24h();
             } catch (Exception e) {
                 LOGGER.log(Level.WARNING, "Failed to get Ethereum price from BlockchainApi, falling back to CoinMarketCap: " + e.getMessage());
                 // Fall back to CoinMarketCap if Etherscan fails
                 CoinPrice coinPrice = cmcService.getPrice("ETH");
                 currentPrice = coinPrice.currentPrice();
                 priceChange = coinPrice.priceChangePercentage24h();
+                // In fallback mode, we don't have market cap and volume
             }
             
             // Return a wallet info with only price data (balance=0, empty transactions)
-            return new WalletInfo(0.0, new ArrayList<>(), currentPrice, priceChange);
+            return new WalletInfo(0.0, new ArrayList<>(), currentPrice, priceChange, marketCap, volume24h);
         } catch (Exception e) {
             LOGGER.log(Level.SEVERE, "Error fetching Ethereum price info: " + e.getMessage(), e);
-            return new WalletInfo(0.0, new ArrayList<>(), 0.0, 0.0);
+            return new WalletInfo(0.0, new ArrayList<>(), 0.0, 0.0, 0.0, 0.0);
         }
     }
 }
