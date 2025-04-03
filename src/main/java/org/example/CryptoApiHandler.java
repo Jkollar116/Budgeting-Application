@@ -174,10 +174,12 @@ public class CryptoApiHandler implements HttpHandler {
                     return;
                 }
                 
-                // Create a simplified response with just price data
+                // Create a simplified response with market data
                 JSONObject response = new JSONObject();
                 response.put("currentPrice", info.currentPrice());
                 response.put("priceChange24h", info.priceChange24h());
+                response.put("marketCap", info.marketCap());
+                response.put("volume24h", info.volume24h());
                 sendResponse(exchange, response.toString(), 200);
                 return;
             }
