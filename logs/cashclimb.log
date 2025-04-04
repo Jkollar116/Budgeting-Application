@@ -1,0 +1,198 @@
+2025-04-02 22:58:43 [main] INFO  org.example.ConfigManager - Configuration file loaded successfully
+2025-04-02 22:58:43 [main] WARN  org.example.ConfigManager - API key 'redis.enabled' not found in any configuration source
+2025-04-02 22:58:43 [main] INFO  org.example.StockApiService - Redis caching disabled, using local memory cache only
+2025-04-02 23:22:29 [main] INFO  org.example.ConfigManager - Configuration file loaded successfully
+2025-04-02 23:22:29 [main] WARN  org.example.ConfigManager - API key 'redis.enabled' not found in any configuration source
+2025-04-02 23:22:29 [main] INFO  org.example.StockApiService - Redis caching disabled, using local memory cache only
+2025-04-02 23:22:39 [HTTP-Dispatcher] INFO  org.example.StockApiService - Fetching stock quote from API for symbol: MSFT
+2025-04-02 23:22:39 [HTTP-Dispatcher] WARN  org.example.ConfigManager - API key 'alphaVantageApiKey' not found in any configuration source
+2025-04-02 23:22:39 [HTTP-Dispatcher] ERROR org.example.StockApiService - Alpha Vantage API key not found in configuration
+2025-04-02 23:22:39 [HTTP-Dispatcher] ERROR org.example.StockApiService - Error fetching quote for MSFT: Alpha Vantage API key not configured. Please set the CASHCLIMB_ALPHAVANTAGEAPIKEY environment variable.
+java.io.IOException: Alpha Vantage API key not configured. Please set the CASHCLIMB_ALPHAVANTAGEAPIKEY environment variable.
+	at org.example.StockApiService.getApiKey(StockApiService.java:195)
+	at org.example.StockApiService.getStockQuote(StockApiService.java:240)
+	at org.example.StockHandler.handleAccountRequest(StockHandler.java:128)
+	at org.example.StockHandler.handle(StockHandler.java:83)
+	at jdk.httpserver/com.sun.net.httpserver.Filter$Chain.doFilter(Filter.java:98)
+	at jdk.httpserver/sun.net.httpserver.AuthFilter.doFilter(AuthFilter.java:82)
+	at jdk.httpserver/com.sun.net.httpserver.Filter$Chain.doFilter(Filter.java:101)
+	at jdk.httpserver/sun.net.httpserver.ServerImpl$Exchange$LinkHandler.handle(ServerImpl.java:871)
+	at jdk.httpserver/com.sun.net.httpserver.Filter$Chain.doFilter(Filter.java:98)
+	at org.example.Login$AuthFilter.doFilter(Login.java:316)
+	at jdk.httpserver/com.sun.net.httpserver.Filter$Chain.doFilter(Filter.java:101)
+	at jdk.httpserver/sun.net.httpserver.ServerImpl$Exchange.run(ServerImpl.java:847)
+	at jdk.httpserver/sun.net.httpserver.ServerImpl$DefaultExecutor.execute(ServerImpl.java:203)
+	at jdk.httpserver/sun.net.httpserver.ServerImpl$Dispatcher.handle(ServerImpl.java:566)
+	at jdk.httpserver/sun.net.httpserver.ServerImpl$Dispatcher.run(ServerImpl.java:531)
+	at java.base/java.lang.Thread.run(Thread.java:1583)
+2025-04-02 23:22:39 [HTTP-Dispatcher] INFO  org.example.StockApiService - Fetching stock quote from API for symbol: NVDA
+2025-04-02 23:22:39 [HTTP-Dispatcher] WARN  org.example.ConfigManager - API key 'alphaVantageApiKey' not found in any configuration source
+2025-04-02 23:22:39 [HTTP-Dispatcher] ERROR org.example.StockApiService - Alpha Vantage API key not found in configuration
+2025-04-02 23:22:39 [HTTP-Dispatcher] ERROR org.example.StockApiService - Error fetching quote for NVDA: Alpha Vantage API key not configured. Please set the CASHCLIMB_ALPHAVANTAGEAPIKEY environment variable.
+java.io.IOException: Alpha Vantage API key not configured. Please set the CASHCLIMB_ALPHAVANTAGEAPIKEY environment variable.
+	at org.example.StockApiService.getApiKey(StockApiService.java:195)
+	at org.example.StockApiService.getStockQuote(StockApiService.java:240)
+	at org.example.StockHandler.handleAccountRequest(StockHandler.java:128)
+	at org.example.StockHandler.handle(StockHandler.java:83)
+	at jdk.httpserver/com.sun.net.httpserver.Filter$Chain.doFilter(Filter.java:98)
+	at jdk.httpserver/sun.net.httpserver.AuthFilter.doFilter(AuthFilter.java:82)
+	at jdk.httpserver/com.sun.net.httpserver.Filter$Chain.doFilter(Filter.java:101)
+	at jdk.httpserver/sun.net.httpserver.ServerImpl$Exchange$LinkHandler.handle(ServerImpl.java:871)
+	at jdk.httpserver/com.sun.net.httpserver.Filter$Chain.doFilter(Filter.java:98)
+	at org.example.Login$AuthFilter.doFilter(Login.java:316)
+	at jdk.httpserver/com.sun.net.httpserver.Filter$Chain.doFilter(Filter.java:101)
+	at jdk.httpserver/sun.net.httpserver.ServerImpl$Exchange.run(ServerImpl.java:847)
+	at jdk.httpserver/sun.net.httpserver.ServerImpl$DefaultExecutor.execute(ServerImpl.java:203)
+	at jdk.httpserver/sun.net.httpserver.ServerImpl$Dispatcher.handle(ServerImpl.java:566)
+	at jdk.httpserver/sun.net.httpserver.ServerImpl$Dispatcher.run(ServerImpl.java:531)
+	at java.base/java.lang.Thread.run(Thread.java:1583)
+2025-04-02 23:22:39 [HTTP-Dispatcher] INFO  org.example.StockApiService - Fetching stock quote from API for symbol: AAPL
+2025-04-02 23:22:39 [HTTP-Dispatcher] WARN  org.example.ConfigManager - API key 'alphaVantageApiKey' not found in any configuration source
+2025-04-02 23:22:39 [HTTP-Dispatcher] ERROR org.example.StockApiService - Alpha Vantage API key not found in configuration
+2025-04-02 23:22:39 [HTTP-Dispatcher] ERROR org.example.StockApiService - Error fetching quote for AAPL: Alpha Vantage API key not configured. Please set the CASHCLIMB_ALPHAVANTAGEAPIKEY environment variable.
+java.io.IOException: Alpha Vantage API key not configured. Please set the CASHCLIMB_ALPHAVANTAGEAPIKEY environment variable.
+	at org.example.StockApiService.getApiKey(StockApiService.java:195)
+	at org.example.StockApiService.getStockQuote(StockApiService.java:240)
+	at org.example.StockHandler.handleAccountRequest(StockHandler.java:128)
+	at org.example.StockHandler.handle(StockHandler.java:83)
+	at jdk.httpserver/com.sun.net.httpserver.Filter$Chain.doFilter(Filter.java:98)
+	at jdk.httpserver/sun.net.httpserver.AuthFilter.doFilter(AuthFilter.java:82)
+	at jdk.httpserver/com.sun.net.httpserver.Filter$Chain.doFilter(Filter.java:101)
+	at jdk.httpserver/sun.net.httpserver.ServerImpl$Exchange$LinkHandler.handle(ServerImpl.java:871)
+	at jdk.httpserver/com.sun.net.httpserver.Filter$Chain.doFilter(Filter.java:98)
+	at org.example.Login$AuthFilter.doFilter(Login.java:316)
+	at jdk.httpserver/com.sun.net.httpserver.Filter$Chain.doFilter(Filter.java:101)
+	at jdk.httpserver/sun.net.httpserver.ServerImpl$Exchange.run(ServerImpl.java:847)
+	at jdk.httpserver/sun.net.httpserver.ServerImpl$DefaultExecutor.execute(ServerImpl.java:203)
+	at jdk.httpserver/sun.net.httpserver.ServerImpl$Dispatcher.handle(ServerImpl.java:566)
+	at jdk.httpserver/sun.net.httpserver.ServerImpl$Dispatcher.run(ServerImpl.java:531)
+	at java.base/java.lang.Thread.run(Thread.java:1583)
+2025-04-02 23:22:56 [HTTP-Dispatcher] INFO  org.example.StockApiService - Fetching stock quote from API for symbol: MSFT
+2025-04-02 23:22:56 [HTTP-Dispatcher] WARN  org.example.ConfigManager - API key 'alphaVantageApiKey' not found in any configuration source
+2025-04-02 23:22:56 [HTTP-Dispatcher] ERROR org.example.StockApiService - Alpha Vantage API key not found in configuration
+2025-04-02 23:22:56 [HTTP-Dispatcher] ERROR org.example.StockApiService - Error fetching quote for MSFT: Alpha Vantage API key not configured. Please set the CASHCLIMB_ALPHAVANTAGEAPIKEY environment variable.
+java.io.IOException: Alpha Vantage API key not configured. Please set the CASHCLIMB_ALPHAVANTAGEAPIKEY environment variable.
+	at org.example.StockApiService.getApiKey(StockApiService.java:195)
+	at org.example.StockApiService.getStockQuote(StockApiService.java:240)
+	at org.example.StockHandler.handleAccountRequest(StockHandler.java:128)
+	at org.example.StockHandler.handle(StockHandler.java:83)
+	at jdk.httpserver/com.sun.net.httpserver.Filter$Chain.doFilter(Filter.java:98)
+	at jdk.httpserver/sun.net.httpserver.AuthFilter.doFilter(AuthFilter.java:82)
+	at jdk.httpserver/com.sun.net.httpserver.Filter$Chain.doFilter(Filter.java:101)
+	at jdk.httpserver/sun.net.httpserver.ServerImpl$Exchange$LinkHandler.handle(ServerImpl.java:871)
+	at jdk.httpserver/com.sun.net.httpserver.Filter$Chain.doFilter(Filter.java:98)
+	at org.example.Login$AuthFilter.doFilter(Login.java:316)
+	at jdk.httpserver/com.sun.net.httpserver.Filter$Chain.doFilter(Filter.java:101)
+	at jdk.httpserver/sun.net.httpserver.ServerImpl$Exchange.run(ServerImpl.java:847)
+	at jdk.httpserver/sun.net.httpserver.ServerImpl$DefaultExecutor.execute(ServerImpl.java:203)
+	at jdk.httpserver/sun.net.httpserver.ServerImpl$Dispatcher.handle(ServerImpl.java:566)
+	at jdk.httpserver/sun.net.httpserver.ServerImpl$Dispatcher.run(ServerImpl.java:531)
+	at java.base/java.lang.Thread.run(Thread.java:1583)
+2025-04-02 23:22:56 [HTTP-Dispatcher] INFO  org.example.StockApiService - Fetching stock quote from API for symbol: NVDA
+2025-04-02 23:22:56 [HTTP-Dispatcher] WARN  org.example.ConfigManager - API key 'alphaVantageApiKey' not found in any configuration source
+2025-04-02 23:22:56 [HTTP-Dispatcher] ERROR org.example.StockApiService - Alpha Vantage API key not found in configuration
+2025-04-02 23:22:56 [HTTP-Dispatcher] ERROR org.example.StockApiService - Error fetching quote for NVDA: Alpha Vantage API key not configured. Please set the CASHCLIMB_ALPHAVANTAGEAPIKEY environment variable.
+java.io.IOException: Alpha Vantage API key not configured. Please set the CASHCLIMB_ALPHAVANTAGEAPIKEY environment variable.
+	at org.example.StockApiService.getApiKey(StockApiService.java:195)
+	at org.example.StockApiService.getStockQuote(StockApiService.java:240)
+	at org.example.StockHandler.handleAccountRequest(StockHandler.java:128)
+	at org.example.StockHandler.handle(StockHandler.java:83)
+	at jdk.httpserver/com.sun.net.httpserver.Filter$Chain.doFilter(Filter.java:98)
+	at jdk.httpserver/sun.net.httpserver.AuthFilter.doFilter(AuthFilter.java:82)
+	at jdk.httpserver/com.sun.net.httpserver.Filter$Chain.doFilter(Filter.java:101)
+	at jdk.httpserver/sun.net.httpserver.ServerImpl$Exchange$LinkHandler.handle(ServerImpl.java:871)
+	at jdk.httpserver/com.sun.net.httpserver.Filter$Chain.doFilter(Filter.java:98)
+	at org.example.Login$AuthFilter.doFilter(Login.java:316)
+	at jdk.httpserver/com.sun.net.httpserver.Filter$Chain.doFilter(Filter.java:101)
+	at jdk.httpserver/sun.net.httpserver.ServerImpl$Exchange.run(ServerImpl.java:847)
+	at jdk.httpserver/sun.net.httpserver.ServerImpl$DefaultExecutor.execute(ServerImpl.java:203)
+	at jdk.httpserver/sun.net.httpserver.ServerImpl$Dispatcher.handle(ServerImpl.java:566)
+	at jdk.httpserver/sun.net.httpserver.ServerImpl$Dispatcher.run(ServerImpl.java:531)
+	at java.base/java.lang.Thread.run(Thread.java:1583)
+2025-04-02 23:22:56 [HTTP-Dispatcher] INFO  org.example.StockApiService - Fetching stock quote from API for symbol: AAPL
+2025-04-02 23:22:56 [HTTP-Dispatcher] WARN  org.example.ConfigManager - API key 'alphaVantageApiKey' not found in any configuration source
+2025-04-02 23:22:56 [HTTP-Dispatcher] ERROR org.example.StockApiService - Alpha Vantage API key not found in configuration
+2025-04-02 23:22:56 [HTTP-Dispatcher] ERROR org.example.StockApiService - Error fetching quote for AAPL: Alpha Vantage API key not configured. Please set the CASHCLIMB_ALPHAVANTAGEAPIKEY environment variable.
+java.io.IOException: Alpha Vantage API key not configured. Please set the CASHCLIMB_ALPHAVANTAGEAPIKEY environment variable.
+	at org.example.StockApiService.getApiKey(StockApiService.java:195)
+	at org.example.StockApiService.getStockQuote(StockApiService.java:240)
+	at org.example.StockHandler.handleAccountRequest(StockHandler.java:128)
+	at org.example.StockHandler.handle(StockHandler.java:83)
+	at jdk.httpserver/com.sun.net.httpserver.Filter$Chain.doFilter(Filter.java:98)
+	at jdk.httpserver/sun.net.httpserver.AuthFilter.doFilter(AuthFilter.java:82)
+	at jdk.httpserver/com.sun.net.httpserver.Filter$Chain.doFilter(Filter.java:101)
+	at jdk.httpserver/sun.net.httpserver.ServerImpl$Exchange$LinkHandler.handle(ServerImpl.java:871)
+	at jdk.httpserver/com.sun.net.httpserver.Filter$Chain.doFilter(Filter.java:98)
+	at org.example.Login$AuthFilter.doFilter(Login.java:316)
+	at jdk.httpserver/com.sun.net.httpserver.Filter$Chain.doFilter(Filter.java:101)
+	at jdk.httpserver/sun.net.httpserver.ServerImpl$Exchange.run(ServerImpl.java:847)
+	at jdk.httpserver/sun.net.httpserver.ServerImpl$DefaultExecutor.execute(ServerImpl.java:203)
+	at jdk.httpserver/sun.net.httpserver.ServerImpl$Dispatcher.handle(ServerImpl.java:566)
+	at jdk.httpserver/sun.net.httpserver.ServerImpl$Dispatcher.run(ServerImpl.java:531)
+	at java.base/java.lang.Thread.run(Thread.java:1583)
+2025-04-02 23:22:56 [HTTP-Dispatcher] INFO  org.example.StockApiService - Fetching stock quote from API for symbol: MSFT
+2025-04-02 23:22:56 [HTTP-Dispatcher] WARN  org.example.ConfigManager - API key 'alphaVantageApiKey' not found in any configuration source
+2025-04-02 23:22:56 [HTTP-Dispatcher] ERROR org.example.StockApiService - Alpha Vantage API key not found in configuration
+2025-04-02 23:22:56 [HTTP-Dispatcher] ERROR org.example.StockApiService - Error fetching quote for MSFT: Alpha Vantage API key not configured. Please set the CASHCLIMB_ALPHAVANTAGEAPIKEY environment variable.
+java.io.IOException: Alpha Vantage API key not configured. Please set the CASHCLIMB_ALPHAVANTAGEAPIKEY environment variable.
+	at org.example.StockApiService.getApiKey(StockApiService.java:195)
+	at org.example.StockApiService.getStockQuote(StockApiService.java:240)
+	at org.example.StockHandler.handleAccountRequest(StockHandler.java:128)
+	at org.example.StockHandler.handle(StockHandler.java:83)
+	at jdk.httpserver/com.sun.net.httpserver.Filter$Chain.doFilter(Filter.java:98)
+	at jdk.httpserver/sun.net.httpserver.AuthFilter.doFilter(AuthFilter.java:82)
+	at jdk.httpserver/com.sun.net.httpserver.Filter$Chain.doFilter(Filter.java:101)
+	at jdk.httpserver/sun.net.httpserver.ServerImpl$Exchange$LinkHandler.handle(ServerImpl.java:871)
+	at jdk.httpserver/com.sun.net.httpserver.Filter$Chain.doFilter(Filter.java:98)
+	at org.example.Login$AuthFilter.doFilter(Login.java:316)
+	at jdk.httpserver/com.sun.net.httpserver.Filter$Chain.doFilter(Filter.java:101)
+	at jdk.httpserver/sun.net.httpserver.ServerImpl$Exchange.run(ServerImpl.java:847)
+	at jdk.httpserver/sun.net.httpserver.ServerImpl$DefaultExecutor.execute(ServerImpl.java:203)
+	at jdk.httpserver/sun.net.httpserver.ServerImpl$Dispatcher.handle(ServerImpl.java:566)
+	at jdk.httpserver/sun.net.httpserver.ServerImpl$Dispatcher.run(ServerImpl.java:531)
+	at java.base/java.lang.Thread.run(Thread.java:1583)
+2025-04-02 23:22:56 [HTTP-Dispatcher] INFO  org.example.StockApiService - Fetching stock quote from API for symbol: NVDA
+2025-04-02 23:22:56 [HTTP-Dispatcher] WARN  org.example.ConfigManager - API key 'alphaVantageApiKey' not found in any configuration source
+2025-04-02 23:22:56 [HTTP-Dispatcher] ERROR org.example.StockApiService - Alpha Vantage API key not found in configuration
+2025-04-02 23:22:56 [HTTP-Dispatcher] ERROR org.example.StockApiService - Error fetching quote for NVDA: Alpha Vantage API key not configured. Please set the CASHCLIMB_ALPHAVANTAGEAPIKEY environment variable.
+java.io.IOException: Alpha Vantage API key not configured. Please set the CASHCLIMB_ALPHAVANTAGEAPIKEY environment variable.
+	at org.example.StockApiService.getApiKey(StockApiService.java:195)
+	at org.example.StockApiService.getStockQuote(StockApiService.java:240)
+	at org.example.StockHandler.handleAccountRequest(StockHandler.java:128)
+	at org.example.StockHandler.handle(StockHandler.java:83)
+	at jdk.httpserver/com.sun.net.httpserver.Filter$Chain.doFilter(Filter.java:98)
+	at jdk.httpserver/sun.net.httpserver.AuthFilter.doFilter(AuthFilter.java:82)
+	at jdk.httpserver/com.sun.net.httpserver.Filter$Chain.doFilter(Filter.java:101)
+	at jdk.httpserver/sun.net.httpserver.ServerImpl$Exchange$LinkHandler.handle(ServerImpl.java:871)
+	at jdk.httpserver/com.sun.net.httpserver.Filter$Chain.doFilter(Filter.java:98)
+	at org.example.Login$AuthFilter.doFilter(Login.java:316)
+	at jdk.httpserver/com.sun.net.httpserver.Filter$Chain.doFilter(Filter.java:101)
+	at jdk.httpserver/sun.net.httpserver.ServerImpl$Exchange.run(ServerImpl.java:847)
+	at jdk.httpserver/sun.net.httpserver.ServerImpl$DefaultExecutor.execute(ServerImpl.java:203)
+	at jdk.httpserver/sun.net.httpserver.ServerImpl$Dispatcher.handle(ServerImpl.java:566)
+	at jdk.httpserver/sun.net.httpserver.ServerImpl$Dispatcher.run(ServerImpl.java:531)
+	at java.base/java.lang.Thread.run(Thread.java:1583)
+2025-04-02 23:22:56 [HTTP-Dispatcher] INFO  org.example.StockApiService - Fetching stock quote from API for symbol: AAPL
+2025-04-02 23:22:56 [HTTP-Dispatcher] WARN  org.example.ConfigManager - API key 'alphaVantageApiKey' not found in any configuration source
+2025-04-02 23:22:56 [HTTP-Dispatcher] ERROR org.example.StockApiService - Alpha Vantage API key not found in configuration
+2025-04-02 23:22:56 [HTTP-Dispatcher] ERROR org.example.StockApiService - Error fetching quote for AAPL: Alpha Vantage API key not configured. Please set the CASHCLIMB_ALPHAVANTAGEAPIKEY environment variable.
+java.io.IOException: Alpha Vantage API key not configured. Please set the CASHCLIMB_ALPHAVANTAGEAPIKEY environment variable.
+	at org.example.StockApiService.getApiKey(StockApiService.java:195)
+	at org.example.StockApiService.getStockQuote(StockApiService.java:240)
+	at org.example.StockHandler.handleAccountRequest(StockHandler.java:128)
+	at org.example.StockHandler.handle(StockHandler.java:83)
+	at jdk.httpserver/com.sun.net.httpserver.Filter$Chain.doFilter(Filter.java:98)
+	at jdk.httpserver/sun.net.httpserver.AuthFilter.doFilter(AuthFilter.java:82)
+	at jdk.httpserver/com.sun.net.httpserver.Filter$Chain.doFilter(Filter.java:101)
+	at jdk.httpserver/sun.net.httpserver.ServerImpl$Exchange$LinkHandler.handle(ServerImpl.java:871)
+	at jdk.httpserver/com.sun.net.httpserver.Filter$Chain.doFilter(Filter.java:98)
+	at org.example.Login$AuthFilter.doFilter(Login.java:316)
+	at jdk.httpserver/com.sun.net.httpserver.Filter$Chain.doFilter(Filter.java:101)
+	at jdk.httpserver/sun.net.httpserver.ServerImpl$Exchange.run(ServerImpl.java:847)
+	at jdk.httpserver/sun.net.httpserver.ServerImpl$DefaultExecutor.execute(ServerImpl.java:203)
+	at jdk.httpserver/sun.net.httpserver.ServerImpl$Dispatcher.handle(ServerImpl.java:566)
+	at jdk.httpserver/sun.net.httpserver.ServerImpl$Dispatcher.run(ServerImpl.java:531)
+	at java.base/java.lang.Thread.run(Thread.java:1583)
+2025-04-02 23:29:14 [main] INFO  org.example.ConfigManager - Configuration file loaded successfully
+2025-04-02 23:29:14 [main] WARN  org.example.ConfigManager - API key 'redis.enabled' not found in any configuration source
+2025-04-02 23:29:14 [main] INFO  org.example.StockApiService - Redis caching disabled, using local memory cache only

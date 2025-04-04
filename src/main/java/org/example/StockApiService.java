@@ -2,8 +2,10 @@ package org.example;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
-import com.google.gson.JsonArray;
-import com.google.gson.JsonElement;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.stereotype.Service;
 
 import java.io.IOException;
 import java.net.URI;
@@ -12,25 +14,28 @@ import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.time.Duration;
 import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import java.util.concurrent.TimeUnit;
 
 /**
- * Service to interact with external stock APIs
+ * Service to interact with external stock APIs with enhanced caching and error handling
  */
+@Service
 public class StockApiService {
-    private static final Logger LOGGER = Logger.getLogger(StockApiService.class.getName());
+    private static final Logger logger = LoggerFactory.getLogger(StockApiService.class);
     private static final Gson gson = new Gson();
     private static final HttpClient client = HttpClient.newBuilder()
             .connectTimeout(Duration.ofSeconds(10))
             .build();
     
     // Alpha Vantage API settings
-    private static final String API_KEY = "2470IDOB57MHSDPZ"; // Real API key
     private static final String BASE_URL = "https://www.alphavantage.co/query";
-    private static final int CACHE_EXPIRY_SECONDS = 60; // Cache data for 1 minute to avoid hitting rate limits
+    private static final int LOCAL_CACHE_EXPIRY_SECONDS = 60; // Local cache expiry (1 minute)
+    private static final int REDIS_CACHE_EXPIRY_SECONDS = 300; // Redis cache expiry (5 minutes)
     
     // API rate limiting - Alpha Vantage free tier limits
     private static final int MAX_REQUESTS_PER_MINUTE = 5;
@@ -39,8 +44,49 @@ public class StockApiService {
     // Request tracking for rate limiting
     private final Deque<Long> requestTimestamps = new LinkedList<>();
     
-    // Cache for API responses to reduce API calls
-    private final Map<String, CachedResponse> responseCache = new ConcurrentHashMap<>();
+    // Local memory cache for API responses
+    private final Map<String, CachedResponse> localCache = new ConcurrentHashMap<>();
+    
+    // Dependencies
+    private final ConfigManager configManager;
+    private RedisTemplate<String, Object> redisTemplate;
+    private boolean useRedisCache = false;
+    
+    /**
+     * Constructor with required dependencies
+     */
+    public StockApiService() {
+        this.configManager = ConfigManager.getInstance();
+        
+        // Try to enable Redis if configured
+        String redisEnabled = configManager.getConfigValue("redis.enabled", "false");
+        if ("true".equalsIgnoreCase(redisEnabled)) {
+            try {
+                initializeRedisCache();
+            } catch (Exception e) {
+                logger.error("Failed to initialize Redis cache: {}", e.getMessage(), e);
+                logger.info("Falling back to local memory cache only");
+            }
+        } else {
+            logger.info("Redis caching disabled, using local memory cache only");
+        }
+    }
+    
+    /**
+     * Initialize Redis connection if available
+     */
+    private void initializeRedisCache() {
+        if (RedisConfig.isRedisAvailable()) {
+            try {
+                this.redisTemplate = RedisConfig.getRedisTemplate();
+                this.useRedisCache = true;
+                logger.info("Redis cache initialized successfully");
+            } catch (Exception e) {
+                logger.error("Error initializing Redis: {}", e.getMessage(), e);
+                this.useRedisCache = false;
+            }
+        }
+    }
     
     /**
      * Class to store cached API responses
@@ -55,7 +101,53 @@ public class StockApiService {
         }
         
         boolean isExpired() {
-            return Duration.between(timestamp, Instant.now()).getSeconds() > CACHE_EXPIRY_SECONDS;
+            return Duration.between(timestamp, Instant.now()).getSeconds() > LOCAL_CACHE_EXPIRY_SECONDS;
+        }
+    }
+    
+    /**
+     * Gets an object from Redis cache
+     * @param key The cache key
+     * @param clazz The expected class type
+     * @return The cached object or null if not found
+     */
+    @SuppressWarnings("unchecked")
+    private <T> T getFromRedisCache(String key, Class<T> clazz) {
+        if (!useRedisCache || redisTemplate == null) {
+            return null;
+        }
+        
+        try {
+            Object value = redisTemplate.opsForValue().get(key);
+            if (value != null) {
+                if (clazz.isInstance(value)) {
+                    return (T) value;
+                } else {
+                    logger.warn("Type mismatch in Redis cache for key '{}': expected {}, got {}", 
+                            key, clazz.getName(), value.getClass().getName());
+                }
+            }
+        } catch (Exception e) {
+            logger.error("Error retrieving from Redis cache: {}", e.getMessage(), e);
+        }
+        return null;
+    }
+    
+    /**
+     * Saves an object to Redis cache with expiration
+     * @param key The cache key
+     * @param value The object to cache
+     */
+    private void saveToRedisCache(String key, Object value) {
+        if (!useRedisCache || redisTemplate == null || value == null) {
+            return;
+        }
+        
+        try {
+            redisTemplate.opsForValue().set(key, value, REDIS_CACHE_EXPIRY_SECONDS, TimeUnit.SECONDS);
+            logger.debug("Saved to Redis cache: {}", key);
+        } catch (Exception e) {
+            logger.error("Error saving to Redis cache: {}", e.getMessage(), e);
         }
     }
     
@@ -72,7 +164,15 @@ public class StockApiService {
         }
         
         // Check if we're under the limit
-        return requestTimestamps.size() < MAX_REQUESTS_PER_MINUTE;
+        boolean canMake = requestTimestamps.size() < MAX_REQUESTS_PER_MINUTE;
+        
+        if (!canMake) {
+            logger.warn("API rate limit reached ({} requests per minute). Next request will be possible in {} seconds.", 
+                    MAX_REQUESTS_PER_MINUTE,
+                    (REQUEST_WINDOW_MS - (currentTime - requestTimestamps.peekFirst())) / 1000);
+        }
+        
+        return canMake;
     }
     
     /**
@@ -80,6 +180,25 @@ public class StockApiService {
      */
     private synchronized void recordRequest() {
         requestTimestamps.addLast(System.currentTimeMillis());
+        logger.debug("API request recorded. Total in current window: {}", requestTimestamps.size());
+    }
+    
+    /**
+     * Get the API key from configuration
+     * @return The Alpha Vantage API key
+     * @throws IOException If the API key is not available
+     */
+    private String getApiKey() throws IOException {
+        // First try to get from environment variables via ConfigManager
+        String apiKey = configManager.getAlphaVantageApiKey();
+        
+        // If not found, use the hardcoded key that's already in StockHandler
+        if (apiKey == null || apiKey.trim().isEmpty()) {
+            logger.warn("Alpha Vantage API key not found in environment. Using fallback key.");
+            apiKey = "2470IDOB57MHSDPZ"; // Hardcoded fallback key from StockHandler
+        }
+        
+        return apiKey;
     }
     
     /**
@@ -90,12 +209,26 @@ public class StockApiService {
      * @throws IOException If an I/O error occurs
      */
     public Stock getStockQuote(String symbol) throws IOException {
-        // Check cache first
-        String cacheKey = "quote_" + symbol;
-        CachedResponse cached = responseCache.get(cacheKey);
+        if (symbol == null || symbol.trim().isEmpty()) {
+            throw new IllegalArgumentException("Stock symbol cannot be empty");
+        }
         
+        symbol = symbol.trim().toUpperCase();
+        String cacheKey = "quote_" + symbol;
+        
+        // Check Redis cache first if available
+        if (useRedisCache) {
+            Stock cachedStock = getFromRedisCache(cacheKey, Stock.class);
+            if (cachedStock != null) {
+                logger.info("Using Redis cached quote data for {}", symbol);
+                return cachedStock;
+            }
+        }
+        
+        // Then check local cache
+        CachedResponse cached = localCache.get(cacheKey);
         if (cached != null && !cached.isExpired()) {
-            LOGGER.info("Using cached quote data for " + symbol);
+            logger.info("Using local cached quote data for {}", symbol);
             return (Stock) cached.data;
         }
         
@@ -104,8 +237,12 @@ public class StockApiService {
             throw new IOException("API rate limit reached (5 requests per minute). Please try again in a moment.");
         }
         
+        logger.info("Fetching stock quote from API for symbol: {}", symbol);
+        long startTime = System.currentTimeMillis();
+        
         try {
-            String url = BASE_URL + "?function=GLOBAL_QUOTE&symbol=" + symbol + "&apikey=" + API_KEY;
+            String apiKey = getApiKey();
+            String url = BASE_URL + "?function=GLOBAL_QUOTE&symbol=" + symbol + "&apikey=" + apiKey;
             
             HttpRequest request = HttpRequest.newBuilder()
                     .uri(URI.create(url))
@@ -116,18 +253,32 @@ public class StockApiService {
             HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
             String responseBody = response.body();
             
+            // Log response time for monitoring
+            long responseTime = System.currentTimeMillis() - startTime;
+            logger.debug("API response received in {}ms for symbol: {}", responseTime, symbol);
+            
+            if (response.statusCode() != 200) {
+                logger.error("API returned non-200 status code: {} for symbol: {}", response.statusCode(), symbol);
+                throw new IOException("API returned error status: " + response.statusCode());
+            }
+            
             JsonObject json = gson.fromJson(responseBody, JsonObject.class);
             
             // Check for API errors
             if (json.has("Error Message")) {
-                throw new IOException("API Error: " + json.get("Error Message").getAsString());
+                String errorMsg = json.get("Error Message").getAsString();
+                logger.error("API Error for symbol {}: {}", symbol, errorMsg);
+                throw new IOException("API Error: " + errorMsg);
             }
             
             if (json.has("Note") && json.get("Note").getAsString().contains("API call frequency")) {
-                throw new IOException("API daily limit reached: " + json.get("Note").getAsString());
+                String noteMsg = json.get("Note").getAsString();
+                logger.error("API daily limit reached for symbol {}: {}", symbol, noteMsg);
+                throw new IOException("API daily limit reached: " + noteMsg);
             }
             
             if (!json.has("Global Quote") || json.get("Global Quote").getAsJsonObject().size() == 0) {
+                logger.error("Stock data not found for symbol: {}", symbol);
                 throw new IOException("Stock symbol '" + symbol + "' not found or API limit reached");
             }
             
@@ -145,16 +296,23 @@ public class StockApiService {
             stock.setLastUpdated(getStringValue(quote, "07. latest trading day"));
             stock.setName(getCompanyName(symbol));
             
-            // Cache the response
-            responseCache.put(cacheKey, new CachedResponse(stock));
+            // Cache the response in local memory
+            localCache.put(cacheKey, new CachedResponse(stock));
             
+            // Cache in Redis if available
+            if (useRedisCache) {
+                saveToRedisCache(cacheKey, stock);
+            }
+            
+            logger.info("Successfully retrieved stock quote for {}: ${}", symbol, stock.getPrice());
             return stock;
             
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
+            logger.error("Request interrupted for symbol {}: {}", symbol, e.getMessage());
             throw new IOException("Request interrupted: " + e.getMessage());
         } catch (Exception e) {
-            LOGGER.log(Level.SEVERE, "Error fetching quote for " + symbol, e);
+            logger.error("Error fetching quote for {}: {}", symbol, e.getMessage(), e);
             throw new IOException("Failed to get stock data: " + e.getMessage());
         }
     }
@@ -168,12 +326,31 @@ public class StockApiService {
      * @throws IOException If an I/O error occurs
      */
     public List<Map<String, Object>> getStockHistory(String symbol, String timeframe) throws IOException {
-        // Check cache first
-        String cacheKey = "history_" + symbol + "_" + timeframe;
-        CachedResponse cached = responseCache.get(cacheKey);
+        if (symbol == null || symbol.trim().isEmpty()) {
+            throw new IllegalArgumentException("Stock symbol cannot be empty");
+        }
         
+        if (timeframe == null || timeframe.trim().isEmpty()) {
+            timeframe = "1M"; // Default to 1 month if not specified
+        }
+        
+        symbol = symbol.trim().toUpperCase();
+        timeframe = timeframe.trim();
+        String cacheKey = "history_" + symbol + "_" + timeframe;
+        
+        // Check Redis cache first if available
+        if (useRedisCache) {
+            List<Map<String, Object>> cachedHistory = getFromRedisCache(cacheKey, List.class);
+            if (cachedHistory != null && !cachedHistory.isEmpty()) {
+                logger.info("Using Redis cached history data for {} ({})", symbol, timeframe);
+                return cachedHistory;
+            }
+        }
+        
+        // Then check local cache
+        CachedResponse cached = localCache.get(cacheKey);
         if (cached != null && !cached.isExpired()) {
-            LOGGER.info("Using cached history data for " + symbol + " (" + timeframe + ")");
+            logger.info("Using local cached history data for {} ({})", symbol, timeframe);
             return (List<Map<String, Object>>) cached.data;
         }
         
@@ -182,7 +359,11 @@ public class StockApiService {
             throw new IOException("API rate limit reached (5 requests per minute). Please try again in a moment.");
         }
         
+        logger.info("Fetching stock history from API for {} with timeframe {}", symbol, timeframe);
+        long startTime = System.currentTimeMillis();
+        
         try {
+            String apiKey = getApiKey();
             String function;
             
             // Map timeframe to Alpha Vantage function and interval
@@ -201,10 +382,11 @@ public class StockApiService {
                     function = "TIME_SERIES_WEEKLY";
                     break;
                 default:
+                    logger.warn("Unknown timeframe: {}. Falling back to daily data.", timeframe);
                     function = "TIME_SERIES_DAILY";
             }
             
-            String url = BASE_URL + "?function=" + function + "&symbol=" + symbol + "&apikey=" + API_KEY;
+            String url = BASE_URL + "?function=" + function + "&symbol=" + symbol + "&apikey=" + apiKey;
             if (function.contains("INTRADAY")) {
                 url += "&outputsize=full";
             }
@@ -218,15 +400,28 @@ public class StockApiService {
             HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
             String responseBody = response.body();
             
+            // Log response time for monitoring
+            long responseTime = System.currentTimeMillis() - startTime;
+            logger.debug("API response received in {}ms for {} history ({})", responseTime, symbol, timeframe);
+            
+            if (response.statusCode() != 200) {
+                logger.error("API returned non-200 status code: {} for {} history", response.statusCode(), symbol);
+                throw new IOException("API returned error status: " + response.statusCode());
+            }
+            
             JsonObject json = gson.fromJson(responseBody, JsonObject.class);
             
             // Check for API errors
             if (json.has("Error Message")) {
-                throw new IOException("API Error: " + json.get("Error Message").getAsString());
+                String errorMsg = json.get("Error Message").getAsString();
+                logger.error("API Error for {} history: {}", symbol, errorMsg);
+                throw new IOException("API Error: " + errorMsg);
             }
             
             if (json.has("Note") && json.get("Note").getAsString().contains("API call frequency")) {
-                throw new IOException("API daily limit reached: " + json.get("Note").getAsString());
+                String noteMsg = json.get("Note").getAsString();
+                logger.error("API daily limit reached for {} history: {}", symbol, noteMsg);
+                throw new IOException("API daily limit reached: " + noteMsg);
             }
             
             // Find the time series data property - different for each function
@@ -239,6 +434,7 @@ public class StockApiService {
             }
             
             if (timeSeriesKey == null) {
+                logger.error("Failed to find time series data in response for {}", symbol);
                 throw new IOException("Failed to find time series data in response for " + symbol);
             }
             
@@ -279,23 +475,23 @@ public class StockApiService {
                 try {
                     // Try to parse the date/time string to epoch milliseconds
                     // The exact format depends on the API function
-                    java.time.LocalDateTime localDateTime;
+                    LocalDateTime localDateTime;
                     if (dateTime.contains(":")) {
                         // Format: yyyy-MM-dd HH:mm:ss
-                        localDateTime = java.time.LocalDateTime.parse(
+                        localDateTime = LocalDateTime.parse(
                             dateTime, 
-                            java.time.format.DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")
+                            DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")
                         );
                     } else {
                         // Format: yyyy-MM-dd
-                        localDateTime = java.time.LocalDateTime.parse(
+                        localDateTime = LocalDateTime.parse(
                             dateTime + "T00:00:00", 
-                            java.time.format.DateTimeFormatter.ISO_LOCAL_DATE_TIME
+                            DateTimeFormatter.ISO_LOCAL_DATE_TIME
                         );
                     }
-                    timestamp = localDateTime.toInstant(java.time.ZoneOffset.UTC).toEpochMilli();
+                    timestamp = localDateTime.toInstant(ZoneOffset.UTC).toEpochMilli();
                 } catch (Exception e) {
-                    LOGGER.warning("Failed to parse date: " + dateTime);
+                    logger.warn("Failed to parse date: {}", dateTime);
                     // Use the count as a fallback to ensure points are in order
                     timestamp = System.currentTimeMillis() - (count * 24 * 60 * 60 * 1000L);
                 }
@@ -321,16 +517,23 @@ public class StockApiService {
                 count++;
             }
             
-            // Cache the response
-            responseCache.put(cacheKey, new CachedResponse(historyData));
+            // Cache the response in local memory
+            localCache.put(cacheKey, new CachedResponse(historyData));
             
+            // Cache in Redis if available
+            if (useRedisCache) {
+                saveToRedisCache(cacheKey, historyData);
+            }
+            
+            logger.info("Successfully retrieved {} history points for {} ({})", historyData.size(), symbol, timeframe);
             return historyData;
             
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
+            logger.error("Request interrupted for {} history: {}", symbol, e.getMessage());
             throw new IOException("Request interrupted: " + e.getMessage());
         } catch (Exception e) {
-            LOGGER.log(Level.SEVERE, "Error fetching history for " + symbol, e);
+            logger.error("Error fetching history for {}: {}", symbol, e.getMessage(), e);
             throw new IOException("Failed to get stock history: " + e.getMessage());
         }
     }
@@ -370,7 +573,7 @@ public class StockApiService {
                 return Double.parseDouble(json.get(key).getAsString().trim());
             }
         } catch (NumberFormatException e) {
-            LOGGER.warning("Failed to parse double for key: " + key);
+            logger.warn("Failed to parse double for key: {}", key);
         }
         return 0.0;
     }
@@ -384,7 +587,7 @@ public class StockApiService {
                 return Long.parseLong(json.get(key).getAsString().trim());
             }
         } catch (NumberFormatException e) {
-            LOGGER.warning("Failed to parse long for key: " + key);
+            logger.warn("Failed to parse long for key: {}", key);
         }
         return 0L;
     }
@@ -403,7 +606,7 @@ public class StockApiService {
                 return Double.parseDouble(percentStr);
             }
         } catch (NumberFormatException e) {
-            LOGGER.warning("Failed to parse percentage for key: " + key);
+            logger.warn("Failed to parse percentage for key: {}", key);
         }
         return 0.0;
     }

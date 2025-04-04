@@ -1,50 +1,141 @@
-# Cash Climb - Financial Management Application
+# CashClimb Financial Management Application
 
-Cash Climb is designed to help users effectively manage their finances, track their expenses, and monitor their wealth growth over time. It integrates advanced features like a crypto wallet, personalized financial insights, and secure account management to provide a comprehensive financial tool.
+CashClimb is a comprehensive financial management application that helps users track their expenses, manage budgets, monitor investments, and gain insights into their financial health.
 
-#### Features
+## 🌟 Key Features
 
-1. **Secure Login with OAuth**
-    - Users can securely sign up and log in using OAuth integrations with Google, ensuring all financial data and user accounts are protected.
+- **Dashboard**: Visualize your financial health with dynamic charts and metrics
+- **Budgeting & Goals**: Set financial goals and track your progress
+- **Expense Tracking**: Log and categorize expenses
+- **Investment Management**: Track stocks and cryptocurrency investments
+- **Secure Authentication**: User accounts with Firebase authentication
 
-2. **Regex Input Validation**
-    - Validates all user inputs such as email, monetary values, and crypto transactions using regular expressions to ensure data integrity and formatting consistency.
+## 🚀 Technical Highlights
 
-3. **Dashboard**
-    - Offers a holistic view of the user's financial health, displaying key metrics such as total net worth, expenses, savings, and investment values.
+### Architecture
 
-4. **Expense Tracker**
-    - Allows users to input daily expenses categorically and see how these impact their overall financial goals and monthly budget.
+- **Backend**: Java Spring Boot application
+- **Frontend**: Custom HTML/CSS/JS with responsive design
+- **Database**: Firestore for data persistence
+- **Authentication**: Firebase Authentication
+- **API Integration**: Stock market and cryptocurrency data APIs
 
-5. **Net Worth Calculator**
-    - Dynamically calculates and displays the user’s net worth by aggregating assets (including crypto investments) and subtracting liabilities.
+### Recent Improvements
 
-6. **Crypto Wallet Integration**
-    - Provides a secure interface to manage cryptocurrency transactions, view balances, and track performance directly within the app.
+#### Enhanced Error Handling & Logging
+- Implemented SLF4J with Logback for structured logging
+- Added comprehensive error tracking and contextual logs
+- Created logback.xml with console and file appenders
 
-7. **Settings with Personalization Options**
-    - Enables users to customize the app interface with themes that reflect their style and preference, ensuring a personalized user experience.
+#### Advanced Security Measures
+- Removed hardcoded API keys and replaced with secure configuration
+- Multiple credential sources (environment variables, AWS Secrets Manager, config files)
+- API key rotation support
 
-8. **Thread-Safe Operations**
-    - Guarantees that changes in the settings and updates to financial data are handled safely in a multi-threaded environment to avoid data inconsistency.
+#### Distributed Caching with Redis
+- Added Redis integration for high-performance caching
+- Fallback to local caching when Redis is unavailable
+- Configurable cache timeouts for different data types
 
-9. **Account Management**
-    - Offers features to update user profile details, change passwords, and securely delete accounts with all associated data.
+#### Automated Testing
+- Comprehensive unit tests with JUnit and Mockito
+- Test coverage for critical service components
+- Reflection-based testing for private methods
 
-10. **Real-Time Financial Insights**
-    - Provides real-time analytics on spending habits, investment returns, and alerts for unusual activities to help users stay informed and proactive.
+#### CI/CD Pipeline
+- GitHub Actions workflow for continuous integration
+- Automated build, test, and analysis
+- Prepared for SonarCloud code quality analysis
 
-#### Technologies Used
+#### Containerization
+- Docker support for consistent deployment
+- Containerized application with proper resource configuration
 
-- **HTML/CSS**: For structuring and styling the user interface, ensuring a clean and modern look.
-- **JavaFX**: Utilized for building a smooth and responsive user interface, providing users with an enjoyable experience navigating their financial data.
-- **Regex**: Used extensively to validate input formats like emails, monetary values, and crypto addresses.
-- **Thread Safety**: Critical for ensuring that user interactions with the app remain consistent and error-free across different threads, especially when dealing with financial data.
-- **Crypto API Integration**: Connects with popular crypto platforms to retrieve wallet information and facilitate transactions.
+## 🛠️ Getting Started
 
-#### Enhancing User Experience
+### Prerequisites
+- Java 17 or higher
+- Maven 3.6+
+- Redis (optional, for distributed caching)
 
-- **User-Friendly Interface**: Designed with simplicity in mind, using clear layouts and intuitive controls to make financial management accessible to everyone.
-- **Interactive Guides**: Hover tips and guided walkthroughs to help new users understand how to manage their finances using the app.
-- **Responsive Design**: Ensures that the app performs well on both desktop and mobile platforms, allowing users to manage their finances on the go.
+### Configuration
 
+1. Configure environment variables:
+   ```
+   CASHCLIMB_ALPHAVANTAGEAPIKEY=your_api_key
+   CASHCLIMB_COINMARKETCAPAPIKEY=your_api_key
+   CASHCLIMB_ETHERSCANAPI=your_api_key
+   ```
+
+2. For Redis (optional):
+   ```
+   CASHCLIMB_REDIS_ENABLED=true
+   CASHCLIMB_REDIS_HOST=localhost
+   CASHCLIMB_REDIS_PORT=6379
+   CASHCLIMB_REDIS_PASSWORD=your_redis_password  # if required
+   ```
+
+3. For AWS Secrets Manager (optional):
+   ```
+   USE_AWS_SECRETS=true
+   AWS_REGION=us-east-1
+   AWS_ACCESS_KEY_ID=your_access_key
+   AWS_SECRET_ACCESS_KEY=your_secret_key
+   ```
+
+### Building the Application
+
+```bash
+mvn clean install
+```
+
+### Running the Application
+
+```bash
+java -jar target/firebase-login-app-1.0.0.jar
+```
+
+### Using Docker
+
+Build the Docker image:
+```bash
+docker build -t cashclimb:latest .
+```
+
+Run the container:
+```bash
+docker run -p 8080:8080 \
+  -e CASHCLIMB_ALPHAVANTAGEAPIKEY=your_api_key \
+  -e CASHCLIMB_REDIS_ENABLED=false \
+  cashclimb:latest
+```
+
+## 🧪 Testing
+
+Run the test suite:
+```bash
+mvn test
+```
+
+## 📚 API Documentation
+
+[API Documentation](docs/api.md) - Details about the available endpoints and request/response formats.
+
+## 📊 Monitoring
+
+Application exposes Actuator endpoints for monitoring:
+- Health: `/actuator/health`
+- Metrics: `/actuator/metrics`
+- Prometheus: `/actuator/prometheus`
+
+## 🌐 Frontend Access
+
+Once running, access the application at: http://localhost:8080
+
+## 🔧 Contributing
+
+See [CONTRIBUTING.md](CONTRIBUTING.md) for development guidelines.
+
+## 📄 License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
