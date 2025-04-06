@@ -57,6 +57,9 @@ public class Login {
         HttpContext apiStockSymbolContext = server.createContext("/api/stocks/", new StockHandler());
         apiStockSymbolContext.getFilters().add(new AuthFilter());
         
+        // Add Firebase diagnostic endpoint
+        server.createContext("/api/diagnostic/firebase", new FirebaseDiagnosticHandler());
+        
         server.createContext("/logout", new LogoutHandler());
 
         server.setExecutor(null);
