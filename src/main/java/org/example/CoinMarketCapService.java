@@ -41,8 +41,9 @@ public class CoinMarketCapService {
         }
         
         if (apiKey == null || apiKey.isEmpty()) {
-            LOGGER.warning("CoinMarketCap API key is not configured, returning fallback data");
-            return getFallbackPrice(symbol);
+            String errorMsg = "CoinMarketCap API key is not configured";
+            LOGGER.severe(errorMsg);
+            throw new IOException(errorMsg);
         }
         
         Exception lastException = null;
@@ -65,9 +66,10 @@ public class CoinMarketCapService {
             }
         }
         
-        LOGGER.severe("All API attempts failed for " + symbol + ". Last error: " + 
-                     (lastException != null ? lastException.getMessage() : "Unknown error"));
-        return getFallbackPrice(symbol);
+        String errorMsg = "All API attempts failed for " + symbol + ". Last error: " + 
+                     (lastException != null ? lastException.getMessage() : "Unknown error");
+        LOGGER.severe(errorMsg);
+        throw new IOException(errorMsg);
     }
     
     private CoinPrice fetchPriceFromApi(String symbol) throws IOException, JSONException {
@@ -125,24 +127,7 @@ public class CoinMarketCapService {
         }
     }
     
-    private CoinPrice getFallbackPrice(String symbol) {
-        LOGGER.info("Using fallback price data for " + symbol);
-        
-        if (symbol.equalsIgnoreCase("BTC")) {
-            return new CoinPrice(
-                77865.91,
-                -6.73
-            );
-        } else if (symbol.equalsIgnoreCase("ETH")) {
-            return new CoinPrice(
-                3895.42,
-                -5.51
-            );
-        } else {
-            LOGGER.warning("No fallback data available for symbol: " + symbol);
-            return new CoinPrice(100.0, 0.0);
-        }
-    }
+    // Removed fallback method to ensure only real API data is used
 }
 
 record CoinPrice(double currentPrice, double priceChangePercentage24h) {}
