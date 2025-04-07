@@ -127,8 +127,7 @@ public class BlockchainApiService {
                                       coinPrice.priceChangePercentage24h(), 0.0, 0.0);
             } catch (Exception fallbackEx) {
                 LOGGER.log(Level.SEVERE, "Fallback to CoinMarketCap also failed: " + fallbackEx.getMessage(), fallbackEx);
-                // Last resort fallback - use static reasonable values that won't break the UI
-                return new WalletInfo(0.0, new ArrayList<>(), 65000.0, 1.2, 1300000000000.0, 45000000000.0);
+                throw new IOException("All API attempts failed and no real-time data is available");
             }
         }
     }
@@ -188,17 +187,11 @@ public class BlockchainApiService {
                     // Get 24h price change from CoinGecko since Etherscan doesn't provide it
                     if (market.has("price_change_percentage_24h")) {
                         priceChange = market.getDouble("price_change_percentage_24h");
-                    } else {
-                        // Fallback to a random value if needed
-                        priceChange = (Math.random() * 10) - 5;
                     }
                 }
             } catch (Exception e) {
                 LOGGER.log(Level.WARNING, "Error fetching Ethereum market data from CoinGecko: " + e.getMessage());
-                // Fallback to a random value if CoinGecko fails
-                if (priceChange == 0.0) {
-                    priceChange = (Math.random() * 10) - 5;
-                }
+                // No longer using random fallback values
             }
 
             // Get transactions
@@ -230,8 +223,7 @@ public class BlockchainApiService {
                                      coinPrice.priceChangePercentage24h(), 0.0, 0.0);
             } catch (Exception fallbackEx) {
                 LOGGER.log(Level.SEVERE, "Fallback to CoinMarketCap also failed: " + fallbackEx.getMessage(), fallbackEx);
-                // Last resort fallback - use static reasonable values that won't break the UI
-                return new WalletInfo(0.0, new ArrayList<>(), 3900.0, 0.8, 470000000000.0, 22000000000.0);
+                throw new IOException("All API attempts failed and no real-time data is available for Ethereum");
             }
         }
     }
@@ -472,25 +464,7 @@ public class BlockchainApiService {
             }
         }
         
-        // If no cached fallback and alternative API failed, return a mock structure as a last resort
-        // This helps avoid UI breakage when APIs are completely down
-        if (url.contains("coingecko.com")) {
-            if (url.contains("/bitcoin")) {
-                LOGGER.info("Returning mock Bitcoin market data structure");
-                return createMockBitcoinMarketData();
-            } else if (url.contains("/ethereum")) {
-                LOGGER.info("Returning mock Ethereum market data structure");
-                return createMockEthereumMarketData();
-            }
-        } else if (url.contains("blockchain.info/ticker")) {
-            LOGGER.info("Returning mock Bitcoin ticker structure");
-            return createMockBitcoinTickerData();
-        } else if (url.contains("etherscan.io") && url.contains("ethprice")) {
-            LOGGER.info("Returning mock Ethereum price structure");
-            return createMockEthereumPriceData();
-        }
-
-        // If no cached fallback and no mock structure available, throw exception
+        // No more mock data - throw exception indicating the real API call failed
         throw new IOException("API call failed after multiple retries and no fallback available");
     }
     

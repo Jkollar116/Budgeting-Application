@@ -197,40 +197,9 @@ public class CryptoApiHandler implements HttpHandler {
                 System.out.println("Getting full wallet info for: " + address + " (" + type + ")");
                 info = walletService.getWalletInfo(address, type);
             } catch (Exception e) {
-                System.err.println("Error getting primary wallet info: " + e.getMessage());
-                
-                // If we can't get data from primary service, create fallback data
-                // This ensures the UI doesn't break even if all APIs are down
-                if (info == null) {
-                    if (type.equals("BTC")) {
-                        info = new WalletInfo(
-                            0.0, 
-                            new ArrayList<>(), 
-                            77865.91,  // Current BTC price
-                            -6.73,     // 24h change
-                            1545461492217.65, // Market cap
-                            38627949290.95    // Volume
-                        );
-                        System.out.println("Using fallback BTC data: Price=" + info.currentPrice());
-                    } else if (type.equals("ETH")) {
-                        info = new WalletInfo(
-                            0.0, 
-                            new ArrayList<>(), 
-                            3895.42,   // Current ETH price
-                            -5.51,     // 24h change
-                            467450400000.0, // Market cap
-                            23372520000.0   // Volume
-                        );
-                        System.out.println("Using fallback ETH data: Price=" + info.currentPrice());
-                    }
-                }
-            }
-            
-            if (info == null) {
-                sendResponse(exchange, new JSONObject()
-                    .put("error", "Failed to get wallet info and no fallback available")
-                    .toString(), 500);
-                return;
+                // Throw the error to be handled by the outer catch block
+                System.err.println("Error getting wallet info: " + e.getMessage());
+                throw e;
             }
             
             // Create response JSON with all wallet fields
@@ -264,28 +233,12 @@ public class CryptoApiHandler implements HttpHandler {
             System.err.println("Critical error in handleGetWalletInfo: " + e.getMessage());
             e.printStackTrace();
             
-            // Always send something back that the UI can display
-            JSONObject fallbackResponse = new JSONObject();
-            if (type != null && type.equals("BTC")) {
-                fallbackResponse.put("currentPrice", 77865.91);
-                fallbackResponse.put("priceChange24h", -6.73);
-                fallbackResponse.put("marketCap", 1545461492217.65);
-                fallbackResponse.put("volume24h", 38627949290.95);
-            } else {
-                fallbackResponse.put("currentPrice", 3895.42);
-                fallbackResponse.put("priceChange24h", -5.51);
-                fallbackResponse.put("marketCap", 467450400000.0);
-                fallbackResponse.put("volume24h", 23372520000.0);
-            }
+            // Send an error response with the actual error message
+            JSONObject errorResponse = new JSONObject();
+            errorResponse.put("error", "Unable to fetch real-time data: " + e.getMessage());
             
-            if (address != null) {
-                fallbackResponse.put("balance", 0.0);
-                fallbackResponse.put("value", 0.0);
-                fallbackResponse.put("transactions", new JSONArray());
-            }
-            
-            System.out.println("Sending fallback data to client due to error");
-            sendResponse(exchange, fallbackResponse.toString(), 200);
+            System.out.println("Sending error response to client");
+            sendResponse(exchange, errorResponse.toString(), 500);
         }
     }
     
