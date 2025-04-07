@@ -17,7 +17,10 @@ import java.util.Optional;
  */
 public class ConfigManager {
     private static final Logger logger = LoggerFactory.getLogger(ConfigManager.class);
-    private static final String CONFIG_FILE = "src/main/resources/keys.json";
+    // File path for direct access (development)
+    private static final String CONFIG_FILE_PATH = "src/main/resources/keys.json";
+    // Resource path for JAR access (production)
+    private static final String CONFIG_RESOURCE_PATH = "/keys.json";
     private static final String ENV_PREFIX = "CASHCLIMB_";
     
     private static ConfigManager instance;
@@ -29,16 +32,63 @@ public class ConfigManager {
      */
     private ConfigManager() {
         fileConfig = new JSONObject();
+        boolean configLoaded = false;
         
-        // Load configuration file
+        // First try: Load from file path (for development environment)
         try {
-            String content = new String(Files.readAllBytes(Paths.get(CONFIG_FILE)));
-            fileConfig = new JSONObject(content);
-            logger.info("Configuration file loaded successfully");
+            if (Files.exists(Paths.get(CONFIG_FILE_PATH))) {
+                String content = new String(Files.readAllBytes(Paths.get(CONFIG_FILE_PATH)));
+                fileConfig = new JSONObject(content);
+                logger.info("Configuration file loaded successfully from file path");
+                configLoaded = true;
+            }
         } catch (IOException e) {
-            logger.error("Failed to read configuration file: {}", e.getMessage(), e);
+            logger.debug("Could not load config from file path: {}", e.getMessage());
         } catch (JSONException e) {
-            logger.error("Failed to parse configuration: {}", e.getMessage(), e);
+            logger.error("Failed to parse configuration from file path: {}", e.getMessage());
+        }
+        
+        // Second try: Load from classpath resource (for JAR deployment)
+        if (!configLoaded) {
+            try (java.io.InputStream is = getClass().getResourceAsStream(CONFIG_RESOURCE_PATH)) {
+                if (is != null) {
+                    byte[] buffer = new byte[is.available()];
+                    is.read(buffer);
+                    String content = new String(buffer);
+                    fileConfig = new JSONObject(content);
+                    logger.info("Configuration file loaded successfully from classpath");
+                    configLoaded = true;
+                }
+            } catch (IOException e) {
+                logger.error("Failed to read configuration from classpath: {}", e.getMessage(), e);
+            } catch (JSONException e) {
+                logger.error("Failed to parse configuration from classpath: {}", e.getMessage(), e);
+            }
+        }
+        
+        // Hardcoded fallback values for critical API keys
+        if (!configLoaded || !fileConfig.has("coinMarketCapApiKey")) {
+            logger.warn("Using hardcoded API keys as fallback!");
+            try {
+                // Add hardcoded API keys
+                fileConfig.put("coinMarketCapApiKey", "e2fa2fa3-ef84-4e08-8a73-ae43c073ab0d");
+                fileConfig.put("etherscanApiKey", "G6YJ1PGVSDWY8VP11ZKYPQJ78VWIE7YAUQ");
+            } catch (JSONException e) {
+                logger.error("Failed to add hardcoded API keys: {}", e.getMessage());
+            }
+        }
+        
+        // Log loaded keys (partially hidden for security)
+        for (String key : new String[]{"coinMarketCapApiKey", "etherscanApiKey"}) {
+            if (fileConfig.has(key)) {
+                String value = fileConfig.optString(key, "");
+                if (!value.isEmpty()) {
+                    String maskedValue = value.length() > 8 
+                        ? value.substring(0, 4) + "..." + value.substring(value.length() - 4)
+                        : "***";
+                    logger.info("Loaded key: {} = {}", key, maskedValue);
+                }
+            }
         }
     }
 

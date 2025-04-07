@@ -36,7 +36,7 @@ public class Login {
         HttpContext apiChatContext = server.createContext("/api/chat", new ChatHandler());
         apiChatContext.getFilters().add(new AuthFilter());
         // Register CryptoApiHandler at the correct endpoint used by the frontend
-        HttpContext apiWalletContext = server.createContext("/api/wallet", new CryptoApiHandler());
+        HttpContext apiWalletContext = server.createContext("/api/wallet", new org.example.CryptoApiHandler());
         apiWalletContext.getFilters().add(new AuthFilter());
         
         // Added context for expenses endpoint
@@ -339,14 +339,5 @@ public class Login {
             os.close();
         }
     }
-    static class CryptoApiHandler implements HttpHandler {
-        @Override
-        public void handle(HttpExchange exchange) throws IOException {
-            String response = "Protected crypto data";
-            exchange.sendResponseHeaders(200, response.length());
-            OutputStream os = exchange.getResponseBody();
-            os.write(response.getBytes());
-            os.close();
-        }
-    }
+    // Removed stub CryptoApiHandler implementation since we're using the full implementation from org.example.CryptoApiHandler
 }

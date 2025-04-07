@@ -196,3 +196,14 @@ java.io.IOException: Alpha Vantage API key not configured. Please set the CASHCL
 2025-04-02 23:29:14 [main] INFO  org.example.ConfigManager - Configuration file loaded successfully
 2025-04-02 23:29:14 [main] WARN  org.example.ConfigManager - API key 'redis.enabled' not found in any configuration source
 2025-04-02 23:29:14 [main] INFO  org.example.StockApiService - Redis caching disabled, using local memory cache only
+2025-04-06 20:20:39 [main] INFO  org.example.ConfigManager - Configuration file loaded successfully
+2025-04-06 20:20:39 [main] WARN  org.example.ConfigManager - API key 'redis.enabled' not found in any configuration source
+2025-04-06 20:20:39 [main] INFO  org.example.StockApiService - Redis caching disabled, using local memory cache only
+2025-04-06 20:42:37 [main] INFO  org.example.ConfigManager - Configuration file loaded successfully
+2025-04-06 20:42:37 [main] WARN  org.example.ConfigManager - API key 'redis.enabled' not found in any configuration source
+2025-04-06 20:42:37 [main] INFO  org.example.StockApiService - Redis caching disabled, using local memory cache only
+2025-04-06 21:14:32 [main] INFO  org.example.ConfigManager - Configuration file loaded successfully from file path
+2025-04-06 21:14:32 [main] INFO  org.example.ConfigManager - Loaded key: coinMarketCapApiKey = e2fa...ab0d
+2025-04-06 21:14:32 [main] INFO  org.example.ConfigManager - Loaded key: etherscanApiKey = G6YJ...YAUQ
+2025-04-06 21:15:05 [main] WARN  org.example.ConfigManager - API key 'redis.enabled' not found in any configuration source
+2025-04-06 21:15:05 [main] INFO  org.example.StockApiService - Redis caching disabled, using local memory cache only
