@@ -539,14 +539,15 @@
     function addWallet(label, address, cryptoType) {
         console.log(`Adding wallet: ${label}, ${address}, ${cryptoType}`);
 
-        const newWallet = {
+        // Create wallet with temporary placeholder data first
+        const temporaryWallet = {
             id: Date.now().toString(), // Add unique ID for each wallet
             label: label,
             address: address,
             cryptoType: cryptoType,
-            balance: cryptoType === 'BTC' ? 3084.31624354 : 150.45678912,
-            value: cryptoType === 'BTC' ? 290852227.31 : 450678.23,
-            change24h: cryptoType === 'BTC' ? -1.38 : 2.45,
+            balance: 0,
+            value: 0,
+            change24h: 0,
             lastUpdated: new Date().toISOString()
         };
 
@@ -558,12 +559,50 @@
             return;
         }
 
-        wallets.push(newWallet);
+        // Add temporary wallet first so the UI updates immediately
+        wallets.push(temporaryWallet);
         localStorage.setItem('wallets', JSON.stringify(wallets));
         loadWallets();
-
-        // Show success message
-        showMessage(`Added ${cryptoType} wallet: ${label}`);
+        
+        showMessage(`Adding wallet ${label}, fetching real-time data...`);
+        
+        // Fetch real-time data for the new wallet
+        const apiUrl = `/api/wallet?address=${encodeURIComponent(address)}&type=${encodeURIComponent(cryptoType)}`;
+        
+        fetch(apiUrl)
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`API call failed: ${response.status}`);
+                }
+                return response.json();
+            })
+            .then(data => {
+                // Update wallet with real data from API
+                let updatedWallets = JSON.parse(localStorage.getItem('wallets') || '[]');
+                const walletIndex = updatedWallets.findIndex(w => w.id === temporaryWallet.id);
+                
+                if (walletIndex !== -1) {
+                    // Update with real data
+                    updatedWallets[walletIndex].balance = data.balance;
+                    updatedWallets[walletIndex].value = data.value;
+                    updatedWallets[walletIndex].change24h = data.priceChange24h || data.change24h;
+                    updatedWallets[walletIndex].lastUpdated = new Date().toISOString();
+                    
+                    if (data.transactions && data.transactions.length > 0) {
+                        updatedWallets[walletIndex].transactions = data.transactions;
+                    }
+                    
+                    // Save updated wallets
+                    localStorage.setItem('wallets', JSON.stringify(updatedWallets));
+                    loadWallets();
+                    
+                    showMessage(`${cryptoType} wallet added with real-time data`);
+                }
+            })
+            .catch(error => {
+                console.error(`Error adding wallet with real-time data:`, error);
+                showError(`Added wallet with placeholder data. Real-time data could not be fetched.`);
+            });
     }
 
     function loadWallets() {
@@ -845,9 +884,9 @@
         const wallet = TEST_WALLETS.BTC[currentBTCIndex % TEST_WALLETS.BTC.length];
         currentBTCIndex++;
         
-        // Add unique suffix to make the address unique each time
-        const uniqueAddress = wallet.address + "-" + Date.now().toString().substr(-6);
-        addWallet(wallet.label + " " + currentBTCIndex, uniqueAddress, "BTC");
+        // Use the actual wallet address without modification
+        // This ensures it's a valid address for the blockchain API
+        addWallet(wallet.label + " " + currentBTCIndex, wallet.address, "BTC");
     }
 
     function addTestEthereumWallet() {
@@ -855,9 +894,9 @@
         const wallet = TEST_WALLETS.ETH[currentETHIndex % TEST_WALLETS.ETH.length];
         currentETHIndex++;
         
-        // Add unique suffix to make the address unique each time
-        const uniqueAddress = wallet.address + "-" + Date.now().toString().substr(-6);
-        addWallet(wallet.label + " " + currentETHIndex, uniqueAddress, "ETH");
+        // Use the actual wallet address without modification
+        // This ensures it's a valid address for the blockchain API
+        addWallet(wallet.label + " " + currentETHIndex, wallet.address, "ETH");
     }
 
     function refreshAllWallets() {
@@ -868,16 +907,62 @@
             return;
         }
 
-        wallets.forEach(wallet => {
-            const changePercent = (Math.random() * 4) - 2; // Random change between -2% and 2%
-            wallet.value = wallet.value * (1 + (changePercent / 100));
-            wallet.change24h = changePercent;
-            wallet.lastUpdated = new Date().toISOString();
+        showMessage(`Refreshing ${wallets.length} wallets with real-time data...`);
+        
+        // Count how many wallets have been refreshed
+        let refreshedCount = 0;
+        let errorCount = 0;
+        
+        // Create a promise for each wallet refresh
+        const refreshPromises = wallets.map(wallet => {
+            // Create API URL for this wallet
+            const apiUrl = `/api/wallet?address=${encodeURIComponent(wallet.address)}&type=${encodeURIComponent(wallet.cryptoType)}`;
+            
+            // Return a promise for this wallet refresh
+            return fetch(apiUrl)
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error(`API call failed: ${response.status}`);
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    // Update wallet with real data from API
+                    wallet.balance = data.balance;
+                    wallet.value = data.value;
+                    wallet.change24h = data.priceChange24h || data.change24h;
+                    wallet.lastUpdated = new Date().toISOString();
+                    
+                    if (data.transactions && data.transactions.length > 0) {
+                        wallet.transactions = data.transactions;
+                    }
+                    
+                    refreshedCount++;
+                    return wallet;
+                })
+                .catch(error => {
+                    console.error(`Error refreshing wallet ${wallet.label}:`, error);
+                    errorCount++;
+                    return wallet; // Return wallet unmodified on error
+                });
         });
-
-        localStorage.setItem('wallets', JSON.stringify(wallets));
-        loadWallets();
-        showMessage(`Refreshed ${wallets.length} wallets`);
+        
+        // Wait for all refresh operations to complete
+        Promise.all(refreshPromises)
+            .then(updatedWallets => {
+                // Save all updated wallets
+                localStorage.setItem('wallets', JSON.stringify(updatedWallets));
+                loadWallets();
+                
+                // Show appropriate message based on refresh results
+                if (errorCount === 0) {
+                    showMessage(`Successfully refreshed all ${wallets.length} wallets with real-time data`);
+                } else if (refreshedCount > 0) {
+                    showMessage(`Refreshed ${refreshedCount} wallets, ${errorCount} failed`);
+                } else {
+                    showMessage(`Could not refresh any wallets with real-time data`);
+                }
+            });
     }
 
     // Market Data Implementation - Fetches real-time data from APIs
@@ -920,65 +1005,42 @@
             }
         }
         
-    // Function to fetch data with retry capability and fallback mechanism
-    function fetchWithRetry(url, maxRetries = 3, fallbackData = null) {
-        let retryCount = 0;
-        
-        function tryFetch() {
-            return fetch(url, { timeout: 10000 }) // Add timeout to prevent long hanging requests
-                .then(response => {
-                    if (!response.ok) {
-                        throw new Error(`API call failed: ${response.status}`);
-                    }
-                    return response.json();
-                })
-                .catch(error => {
-                    console.error(`Error fetching data (attempt ${retryCount + 1}):`, error);
-                    if (retryCount < maxRetries) {
-                        retryCount++;
-                        // Exponential backoff retry
-                        const backoff = Math.min(1000 * Math.pow(2, retryCount), 10000);
-                        console.log(`Retrying in ${backoff}ms...`);
-                        return new Promise(resolve => setTimeout(() => resolve(tryFetch()), backoff));
-                    }
-                    
-                    // If we have fallback data and all retries failed, use it
-                    if (fallbackData) {
-                        console.log("Using fallback data after failed retries");
-                        return fallbackData;
-                    }
-                    
-                    throw error;
-                });
+        // Function to fetch data with retry capability
+        function fetchWithRetry(url, maxRetries = 3) {
+            let retryCount = 0;
+            
+            function tryFetch() {
+                return fetch(url, { timeout: 10000 }) // Add timeout to prevent long hanging requests
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error(`API call failed: ${response.status}`);
+                        }
+                        return response.json();
+                    })
+                    .catch(error => {
+                        console.error(`Error fetching data (attempt ${retryCount + 1}):`, error);
+                        if (retryCount < maxRetries) {
+                            retryCount++;
+                            // Exponential backoff retry
+                            const backoff = Math.min(1000 * Math.pow(2, retryCount), 10000);
+                            console.log(`Retrying in ${backoff}ms...`);
+                            return new Promise(resolve => setTimeout(() => resolve(tryFetch()), backoff));
+                        }
+                        throw error;
+                    });
+            }
+            
+            return tryFetch();
         }
         
-        return tryFetch();
-    }
-        
-        // Define fallback data as a last resort
-        const fallbackData = {
-            BTC: {
-                currentPrice: 65000.0,
-                priceChange24h: 1.2, 
-                marketCap: 1300000000000.0,
-                volume24h: 45000000000.0
-            },
-            ETH: {
-                currentPrice: 3900.0,
-                priceChange24h: 0.8,
-                marketCap: 470000000000.0,
-                volume24h: 22000000000.0
-            }
-        };
-        
-        // Fetch BTC market data with fallback
-        fetchWithRetry(btcApiUrl, 3, fallbackData.BTC)
+        // Fetch BTC market data
+        fetchWithRetry(btcApiUrl, 3)
             .then(data => {
                 btcData = data;
                 displayMarketData();
             })
             .catch(() => {
-                // If all retries and fallbacks failed, show error UI
+                // If all retries failed, show error UI
                 const errorCard = document.createElement('div');
                 errorCard.className = 'market-card';
                 errorCard.innerHTML = `
@@ -991,33 +1053,28 @@
                 marketDataDiv.innerHTML = ''; // Clear loading if this is first response
                 marketDataDiv.appendChild(errorCard);
                 
-                // But also load fallback data to ensure UI works
-                btcData = fallbackData.BTC;
-                
                 document.getElementById('retry-btc-btn').addEventListener('click', function() {
                     this.textContent = "Retrying...";
                     this.disabled = true;
-                    fetchWithRetry(btcApiUrl, 3, fallbackData.BTC)
+                    fetchWithRetry(btcApiUrl, 3)
                         .then(data => {
                             btcData = data;
                             displayMarketData();
                         })
                         .catch(e => {
                             console.error("Retry failed:", e);
-                            // Still need to display market data even after failed retry
-                            displayMarketData();
                         });
                 });
             });
         
-        // Fetch ETH market data with fallback
-        fetchWithRetry(ethApiUrl, 3, fallbackData.ETH)
+        // Fetch ETH market data
+        fetchWithRetry(ethApiUrl, 3)
             .then(data => {
                 ethData = data;
                 displayMarketData();
             })
             .catch(() => {
-                // If all retries and fallbacks failed, show error UI
+                // If all retries failed, show error UI
                 if (marketDataDiv.innerHTML.includes('Loading')) {
                     marketDataDiv.innerHTML = '';
                 }
@@ -1033,21 +1090,16 @@
                 `;
                 marketDataDiv.appendChild(errorCard);
                 
-                // But also load fallback data to ensure UI works
-                ethData = fallbackData.ETH;
-                
                 document.getElementById('retry-eth-btn').addEventListener('click', function() {
                     this.textContent = "Retrying...";
                     this.disabled = true;
-                    fetchWithRetry(ethApiUrl, 3, fallbackData.ETH)
+                    fetchWithRetry(ethApiUrl, 3)
                         .then(data => {
                             ethData = data;
                             displayMarketData();
                         })
                         .catch(e => {
                             console.error("Retry failed:", e);
-                            // Still need to display market data even after failed retry
-                            displayMarketData();
                         });
                 });
             });
@@ -1090,7 +1142,7 @@
         return card;
     }
 
-    // Function to create trend chart with improved robustness
+    // Function to create trend chart with real-time data
     function createTrendChart() {
         try {
             // Create chart container
@@ -1101,9 +1153,7 @@
             trendContainer.innerHTML = '<canvas id="trend-chart"></canvas>';
             marketDataDiv.appendChild(trendContainer);
     
-            // Try to get data from multiple sources, with fallbacks at each step
-            
-            // 1. Try market data from DOM
+            // Extract prices from DOM
             let btcPrice = 0;
             let ethPrice = 0;
             
@@ -1121,100 +1171,64 @@
                 }
             } catch (e) {
                 console.warn("Could not extract prices from DOM:", e);
+                // If we can't extract prices, don't show the chart
+                return;
             }
             
-            // 2. If DOM extraction failed, try wallet collection
-            if (!btcPrice || !ethPrice) {
-                const wallets = JSON.parse(localStorage.getItem('wallets') || '[]');
-                const btcWallets = wallets.filter(w => w.cryptoType === 'BTC');
-                const ethWallets = wallets.filter(w => w.cryptoType === 'ETH');
-                
-                if (btcWallets.length > 0 && btcPrice === 0) {
-                    btcPrice = btcWallets[0].value / btcWallets[0].balance;
-                }
-                
-                if (ethWallets.length > 0 && ethPrice === 0) {
-                    ethPrice = ethWallets[0].value / ethWallets[0].balance;
-                }
+            // If we couldn't get prices, don't show chart
+            if (!btcPrice || !ethPrice || btcPrice === 0 || ethPrice === 0) {
+                console.warn("Invalid price data, cannot create chart");
+                return;
             }
             
-            // 3. Final fallback - use reasonable values if all else fails
-            if (!btcPrice || btcPrice === 0) {
-                btcPrice = 68452.75;
-            }
-            
-            if (!ethPrice || ethPrice === 0) {
-                ethPrice = 3890.42;
-            }
-                
-            // Generate trend data based on prices
-            const hours = Array.from({length: 24}, (_, i) => `${i}h`);
-            
-            // Use more realistic trend generation
-            // Start with yesterday's price and work forward to today's price
-            // For BTC (more volatile)
-            let lastBtcPrice = btcPrice * 0.97; // Start 3% lower than current
-            const btcTrend = [];
-            for (let i = 0; i < 24; i++) {
-                // More realistic hourly movements
-                const hourlyChange = (Math.random() * 0.015) - 0.007; // -0.7% to +0.7%
-                lastBtcPrice = lastBtcPrice * (1 + hourlyChange);
-                
-                // Gradual trend toward current price
-                const currentPricePull = (btcPrice - lastBtcPrice) * (i / 120); // Gentle pull toward target
-                lastBtcPrice += currentPricePull;
-                
-                btcTrend.push(lastBtcPrice);
-            }
-            
-            // For ETH (less volatile than BTC)
-            let lastEthPrice = ethPrice * 0.98; // Start 2% lower than current
-            const ethTrend = [];
-            for (let i = 0; i < 24; i++) {
-                // More realistic hourly movements
-                const hourlyChange = (Math.random() * 0.01) - 0.005; // -0.5% to +0.5%
-                lastEthPrice = lastEthPrice * (1 + hourlyChange);
-                
-                // Gradual trend toward current price
-                const currentPricePull = (ethPrice - lastEthPrice) * (i / 150); // Gentle pull toward target
-                lastEthPrice += currentPricePull;
-                
-                ethTrend.push(lastEthPrice);
-            }
-            
-            // Create the chart
+            // Instead of generating mock trend data, show just the current prices
+            // as a simple comparison chart
             const trendCtx = document.getElementById('trend-chart').getContext('2d');
             new Chart(trendCtx, {
-                type: 'line',
+                type: 'bar',
                 data: {
-                    labels: hours,
+                    labels: ['Current Prices (USD)'],
                     datasets: [
                         {
                             label: 'BTC',
-                            data: btcTrend,
+                            data: [btcPrice],
+                            backgroundColor: 'rgba(255, 140, 0, 0.7)',
                             borderColor: '#FF8C00',
-                            backgroundColor: 'rgba(255, 140, 0, 0.1)',
-                            borderWidth: 2,
-                            tension: 0.4,
-                            yAxisID: 'y-btc'
+                            borderWidth: 1
                         },
                         {
                             label: 'ETH',
-                            data: ethTrend,
+                            data: [ethPrice],
+                            backgroundColor: 'rgba(30, 144, 255, 0.7)',
                             borderColor: '#1E90FF',
-                            backgroundColor: 'rgba(30, 144, 255, 0.1)',
-                            borderWidth: 2,
-                            tension: 0.4,
-                            yAxisID: 'y-eth'
+                            borderWidth: 1
                         }
                     ]
                 },
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
-                    interaction: {
-                        mode: 'index',
-                        intersect: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                callback: function(value) {
+                                    return '$' + value.toLocaleString();
+                                },
+                                color: 'rgba(255, 255, 255, 0.7)'
+                            },
+                            grid: {
+                                color: 'rgba(255, 255, 255, 0.05)'
+                            }
+                        },
+                        x: {
+                            ticks: {
+                                color: 'rgba(255, 255, 255, 0.7)'
+                            },
+                            grid: {
+                                display: false
+                            }
+                        }
                     },
                     plugins: {
                         legend: {
@@ -1225,60 +1239,26 @@
                                 padding: 10
                             }
                         },
-                        title: {
-                            display: true,
-                            text: '24h Price Trends',
-                            color: 'white',
-                            font: {
-                                size: 14
-                            }
-                        }
-                    },
-                    scales: {
-                        x: {
-                            display: false
-                        },
-                        'y-btc': {
-                            type: 'linear',
-                            display: true,
-                            position: 'left',
-                            ticks: {
-                                callback: function(value) {
-                                    return '$' + parseInt(value).toLocaleString();
-                                },
-                                color: '#FF8C00'
-                            },
-                            grid: {
-                                display: false
-                            }
-                        },
-                        'y-eth': {
-                            type: 'linear',
-                            display: true,
-                            position: 'right',
-                            ticks: {
-                                callback: function(value) {
-                                    return '$' + parseInt(value).toLocaleString();
-                                },
-                                color: '#1E90FF'
-                            },
-                            grid: {
-                                display: false
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return context.dataset.label + ': $' + context.raw.toLocaleString();
+                                }
                             }
                         }
                     }
                 }
             });
         } catch (error) {
-            console.error("Error creating trend chart:", error);
+            console.error("Error creating price comparison chart:", error);
             
-            // Add error recovery - insert a simplified no-chart message if chart creation fails
+            // Add error recovery
             const marketDataDiv = document.getElementById('market-data');
             const errorNotice = document.createElement('div');
             errorNotice.className = 'market-card';
             errorNotice.innerHTML = `
                 <div style="text-align: center; padding: 10px;">
-                    <p>Price trend chart unavailable</p>
+                    <p>Price chart unavailable</p>
                     <button id="retry-chart-btn" class="btn btn-small">Retry</button>
                 </div>
             `;
@@ -1327,31 +1307,22 @@
             ctx.fillText('No wallet data to display', ctx.canvas.width/2, ctx.canvas.height/2);
             return;
         }
-
-        // Generate mock historical data
-        const timeframe = document.getElementById('timeframe-selector').value;
-        const dataPoints = timeframe === '24h' ? 24 : timeframe === '7d' ? 7 : timeframe === '30d' ? 30 : 12;
-        const labels = Array.from({length: dataPoints}, (_, i) => {
-            if (timeframe === '24h') return `${23-i}h ago`;
-            if (timeframe === '7d') return `${6-i}d ago`;
-            if (timeframe === '30d') return `${29-i}d ago`;
-            return `${11-i}mo ago`;
-        }).reverse();
-
+        
+        // We don't have historical data available yet, so display info message
         const totalValue = wallets.reduce((sum, wallet) => sum + wallet.value, 0);
-        const values = [];
-
-        // Create more realistic trend data
-        let currentValue = totalValue * 0.85; // Start lower than current
-        for (let i = 0; i < dataPoints; i++) {
-            // Gradual uptrend with random noise
-            const growthFactor = 1 + (Math.random() * 0.03);
-            currentValue *= growthFactor;
-
-            // Add some realistic volatility
-            const volatility = Math.random() * 0.05 - 0.025;
-            values.push(currentValue * (1 + volatility));
-        }
+        
+        ctx.font = '14px Arial';
+        ctx.fillStyle = 'rgba(255,255,255,0.7)';
+        ctx.textAlign = 'center';
+        ctx.fillText('Historical data not available - Only current data is shown', ctx.canvas.width/2, ctx.canvas.height/2);
+        
+        // Instead of generating mock data, just show the current value
+        const timeframe = document.getElementById('timeframe-selector').value;
+        const labels = [timeframe === '24h' ? 'Current' : 
+                       timeframe === '7d' ? 'This Week' : 
+                       timeframe === '30d' ? 'This Month' : 'This Year'];
+        
+        const values = [totalValue];
 
         performanceChart = new Chart(ctx, {
             type: 'line',
