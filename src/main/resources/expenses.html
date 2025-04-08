@@ -45,20 +45,31 @@
   </style>
 </head>
 <body>
-<header>
+<div class="topbar">
+  <button class="drawer-toggle" onclick="toggleDrawer()">☰</button>
   <div class="logo">CashClimb</div>
-  <nav>
-    <ul>
-      <li><a href="home.html">Dashboard</a></li>
-      <li><a href="expenses.html">Expenses</a></li>
-    </ul>
-  </nav>
-</header>
+  <div class="profile">👤Profile</div>
+</div>
+<nav class="drawer" id="sideDrawer">
+  <ul>
+    <li><a href=""></a></li>
+    <li><a href=""></a></li>
+    <li><a href="home.html"> Dashboard</a></li>
+    <li><a href="budgeting.html"> Budgeting</a></li>
+    <li><a href="expenses.html"> Expenses</a></li>
+    <li><a href="crypto.html"> Crypto</a></li>
+    <li><a href="stocks.html"> Stocks</a></li>
+    <li><a href="chat.html"> Chat</a></li>
+    <li><a href="tax.html"> Tax</a></li>
+    <li><a href="#">👤 Profile</a></li>
+    <li><a href="#">⚙️ Settings</a></li>
+    <li><a href="#">🚪 Log Out</a></li>
+  </ul>
+</nav>
 <main>
   <h1>Upload Your Expenses Excel File(s)</h1>
   <input type="file" id="excelFileInput" accept=".xlsx, .xls" multiple>
   <div id="output"></div>
-
   <!-- Form to manually add a new expense -->
   <form id="expenseForm">
     <label for="date">Date</label>
@@ -76,6 +87,10 @@
   <div id="expensesList"></div>
 
   <script>
+    function toggleDrawer() {
+      const drawer = document.getElementById('sideDrawer');
+      drawer.classList.toggle('collapsed');
+    }
     // Global arrays for combined Excel data and header indices
     var globalCombinedData = [];
     var globalHeaderIndices = null;
@@ -248,3 +263,4 @@
 </main>
 </body>
 </html>
+

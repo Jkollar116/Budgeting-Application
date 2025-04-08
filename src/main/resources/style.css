@@ -1,3 +1,6 @@
+/*
+This is for the raw background of the app, not accounting for any containers
+ */
 body {
     font-family: Arial, sans-serif;
     margin: 0;
@@ -5,6 +8,10 @@ body {
     background: linear-gradient(135deg, #2C003E, #4A1D5A);
     color: #F5F5F5;
 }
+/*
+This is for the header, for some reason is is only used in the stock and crypto headers.
+The assumption is that the top bar will replace this
+ */
 header {
     display: flex;
     align-items: center;
@@ -13,10 +20,17 @@ header {
     padding: 15px 20px;
     border-bottom: 2px solid #FF8C00;
 }
+/*
+This is for the logo, or the app name. It will adjust the boldness and size of it
+ */
 header .logo {
     font-size: 1.8rem;
     font-weight: bold;
 }
+/*
+This is for the formatting of the header, in terms of padding and the margins, also will be replaced,
+or the top bar code will be thrown into the headers.
+ */
 header nav ul {
     list-style: none;
     display: flex;
@@ -24,38 +38,65 @@ header nav ul {
     margin: 0;
     padding: 0;
 }
+/*
+This is for the navigation items in the header
+ */
 header nav ul li a {
     color: #FF8C00;
     text-decoration: none;
     font-weight: bold;
 }
+/*
+This adds a little underline to the relocation links in the header
+ */
 header nav ul li a:hover {
     text-decoration: underline;
 }
+/*
+Wherever you see hero called, this is what it is referencing,
+one example is the huge Dashboard line in the dashboard
+ */
 .hero {
     position: relative;
     text-align: center;
     padding: 80px 20px;
     background:linear-gradient(135deg, #2C003E, #4A1D5A);
 }
+/*
+Manages the position of the hero content
+If the position is fixed, it means that it stays on the same part of the screen at all times,
+relative is better
+ */
 .hero .hero-content {
     position: relative;
     z-index: 1;
 }
+/*
+No clue where this is used, will come back when i have more info
+ */
 .hero h1 {
     font-size: 3rem;
     margin-bottom: 20px;
 }
+/*
+No clue where this is used, will come back when i have more info
+ */
 .hero p {
     font-size: 1.2rem;
     margin-bottom: 30px;
 }
+/*
+Only for the dashboard
+ */
 .dashboard {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
     gap: 20px;
     padding: 20px;
 }
+/*
+The cards used in the dashboard, and stocks for some reason
+ */
 .card {
     background: linear-gradient(135deg, #2C003E, #4A1D5A);
     padding: 20px;
@@ -65,28 +106,46 @@ header nav ul li a:hover {
     text-align: center;
     margin-bottom: 15px;
 }
+/*
+Hover effect, added to all cards being used
+ */
 .card:hover {
     transform: translateY(-5px);
     box-shadow: 0 6px 8px rgba(0,0,0,0.6);
 }
+/*
+For the words and symbols in the cards
+ */
 .card h2 {
     margin-top: 0;
     font-size: 1.4rem;
     margin-bottom: 10px;
 }
+/*
+For the numerical values in the cards
+ */
 .card p {
     font-size: 0.95rem;
     line-height: 1.4;
     margin-bottom: 15px;
 }
+/*
+For the charts in the cards
+ */
 #chartContainer, #expensesPieChart, #netWorthChart, #incomeChart {
     margin-top: 10px;
     overflow: hidden;
 }
+/*
+For the value in the bill reminder
+ */
 #billRemindersDisplay {
     font-size: 2.5rem;
     font-weight: bold;
 }
+/*
+For the footer, only used on the home page and login i think
+ */
 footer {
     background-color: #3E1F5B;
     text-align: center;
@@ -95,6 +154,9 @@ footer {
     text-shadow: 0 0 5px rgba(255, 140, 0, 0.7);
     font-size: 0.9rem;
 }
+/*
+Used for the login, it is hte container
+ */
 .login-container {
     width: 100%;
     max-width: 400px;
@@ -105,15 +167,24 @@ footer {
     box-shadow: 0 4px 6px rgba(0,0,0,0.4);
     text-align: center;
 }
+/*
+Size of the text for the login word in the container
+ */
 .login-container h2 {
     margin-bottom: 20px;
     font-size: 1.8rem;
 }
+/*
+Gap between elements in the container
+ */
 .login-container form {
     display: flex;
     flex-direction: column;
     gap: 15px;
 }
+/*
+For the input fields, make sure they get centered
+ */
 .login-container input {
     width: 100%;
     padding: 12px;
@@ -123,6 +194,9 @@ footer {
     color: #fff;
     font-size: 1rem;
 }
+/*
+Format for the botton
+ */
 .login-container button {
     width: 100%;
     padding: 12px;
@@ -134,20 +208,35 @@ footer {
     font-weight: bold;
     transition: background-color 0.3s;
 }
+/*
+Change in button look when hovering over it
+ */
 .login-container button:hover {
     background-color: #e07a00;
 }
+/*
+For the bottom part, below the button, the register account and forgot password
+ */
 .login-container p {
     font-size: 0.9rem;
     margin-top: 15px;
 }
+/*
+For the redirect text in the login
+ */
 .login-container a {
     color: #FF8C00;
     text-decoration: none;
 }
+/*
+Underlines the links when hovering over it
+ */
 .login-container a:hover {
     text-decoration: underline;
 }
+/*
+Adapts based on screen size, do not touch.
+ */
 @media (max-width: 768px) {
     .hero h1 {
         font-size: 2.5rem;
@@ -164,6 +253,9 @@ footer {
         align-items: center;
     }
 }
+/*
+Top bard position and settings.
+ */
 .topbar {
     position: fixed;
     top: 0;
@@ -180,20 +272,32 @@ footer {
     text-shadow: 0 0 5px rgba(255, 140, 0, 0.7);
     border-bottom: 2px solid #FF8C00;
 }
+/*
+For the cash climb name
+ */
 .topbar .logo {
     font-size: 20px;
     font-weight: bold;
 }
+/*
+For the profile redirect
+ */
 .topbar .profile {
     font-size: 20px;
     cursor: pointer;
 }
+/*
+For the drawer, rename to make it more specific
+ */
 .layout {
     margin-left: 250px;
     transition: margin-left 0.2s ease-in-out;
     width: 100%;
     padding-top: 60px;
 }
+/*
+Drawer format
+ */
 .drawer{
     width: 250px;
     height: 100vh;
@@ -205,17 +309,29 @@ footer {
     transition: transform 0.2s ease-in-out;
     transform: translateX(0);
 }
+/*
+Makes the drawer collapse
+ */
 .drawer.collapsed{
     transform: translateX(-250px);
 }
+/*
+Adjusts the position of the items in the drawer
+ */
 .drawer ul{
     list-style: none;
     padding: 0;
     margin: 0;
 }
+/*
+Padding between the items
+ */
 .drawer ul li{
     padding: 10px 15px;
 }
+/*
+Format of the items
+ */
 .drawer ul li a{
     color: #d97600;
     text-decoration: none;
@@ -224,10 +340,11 @@ footer {
     font-size: 16px;
     display: flex;
 }
+/*
+For the position of the drawer toggle, it used to have a position
+ */
 .drawer-toggle {
     position: fixed;
-    top: 50px;
-    left: 5px;
     font-size: 40px;
     font-weight: bold;
     background: none;
@@ -237,20 +354,115 @@ footer {
     cursor: pointer;
     z-index: 1001;
 }
+/*
+For the padding between the top bar and everything else, I think
+ */
 main{
+    padding-top: 60px;
     margin-left: 250px;
-    padding: 15px;
     flex-grow: 1;
 }
+/*
+Margin for when the top bar is collapsed
+ */
 .drawer.collapsed ~ main{
     margin-left: 0;
 }
-.hero-content h1 {
-    margin: 0 0 10px;
+/*
+From the chat.css, I moved it over here in preparation of having everything in style.css
+This is the container
+ */
+.chat-container {
+    max-width: 600px;
+    margin: 40px auto;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    background-color: #fff;
+    display: flex;
+    flex-direction: column;
+    height: 80vh;
 }
-.hero-content p {
-    margin: 0;
-    font-size: 16px;
+/*
+Header for the chat
+ */
+.chat-header {
+    padding: 16px;
+    background-color: #3E1F5B;
+    color: #fff;
+    text-align: center;
+    border-top-left-radius: 8px;
+    border-top-right-radius: 8px;
+}
+/*
+Background for the chat
+ */
+.chat-window {
+    flex: 1;
+    padding: 16px;
+    overflow-y: auto;
+    background-color: #f9f9f9;
+}
+/*
+Format of the text sent
+ */
+.message {
+    margin-bottom: 12px;
+    max-width: 80%;
+    padding: 8px 12px;
+    border-radius: 16px;
+    clear: both;
+}
+/*
+Also format for the user text
+ */
+.message.user {
+    background-color: #d97600;
+    float: right;
+    text-align: right;
+}
+/*
+Message recieved from the bot
+ */
+.message.bot {
+    background-color: #fff;
+    border: 1px solid #ccc;
+    float: left;
+    text-align: left;
+}
+/*
+Border above input field
+ */
+.chat-input {
+    padding: 12px;
+    border-top: 1px solid #ccc;
+    display: flex;
+}
+/*
+Border around enter field
+ */
+.chat-input input {
+    flex: 1;
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+}
+/*
+Send button format
+ */
+.chat-input button {
+    margin-left: 8px;
+    padding: 8px 16px;
+    background-color: #3E1F5B;
+    color: #fff;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+/*
+Alters button when you hover over it
+ */
+.chat-input button:hover {
+    background-color: #2b1246;
 }
 
 
