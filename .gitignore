@@ -41,6 +41,7 @@ build/
 src/main/resources/serviceAccountKey.json
 serviceAccountKey.json
 firebase-credentials.json
+src/main/resources/keys.json
 
 ### Backups ###
 backups/

@@ -70,13 +70,37 @@ public class StockHandler implements HttpHandler {
                 return;
             }
             
-            // Check if the path starts with our API prefix
-            if (!path.startsWith("/api/stocks")) {
-                // Not a path we should handle
-                exchange.getResponseHeaders().set("Location", "/");
-                exchange.sendResponseHeaders(302, -1);
-                return;
+        // Check if the path starts with our API prefix
+        if (!path.startsWith("/api/stocks")) {
+            // For development: Handle direct file requests to resources
+            if (path.endsWith(".html") || path.endsWith(".js") || path.endsWith(".css")) {
+                String filePath = "src/main/resources" + path;
+                try {
+                    java.nio.file.Path resourcePath = java.nio.file.Paths.get(filePath);
+                    if (java.nio.file.Files.exists(resourcePath)) {
+                        String contentType = "text/plain";
+                        if (path.endsWith(".html")) contentType = "text/html";
+                        if (path.endsWith(".js")) contentType = "application/javascript";
+                        if (path.endsWith(".css")) contentType = "text/css";
+                        
+                        exchange.getResponseHeaders().set("Content-Type", contentType);
+                        exchange.sendResponseHeaders(200, java.nio.file.Files.size(resourcePath));
+                        
+                        try (OutputStream os = exchange.getResponseBody()) {
+                            java.nio.file.Files.copy(resourcePath, os);
+                        }
+                        return;
+                    }
+                } catch (Exception e) {
+                    LOGGER.warning("Error serving file: " + e.getMessage());
+                }
             }
+            
+            // Not a path we should handle
+            exchange.getResponseHeaders().set("Location", "/");
+            exchange.sendResponseHeaders(302, -1);
+            return;
+        }
             
             // Handle our specific endpoints
             if (path.equals("/api/stocks/account")) {
@@ -507,9 +531,8 @@ public class StockHandler implements HttpHandler {
                         String timeSeries = responseBody.substring(objStart, objEnd + 1);
                         String[] dateTimes = timeSeries.split("\\{");
                         
+                        boolean firstPoint = true;
                         for (int i = 1; i < dateTimes.length && i < 100; i++) { // Limit to 100 points
-                            if (i > 1) jsonBuilder.append(",");
-                            
                             // Extract date
                             String dateTime = dateTimes[i-1];
                             int dateEnd = dateTime.lastIndexOf("\":");
@@ -526,6 +549,13 @@ public class StockHandler implements HttpHandler {
                                     
                                     if (priceEnd > priceStart) {
                                         String price = dateTimes[i].substring(priceStart, priceEnd).replace("\"", "").trim();
+                                        
+                                        // Only add a comma if it's not the first point
+                                        if (!firstPoint) {
+                                            jsonBuilder.append(",");
+                                        } else {
+                                            firstPoint = false;
+                                        }
                                         
                                         // Add formatted point
                                         jsonBuilder.append("{\"timestamp\":\"").append(date).append("\",");
