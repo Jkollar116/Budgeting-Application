@@ -1,3 +1,4 @@
+
 document.addEventListener('DOMContentLoaded', function() {
     // Initialize the tabs functionality
     const tabs = document.querySelectorAll('.tab');
@@ -814,4 +815,60 @@ document.addEventListener('DOMContentLoaded', function() {
         fetchOrders(status);
     });
 
-    document.getElementById('
+    document.getElementById('stock-search-button').addEventListener('click', function() {
+        searchStock();
+    });
+    
+    // Enable pressing Enter in the search input
+    document.getElementById('stock-search-input').addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') {
+            searchStock();
+        }
+    });
+    
+    // Set up event listeners for order buttons
+    document.getElementById('market-buy-button').addEventListener('click', function() {
+        placeOrder('market', 'buy', 'market-order-form');
+    });
+    
+    document.getElementById('market-sell-button').addEventListener('click', function() {
+        placeOrder('market', 'sell', 'market-order-form');
+    });
+    
+    document.getElementById('limit-buy-button').addEventListener('click', function() {
+        placeOrder('limit', 'buy', 'limit-order-form');
+    });
+    
+    document.getElementById('limit-sell-button').addEventListener('click', function() {
+        placeOrder('limit', 'sell', 'limit-order-form');
+    });
+    
+    document.getElementById('stop-buy-button').addEventListener('click', function() {
+        placeOrder('stop', 'buy', 'stop-order-form');
+    });
+    
+    document.getElementById('stop-sell-button').addEventListener('click', function() {
+        placeOrder('stop', 'sell', 'stop-order-form');
+    });
+    
+    document.getElementById('stop-limit-buy-button').addEventListener('click', function() {
+        placeOrder('stop-limit', 'buy', 'stop-limit-order-form');
+    });
+    
+    document.getElementById('stop-limit-sell-button').addEventListener('click', function() {
+        placeOrder('stop-limit', 'sell', 'stop-limit-order-form');
+    });
+    
+    document.getElementById('trailing-stop-buy-button').addEventListener('click', function() {
+        placeOrder('trailing-stop', 'buy', 'trailing-stop-order-form');
+    });
+    
+    document.getElementById('trailing-stop-sell-button').addEventListener('click', function() {
+        placeOrder('trailing-stop', 'sell', 'trailing-stop-order-form');
+    });
+    
+    // Initialize with sample data
+    fetchAccountInfo();
+    fetchPortfolio();
+    fetchOrders('open');
+});
