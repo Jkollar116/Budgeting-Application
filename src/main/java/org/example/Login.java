@@ -6,7 +6,6 @@ import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpContext;
 import com.sun.net.httpserver.Filter;
 import org.json.JSONObject;
-
 import java.io.*;
 import java.net.*;
 import java.nio.charset.StandardCharsets;
@@ -19,12 +18,11 @@ public class Login {
         int port = 8000;
         String portEnv = System.getenv("PORT");
         if (portEnv != null) {
-            try { port = Integer.parseInt(portEnv); } catch (NumberFormatException e) { System.err.println("Invalid PORT environment variable. Using default port " + port); }
+            try { port = Integer.parseInt(portEnv); } catch (NumberFormatException e) { System.err.println("Invalid PORT env. Using default " + port); }
         } else if (args.length > 0) {
-            try { port = Integer.parseInt(args[0]); } catch (NumberFormatException e) { System.err.println("Invalid port specified. Using default port " + port); }
+            try { port = Integer.parseInt(args[0]); } catch (NumberFormatException e) { System.err.println("Invalid port. Using default " + port); }
         }
         HttpServer server = HttpServer.create(new InetSocketAddress("0.0.0.0", port), 0);
-        // Existing context registrations
         server.createContext("/", new StaticFileHandler());
         server.createContext("/dologin", new LoginHandler());
         server.createContext("/register", new RegisterHandler());
@@ -35,19 +33,12 @@ public class Login {
         apiDataContext.getFilters().add(new AuthFilter());
         HttpContext apiChatContext = server.createContext("/api/chat", new ChatHandler());
         apiChatContext.getFilters().add(new AuthFilter());
-        // Register CryptoApiHandler at both /api/wallets (original) and /api/wallet (for frontend compatibility)
         HttpContext apiWalletsContext = server.createContext("/api/wallets", new CryptoApiHandler());
         apiWalletsContext.getFilters().add(new AuthFilter());
-        
-        // Add an additional endpoint at singular form that the frontend is using
         HttpContext apiWalletContext = server.createContext("/api/wallet", new CryptoApiHandler());
         apiWalletContext.getFilters().add(new AuthFilter());
-        
-        // Added context for expenses endpoint
         HttpContext apiExpensesContext = server.createContext("/api/expenses", new ExpensesHandler());
         apiExpensesContext.getFilters().add(new AuthFilter());
-
-        // Register Stock API handler for stock-related endpoints with more specific paths
         HttpContext apiStockAccountContext = server.createContext("/api/stocks/account", new StockHandler());
         apiStockAccountContext.getFilters().add(new AuthFilter());
         HttpContext apiStockPortfolioContext = server.createContext("/api/stocks/portfolio", new StockHandler());
@@ -56,23 +47,39 @@ public class Login {
         apiStockOrdersContext.getFilters().add(new AuthFilter());
         HttpContext apiStockSymbolContext = server.createContext("/api/stocks/", new StockHandler());
         apiStockSymbolContext.getFilters().add(new AuthFilter());
-        
         server.createContext("/logout", new LogoutHandler());
+
+        HttpContext apiIncomeContext = server.createContext("/api/income", new IncomeHandler());
+        apiIncomeContext.getFilters().add(new AuthFilter());
 
         server.setExecutor(null);
         server.start();
-        if (Desktop.isDesktopSupported()) { Desktop.getDesktop().browse(new URI("http://localhost:" + port)); }
+        if (Desktop.isDesktopSupported()) {
+            Desktop.getDesktop().browse(new URI("http://localhost:" + port));
+        }
     }
     static class StaticFileHandler implements HttpHandler {
         private final String basePath = "src/main/resources";
         public void handle(HttpExchange exchange) throws IOException {
             String uriPath = exchange.getRequestURI().getPath();
-            if (uriPath.equals("/")) { uriPath = "/index.html"; }
+            if (uriPath.equals("/")) {
+                uriPath = "/index.html";
+            }
             File file = new File(basePath + uriPath).getCanonicalFile();
-            if (!file.getPath().startsWith(new File(basePath).getCanonicalPath())) { exchange.sendResponseHeaders(403, 0); exchange.getResponseBody().close(); return; }
-            if (!file.isFile()) { exchange.sendResponseHeaders(404, 0); exchange.getResponseBody().close(); return; }
+            if (!file.getPath().startsWith(new File(basePath).getCanonicalPath())) {
+                exchange.sendResponseHeaders(403, 0);
+                exchange.getResponseBody().close();
+                return;
+            }
+            if (!file.isFile()) {
+                exchange.sendResponseHeaders(404, 0);
+                exchange.getResponseBody().close();
+                return;
+            }
             String mime = "text/plain";
-            if (uriPath.endsWith(".html")) { mime = "text/html"; } else if (uriPath.endsWith(".css")) { mime = "text/css"; } else if (uriPath.endsWith(".js")) { mime = "application/javascript"; }
+            if (uriPath.endsWith(".html")) mime = "text/html";
+            else if (uriPath.endsWith(".css")) mime = "text/css";
+            else if (uriPath.endsWith(".js")) mime = "application/javascript";
             exchange.getResponseHeaders().set("Content-Type", mime);
             byte[] bytes = Files.readAllBytes(file.toPath());
             exchange.sendResponseHeaders(200, bytes.length);
@@ -88,7 +95,9 @@ public class Login {
                 BufferedReader br = new BufferedReader(isr);
                 StringBuilder buf = new StringBuilder();
                 String line;
-                while ((line = br.readLine()) != null) { buf.append(line); }
+                while ((line = br.readLine()) != null) {
+                    buf.append(line);
+                }
                 String formData = buf.toString();
                 String email = "", password = "";
                 String[] pairs = formData.split("&");
@@ -97,8 +106,8 @@ public class Login {
                     if (parts.length == 2) {
                         String key = URLDecoder.decode(parts[0], "UTF-8");
                         String value = URLDecoder.decode(parts[1], "UTF-8");
-                        if (key.equals("email")) { email = value; }
-                        else if (key.equals("password")) { password = value; }
+                        if (key.equals("email")) email = value;
+                        else if (key.equals("password")) password = value;
                     }
                 }
                 String firebaseUrl = "https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key=" + FIREBASE_API_KEY;
@@ -113,34 +122,30 @@ public class Login {
                 os.close();
                 int responseCode = conn.getResponseCode();
                 if (responseCode == 200) {
-                    // Read the Firebase response
                     BufferedReader in = new BufferedReader(new InputStreamReader(conn.getInputStream(), StandardCharsets.UTF_8));
                     StringBuilder firebaseResponse = new StringBuilder();
-
-                    while ((line = in.readLine()) != null) {
-                        firebaseResponse.append(line);
+                    String ln;
+                    while ((ln = in.readLine()) != null) {
+                        firebaseResponse.append(ln);
                     }
                     in.close();
-
-                    // Parse the JSON response (requires org.json library)
                     JSONObject jsonObject = new JSONObject(firebaseResponse.toString());
                     String idToken = jsonObject.getString("idToken");
                     String localId = jsonObject.getString("localId");
-
-                    // Set cookies for session idToken and localId
                     exchange.getResponseHeaders().add("Set-Cookie", "session=valid; Path=/");
                     exchange.getResponseHeaders().add("Set-Cookie", "idToken=" + idToken + "; Path=/; HttpOnly");
                     exchange.getResponseHeaders().add("Set-Cookie", "localId=" + localId + "; Path=/; HttpOnly");
                     exchange.getResponseHeaders().set("Location", "/home.html");
                     exchange.sendResponseHeaders(302, -1);
                     return;
-                }
-                else {
+                } else {
                     InputStream errorStream = conn.getErrorStream();
                     InputStreamReader isrError = new InputStreamReader(errorStream, StandardCharsets.UTF_8);
                     BufferedReader in = new BufferedReader(isrError);
                     StringBuilder response = new StringBuilder();
-                    while ((line = in.readLine()) != null) { response.append(line); }
+                    while ((line = in.readLine()) != null) {
+                        response.append(line);
+                    }
                     in.close();
                     String userMessage = "Invalid email or password. Please try again.";
                     String errorHtml = "<!DOCTYPE html><html lang=\"en\"><head><meta charset=\"UTF-8\"><title>Login Error</title><link rel=\"stylesheet\" href=\"style.css\"></head><body><div class=\"login-container\"><h2>Login Error</h2><p>" + userMessage + "</p><a href='/index.html'>Try Again</a></div></body></html>";
@@ -151,7 +156,9 @@ public class Login {
                     osResp.write(errorBytes);
                     osResp.close();
                 }
-            } else { exchange.sendResponseHeaders(405, -1); }
+            } else {
+                exchange.sendResponseHeaders(405, -1);
+            }
         }
     }
     static class RegisterHandler implements HttpHandler {
@@ -160,7 +167,11 @@ public class Login {
             if ("GET".equalsIgnoreCase(exchange.getRequestMethod())) {
                 String fileName = "/register.html";
                 File file = new File(basePath + fileName).getCanonicalFile();
-                if (!file.isFile()) { exchange.sendResponseHeaders(404, 0); exchange.getResponseBody().close(); return; }
+                if (!file.isFile()) {
+                    exchange.sendResponseHeaders(404, 0);
+                    exchange.getResponseBody().close();
+                    return;
+                }
                 String mime = "text/html";
                 exchange.getResponseHeaders().set("Content-Type", mime);
                 byte[] bytes = Files.readAllBytes(file.toPath());
@@ -168,13 +179,14 @@ public class Login {
                 OutputStream os = exchange.getResponseBody();
                 os.write(bytes);
                 os.close();
-                return;
             } else if ("POST".equalsIgnoreCase(exchange.getRequestMethod())) {
                 InputStreamReader isr = new InputStreamReader(exchange.getRequestBody(), StandardCharsets.UTF_8);
                 BufferedReader br = new BufferedReader(isr);
                 StringBuilder buf = new StringBuilder();
                 String line;
-                while ((line = br.readLine()) != null) { buf.append(line); }
+                while ((line = br.readLine()) != null) {
+                    buf.append(line);
+                }
                 String formData = buf.toString();
                 String email = "", password = "", confirm = "";
                 String[] pairs = formData.split("&");
@@ -183,9 +195,9 @@ public class Login {
                     if (parts.length == 2) {
                         String key = URLDecoder.decode(parts[0], "UTF-8");
                         String value = URLDecoder.decode(parts[1], "UTF-8");
-                        if (key.equals("email")) { email = value; }
-                        else if (key.equals("password")) { password = value; }
-                        else if (key.equals("confirm")) { confirm = value; }
+                        if (key.equals("email")) email = value;
+                        else if (key.equals("password")) password = value;
+                        else if (key.equals("confirm")) confirm = value;
                     }
                 }
                 if (!password.equals(confirm)) {
@@ -212,17 +224,18 @@ public class Login {
                 if (responseCode == 200) {
                     exchange.getResponseHeaders().set("Location", "/index.html");
                     exchange.sendResponseHeaders(302, -1);
-                    return;
                 } else {
                     InputStream errorStream = conn.getErrorStream();
-                    InputStreamReader isrError = new InputStreamReader(errorStream, StandardCharsets.UTF_8);
-                    BufferedReader in = new BufferedReader(isrError);
-                    StringBuilder response = new StringBuilder();
-                    while ((line = in.readLine()) != null) { response.append(line); }
-                    in.close();
-                    String errorResponse = response.toString();
+                    if (errorStream != null) {
+                        InputStreamReader isrError = new InputStreamReader(errorStream, StandardCharsets.UTF_8);
+                        BufferedReader in = new BufferedReader(isrError);
+                        StringBuilder response = new StringBuilder();
+                        while ((line = in.readLine()) != null) {
+                            response.append(line);
+                        }
+                        in.close();
+                    }
                     String userMessage = "Registration failed. Please try again.";
-                    if (errorResponse.contains("EMAIL_EXISTS")) { userMessage = "This email is already registered. Please use a different email."; }
                     String errorHtml = "<!DOCTYPE html><html lang=\"en\"><head><meta charset=\"UTF-8\"><title>Registration Error</title><link rel=\"stylesheet\" href=\"style.css\"></head><body><div class=\"login-container\"><h2>Registration Error</h2><p>" + userMessage + "</p><a href='/register.html'>Try Again</a></div></body></html>";
                     exchange.getResponseHeaders().set("Content-Type", "text/html; charset=UTF-8");
                     byte[] errorBytes = errorHtml.getBytes(StandardCharsets.UTF_8);
@@ -231,7 +244,9 @@ public class Login {
                     osResp.write(errorBytes);
                     osResp.close();
                 }
-            } else { exchange.sendResponseHeaders(405, -1); }
+            } else {
+                exchange.sendResponseHeaders(405, -1);
+            }
         }
     }
     static class ForgotPasswordHandler implements HttpHandler {
@@ -240,7 +255,11 @@ public class Login {
             if ("GET".equalsIgnoreCase(exchange.getRequestMethod())) {
                 String fileName = "/forgot.html";
                 File file = new File(basePath + fileName).getCanonicalFile();
-                if (!file.isFile()) { exchange.sendResponseHeaders(404, 0); exchange.getResponseBody().close(); return; }
+                if (!file.isFile()) {
+                    exchange.sendResponseHeaders(404, 0);
+                    exchange.getResponseBody().close();
+                    return;
+                }
                 String mime = "text/html";
                 exchange.getResponseHeaders().set("Content-Type", mime);
                 byte[] bytes = Files.readAllBytes(file.toPath());
@@ -248,13 +267,14 @@ public class Login {
                 OutputStream os = exchange.getResponseBody();
                 os.write(bytes);
                 os.close();
-                return;
             } else if ("POST".equalsIgnoreCase(exchange.getRequestMethod())) {
                 InputStreamReader isr = new InputStreamReader(exchange.getRequestBody(), StandardCharsets.UTF_8);
                 BufferedReader br = new BufferedReader(isr);
                 StringBuilder buf = new StringBuilder();
                 String line;
-                while ((line = br.readLine()) != null) { buf.append(line); }
+                while ((line = br.readLine()) != null) {
+                    buf.append(line);
+                }
                 String formData = buf.toString();
                 String email = "";
                 String[] pairs = formData.split("&");
@@ -263,7 +283,7 @@ public class Login {
                     if (parts.length == 2) {
                         String key = URLDecoder.decode(parts[0], "UTF-8");
                         String value = URLDecoder.decode(parts[1], "UTF-8");
-                        if (key.equals("email")) { email = value; }
+                        if (key.equals("email")) email = value;
                     }
                 }
                 String firebaseUrl = "https://identitytoolkit.googleapis.com/v1/accounts:sendOobCode?key=" + FIREBASE_API_KEY;
@@ -287,11 +307,16 @@ public class Login {
                     osResp.close();
                 } else {
                     InputStream errorStream = conn.getErrorStream();
-                    InputStreamReader isrError = new InputStreamReader(errorStream, StandardCharsets.UTF_8);
-                    BufferedReader in = new BufferedReader(isrError);
-                    StringBuilder response = new StringBuilder();
-                    while ((line = in.readLine()) != null) { response.append(line); }
-                    in.close();
+                    if (errorStream != null) {
+                        InputStreamReader isrError = new InputStreamReader(errorStream, StandardCharsets.UTF_8);
+                        BufferedReader in = new BufferedReader(isrError);
+                        StringBuilder response = new StringBuilder();
+                        while ((line = in.readLine()) != null) {
+                            response.append(line);
+                        }
+                        in.close();
+                        System.out.println("Firestore password reset error: " + response);
+                    }
                     String userMessage = "Failed to send password reset email. Please try again.";
                     String errorHtml = "<!DOCTYPE html><html lang=\"en\"><head><meta charset=\"UTF-8\"><title>Forgot Password Error</title><link rel=\"stylesheet\" href=\"style.css\"></head><body><div class=\"login-container\"><h2>Forgot Password Error</h2><p>" + userMessage + "</p><a href='/forgot.html'>Try Again</a></div></body></html>";
                     exchange.getResponseHeaders().set("Content-Type", "text/html; charset=UTF-8");
@@ -301,7 +326,9 @@ public class Login {
                     osResp.write(errorBytes);
                     osResp.close();
                 }
-            } else { exchange.sendResponseHeaders(405, -1); }
+            } else {
+                exchange.sendResponseHeaders(405, -1);
+            }
         }
     }
     static class AuthFilter extends Filter {
@@ -316,7 +343,9 @@ public class Login {
             chain.doFilter(exchange);
         }
         @Override
-        public String description() { return "AuthFilter checks for a valid session cookie"; }
+        public String description() {
+            return "AuthFilter checks for a valid session cookie";
+        }
     }
     static class LogoutHandler implements HttpHandler {
         @Override
