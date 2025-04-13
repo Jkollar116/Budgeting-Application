@@ -355,16 +355,7 @@ public class Login {
             exchange.sendResponseHeaders(302, -1);
         }
     }
-    static class ChatHandler implements HttpHandler {
-        @Override
-        public void handle(HttpExchange exchange) throws IOException {
-            String response = "Protected chat data";
-            exchange.sendResponseHeaders(200, response.length());
-            OutputStream os = exchange.getResponseBody();
-            os.write(response.getBytes());
-            os.close();
-        }
-    }
+
     static class CryptoApiHandler implements HttpHandler {
         @Override
         public void handle(HttpExchange exchange) throws IOException {
