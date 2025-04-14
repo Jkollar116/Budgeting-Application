@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Income Management</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        .income-container {
+            max-width: 800px;
+            margin: 80px auto;
+            background-color: #3E1F5B;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.4);
+            color: #fff;
+        }
+        .income-container h2 {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .income-form {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            grid-gap: 15px;
+            margin-bottom: 25px;
+        }
+        .income-form label {
+            grid-column: 1 / span 2;
+            margin-bottom: 3px;
+            font-weight: bold;
+            color: #FF8C00;
+        }
+        .income-form input,
+        .income-form select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #FF8C00;
+            border-radius: 6px;
+            background-color: #4A1D5A;
+            color: #fff;
+            font-size: 0.9rem;
+        }
+        .income-form button {
+            grid-column: 1 / span 2;
+            margin-top: 10px;
+            padding: 12px;
+            background-color: #FF8C00;
+            border: none;
+            border-radius: 10px;
+            color: #fff;
+            cursor: pointer;
+            font-weight: bold;
+            transition: background-color 0.3s;
+        }
+        .income-form button:hover {
+            background-color: #e07a00;
+        }
+        .income-list {
+            margin-top: 15px;
+        }
+        .income-item {
+            background: rgba(255,255,255,0.1);
+            margin: 8px 0;
+            padding: 10px;
+            border-radius: 6px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .income-item .info {
+            display: flex;
+            flex-direction: column;
+        }
+        .income-item .info .label {
+            font-weight: bold;
+            margin-bottom: 2px;
+        }
+        .charts-section {
+            margin-top: 30px;
+        }
+        .chart-block {
+            margin-top: 20px;
+            text-align: center;
+        }
+        .chart-block h3 {
+            margin-bottom: 10px;
+            color: #FF8C00;
+        }
+        .chart-canvas {
+            background: #4A1D5A;
+            border-radius: 6px;
+            display: inline-block;
+            padding: 15px;
+            max-width: 600px;
+        }
+        .btn-back {
+            margin-top: 10px;
+            display: inline-block;
+            background: #2c003e;
+            border: 1px solid #FF8C00;
+            padding: 10px 20px;
+            border-radius: 8px;
+            color: #ff8c00;
+            font-weight: bold;
+            text-decoration: none;
+            cursor: pointer;
+        }
+        .btn-back:hover {
+            background: #22002f;
+        }
+        .results-summary {
+            margin-top: 20px;
+            background: rgba(255,255,255,0.1);
+            padding: 15px;
+            border-radius: 6px;
+        }
+        .results-summary p {
+            margin: 5px 0;
+        }
+        .positive {
+            color: #32CD32;
+        }
+    </style>
+</head>
+<body>
+<header>
+    <div class="logo">CashClimb</div>
+    <nav>
+        <ul>
+            <li><a href="home.html">Dashboard</a></li>
+            <li><a href="income.html">Income</a></li>
+            <li><a href="expenses.html">Expenses</a></li>
+            <li><a href="crypto.html">Crypto</a></li>
+            <li><a href="stocks.html">Stocks</a></li>
+            <li><a href="chat.html">Chat</a></li>
+        </ul>
+    </nav>
+</header>
+<div class="income-container">
+    <h2>Manage Your Income</h2>
+    <form class="income-form" id="incomeForm">
+        <label for="date">Date (for one-time or start):</label>
+        <input type="date" id="date" required>
+        <label for="name">Source Name:</label>
+        <input type="text" id="name" required>
+        <label for="amount">Amount:</label>
+        <input type="number" step="0.01" id="amount" required>
+        <label for="recurring">Recurring?</label>
+        <select id="recurring">
+            <option value="false">No</option>
+            <option value="true">Yes</option>
+        </select>
+        <label for="frequency">Frequency if recurring:</label>
+        <select id="frequency">
+            <option value="once">Once</option>
+            <option value="weekly">Weekly</option>
+            <option value="biweekly">Biweekly</option>
+            <option value="monthly">Monthly</option>
+            <option value="yearly">Yearly</option>
+        </select>
+        <button type="submit">Add Income</button>
+    </form>
+    <div class="income-list" id="incomeList"></div>
+    <div class="charts-section">
+        <div class="chart-block">
+            <h3>Monthly Incomes</h3>
+            <div class="chart-canvas" id="barChart"></div>
+        </div>
+        <div class="chart-block">
+            <h3>Distribution of Incomes</h3>
+            <div class="chart-canvas" id="pieChart"></div>
+        </div>
+        <div class="results-summary" id="resultsSummary"></div>
+    </div>
+    <a class="btn-back" href="home.html">← Back to Dashboard</a>
+</div>
+<script>
+    console.log("income.html loaded");
+    const incomeForm = document.getElementById("incomeForm");
+    const incomeListEl = document.getElementById("incomeList");
+    const barChartEl = document.getElementById("barChart");
+    const pieChartEl = document.getElementById("pieChart");
+    const resultsSummary = document.getElementById("resultsSummary");
+    document.addEventListener("DOMContentLoaded", () => {
+        console.log("DOMContentLoaded -> fetchIncomes()");
+        fetchIncomes();
+    });
+    incomeForm.addEventListener("submit", (e) => {
+        e.preventDefault();
+        const date = document.getElementById("date").value.trim();
+        const name = document.getElementById("name").value.trim();
+        const amountStr = document.getElementById("amount").value.trim();
+        const recurringVal = document.getElementById("recurring").value;
+        const freq = document.getElementById("frequency").value;
+        if(!date || !name || !amountStr){
+            alert("Please fill out the form completely.");
+            return;
+        }
+        let totalAmount = parseFloat(amountStr);
+        if(isNaN(totalAmount) || totalAmount<=0){
+            alert("Invalid income amount");
+            return;
+        }
+        const body = {
+            date: date,
+            name: name,
+            total: totalAmount,
+            recurring: recurringVal,
+            frequency: freq
+        };
+        console.log("POSTing income:", body);
+        fetch("/api/income", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(body)
+        })
+            .then(resp => {
+                if(!resp.ok) throw new Error("Failed to add income");
+                return resp.text();
+            })
+            .then(txt => {
+                console.log("Income POST success:", txt);
+                incomeForm.reset();
+                fetchIncomes();
+            })
+            .catch(err => {
+                console.error("Error adding income:", err);
+                alert("Error adding income");
+            });
+    });
+    function fetchIncomes() {
+        console.log("Fetching incomes...");
+        fetch("/api/income")
+            .then(response => {
+                if(!response.ok) throw new Error("Failed to fetch incomes");
+                return response.json();
+            })
+            .then(data => {
+                console.log("Incomes data:", data);
+                renderIncomeList(data);
+                renderCharts(data);
+            })
+            .catch(err => {
+                console.error("Error fetching incomes:", err);
+                incomeListEl.innerHTML = `<p style="color:red;">Error loading incomes</p>`;
+            });
+    }
+    function renderIncomeList(incomeData) {
+        incomeListEl.innerHTML = "";
+        const docs = incomeData.incomes || [];
+        if (docs.length === 0) {
+            incomeListEl.innerHTML = "<p>No incomes found.</p>";
+            return;
+        }
+        if(!docs || docs.length===0) {
+            incomeListEl.innerHTML = "<p>No incomes found.</p>";
+            return;
+        }
+        docs.forEach(doc => {
+            const fields = doc.fields || {};
+            const dateVal = fields.date && fields.date.stringValue ? fields.date.stringValue : "";
+            const nameVal = fields.name && fields.name.stringValue ? fields.name.stringValue : "";
+            const freqVal = fields.frequency && fields.frequency.stringValue ? fields.frequency.stringValue : "";
+            const recVal = fields.recurring && fields.recurring.stringValue ? fields.recurring.stringValue : "false";
+            let totalVal = 0.0;
+            if(fields.total && fields.total.doubleValue!==undefined){
+                totalVal = parseFloat(fields.total.doubleValue);
+            }
+            const div = document.createElement("div");
+            div.className = "income-item";
+            div.innerHTML = `
+                <div class="info">
+                    <div class="label">${nameVal}</div>
+                    <div>Date: ${dateVal} | Recurring: ${recVal} | Freq: ${freqVal}</div>
+                </div>
+                <div class="amount">$${totalVal.toFixed(2)}</div>
+            `;
+            incomeListEl.appendChild(div);
+        });
+    }
+    function renderCharts(incomeData) {
+        const monthlyArr = incomeData.monthlyIncomes || [];
+        const yearlyVal = incomeData.yearlyIncome || 0;
+        resultsSummary.innerHTML = `
+            <p>Total Yearly Income: <span class="positive">$${yearlyVal.toFixed(2)}</span></p>
+        `;
+        buildBarChart(monthlyArr, barChartEl);
+        buildPieChart(monthlyArr, pieChartEl);
+    }
+    function buildBarChart(dataArr, container) {
+        container.innerHTML = "";
+        if(!dataArr || dataArr.length===0){
+            container.innerHTML = "<p style='padding:10px;text-align:center;'>No monthly data</p>";
+            return;
+        }
+        console.log("Building bar chart:", dataArr);
+        const svgNS = "http://www.w3.org/2000/svg";
+        const chartHeight = 200;
+        const barWidth = 30;
+        const gap = 10;
+        const chartWidth = dataArr.length*(barWidth+gap)+gap;
+        let maxVal = Math.max(...dataArr,1);
+        const svg = document.createElementNS(svgNS, "svg");
+        svg.setAttribute("width", chartWidth);
+        svg.setAttribute("height", chartHeight);
+        dataArr.forEach((val, i) => {
+            let x = i*(barWidth+gap)+gap;
+            let barH = (val/maxVal)*(chartHeight-20);
+            let y = chartHeight - barH;
+            let rect = document.createElementNS(svgNS, "rect");
+            rect.setAttribute("x", x);
+            rect.setAttribute("y", y);
+            rect.setAttribute("width", barWidth);
+            rect.setAttribute("height", barH);
+            rect.setAttribute("fill", "#FF8C00");
+            svg.appendChild(rect);
+            let lbl = document.createElementNS(svgNS, "text");
+            lbl.setAttribute("x", x+(barWidth/2));
+            lbl.setAttribute("y", chartHeight-5);
+            lbl.setAttribute("text-anchor", "middle");
+            lbl.setAttribute("fill", "#fff");
+            lbl.setAttribute("font-size", "10");
+            lbl.textContent = (i+1);
+            svg.appendChild(lbl);
+        });
+        container.appendChild(svg);
+    }
+    function buildPieChart(dataArr, container) {
+        container.innerHTML = "";
+        if(!dataArr || dataArr.length===0){
+            container.innerHTML = "<p style='padding:10px;text-align:center;'>No monthly data</p>";
+            return;
+        }
+        console.log("Building pie chart:", dataArr);
+        const sum = dataArr.reduce((a,b)=>a+b,0);
+        if(sum<=0){
+            container.innerHTML = "<p style='padding:10px;text-align:center;'>No data</p>";
+            return;
+        }
+        const svgNS = "http://www.w3.org/2000/svg";
+        const size = 200;
+        const cx = size/2;
+        const cy = size/2;
+        const r = (size/2)-10;
+        const svg = document.createElementNS(svgNS, "svg");
+        svg.setAttribute("width", size);
+        svg.setAttribute("height", size);
+        let startAngle = 0;
+        const colors = ["#FF8C00","#FF4500","#1E90FF","#32CD32","#FFD700","#8A2BE2","#20B2AA","#F08080","#DEB887","#87CEEB","#FFA500","#C71585"];
+        dataArr.forEach((val,i)=>{
+            if(val<=0)return;
+            const sliceAngle = (val/sum)*2*Math.PI;
+            const endAngle = startAngle+sliceAngle;
+            const x1 = cx + r*Math.cos(startAngle);
+            const y1 = cy + r*Math.sin(startAngle);
+            const x2 = cx + r*Math.cos(endAngle);
+            const y2 = cy + r*Math.sin(endAngle);
+            const largeArc = sliceAngle>Math.PI ? 1:0;
+            const pathData = [
+                `M ${cx} ${cy}`,
+                `L ${x1} ${y1}`,
+                `A ${r} ${r} 0 ${largeArc} 1 ${x2} ${y2}`,
+                "Z"
+            ].join(" ");
+            let path = document.createElementNS(svgNS, "path");
+            path.setAttribute("d", pathData);
+            path.setAttribute("fill", colors[i%colors.length]);
+            svg.appendChild(path);
+            const midAngle = startAngle + sliceAngle/2;
+            const labelX = cx + (r/2)*Math.cos(midAngle);
+            const labelY = cy + (r/2)*Math.sin(midAngle);
+            let text = document.createElementNS(svgNS, "text");
+            text.setAttribute("x", labelX);
+            text.setAttribute("y", labelY);
+            text.setAttribute("text-anchor", "middle");
+            text.setAttribute("fill", "#fff");
+            text.setAttribute("font-size","10");
+            text.textContent = (i+1);
+            svg.appendChild(text);
+            startAngle = endAngle;
+        });
+        container.appendChild(svg);
+    }
+</script>
+</body>
+</html>
