@@ -6,9 +6,32 @@
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
+<header>
+  <div class="logo">CashClimb</div>
+  <nav>
+    <ul>
+      <li><a href="profile.html">Profile</a></li>
+    </ul>
+  </nav>
+</header>
+<button class="drawer-toggle" onclick="toggleDrawer()">☰</button>
+<nav class="drawer" id="sideDrawer">
+  <ul>
+    <li><a href="home.html">Dashboard</a></li>
+    <li><a href="expenses.html">Expenses</a></li>
+    <li><a href="income.html">Income</a></li>
+    <li><a href="crypto.html">Crypto</a></li>
+    <li><a href="stocks.html">Stocks</a></li>
+    <li><a href="chat.html">Chat</a></li>
+    <li><a href="tax.html">Tax</a></li>
+    <li><a href="bills.html">Bills</a></li>
+    <li><a href="#">Profile</a></li>
+    <li><a href="settings.html">Settings</a></li>
+    <li><a href="index.html">Logout</a></li>
+  </ul>
+</nav>
 <div class="chat-container">
   <div class="chat-header">
-    <button onclick="window.location.href='home.html'" class="dashboard-button">Back to Dashboard</button>
     <h1>Chatbot</h1>
   </div>
   <div class="chat-window" id="chat-window"></div>
@@ -17,6 +40,29 @@
     <button id="send-btn">Send</button>
   </div>
 </div>
-<script src="chat.js"></script>
+<script src="chat.js">
+</script>
+<script>
+  function getThemePreference(name) {
+    const match = document.cookie.match(new RegExp('(^| )' + name + '=([^;]+)'));
+    if (!match) return null;
+    return match[2];
+  }
+  window.addEventListener('DOMContentLoaded', () => {
+    const savedTheme = getThemePreference('theme');
+    const body = document.body;
+
+    body.classList.remove('light-mode', 'dark-mode');
+    if (savedTheme === 'light') {
+      body.classList.add('light-mode');
+    } else if (savedTheme === 'dark') {
+      body.classList.add('dark-mode');
+    }
+  });
+  function toggleDrawer() {
+    const drawer = document.getElementById('sideDrawer');
+    drawer.classList.toggle('collapsed');
+  }
+</script>
 </body>
 </html>
