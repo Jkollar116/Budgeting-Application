@@ -4,282 +4,32 @@
     <meta charset="UTF-8">
     <title>Stock Trading</title>
     <link rel="stylesheet" href="style.css">
-    <style>
-        .dashboard {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            grid-gap: 20px;
-            margin: 20px;
-        }
-
-        .card {
-            background-color: #2a1a4a;
-            border-radius: 10px;
-            padding: 20px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-        }
-
-        .full-width {
-            grid-column: 1 / span 2;
-        }
-
-        .portfolio-summary {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 20px;
-        }
-
-        .portfolio-summary div {
-            text-align: center;
-        }
-
-        .portfolio-summary h3 {
-            margin-bottom: 5px;
-            color: #f5a623;
-        }
-
-        .portfolio-summary p {
-            font-size: 1.5em;
-            margin: 0;
-        }
-
-        .position-table, .order-table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 10px;
-        }
-
-        .position-table th, .position-table td,
-        .order-table th, .order-table td {
-            padding: 10px;
-            text-align: left;
-            border-bottom: 1px solid #3d2b6b;
-        }
-
-        .position-table th, .order-table th {
-            color: #f5a623;
-        }
-
-        .profit {
-            color: #4CAF50;
-        }
-
-        .loss {
-            color: #F44336;
-        }
-
-        .stock-search {
-            margin-bottom: 20px;
-        }
-
-        .stock-search input {
-            width: 70%;
-            padding: 10px;
-            border-radius: 5px;
-            border: none;
-            background-color: #3d2b6b;
-            color: white;
-        }
-
-        .stock-search button {
-            padding: 10px 15px;
-            border-radius: 5px;
-            border: none;
-            background-color: #f5a623;
-            color: white;
-            cursor: pointer;
-            margin-left: 10px;
-        }
-
-        .tabs {
-            display: flex;
-            margin-bottom: 20px;
-        }
-
-        .tab {
-            padding: 10px 20px;
-            background-color: #3d2b6b;
-            color: white;
-            cursor: pointer;
-            border-radius: 5px 5px 0 0;
-            margin-right: 5px;
-        }
-
-        .tab.active {
-            background-color: #f5a623;
-        }
-
-        .tab-content {
-            display: none;
-        }
-
-        .tab-content.active {
-            display: block;
-        }
-
-        .order-form {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            grid-gap: 15px;
-        }
-
-        .order-form label {
-            display: block;
-            margin-bottom: 5px;
-            color: #f5a623;
-        }
-
-        .order-form input, .order-form select {
-            width: 100%;
-            padding: 10px;
-            border-radius: 5px;
-            border: none;
-            background-color: #3d2b6b;
-            color: white;
-        }
-
-        .order-form button {
-            grid-column: 1 / span 2;
-            padding: 10px 15px;
-            border-radius: 5px;
-            border: none;
-            background-color: #f5a623;
-            color: white;
-            cursor: pointer;
-            font-weight: bold;
-            margin-top: 10px;
-        }
-
-        .order-form .buy-button {
-            background-color: #4CAF50;
-        }
-
-        .order-form .sell-button {
-            background-color: #F44336;
-        }
-
-        .price-chart {
-            width: 100%;
-            height: 300px;
-            background-color: #3d2b6b;
-            border-radius: 5px;
-            margin-top: 20px;
-            position: relative;
-        }
-
-        .stock-details {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 10px;
-        }
-
-        .stock-details div {
-            text-align: center;
-        }
-
-        .stock-details h3 {
-            margin-bottom: 5px;
-            color: #f5a623;
-        }
-
-        .stock-details p {
-            font-size: 1.2em;
-            margin: 0;
-        }
-
-        .timeframe-selector {
-            display: flex;
-            justify-content: center;
-            margin-top: 10px;
-        }
-
-        .timeframe-selector button {
-            padding: 5px 10px;
-            margin: 0 5px;
-            background-color: #3d2b6b;
-            border: none;
-            border-radius: 3px;
-            color: white;
-            cursor: pointer;
-        }
-
-        .timeframe-selector button.active {
-            background-color: #f5a623;
-        }
-
-        .refresh-button {
-            background-color: #3d2b6b;
-            border: none;
-            border-radius: 5px;
-            color: white;
-            padding: 5px 10px;
-            cursor: pointer;
-            margin-left: 10px;
-        }
-
-        .position-actions button {
-            padding: 5px 10px;
-            border-radius: 3px;
-            border: none;
-            color: white;
-            cursor: pointer;
-            margin-right: 5px;
-        }
-
-        .position-actions .buy-more {
-            background-color: #4CAF50;
-        }
-
-        .position-actions .sell {
-            background-color: #F44336;
-        }
-
-        .loading {
-            display: none;
-            text-align: center;
-            padding: 20px;
-        }
-
-        .loading:after {
-            content: "Loading...";
-            font-size: 1.2em;
-            color: #f5a623;
-        }
-
-        .error-message {
-            color: #F44336;
-            text-align: center;
-            margin: 10px 0;
-            display: none;
-        }
-
-        .success-message {
-            color: #4CAF50;
-            text-align: center;
-            margin: 10px 0;
-            display: none;
-        }
-        
-        .or-divider {
-            margin: 0 10px;
-            color: #f5a623;
-        }
-    </style>
 </head>
-<body>
-    <header>
-        <div class="logo">CashClimb</div>
-        <nav>
-            <ul>
-                <li><a href="home.html">Dashboard</a></li>
-                <li><a href="crypto.html">Crypto</a></li>
-                <li><a href="stocks.html">Stocks</a></li>
-                <li><a href="expenses.html">Expenses</a></li>
-                <li><a href="chat.html">Chat</a></li>
-                <li><a href="javascript:void(0)">Log Out <span class="icon">🚪</span></a></li>
-            </ul>
-        </nav>
-    </header>
+<body class="stocks-page">
+<header>
+    <div class="logo">CashClimb</div>
+    <nav>
+        <ul>
+            <li><a href="profile.html">Profile</a></li>
+        </ul>
+    </nav>
+</header>
+<button class="drawer-toggle" onclick="toggleDrawer()">☰</button>
+<nav class="drawer" id="sideDrawer">
+    <ul>
+        <li><a href="home.html">Dashboard</a></li>
+        <li><a href="expenses.html">Expenses</a></li>
+        <li><a href="income.html">Income</a></li>
+        <li><a href="crypto.html">Crypto</a></li>
+        <li><a href="stocks.html">Stocks</a></li>
+        <li><a href="chat.html">Chat</a></li>
+        <li><a href="tax.html">Tax</a></li>
+        <li><a href="bills.html">Bills</a></li>
+        <li><a href="#">Profile</a></li>
+        <li><a href="settings.html">Settings</a></li>
+        <li><a href="index.html">Logout</a></li>
+    </ul>
+</nav>
 
     <section class="hero">
         <div class="hero-content">
@@ -620,5 +370,27 @@
     </div>
 
     <script src="stocks.js"></script>
+<script>
+    function toggleDrawer() {
+        const drawer = document.getElementById('sideDrawer');
+        drawer.classList.toggle('collapsed');
+    }
+    function getThemePreference(name) {
+        const match = document.cookie.match(new RegExp('(^| )' + name + '=([^;]+)'));
+        if (!match) return null;
+        return match[2];
+    }
+    window.addEventListener('DOMContentLoaded', () => {
+        const savedTheme = getThemePreference('theme');
+        const body = document.body;
+
+        body.classList.remove('light-mode', 'dark-mode');
+        if (savedTheme === 'light') {
+            body.classList.add('light-mode');
+        } else if (savedTheme === 'dark') {
+            body.classList.add('dark-mode');
+        }
+    });
+</script>
 </body>
 </html>

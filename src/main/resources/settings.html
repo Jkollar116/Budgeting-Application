@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Chatbot</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body class="default-mode">
+<header>
+    <div class="logo">CashClimb</div>
+    <nav>
+        <ul>
+            <li><a href="profile.html">Profile</a></li>
+        </ul>
+    </nav>
+</header>
+<button class="drawer-toggle" onclick="toggleDrawer()">☰</button>
+<nav class="drawer" id="sideDrawer">
+    <ul>
+        <li><a href="home.html">Dashboard</a></li>
+        <li><a href="expenses.html">Expenses</a></li>
+        <li><a href="income.html">Income</a></li>
+        <li><a href="crypto.html">Crypto</a></li>
+        <li><a href="stocks.html">Stocks</a></li>
+        <li><a href="chat.html">Chat</a></li>
+        <li><a href="tax.html">Tax</a></li>
+        <li><a href="bills.html">Bills</a></li>
+        <li><a href="#">Profile</a></li>
+        <li><a href="settings.html">Settings</a></li>
+        <li><a href="index.html">Logout</a></li>
+    </ul>
+</nav>
+<div class="settings-page">
+    <h2 class="settings-header">Theme Settings</h2>
+    <div class="theme-options-group">
+        <label class="theme-option-label"><input type="radio" name="theme" value="default"> Default</label>
+        <label class="theme-option-label"><input type="radio" name="theme" value="dark"> Dark</label>
+        <label class="theme-option-label"><input type="radio" name="theme" value="light"> Light</label>
+    </div>
+    <button class="apply-theme-button">Apply Theme</button>
+</div>
+<script>
+    function toggleDrawer() {
+        const drawer = document.getElementById('sideDrawer');
+        drawer.classList.toggle('collapsed');
+    }
+    //Sets the user preference for the theme
+    function setThemePreference(name, value, days) {
+        const expires = new Date(Date.now() + days * 86400000).toUTCString();
+        document.cookie = `${name}=${value}; expires=${expires}; path=/`;
+    }
+    //Gets the user preference for the theme
+    function getThemePreference(name) {
+        const match = document.cookie.match(new RegExp('(^| )' + name + '=([^;]+)'));
+        if (!match) return null;
+        return match[2];
+    }
+    window.addEventListener('DOMContentLoaded', () => {
+        const savedTheme = getThemePreference('theme');
+        const body = document.body;
+        if (savedTheme === 'light') {
+            body.classList.add('light-mode');
+        } else if (savedTheme === 'dark') {
+            body.classList.add('dark-mode');
+        }
+        if (savedTheme) {
+            const input = document.querySelector(`input[name="theme"][value="${savedTheme}"]`);
+            if (input) input.checked = true;
+        }
+    });
+    document.querySelector('.apply-theme-button').addEventListener('click', () => {
+        const selectedTheme = document.querySelector('input[name="theme"]:checked').value;
+        const body = document.body;
+        body.classList.remove('light-mode', 'dark-mode');
+
+        if (selectedTheme === 'light') {
+            body.classList.add('light-mode');
+        } else if (selectedTheme === 'dark') {
+            body.classList.add('dark-mode');
+        }
+        setThemePreference('theme', selectedTheme, 30);
+    });
+</script>
+</body>
+</html>
