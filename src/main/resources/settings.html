@@ -4,6 +4,25 @@
     <meta charset="UTF-8">
     <title>Chatbot</title>
     <link rel="stylesheet" href="style.css">
+
+    <!-- Firebase SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+
+    <script>
+        // Replace with your actual Firebase project config
+        const firebaseConfig = {
+            apiKey: "AIzaSyCMA1F8Xd4rCxGXssXIs8Da80qqP6jien8",
+            authDomain: "cashclimb-d162c.firebaseapp.com",
+            projectId: "cashclimb-d162c",
+            storageBucket: "cashclimb-d162c.firebasestorage.app",
+            messagingSenderId: "538805427495",
+            appId: "1:538805427495:web:868215aa93eea1c3af9d02",
+            measurementId: "G-L8RWHZG3VS"
+        };
+
+        firebase.initializeApp(firebaseConfig);
+    </script>
 </head>
 <body class="default-mode">
 <header>
@@ -30,6 +49,7 @@
         <li><a href="index.html">Logout</a></li>
     </ul>
 </nav>
+
 <div class="settings-page">
     <h2 class="settings-header">Theme Settings</h2>
     <div class="theme-options-group">
@@ -38,23 +58,31 @@
         <label class="theme-option-label"><input type="radio" name="theme" value="light"> Light</label>
     </div>
     <button class="apply-theme-button">Apply Theme</button>
+
+    <hr>
+    <h2>Account Settings</h2>
+    <button onclick="deleteAccount()" class="apply-theme-button" style="background-color: red; color: white;">
+        Delete Account
+    </button>
 </div>
+
 <script>
     function toggleDrawer() {
         const drawer = document.getElementById('sideDrawer');
         drawer.classList.toggle('collapsed');
     }
-    //Sets the user preference for the theme
+
     function setThemePreference(name, value, days) {
         const expires = new Date(Date.now() + days * 86400000).toUTCString();
         document.cookie = `${name}=${value}; expires=${expires}; path=/`;
     }
-    //Gets the user preference for the theme
+
     function getThemePreference(name) {
         const match = document.cookie.match(new RegExp('(^| )' + name + '=([^;]+)'));
         if (!match) return null;
         return match[2];
     }
+
     window.addEventListener('DOMContentLoaded', () => {
         const savedTheme = getThemePreference('theme');
         const body = document.body;
@@ -68,11 +96,11 @@
             if (input) input.checked = true;
         }
     });
+
     document.querySelector('.apply-theme-button').addEventListener('click', () => {
         const selectedTheme = document.querySelector('input[name="theme"]:checked').value;
         const body = document.body;
         body.classList.remove('light-mode', 'dark-mode');
-
         if (selectedTheme === 'light') {
             body.classList.add('light-mode');
         } else if (selectedTheme === 'dark') {
@@ -80,6 +108,21 @@
         }
         setThemePreference('theme', selectedTheme, 30);
     });
+
+    function deleteAccount() {
+        if (confirm("Are you sure you want to delete your account?")) {
+            fetch('/deleteAccount', { method: 'POST' })
+                .then(res => {
+                    if (res.status === 302 || res.redirected) {
+                        window.location.href = "/home.html";
+                    } else if (res.status === 401) {
+                        alert("You're not signed in.");
+                    } else {
+                        alert("Account deletion failed.");
+                    }
+                });
+        }
+    }
 </script>
 </body>
 </html>
