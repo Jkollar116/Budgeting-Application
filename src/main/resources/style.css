@@ -1,3 +1,4 @@
+/* Base styles */
 body {
     font-family: Arial, sans-serif;
     margin: 0;
@@ -5,6 +6,8 @@ body {
     background: linear-gradient(135deg, #2C003E, #4A1D5A);
     color: #F5F5F5;
 }
+
+/* Header */
 header {
     display: flex;
     align-items: center;
@@ -32,6 +35,8 @@ header nav ul li a {
 header nav ul li a:hover {
     text-decoration: underline;
 }
+
+/* Hero Section */
 .hero {
     position: relative;
     text-align: center;
@@ -50,6 +55,8 @@ header nav ul li a:hover {
     font-size: 1.2rem;
     margin-bottom: 30px;
 }
+
+/* Dashboard Cards */
 .dashboard {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
@@ -87,6 +94,8 @@ header nav ul li a:hover {
     font-size: 2.5rem;
     font-weight: bold;
 }
+
+/* Footer */
 footer {
     background-color: #3E1F5B;
     text-align: center;
@@ -94,6 +103,8 @@ footer {
     border-top: 2px solid #FF8C00;
     font-size: 0.9rem;
 }
+
+/* Login Container */
 .login-container {
     width: 100%;
     max-width: 400px;
@@ -147,6 +158,76 @@ footer {
 .login-container a:hover {
     text-decoration: underline;
 }
+
+/* Profile Page Styles */
+.profile-container {
+    max-width: 500px;
+    margin: 60px auto;
+    background-color: #3E1F5B;
+    padding: 30px;
+    border-radius: 12px;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.5);
+    text-align: center;
+}
+.profile-container h1 {
+    font-size: 2rem;
+    margin-bottom: 20px;
+    color: #FF8C00;
+}
+.profile-picture-section {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 15px;
+    margin-bottom: 25px;
+}
+.profile-picture-section img {
+    width: 120px;
+    height: 120px;
+    object-fit: cover;
+    border-radius: 50%;
+    border: 3px solid #FF8C00;
+    background-color: #fff;
+}
+.profile-picture-section input[type="file"] {
+    color: #F5F5F5;
+    background-color: #4A1D5A;
+    border: 1px solid #FF8C00;
+    padding: 8px;
+    border-radius: 8px;
+    font-size: 0.9rem;
+}
+.profile-form {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+.profile-form input,
+.profile-form textarea {
+    padding: 12px;
+    border: 1px solid #FF8C00;
+    border-radius: 10px;
+    background-color: #4A1D5A;
+    color: #fff;
+    font-size: 1rem;
+    resize: none;
+}
+.profile-form button {
+    padding: 12px;
+    background-color: #FF8C00;
+    border: none;
+    border-radius: 10px;
+    color: #fff;
+    font-weight: bold;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+.profile-form button:hover {
+    background-color: #e07a00;
+}
+
+/* Responsive */
 @media (max-width: 768px) {
     .hero h1 {
         font-size: 2.5rem;
@@ -161,5 +242,9 @@ footer {
     header nav ul {
         flex-direction: column;
         align-items: center;
+    }
+    .profile-container {
+        margin: 30px 15px;
+        padding: 20px;
     }
 }
