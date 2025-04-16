@@ -1,16 +1,13 @@
 package org.example;
 
-import com.sun.net.httpserver.HttpServer;
-import com.sun.net.httpserver.HttpHandler;
-import com.sun.net.httpserver.HttpExchange;
-import com.sun.net.httpserver.HttpContext;
-import com.sun.net.httpserver.Filter;
+import com.sun.net.httpserver.*;
 import org.json.JSONObject;
 import java.io.*;
 import java.net.*;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.*;
 import java.awt.Desktop;
+import java.util.List;
 
 public class Login {
     private static final String FIREBASE_API_KEY = "AIzaSyCMA1F8Xd4rCxGXssXIs8Da80qqP6jien8";
@@ -25,6 +22,7 @@ public class Login {
         HttpServer server = HttpServer.create(new InetSocketAddress("0.0.0.0", port), 0);
         server.createContext("/", new StaticFileHandler());
         server.createContext("/dologin", new LoginHandler());
+        server.createContext("/deleteAccount", new DeleteAccountHandler());
         server.createContext("/register", new RegisterHandler());
         server.createContext("/forgot", new ForgotPasswordHandler());
         HttpContext homeContext = server.createContext("/home.html", new StaticFileHandler());
@@ -58,6 +56,8 @@ public class Login {
             Desktop.getDesktop().browse(new URI("http://localhost:" + port));
         }
     }
+
+
     static class StaticFileHandler implements HttpHandler {
         private final String basePath = "src/main/resources";
         public void handle(HttpExchange exchange) throws IOException {
@@ -158,6 +158,70 @@ public class Login {
                 }
             } else {
                 exchange.sendResponseHeaders(405, -1);
+            }
+        }
+    }
+
+    static class DeleteAccountHandler implements HttpHandler {
+        public void handle(HttpExchange exchange) throws IOException {
+            if ("POST".equalsIgnoreCase(exchange.getRequestMethod())) {
+                Headers requestHeaders = exchange.getRequestHeaders();
+                List<String> cookies = requestHeaders.get("Cookie");
+                String idToken = null;
+
+                // Extract idToken from cookie
+                if (cookies != null) {
+                    for (String cookie : cookies) {
+                        String[] cookiePairs = cookie.split(";");
+                        for (String pair : cookiePairs) {
+                            String[] kv = pair.trim().split("=");
+                            if (kv.length == 2 && kv[0].equals("idToken")) {
+                                idToken = kv[1];
+                            }
+                        }
+                    }
+                }
+
+                if (idToken == null) {
+                    exchange.sendResponseHeaders(401, -1); // Unauthorized
+                    return;
+                }
+
+                // Call Firebase REST API to delete the user
+                String deleteUrl = "https://identitytoolkit.googleapis.com/v1/accounts:delete?key=" + FIREBASE_API_KEY;
+                URL url = new URL(deleteUrl);
+                HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+                conn.setRequestMethod("POST");
+                conn.setRequestProperty("Content-Type", "application/json");
+                conn.setDoOutput(true);
+
+                String jsonPayload = "{\"idToken\":\"" + idToken + "\"}";
+                OutputStream os = conn.getOutputStream();
+                os.write(jsonPayload.getBytes(StandardCharsets.UTF_8));
+                os.close();
+
+                int responseCode = conn.getResponseCode();
+                if (responseCode == 200) {
+                    // Success - clear cookies and redirect
+                    exchange.getResponseHeaders().add("Set-Cookie", "session=; Path=/; Max-Age=0");
+                    exchange.getResponseHeaders().add("Set-Cookie", "idToken=; Path=/; Max-Age=0");
+                    exchange.getResponseHeaders().add("Set-Cookie", "localId=; Path=/; Max-Age=0");
+                    exchange.getResponseHeaders().set("Location", "/index.html");
+                    exchange.sendResponseHeaders(302, -1); // Redirect to login
+                } else {
+                    InputStream errorStream = conn.getErrorStream();
+                    BufferedReader br = new BufferedReader(new InputStreamReader(errorStream, StandardCharsets.UTF_8));
+                    StringBuilder errorResponse = new StringBuilder();
+                    String line;
+                    while ((line = br.readLine()) != null) {
+                        errorResponse.append(line);
+                    }
+                    br.close();
+                    System.err.println("Firebase delete failed: " + errorResponse.toString());
+                    exchange.sendResponseHeaders(500, -1); // Internal Server Error
+                }
+            } else {
+                exchange.sendResponseHeaders(405, -1); // Method not allowed
             }
         }
     }
