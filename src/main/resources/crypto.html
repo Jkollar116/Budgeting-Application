@@ -24,11 +24,30 @@
         <li><a href="crypto.html">Crypto</a></li>
         <li><a href="stocks.html">Stocks</a></li>
         <li><a href="chat.html">Chat</a></li>
-        <li><a href="tax.html">Tax</a></li>
-        <li><a href="bills.html">Bills</a></li>
+        <!--
+        Add net worth amount to profile
+        -->
         <li><a href="#">Profile</a></li>
         <li><a href="settings.html">Settings</a></li>
+        <!--
+        This is not working as it's supposed to
+        -->
         <li><a href="index.html">Logout</a></li>
+        <li><a href="bills.html">Bills Page (Not Done)</a></li>
+        <!--
+        Everything Below this is incomplete, add as its completed, the page below this comment
+        section that actually works, has a template for including the side drawer, and relevant
+        javascript for the theme change. Copy and paste that to any html and you should be fine
+        <li><a href="leaderboard.html">Leaderboard</a></li>
+        <li><a href="reminders.html">Set Reminders</a></li>
+        <li><a href="alerts.html">Alerts</a></li>
+        <li><a href="assetsLiabilities.html">Assets & Liabilities</a></li>
+        <li><a href="reports.html">Reports</a></li>
+        <li><a href="netWorth.html">Net Worth</a></li>
+        <li><a href="financialTips.html">Financial Tips</a></li>
+        <li><a href="goals.html">Goals and Limits</a></li>
+        -->
+        <li><a href="leaderboard.html">Leaderboard</a></li>
     </ul>
 </nav>
 <div class="dashboard">
@@ -110,7 +129,7 @@
     <!-- Analytics Section -->
     <div class="card analytics-section">
         <h2>Performance Analytics</h2>
-        <select id="timeframe-selector" style="padding: 8px; border-radius: 5px; background: rgba(62, 31, 91, 0.7); color: white; border: 1px solid #FF8C00; margin-bottom: 10px;">
+        <select id="timeframe-selector">
             <option value="24h">24 Hours</option>
             <option value="7d">7 Days</option>
             <option value="30d">30 Days</option>
@@ -240,7 +259,7 @@
         container.innerHTML = '';
 
         if (wallets.length === 0) {
-            container.innerHTML = '<div style="text-align: center; padding: 30px; color: rgba(255,255,255,0.7);">No wallets added. Add a wallet to get started.</div>';
+            container.innerHTML = '<div class="wallets-empty-message"></div>';
             return;
         }
 
@@ -411,9 +430,10 @@
 
         if (wallets.length === 0) {
             ctx.font = '14px Arial';
-            ctx.fillStyle = 'rgba(255,255,255,0.7)';
             ctx.textAlign = 'center';
-            ctx.fillText('No wallet data to display', ctx.canvas.width/2, ctx.canvas.height/2);
+            const isDark = document.body.classList.contains('dark-mode');
+            ctx.fillStyle = isDark ? 'rgba(255,255,255,0.7)' : '#444';
+            ctx.fillText('No wallet data to display', ctx.canvas.width / 2, ctx.canvas.height / 2);
             return;
         }
 
@@ -954,9 +974,10 @@
 
         if (wallets.length === 0) {
             ctx.font = '14px Arial';
-            ctx.fillStyle = 'rgba(255,255,255,0.7)';
             ctx.textAlign = 'center';
-            ctx.fillText('No wallet data to display', ctx.canvas.width/2, ctx.canvas.height/2);
+            const isDark = document.body.classList.contains('dark-mode');
+            ctx.fillStyle = isDark ? 'rgba(255,255,255,0.7)' : '#444';
+            ctx.fillText('No wallet data to display', ctx.canvas.width / 2, ctx.canvas.height / 2);
             return;
         }
 
@@ -1052,9 +1073,10 @@
 
         if (wallets.length === 0) {
             ctx.font = '14px Arial';
-            ctx.fillStyle = 'rgba(255,255,255,0.7)';
             ctx.textAlign = 'center';
-            ctx.fillText('No wallet data to display', ctx.canvas.width/2, ctx.canvas.height/2);
+            const isDark = document.body.classList.contains('dark-mode');
+            ctx.fillStyle = isDark ? 'rgba(255,255,255,0.7)' : '#444';
+            ctx.fillText('No wallet data to display', ctx.canvas.width / 2, ctx.canvas.height / 2);
             return;
         }
 

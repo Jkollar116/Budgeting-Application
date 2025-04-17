@@ -362,14 +362,17 @@ For the drawer, rename to make it more specific
 /*
 Drawer format
  */
-.drawer{
+.drawer {
     width: 250px;
-    height: 100vh;
-    color: #d97600;
+    height: calc(100vh - 74px); /*This makes it so that the drawer can be scrollable if need be*/
     position: fixed;
-    top: 60px;
+    top: 72px;
     left: 0;
     z-index: 1000;
+    background: linear-gradient(135deg, #2C003E, #4A1D5A);
+    color: #d97600;
+    overflow-y: auto; /*This makes it so that the drawer can be scrollable if need be*/
+    overflow-x: hidden; /*This makes it so that the drawer can be scrollable if need be*/
     transition: transform 0.2s ease-in-out;
     transform: translateX(0);
 }
@@ -385,7 +388,6 @@ Adjusts the position of the items in the drawer
 .drawer ul{
     list-style: none;
     margin: 0;
-    padding-top: 40px;
 }
 /*
 Padding between the items
@@ -1241,8 +1243,7 @@ STOCKS PAGE, also a lot
     padding: 10px;
     border-radius: 5px;
     border: none;
-    background-color: #3d2b6b;
-    color: white;
+    color: black;
 }
 
 .stocks-page .stock-search button {
@@ -1542,14 +1543,25 @@ body.light-mode .chat-input button {
 }
 
 body.light-mode .drawer {
-    background-color: #f5f5f5;
-    color: #333;
+    background: linear-gradient(135deg, #ffffff, #f3f3f3);
+    color: #4A1D5A;
+    box-shadow: 2px 0 5px rgba(0, 0, 0, 0.05);
 }
 
 body.light-mode .drawer ul li a {
-    color: #333;
+    color: #d97600;
+    font-weight: bold;
+    text-decoration: none;
     text-shadow: none;
+    transition: color 0.3s;
 }
+
+body.light-mode .drawer ul li a:hover {
+    text-decoration: underline;
+    color: #b46000;
+}
+
+
 
 body.light-mode footer {
     background-color: #eaeaea;
@@ -1600,7 +1612,7 @@ body.light-mode .income-form select {
 }
 
 body.light-mode .chart-canvas {
-    background-color: #f9f9f9;
+    background-color: #e7e7e7;
 }
 
 body.light-mode .results-summary {
@@ -1643,10 +1655,9 @@ body.light-mode .tax-page .hero p {
     color: #333333;
 }
 
-body.light-mode .tax-page .container {
-    background: #ffffff;
-    color: #000000;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+body.light-mode.tax-page .container {
+    background: linear-gradient(135deg, #ffffff, #f3f3f3);
+    color: #000;
 }
 
 body.light-mode .tax-page label {
@@ -1669,9 +1680,10 @@ body.light-mode .tax-page .container button:hover {
     background-color: #e69500;
 }
 
-body.light-mode .tax-page .result-container {
-    background-color: #f0f0f0;
-    color: #000000;
+body.light-mode.tax-page .result-container {
+    background: linear-gradient(135deg, #f5f5f5, #eaeaea);
+    color: #111;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
 }
 
 /*
@@ -1705,8 +1717,12 @@ body.dark-mode #expenseForm button {
     border: 1px solid #FF8C00;
 }
 
+body.dark-mode.tax-page .container {
+    background: linear-gradient(135deg, #1a1a1a, #333333);
+    color: #fff;
+}
 body.dark-mode .income-container {
-    background-color: #1e1e1e;
+    background-color: #000;
     color: #fff;
 }
 
@@ -1747,9 +1763,10 @@ body.dark-mode .tax-page select {
     border: 1px solid #444;
 }
 
-body.dark-mode .tax-page .result-container {
-    background-color: #2e2e2e;
+body.dark-mode.tax-page .result-container {
+    background: linear-gradient(135deg, #1f1f1f, #2e2e2e);
     color: #fff;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
 }
 
 body.dark-mode .settings-page {
@@ -1808,7 +1825,10 @@ body.light-mode header {
     color: #333;
     border-bottom: 2px solid #ccc;
 }
-body.light-mode header nav ul li a,
+body.light-mode header nav ul li a{
+    background: #f9f9f9;
+    color: #000;
+}
 body.light-mode .drawer ul li a {
     color: #333;
     text-shadow: none;
@@ -1823,8 +1843,15 @@ body.light-mode .settings-page {
     color: #000000;
 }
 
-body.light-mode .theme-options-group,
-body.light-mode .theme-option-label,
+body.light-mode .theme-options-group{
+    background: #f9f9f9;
+    color: #000;
+}
+
+body.light-mode .theme-option-label{
+    background: #f9f9f9;
+    color: #000;
+}
 body.light-mode .settings-header {
     color: #000000;
 }
@@ -1839,53 +1866,51 @@ body.light-mode .theme-options-group {
     border-radius: 8px;
 }
 
-body.light-mode .crypto-page .card,
-body.light-mode .crypto-page .qr-content {
-    background: #f9f9f9;
-    color: #000;
+body.light-mode.crypto-page .card,
+body.light-mode.crypto-page .market-card,
+body.light-mode.crypto-page .add-wallet-form,
+body.light-mode.crypto-page .test-buttons,
+body.light-mode.crypto-page .wallet-card,
+body.light-mode.crypto-page .qr-content {
+    background: #f9f9f9  ;
+    color: #000  ;
 }
 
-body.light-mode .crypto-page .stat {
-    background: #ffffff;
+body.light-mode.crypto-page .chart-container {
+    background: #f3f3f3  ;
+    color: #000  ;
+}
+
+body.light-mode.crypto-page .stat {
+    background: #ffffff  ;
+    color: #000  ;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
 }
 
-body.light-mode .crypto-page .stat-label {
-    color: #555;
+body.light-mode.crypto-page .stat-label,
+body.light-mode.crypto-page .wallet-info-item .label {
+    color: #555  ;
 }
 
-body.light-mode .crypto-page .market-card,
-body.light-mode .crypto-page .add-wallet-form,
-body.light-mode .crypto-page .test-buttons,
-body.light-mode .crypto-page .wallet-card,
-body.light-mode .crypto-page .chart-container {
-    background: #f3f3f3;
-    color: #000;
+body.light-mode.crypto-page .btn {
+    background: #f5a623  ;
+    color: #000  ;
 }
 
-body.light-mode .crypto-page .wallet-info-item .label {
-    color: #555;
+body.light-mode.crypto-page .add-wallet-form input,
+body.light-mode.crypto-page .add-wallet-form select {
+    background: #ffffff  ;
+    color: #000  ;
+    border: 1px solid #ccc  ;
 }
 
-body.light-mode .crypto-page .add-wallet-form input,
-body.light-mode .crypto-page .add-wallet-form select {
-    background: #fff;
-    color: #000;
-    border: 1px solid #ccc;
+body.light-mode.crypto-page .qr-code img {
+    background: #ffffff  ;
 }
 
-body.light-mode .crypto-page .btn {
-    background: #f5a623;
-    color: #000;
-}
-
-body.light-mode .crypto-page .qr-code img {
-    background: #fff;
-}
-
-body.light-mode .crypto-page .error-message {
-    background: rgba(255, 0, 0, 0.05);
-    color: #b00020;
+body.light-mode.crypto-page .error-message {
+    background: rgba(255, 0, 0, 0.05)  ;
+    color: #b00020  ;
 }
 
 body.light-mode .stocks-page .dashboard {
@@ -1903,15 +1928,7 @@ body.light-mode .stocks-page .order-table th {
     color: #d97600;
 }
 
-body.light-mode .stocks-page .stock-search input {
-    background-color: #f0f0f0;
-    color: #000;
-}
 
-body.light-mode .stocks-page .tab {
-    background-color: #f0f0f0;
-    color: #000;
-}
 
 body.light-mode .stocks-page .tab.active {
     background-color: #d97600;
@@ -1995,8 +2012,6 @@ body.light-mode .stocks-page .success-message {
 
 
 
-
-/* === DARK MODE OVERRIDES === */
 body.dark-mode .home-hero {
     background: linear-gradient(135deg, #000000, #2e2e2e);
     color: #fff;
@@ -2093,13 +2108,20 @@ body.dark-mode .chat-input button {
 }
 
 body.dark-mode .drawer {
-    background-color: #1a1a1a;
+    background: linear-gradient(135deg, #1a1a1a, #2a2a2a);
     color: #f0f0f0;
+    box-shadow: 2px 0 5px rgba(0, 0, 0, 0.4);
 }
-
 body.dark-mode .drawer ul li a {
-    color: #f0f0f0;
-    text-shadow: none;
+    color: #ff8c00;
+    font-weight: bold;
+    text-decoration: none;
+    text-shadow: 0 0 4px rgba(255, 140, 0, 0.6);
+    transition: color 0.3s;
+}
+body.dark-mode .drawer ul li a:hover {
+    text-decoration: underline;
+    color: #ffa733;
 }
 body.dark-mode footer {
     background-color: #111111;
@@ -2151,56 +2173,47 @@ body.dark-mode .drawer ul li a {
     color: #f0f0f0;
     text-shadow: none;
 }
-/* === CRYPTO PAGE === */
-body.dark-mode .crypto-page .card,
-body.dark-mode .crypto-page .qr-content {
-    background: #1f1f1f;
-    color: #fff;
+body.dark-mode.crypto-page .card,
+body.dark-mode.crypto-page .market-card,
+body.dark-mode.crypto-page .add-wallet-form,
+body.dark-mode.crypto-page .test-buttons,
+body.dark-mode.crypto-page .wallet-card,
+body.dark-mode.crypto-page .qr-content,
+body.dark-mode.crypto-page .chart-container {
+    background: #1f1f1f  ;
+    color: #fff  ;
 }
 
-body.dark-mode .crypto-page .stat {
-    background: #292929;
+body.dark-mode.crypto-page .stat {
+    background: #292929  ;
+    color: #fff  ;
 }
 
-body.dark-mode .crypto-page .stat-label {
-    color: #ccc;
+body.dark-mode.crypto-page .stat-label,
+body.dark-mode.crypto-page .wallet-info-item .label {
+    color: #ccc  ;
 }
 
-body.dark-mode .crypto-page .market-card,
-body.dark-mode .crypto-page .add-wallet-form,
-body.dark-mode .crypto-page .test-buttons,
-body.dark-mode .crypto-page .wallet-card,
-body.dark-mode .crypto-page .chart-container {
-    background: #292929;
-    color: #fff;
+body.dark-mode.crypto-page .add-wallet-form input,
+body.dark-mode.crypto-page .add-wallet-form select {
+    background: #333  ;
+    color: #fff  ;
+    border: 1px solid #FF8C00  ;
 }
 
-body.dark-mode .crypto-page .wallet-info-item .label {
-    color: #ccc;
+body.dark-mode.crypto-page .btn {
+    background: #FF8C00  ;
+    color: #fff  ;
 }
 
-body.dark-mode .crypto-page .add-wallet-form input,
-body.dark-mode .crypto-page .add-wallet-form select {
-    background: #333;
-    color: #fff;
-    border: 1px solid #FF8C00;
+body.dark-mode.crypto-page .qr-code img {
+    background: #fff  ;
 }
 
-body.dark-mode .crypto-page .btn {
-    background: #FF8C00;
-    color: white;
+body.dark-mode.crypto-page .error-message {
+    background: rgba(255, 0, 0, 0.1)  ;
+    color: #ff4444  ;
 }
-
-body.dark-mode .crypto-page .qr-code img {
-    background: #fff;
-}
-
-body.dark-mode .crypto-page .error-message {
-    background: rgba(255, 0, 0, 0.1);
-    color: #ff4444;
-}
-
-/* === STOCKS PAGE === */
 body.dark-mode .stocks-page .dashboard {
     background-color: #121212;
     color: #f0f0f0;
@@ -2229,7 +2242,7 @@ body.dark-mode .stocks-page .tab {
 body.dark-mode .stocks-page .tab.active {
     background-color: #FF8C00;
 }
-/* === DARK MODE: Stocks Page === */
+
 body.dark-mode .stocks-page .order-form label,
 body.dark-mode .stocks-page .or-divider,
 body.dark-mode .stocks-page .loading:after {
@@ -2261,3 +2274,309 @@ body.dark-mode .stocks-page .error-message {
 body.dark-mode .stocks-page .success-message {
     color: #32CD32;
 }
+
+.crypto-page #timeframe-selector {
+    padding: 8px;
+    border-radius: 5px;
+    background: rgba(62, 31, 91, 0.7);
+    color: white;
+    border: 1px solid #FF8C00;
+    margin-bottom: 10px;
+}
+body.light-mode.crypto-page #timeframe-selector,
+body.light-mode .crypto-page #timeframe-selector {
+    background: #f9f9f9;
+    color: #000;
+    border: 1px solid #ccc;
+}
+body.dark-mode.crypto-page #timeframe-selector,
+body.dark-mode .crypto-page #timeframe-selector  {
+    background: #2b2b2b;
+    color: #fff;
+    border: 1px solid #FF8C00;
+}
+.crypto-page .wallets-empty-message {
+    text-align: center;
+    padding: 30px;
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 1rem;
+}
+body.light-mode .crypto-page .wallets-empty-message {
+    color: #444;
+}
+
+/* PROFILE PAGE STYLES */
+.profile-container {
+    max-width: 600px;
+    margin: 80px auto;
+    background: linear-gradient(135deg, #2C003E, #4A1D5A);
+    padding: 30px;
+    border-radius: 12px;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+    color: #F5F5F5;
+    border: 1px solid #FF8C00;
+}
+
+.profile-header {
+    text-align: center;
+    margin-bottom: 30px;
+}
+
+.profile-header h1 {
+    font-size: 2.2rem;
+    color: #FF8C00;
+    text-shadow: 0 0 8px rgba(255, 140, 0, 0.5);
+    margin-bottom: 10px;
+}
+
+.profile-header p {
+    color: #d2d2d2;
+    font-size: 1rem;
+}
+
+.profile-form {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.profile-picture-section {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.profile-picture-preview {
+    width: 150px;
+    height: 150px;
+    border-radius: 50%;
+    background-color: #3E1F5B;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    overflow: hidden;
+    border: 3px solid #FF8C00;
+    margin-bottom: 15px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+}
+
+.profile-picture-preview img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.profile-picture-preview span {
+    color: #d2d2d2;
+    font-size: 0.9rem;
+}
+
+.profile-upload-btn {
+    position: relative;
+    display: inline-block;
+    padding: 10px 20px;
+    background-color: #FF8C00;
+    color: white;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.3s;
+    font-weight: bold;
+    text-align: center;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    font-size: 0.9rem;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+}
+
+.profile-upload-btn:hover {
+    background-color: #e07a00;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+}
+
+.profile-upload-btn input[type="file"] {
+    position: absolute;
+    left: 0;
+    top: 0;
+    opacity: 0;
+    width: 100%;
+    height: 100%;
+    cursor: pointer;
+}
+
+.form-group {
+    margin-bottom: 15px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 8px;
+    color: #FF8C00;
+    font-weight: bold;
+    font-size: 0.95rem;
+}
+
+.form-group input,
+.form-group select,
+.form-group textarea {
+    width: 100%;
+    padding: 12px 15px;
+    background-color: #3E1F5B;
+    border: 1px solid #FF8C00;
+    border-radius: 8px;
+    color: #F5F5F5;
+    font-size: 1rem;
+    transition: border-color 0.3s;
+}
+
+.form-group input:focus,
+.form-group select:focus,
+.form-group textarea:focus {
+    outline: none;
+    border-color: #e07a00;
+    box-shadow: 0 0 0 2px rgba(255, 140, 0, 0.3);
+}
+
+.profile-bio textarea {
+    min-height: 100px;
+    resize: vertical;
+}
+
+.profile-submit-btn {
+    width: 100%;
+    padding: 14px;
+    background-color: #FF8C00;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 1.1rem;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.3s;
+    margin-top: 20px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.profile-submit-btn:hover {
+    background-color: #e07a00;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
+}
+
+.profile-links {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 20px;
+}
+
+.profile-link {
+    color: #FF8C00;
+    text-decoration: none;
+    font-size: 0.9rem;
+    transition: color 0.3s;
+}
+
+.profile-link:hover {
+    color: #e07a00;
+    text-decoration: underline;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .profile-container {
+        margin: 40px 20px;
+        padding: 25px;
+    }
+
+    .profile-header h1 {
+        font-size: 1.8rem;
+    }
+
+    .profile-picture-preview {
+        width: 120px;
+        height: 120px;
+    }
+}
+
+@media (max-width: 480px) {
+    .profile-container {
+        padding: 20px 15px;
+    }
+
+    .profile-header h1 {
+        font-size: 1.6rem;
+    }
+
+    .profile-picture-preview {
+        width: 100px;
+        height: 100px;
+    }
+
+    .form-group input,
+    .form-group select,
+    .form-group textarea {
+        padding: 10px 12px;
+    }
+
+    .profile-submit-btn {
+        padding: 12px;
+        font-size: 1rem;
+    }
+}
+
+/* Dark mode styles (matches your existing dark mode) */
+body.dark-mode .profile-container {
+    background: linear-gradient(135deg, #1a1a1a, #2e2e2e);
+    border: 1px solid #FF8C00;
+}
+
+body.dark-mode .profile-picture-preview {
+    background-color: #2a2a2a;
+}
+
+body.dark-mode .form-group input,
+body.dark-mode .form-group select,
+body.dark-mode .form-group textarea {
+    background-color: #2a2a2a;
+    color: #f0f0f0;
+}
+
+/* Light mode styles (matches your existing light mode) */
+body.light-mode .profile-container {
+    background: linear-gradient(135deg, #ffffff, #eaeaea);
+    border: 1px solid #FF8C00;
+    color: #333;
+}
+
+body.light-mode .profile-header h1 {
+    color: #FF8C00;
+    text-shadow: none;
+}
+
+body.light-mode .profile-header p {
+    color: #555;
+}
+
+body.light-mode .profile-picture-preview {
+    background-color: #f0f0f0;
+}
+
+body.light-mode .profile-picture-preview span {
+    color: #777;
+}
+
+body.light-mode .form-group label {
+    color: #FF8C00;
+}
+
+body.light-mode .form-group input,
+body.light-mode .form-group select,
+body.light-mode .form-group textarea {
+    background-color: #f9f9f9;
+    color: #333;
+    border: 1px solid #FF8C00;
+}
+

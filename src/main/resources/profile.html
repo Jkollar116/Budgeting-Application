@@ -1,0 +1,168 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Profile Setup</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f9;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        .profile-container {
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            padding: 30px;
+            width: 100%;
+            max-width: 500px;
+        }
+
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 30px;
+        }
+
+        .profile-form {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        label {
+            font-weight: bold;
+            color: #555;
+        }
+
+        input[type="text"],
+        input[type="file"] {
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 16px;
+        }
+
+        .profile-picture-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .profile-picture-preview {
+            width: 150px;
+            height: 150px;
+            border-radius: 50%;
+            background-color: #eee;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+            border: 3px solid #ddd;
+        }
+
+        .profile-picture-preview img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .upload-btn {
+            background-color: #4CAF50;
+            color: white;
+            padding: 12px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.3s;
+        }
+
+        .upload-btn:hover {
+            background-color: #45a049;
+        }
+
+        .submit-btn {
+            background-color: #4285f4;
+            color: white;
+            padding: 14px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: bold;
+            transition: background-color 0.3s;
+            margin-top: 20px;
+        }
+
+        .submit-btn:hover {
+            background-color: #3367d6;
+        }
+    </style>
+</head>
+<body>
+<div class="profile-container">
+    <h1>Complete Your Profile</h1>
+    <form class="profile-form" id="profileForm">
+        <div class="profile-picture-container">
+            <div class="profile-picture-preview" id="imagePreview">
+                <span>No image selected</span>
+            </div>
+            <div class="form-group">
+                <label for="profileImage">Profile Picture</label>
+                <input type="file" id="profileImage" name="profileImage" accept="image/*" class="upload-btn">
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label for="fullName">Full Name</label>
+            <input type="text" id="fullName" name="fullName" placeholder="Enter your full name" required>
+        </div>
+
+        <button type="submit" class="submit-btn">Save Profile</button>
+    </form>
+</div>
+
+<script>
+    // Preview the selected profile image
+    document.getElementById('profileImage').addEventListener('change', function(event) {
+        const file = event.target.files[0];
+        const preview = document.getElementById('imagePreview');
+
+        if (file) {
+            const reader = new FileReader();
+
+            reader.onload = function(e) {
+                preview.innerHTML = `<img src="${e.target.result}" alt="Profile Preview">`;
+            }
+
+            reader.readAsDataURL(file);
+        } else {
+            preview.innerHTML = '<span>No image selected</span>';
+        }
+    });
+
+    // Form submission handler
+    document.getElementById('profileForm').addEventListener('submit', function(event) {
+        event.preventDefault();
+        // Here you would typically send the data to a server
+        alert('Profile saved successfully!');
+        // window.location.href = '/dashboard.html'; // Redirect after save
+    });
+</script>
+</body>
+</html>
