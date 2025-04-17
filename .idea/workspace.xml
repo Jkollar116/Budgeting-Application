@@ -4,21 +4,7 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="e72c0420-fe48-4af3-a363-18d6d8618447" name="Changes" comment="Preliminary changes to the dashboard">
-      <change afterPath="$PROJECT_DIR$/src/main/resources/settings.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/chat.css" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/chat.html" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/chat.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/crypto.html" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/crypto.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/expenses.html" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/expenses.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/home.html" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/home.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/income.html" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/income.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/index.html" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/index.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/stocks.html" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/stocks.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/style.css" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/style.css" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/tax.css" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/tax.html" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/tax.html" afterDir="false" />
-    </list>
+    <list default="true" id="e72c0420-fe48-4af3-a363-18d6d8618447" name="Changes" comment="Merge remote-tracking branch 'origin/Muhammad' into Muhammad" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -39,7 +25,7 @@
   <component name="Git.Settings">
     <option name="RECENT_BRANCH_BY_REPOSITORY">
       <map>
-        <entry key="$PROJECT_DIR$" value="Jay" />
+        <entry key="$PROJECT_DIR$" value="Muhammad" />
       </map>
     </option>
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
@@ -68,30 +54,26 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent">{
-  &quot;keyToString&quot;: {
-    &quot;Application.Login.executor&quot;: &quot;Run&quot;,
-    &quot;DefaultHtmlFileTemplate&quot;: &quot;HTML File&quot;,
-    &quot;RunOnceActivity.OpenProjectViewOnStart&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
-    &quot;SHARE_PROJECT_CONFIGURATION_FILES&quot;: &quot;true&quot;,
-    &quot;WebServerToolWindowFactoryState&quot;: &quot;false&quot;,
-    &quot;git-widget-placeholder&quot;: &quot;main&quot;,
-    &quot;kotlin-language-version-configured&quot;: &quot;true&quot;,
-    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
-    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
-    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
-    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
-    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
-    &quot;onboarding.tips.debug.path&quot;: &quot;C:/Users/Jkoll/source/repos/Calendar-Reservation-System-Project/Budgeting_Application/src/main/java/org/example/Main.java&quot;,
-    &quot;project.structure.last.edited&quot;: &quot;Project&quot;,
-    &quot;project.structure.proportion&quot;: &quot;0.15&quot;,
-    &quot;project.structure.side.proportion&quot;: &quot;0.0&quot;,
-    &quot;settings.editor.selected.configurable&quot;: &quot;org.jetbrains.plugins.github.ui.GithubSettingsConfigurable&quot;,
-    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "Application.Login.executor": "Run",
+    "DefaultHtmlFileTemplate": "HTML File",
+    "RunOnceActivity.OpenProjectViewOnStart": "true",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "RunOnceActivity.git.unshallow": "true",
+    "SHARE_PROJECT_CONFIGURATION_FILES": "true",
+    "WebServerToolWindowFactoryState": "false",
+    "git-widget-placeholder": "main",
+    "kotlin-language-version-configured": "true",
+    "node.js.detected.package.eslint": "true",
+    "node.js.detected.package.tslint": "true",
+    "node.js.selected.package.eslint": "(autodetect)",
+    "node.js.selected.package.tslint": "(autodetect)",
+    "nodejs_package_manager_path": "npm",
+    "onboarding.tips.debug.path": "C:/Users/Jkoll/source/repos/Calendar-Reservation-System-Project/Budgeting_Application/src/main/java/org/example/Main.java",
+    "vue.rearranger.settings.migration": "true"
   }
-}</component>
+}]]></component>
   <component name="RunManager" selected="Application.Login">
     <configuration name="Login" type="Application" factoryName="Application" temporary="true" nameIsGenerated="true">
       <option name="MAIN_CLASS_NAME" value="org.example.Login" />
@@ -122,6 +104,8 @@
     </list>
     <recent_temporary>
       <list>
+        <item itemvalue="JavaScript Debug.index.html" />
+        <item itemvalue="Application.Login" />
         <item itemvalue="Application.Login" />
         <item itemvalue="JavaScript Debug.index.html" />
       </list>
@@ -148,27 +132,8 @@
       <workItem from="1739377683848" duration="349000" />
       <workItem from="1739499786601" duration="18000" />
       <workItem from="1739547287123" duration="415000" />
-      <workItem from="1739940993013" duration="7291000" />
-      <workItem from="1739980582226" duration="3394000" />
-      <workItem from="1740173774270" duration="5313000" />
-      <workItem from="1740540294185" duration="1109000" />
-      <workItem from="1740584627074" duration="4216000" />
-      <workItem from="1740759143335" duration="2574000" />
-      <workItem from="1741136665933" duration="164000" />
-      <workItem from="1741136849217" duration="886000" />
-      <workItem from="1741138122965" duration="1138000" />
-      <workItem from="1741190699481" duration="1683000" />
-      <workItem from="1741372384188" duration="2501000" />
-      <workItem from="1741960849037" duration="2898000" />
-      <workItem from="1743168188212" duration="4356000" />
-      <workItem from="1743173613206" duration="2561000" />
-      <workItem from="1743358568631" duration="9656000" />
-      <workItem from="1743465034905" duration="999000" />
-      <workItem from="1743466925123" duration="944000" />
-      <workItem from="1743485387699" duration="9191000" />
-      <workItem from="1744377711711" duration="2881000" />
-      <workItem from="1744382133023" duration="3395000" />
-      <workItem from="1744583582140" duration="394000" />
+      <workItem from="1739940993013" duration="6613000" />
+      <workItem from="1744899624448" duration="1055000" />
     </task>
     <task id="LOCAL-00001" summary="First Commit of login">
       <option name="closed" value="true" />
@@ -186,183 +151,111 @@
       <option name="project" value="LOCAL" />
       <updated>1739947127113</updated>
     </task>
-    <task id="LOCAL-00003" summary="workspace.xml">
+    <task id="LOCAL-00003" summary="Expences category">
       <option name="closed" value="true" />
-      <created>1739947800536</created>
+      <created>1740540595779</created>
       <option name="number" value="00003" />
       <option name="presentableId" value="LOCAL-00003" />
       <option name="project" value="LOCAL" />
-      <updated>1739947800536</updated>
+      <updated>1740540595779</updated>
     </task>
-    <task id="LOCAL-00004" summary="workspace.xml">
+    <task id="LOCAL-00004" summary="Expences category">
       <option name="closed" value="true" />
-      <created>1739981811416</created>
+      <created>1740540746564</created>
       <option name="number" value="00004" />
       <option name="presentableId" value="LOCAL-00004" />
       <option name="project" value="LOCAL" />
-      <updated>1739981811416</updated>
+      <updated>1740540746564</updated>
     </task>
-    <task id="LOCAL-00005" summary="chatbot feature">
+    <task id="LOCAL-00005" summary="Merge remote-tracking branch 'origin/Muhammad' into Muhammad&#10;&#10;# Conflicts:&#10;#&#9;.idea/workspace.xml">
       <option name="closed" value="true" />
-      <created>1740202215081</created>
+      <created>1740939995103</created>
       <option name="number" value="00005" />
       <option name="presentableId" value="LOCAL-00005" />
       <option name="project" value="LOCAL" />
-      <updated>1740202215081</updated>
+      <updated>1740939995103</updated>
     </task>
-    <task id="LOCAL-00006" summary="commit for aws">
+    <task id="LOCAL-00006" summary="Merge remote-tracking branch 'origin/Muhammad' into Muhammad&#10;&#10;# Conflicts:&#10;#&#9;.idea/workspace.xml">
       <option name="closed" value="true" />
-      <created>1740202528054</created>
+      <created>1740940003048</created>
       <option name="number" value="00006" />
       <option name="presentableId" value="LOCAL-00006" />
       <option name="project" value="LOCAL" />
-      <updated>1740202528054</updated>
+      <updated>1740940003048</updated>
     </task>
-    <task id="LOCAL-00007" summary="Fixed an issue where the login button on the forgot password page and register page did not correctly take you back to the login screen.">
+    <task id="LOCAL-00007" summary="Merge remote-tracking branch 'origin/Muhammad' into Muhammad&#10;&#10;# Conflicts:&#10;#&#9;.idea/workspace.xml">
       <option name="closed" value="true" />
-      <created>1740522187034</created>
+      <created>1740940049221</created>
       <option name="number" value="00007" />
       <option name="presentableId" value="LOCAL-00007" />
       <option name="project" value="LOCAL" />
-      <updated>1740522187034</updated>
+      <updated>1740940049221</updated>
     </task>
-    <task id="LOCAL-00008" summary="Fixed an issue where the login button on the forgot password page and register page did not correctly take you back to the login screen.">
+    <task id="LOCAL-00008" summary="Merge remote-tracking branch 'origin/Muhammad' into Muhammad&#10;&#10;# Conflicts:&#10;#&#9;.idea/workspace.xml">
       <option name="closed" value="true" />
-      <created>1740530775515</created>
+      <created>1740940313730</created>
       <option name="number" value="00008" />
       <option name="presentableId" value="LOCAL-00008" />
       <option name="project" value="LOCAL" />
-      <updated>1740530775515</updated>
+      <updated>1740940313730</updated>
     </task>
-    <task id="LOCAL-00009" summary="updated js for aws">
+    <task id="LOCAL-00009" summary="Merge remote-tracking branch 'origin/Muhammad' into Muhammad&#10;&#10;# Conflicts:&#10;#&#9;.idea/workspace.xml">
       <option name="closed" value="true" />
-      <created>1740540058087</created>
+      <created>1740940558714</created>
       <option name="number" value="00009" />
       <option name="presentableId" value="LOCAL-00009" />
       <option name="project" value="LOCAL" />
-      <updated>1740540058087</updated>
+      <updated>1740940558714</updated>
     </task>
-    <task id="LOCAL-00010" summary="updated tge log in port">
+    <task id="LOCAL-00010" summary="Merge remote-tracking branch 'origin/Muhammad' into Muhammad&#10;&#10;# Conflicts:&#10;#&#9;.idea/workspace.xml">
       <option name="closed" value="true" />
-      <created>1740585242679</created>
+      <created>1740941772342</created>
       <option name="number" value="00010" />
       <option name="presentableId" value="LOCAL-00010" />
       <option name="project" value="LOCAL" />
-      <updated>1740585242679</updated>
+      <updated>1740941772342</updated>
     </task>
-    <task id="LOCAL-00011" summary="updated the log in port">
+    <task id="LOCAL-00011" summary="Merge remote-tracking branch 'origin/Muhammad' into Muhammad&#10;&#10;# Conflicts:&#10;#&#9;.idea/workspace.xml">
       <option name="closed" value="true" />
-      <created>1740585747475</created>
+      <created>1742533188599</created>
       <option name="number" value="00011" />
       <option name="presentableId" value="LOCAL-00011" />
       <option name="project" value="LOCAL" />
-      <updated>1740585747475</updated>
+      <updated>1742533188599</updated>
     </task>
-    <task id="LOCAL-00012" summary="updated the log in port">
+    <task id="LOCAL-00012" summary="Merge remote-tracking branch 'origin/Muhammad' into Muhammad">
       <option name="closed" value="true" />
-      <created>1740586023873</created>
+      <created>1744812406036</created>
       <option name="number" value="00012" />
       <option name="presentableId" value="LOCAL-00012" />
       <option name="project" value="LOCAL" />
-      <updated>1740586023873</updated>
+      <updated>1744812406036</updated>
     </task>
-    <task id="LOCAL-00013" summary="azure commit to jack branch">
+    <task id="LOCAL-00013" summary="Merge remote-tracking branch 'origin/Muhammad' into Muhammad">
       <option name="closed" value="true" />
-      <created>1741136705584</created>
+      <created>1744812463918</created>
       <option name="number" value="00013" />
       <option name="presentableId" value="LOCAL-00013" />
       <option name="project" value="LOCAL" />
-      <updated>1741136705584</updated>
+      <updated>1744812463918</updated>
     </task>
-    <task id="LOCAL-00014" summary="updated xml java version">
+    <task id="LOCAL-00014" summary="Merge remote-tracking branch 'origin/Muhammad' into Muhammad">
       <option name="closed" value="true" />
-      <created>1741138951239</created>
+      <created>1744812517186</created>
       <option name="number" value="00014" />
       <option name="presentableId" value="LOCAL-00014" />
       <option name="project" value="LOCAL" />
-      <updated>1741138951239</updated>
+      <updated>1744812517186</updated>
     </task>
-    <task id="LOCAL-00015" summary="no jekyell file">
+    <task id="LOCAL-00015" summary="Merge remote-tracking branch 'origin/Muhammad' into Muhammad">
       <option name="closed" value="true" />
-      <created>1741191861756</created>
+      <created>1744900339398</created>
       <option name="number" value="00015" />
       <option name="presentableId" value="LOCAL-00015" />
       <option name="project" value="LOCAL" />
-      <updated>1741191861756</updated>
+      <updated>1744900339398</updated>
     </task>
-    <task id="LOCAL-00016" summary="pluggin for heroku">
-      <option name="closed" value="true" />
-      <created>1741372475258</created>
-      <option name="number" value="00016" />
-      <option name="presentableId" value="LOCAL-00016" />
-      <option name="project" value="LOCAL" />
-      <updated>1741372475258</updated>
-    </task>
-    <task id="LOCAL-00017" summary="pluggin for heroku">
-      <option name="closed" value="true" />
-      <created>1741374715744</created>
-      <option name="number" value="00017" />
-      <option name="presentableId" value="LOCAL-00017" />
-      <option name="project" value="LOCAL" />
-      <updated>1741374715744</updated>
-    </task>
-    <task id="LOCAL-00018" summary="pluggin for heroku">
-      <option name="closed" value="true" />
-      <created>1741375343720</created>
-      <option name="number" value="00018" />
-      <option name="presentableId" value="LOCAL-00018" />
-      <option name="project" value="LOCAL" />
-      <updated>1741375343720</updated>
-    </task>
-    <task id="LOCAL-00019" summary="added log out feature with cookies">
-      <option name="closed" value="true" />
-      <created>1741963567831</created>
-      <option name="number" value="00019" />
-      <option name="presentableId" value="LOCAL-00019" />
-      <option name="project" value="LOCAL" />
-      <updated>1741963567831</updated>
-    </task>
-    <task id="LOCAL-00020" summary="added firebase integration as well as home page">
-      <option name="closed" value="true" />
-      <created>1743374170721</created>
-      <option name="number" value="00020" />
-      <option name="presentableId" value="LOCAL-00020" />
-      <option name="project" value="LOCAL" />
-      <updated>1743374170721</updated>
-    </task>
-    <task id="LOCAL-00021" summary="do login">
-      <option name="closed" value="true" />
-      <created>1743465169950</created>
-      <option name="number" value="00021" />
-      <option name="presentableId" value="LOCAL-00021" />
-      <option name="project" value="LOCAL" />
-      <updated>1743465169950</updated>
-    </task>
-    <task id="LOCAL-00022" summary="do login home page">
-      <option name="closed" value="true" />
-      <created>1743465562168</created>
-      <option name="number" value="00022" />
-      <option name="presentableId" value="LOCAL-00022" />
-      <option name="project" value="LOCAL" />
-      <updated>1743465562168</updated>
-    </task>
-    <task id="LOCAL-00023" summary="updated it so now it shows the charts">
-      <option name="closed" value="true" />
-      <created>1743466006557</created>
-      <option name="number" value="00023" />
-      <option name="presentableId" value="LOCAL-00023" />
-      <option name="project" value="LOCAL" />
-      <updated>1743466006557</updated>
-    </task>
-    <task id="LOCAL-00024" summary="Preliminary changes to the dashboard">
-      <option name="closed" value="true" />
-      <created>1743558255871</created>
-      <option name="number" value="00024" />
-      <option name="presentableId" value="LOCAL-00024" />
-      <option name="project" value="LOCAL" />
-      <updated>1743558255871</updated>
-    </task>
-    <option name="localTasksCounter" value="25" />
+    <option name="localTasksCounter" value="16" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -382,25 +275,11 @@
   <component name="VcsManagerConfiguration">
     <MESSAGE value="First Commit of login" />
     <MESSAGE value="Home page as well as updated colores" />
-    <MESSAGE value="workspace.xml" />
-    <MESSAGE value="chatbot feature" />
-    <MESSAGE value="commit for aws" />
-    <MESSAGE value="Fixed an issue where the login button on the forgot password page and register page did not correctly take you back to the login screen." />
-    <MESSAGE value="Attempting to fix the API key issue by storing it in aws instead" />
-    <MESSAGE value="updated js for aws" />
-    <MESSAGE value="updated tge log in port" />
-    <MESSAGE value="updated the log in port" />
-    <MESSAGE value="azure commit to jack branch" />
-    <MESSAGE value="updated xml java version" />
-    <MESSAGE value="no jekyell file" />
-    <MESSAGE value="pluggin for heroku" />
-    <MESSAGE value="added log out feature with cookies" />
-    <MESSAGE value="added firebase integration as well as home page" />
-    <MESSAGE value="do login" />
-    <MESSAGE value="do login home page" />
-    <MESSAGE value="updated it so now it shows the charts" />
-    <MESSAGE value="Preliminary changes to the dashboard" />
-    <option name="LAST_COMMIT_MESSAGE" value="Preliminary changes to the dashboard" />
+    <MESSAGE value="Expences category" />
+    <MESSAGE value="Daily Expences" />
+    <MESSAGE value="Merge remote-tracking branch 'origin/Muhammad' into Muhammad&#10;&#10;# Conflicts:&#10;#&#9;.idea/workspace.xml" />
+    <MESSAGE value="Merge remote-tracking branch 'origin/Muhammad' into Muhammad" />
+    <option name="LAST_COMMIT_MESSAGE" value="Merge remote-tracking branch 'origin/Muhammad' into Muhammad" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
