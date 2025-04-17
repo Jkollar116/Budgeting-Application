@@ -5,12 +5,18 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="e72c0420-fe48-4af3-a363-18d6d8618447" name="Changes" comment="Preliminary changes to the dashboard">
-      <change afterPath="$PROJECT_DIR$/src/main/java/org/example/BillsHandler.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/resources/bills.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/resources/leaderboard.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/example/Login.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/example/Login.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/chat.html" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/chat.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/crypto.html" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/crypto.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/expenses.html" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/expenses.html" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/resources/home.html" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/home.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/income.html" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/income.html" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/resources/settings.html" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/settings.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/stocks.html" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/stocks.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/style.css" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/style.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/tax.html" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/tax.html" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -21,8 +27,8 @@
     <option name="RECENT_TEMPLATES">
       <list>
         <option value="JavaScript File" />
-        <option value="HTML File" />
         <option value="Class" />
+        <option value="HTML File" />
       </list>
     </option>
   </component>
@@ -119,14 +125,6 @@
         <item itemvalue="JavaScript Debug.index.html" />
       </list>
     </recent_temporary>
-  </component>
-  <component name="SharedIndexes">
-    <attachedChunks>
-      <set>
-        <option value="bundled-jdk-9823dce3aa75-a94e463ab2e7-intellij.indexing.shared.core-IU-243.26053.27" />
-        <option value="bundled-js-predefined-d6986cc7102b-1632447f56bf-JavaScript-IU-243.26053.27" />
-      </set>
-    </attachedChunks>
   </component>
   <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
   <component name="TaskManager">
