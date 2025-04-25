@@ -24,29 +24,10 @@
     <li><a href="crypto.html">Crypto</a></li>
     <li><a href="stocks.html">Stocks</a></li>
     <li><a href="chat.html">Chat</a></li>
-    <!--
-    Add net worth amount to profile
-    -->
     <li><a href="#">Profile</a></li>
     <li><a href="settings.html">Settings</a></li>
-    <!--
-    This is not working as it's supposed to
-    -->
     <li><a href="index.html">Logout</a></li>
     <li><a href="bills.html">Bills Page (Not Done)</a></li>
-    <!--
-    Everything Below this is incomplete, add as its completed, the page below this comment
-    section that actually works, has a template for including the side drawer, and relevant
-    javascript for the theme change. Copy and paste that to any html and you should be fine
-    <li><a href="leaderboard.html">Leaderboard</a></li>
-    <li><a href="reminders.html">Set Reminders</a></li>
-    <li><a href="alerts.html">Alerts</a></li>
-    <li><a href="assetsLiabilities.html">Assets & Liabilities</a></li>
-    <li><a href="reports.html">Reports</a></li>
-    <li><a href="netWorth.html">Net Worth</a></li>
-    <li><a href="financialTips.html">Financial Tips</a></li>
-    <li><a href="goals.html">Goals and Limits</a></li>
-    -->
     <li><a href="leaderboard.html">Leaderboard</a></li>
   </ul>
 </nav>
@@ -60,7 +41,7 @@
           class="expenses-file-input"
   >
   <div id="output"></div>
-  <!-- Form to manually add a new expense -->
+
   <form id="expenseForm">
     <label for="date">Date</label>
     <input type="date" id="date" name="date" required>
@@ -73,200 +54,161 @@
     <button type="submit">Add Expense</button>
   </form>
 
-  <!-- Container where the expenses will be displayed -->
   <div id="expensesList"></div>
 
-<script>
+  <script>
     function toggleDrawer() {
-      const drawer = document.getElementById('sideDrawer');
-      drawer.classList.toggle('collapsed');
+      document.getElementById('sideDrawer').classList.toggle('collapsed');
     }
-    function getThemePreference(name) {
-      const match = document.cookie.match(new RegExp('(^| )' + name + '=([^;]+)'));
-      if (!match) return null;
-      return match[2];
-    }
-    window.addEventListener('DOMContentLoaded', () => {
-      const savedTheme = getThemePreference('theme');
-      const body = document.body;
 
+    function getThemePreference(name) {
+      var match = document.cookie.match(new RegExp('(^| )' + name + '=([^;]+)'));
+      return match ? match[2] : null;
+    }
+
+    window.addEventListener('DOMContentLoaded', () => {
+      var body = document.body;
       body.classList.remove('light-mode', 'dark-mode');
-      if (savedTheme === 'light') {
-        body.classList.add('light-mode');
-      } else if (savedTheme === 'dark') {
-        body.classList.add('dark-mode');
-      }
+      var theme = getThemePreference('theme');
+      if (theme === 'light') body.classList.add('light-mode');
+      else if (theme === 'dark') body.classList.add('dark-mode');
+      loadExpenses();
     });
-    // Global arrays for combined Excel data and header indices
-    var globalCombinedData = [];
-    var globalHeaderIndices = null;
 
     document.getElementById('excelFileInput').addEventListener('change', function(e) {
       var files = e.target.files;
       if (!files.length) return;
       var promises = [];
-      for (let file of files) {
-        let promise = new Promise((resolve, reject) => {
-          let reader = new FileReader();
-          reader.onload = function(e) {
-            let data = e.target.result;
-            let workbook = XLSX.read(data, {type: 'binary'});
-            let firstSheetName = workbook.SheetNames[0];
-            let worksheet = workbook.Sheets[firstSheetName];
-            let rows = XLSX.utils.sheet_to_json(worksheet, {header:1, defval:""});
-            let headerData = detectHeaderRow(rows);
-            if (headerData) {
-              if (!globalHeaderIndices) globalHeaderIndices = headerData.indices;
-              let dataRows = rows.slice(headerData.index + 1);
-              resolve({dataRows: dataRows});
-            } else {
-              resolve(null);
-            }
+      for (var file of files) {
+        promises.push(new Promise((resolve, reject) => {
+          var reader = new FileReader();
+          reader.onload = e => {
+            var wb = XLSX.read(e.target.result, {type:'binary'});
+            var sh = wb.Sheets[wb.SheetNames[0]];
+            var rows = XLSX.utils.sheet_to_json(sh, {header:1, defval:''});
+            var hdr = detectHeaderRow(rows);
+            resolve(hdr ? {dataRows: rows.slice(hdr.index+1), indices: hdr.indices} : null);
           };
-          reader.onerror = function(e) { reject(e); };
+          reader.onerror = reject;
           reader.readAsBinaryString(file);
-        });
-        promises.push(promise);
+        }));
       }
-      Promise.all(promises).then(results => {
-        results.forEach(res => {
-          if (res && res.dataRows) {
-            globalCombinedData = globalCombinedData.concat(res.dataRows);
-          }
-        });
-        processDataCombined(globalCombinedData, globalHeaderIndices);
-        // Upload every expense from the Excel data to Firebase
-        uploadExpenses(globalCombinedData, globalHeaderIndices);
-      }).catch(err => { console.error("Error processing files:", err); });
+      Promise.all(promises).then(res => {
+        var all = [], indices;
+        res.forEach(r => { if (r) { if (!indices) indices = r.indices; all = all.concat(r.dataRows); } });
+        if (all.length) {
+          processDataCombined(all, indices);
+          uploadExpenses(all, indices);
+        }
+      });
     });
 
-    function processDataCombined(dataRows, indices) {
-      var monthlyTotals = {};
-      var detailsHtml = "<table><thead><tr><th>Date</th><th>Expense</th><th>Category</th><th>Total</th></tr></thead><tbody>";
-      for (var i = 0; i < dataRows.length; i++) {
-        var row = dataRows[i];
-        var dateStr = row[indices.date];
-        var expenseName = row[indices.name];
-        var expenseCategory = row[indices.category];
-        var total = parseFloat(row[indices.total]) || 0;
-        if (expenseName && expenseName.toString().toUpperCase().indexOf("MOBILE PAYMENT - THANK YOU") !== -1) continue;
-        detailsHtml += "<tr><td>" + dateStr + "</td><td>" + expenseName + "</td><td>" + expenseCategory + "</td><td>" + total.toFixed(2) + "</td></tr>";
-        var d = new Date(dateStr);
-        if (!isNaN(d.getTime())) {
-          var monthKey = d.getFullYear() + "-" + ("0" + (d.getMonth() + 1)).slice(-2);
-          if (!monthlyTotals[monthKey]) monthlyTotals[monthKey] = 0;
-          monthlyTotals[monthKey] += total;
+    function processDataCombined(rows, idx) {
+      var totals = {}, html = '<table><thead><tr><th>Date</th><th>Expense</th><th>Category</th><th>Total</th></tr></thead><tbody>';
+      rows.forEach(r => {
+        var d = r[idx.date], nm = r[idx.name], cat = r[idx.category], tot = parseFloat(r[idx.total])||0;
+        if (nm && nm.toUpperCase().includes('MOBILE PAYMENT - THANK YOU')) return;
+        html += `<tr><td>${d}</td><td>${nm}</td><td>${cat}</td><td>${tot.toFixed(2)}</td></tr>`;
+        var dt = new Date(d);
+        if (!isNaN(dt)) {
+          var key = dt.getFullYear()+'-'+('0'+(dt.getMonth()+1)).slice(-2);
+          totals[key] = (totals[key]||0) + tot;
         }
-      }
-      detailsHtml += "</tbody></table>";
-      var totalsHtml = "<h2>Monthly Totals</h2><table><thead><tr><th>Month</th><th>Total Amount</th></tr></thead><tbody>";
-      for (var month in monthlyTotals) {
-        totalsHtml += "<tr><td>" + month + "</td><td>" + monthlyTotals[month].toFixed(2) + "</td></tr>";
-      }
-      totalsHtml += "</tbody></table>";
-      document.getElementById('output').innerHTML = totalsHtml + detailsHtml;
+      });
+      html += '</tbody></table>';
+      var summary = '<h2>Monthly Totals</h2>'
+              + `<table><thead><tr><th>Month</th><th>Total Amount</th></tr></thead><tbody>`
+              + Object.keys(totals).map(m => `<tr><td>${m}</td><td>${totals[m].toFixed(2)}</td></tr>`).join('')
+              + '</tbody></table>';
+      document.getElementById('output').innerHTML = summary + html;
     }
 
-    // Function to upload all expenses from the Excel data to Firebase via POST requests
-    function uploadExpenses(dataRows, indices) {
-      dataRows.forEach(row => {
-        var dateStr = row[indices.date];
-        var expenseName = row[indices.name];
-        var expenseCategory = row[indices.category];
-        var total = row[indices.total];
+    function uploadExpenses(rows, idx) {
+      rows.forEach(r => {
         fetch('/api/expenses', {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ date: dateStr, name: expenseName, category: expenseCategory, total: total })
-        })
-                .then(response => {
-                  if (!response.ok) {
-                    console.error("Error uploading expense:", row);
-                  } else {
-                    console.log("Expense uploaded:", row);
-                  }
-                })
-                .catch(err => console.error("Error uploading expense:", err));
+          headers: {'Content-Type':'application/json'},
+          body: JSON.stringify({
+            date: r[idx.date],
+            name: r[idx.name],
+            category: r[idx.category],
+            total: r[idx.total]
+          })
+        });
       });
+    }
+
+    document.getElementById('expenseForm').addEventListener('submit', function(e) {
+      e.preventDefault();
+      var date = this.date.value, name = this.name.value;
+      var category = this.category.value, total = this.total.value;
+      fetch('/api/expenses', {
+        method: 'POST',
+        headers: {'Content-Type':'application/json'},
+        body: JSON.stringify({date, name, category, total})
+      }).then(res => {
+        if (res.ok) {
+          this.reset();
+          loadExpenses();
+        } else {
+          alert('Error adding expense');
+        }
+      }).catch(() => alert('Error adding expense'));
+    });
+
+    function loadExpenses() {
+      fetch('/api/expenses')
+              .then(res => { if (!res.ok) throw Error(); return res.json(); })
+              .then(data => {
+                var docs = data.documents || [];
+                var html = '<table><thead><tr>'
+                        + '<th>Date</th><th>Name</th><th>Category</th><th>Total</th><th>Remove</th>'
+                        + '</tr></thead><tbody>';
+                docs.forEach(doc => {
+                  var f = doc.fields;
+                  var date = f.date.stringValue,
+                          name = f.name.stringValue,
+                          cat = f.category.stringValue,
+                          tot = f.total.doubleValue;
+                  var id = doc.name.split('/').pop();
+                  html += `<tr><td>${date}</td><td>${name}</td><td>${cat}</td><td>${tot}</td>`
+                          + `<td><button class="remove-btn" data-id="${id}">Remove</button></td></tr>`;
+                });
+                html += '</tbody></table>';
+                var container = document.getElementById('expensesList');
+                container.innerHTML = html;
+                container.querySelectorAll('.remove-btn').forEach(btn => {
+                  btn.addEventListener('click', () => removeExpense(btn.dataset.id));
+                });
+              })
+              .catch(() => {
+                document.getElementById('expensesList').innerHTML = '<p>Error loading expenses</p>';
+              });
+    }
+
+    function removeExpense(id) {
+      fetch('/api/expenses?docId=' + encodeURIComponent(id), { method: 'DELETE' })
+              .then(res => {
+                if (res.ok) loadExpenses();
+                else alert('Error removing expense');
+              })
+              .catch(() => alert('Error removing expense'));
     }
 
     function detectHeaderRow(rows) {
       for (var i = 0; i < Math.min(rows.length, 10); i++) {
-        var row = rows[i];
-        var lowerRow = row.map(function(cell) { return cell.toString().trim().toLowerCase(); });
-        var dateIdx = lowerRow.findIndex(function(cell) { return cell.indexOf("date") !== -1; });
-        var nameIdx = lowerRow.findIndex(function(cell) {
-          return ((cell.indexOf("name") !== -1 || cell.indexOf("charge") !== -1 || cell.indexOf("expense") !== -1 || cell.indexOf("description") !== -1) && cell.indexOf("category") === -1);
-        });
-        var categoryIdx = lowerRow.findIndex(function(cell) { return cell.indexOf("category") !== -1; });
-        var totalIdx = lowerRow.findIndex(function(cell) { return cell.indexOf("total") !== -1 || cell.indexOf("amount") !== -1 || cell.indexOf("cost") !== -1; });
-        if (dateIdx !== -1 && nameIdx !== -1 && categoryIdx !== -1 && totalIdx !== -1) {
-          return {index: i, indices: {date: dateIdx, name: nameIdx, category: categoryIdx, total: totalIdx}};
+        var r = rows[i].map(c => c.toString().trim().toLowerCase());
+        var di = r.findIndex(c => c.includes('date'));
+        var ni = r.findIndex(c => ((c.includes('name')||c.includes('charge')||c.includes('expense')||c.includes('description')) && !c.includes('category')));
+        var ci = r.findIndex(c => c.includes('category'));
+        var ti = r.findIndex(c => c.includes('total')||c.includes('amount')||c.includes('cost'));
+        if (di > -1 && ni > -1 && ci > -1 && ti > -1) {
+          return { index: i, indices: { date: di, name: ni, category: ci, total: ti } };
         }
       }
       return null;
     }
-
-    // Handle manual expense form submission via POST request
-    document.getElementById('expenseForm').addEventListener('submit', function(e) {
-      e.preventDefault();
-      var date = document.getElementById('date').value;
-      var name = document.getElementById('name').value;
-      var category = document.getElementById('category').value;
-      var total = document.getElementById('total').value;
-      fetch('/api/expenses', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ date: date, name: name, category: category, total: total })
-      })
-              .then(response => {
-                if (response.ok) {
-                  alert("Expense added successfully");
-                  document.getElementById('expenseForm').reset();
-                  loadExpenses(); // Reload the expenses list
-                } else {
-                  alert("Error adding expense");
-                }
-              })
-              .catch(err => {
-                console.error(err);
-                alert("Error adding expense");
-              });
-    });
-
-    // Function to load and display expenses from Firebase via GET request
-    function loadExpenses() {
-      fetch('/api/expenses', { method: 'GET' })
-              .then(response => {
-                if (!response.ok) {
-                  throw new Error("Failed to fetch expenses");
-                }
-                return response.json();
-              })
-              .then(data => {
-                const docs = data.documents || [];
-                let html = "<table><thead><tr><th>Date</th><th>Name</th><th>Category</th><th>Total</th></tr></thead><tbody>";
-                docs.forEach(doc => {
-                  const fields = doc.fields;
-                  const date = fields.date.stringValue;
-                  const name = fields.name.stringValue;
-                  const category = fields.category.stringValue;
-                  const total = fields.total.doubleValue;
-                  html += `<tr><td>${date}</td><td>${name}</td><td>${category}</td><td>${total}</td></tr>`;
-                });
-                html += "</tbody></table>";
-                document.getElementById('expensesList').innerHTML = html;
-              })
-              .catch(err => {
-                console.error(err);
-                document.getElementById('expensesList').innerHTML = "<p>Error loading expenses</p>";
-              });
-    }
-
-    // Load expenses on page load
-    window.onload = loadExpenses;
   </script>
 </main>
 </body>
 </html>
-
