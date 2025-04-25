@@ -13,136 +13,153 @@ public class ExpensesHandler implements HttpHandler {
     public void handle(HttpExchange exchange) throws IOException {
         System.out.println("ExpensesHandler invoked: " + exchange.getRequestMethod());
         String cookies = exchange.getRequestHeaders().getFirst("Cookie");
-        System.out.println("ExpensesHandler cookies: " + cookies);
         if (cookies == null || !cookies.contains("idToken=") || !cookies.contains("localId=")) {
-            System.out.println("401 - Missing idToken/localId in cookies");
             exchange.sendResponseHeaders(401, -1);
             return;
         }
         String idToken = extractCookieValue(cookies, "idToken");
         String localId = extractCookieValue(cookies, "localId");
-        System.out.println("Extracted idToken: " + idToken);
-        System.out.println("Extracted localId: " + localId);
         if (idToken == null || localId == null) {
-            System.out.println("401 - null tokens");
             exchange.sendResponseHeaders(401, -1);
             return;
         }
-        if ("GET".equalsIgnoreCase(exchange.getRequestMethod())) {
-            String firestoreUrl = "https://firestore.googleapis.com/v1/projects/cashclimb-d162c/databases/(default)/documents/Users/"
-                    + localId + "/Expenses";
-            System.out.println("Firestore GET URL: " + firestoreUrl);
-            URL url = new URL(firestoreUrl);
-            HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-            conn.setRequestMethod("GET");
-            conn.setRequestProperty("Authorization", "Bearer " + idToken);
-            int responseCode = conn.getResponseCode();
-            System.out.println("Firestore GET response code: " + responseCode);
-            if (responseCode == 200) {
-                BufferedReader in = new BufferedReader(new InputStreamReader(conn.getInputStream(), StandardCharsets.UTF_8));
-                StringBuilder response = new StringBuilder();
-                String line;
-                while ((line = in.readLine()) != null) {
-                    response.append(line);
-                }
-                in.close();
-                exchange.getResponseHeaders().set("Content-Type", "application/json; charset=UTF-8");
-                byte[] responseBytes = response.toString().getBytes(StandardCharsets.UTF_8);
-                exchange.sendResponseHeaders(200, responseBytes.length);
-                OutputStream os = exchange.getResponseBody();
-                os.write(responseBytes);
-                os.close();
-            } else {
-                exchange.sendResponseHeaders(responseCode, -1);
-            }
-        } else if ("POST".equalsIgnoreCase(exchange.getRequestMethod())) {
-            StringBuilder body = new StringBuilder();
-            BufferedReader br = new BufferedReader(new InputStreamReader(exchange.getRequestBody(), StandardCharsets.UTF_8));
-            String line;
-            while ((line = br.readLine()) != null) {
-                body.append(line);
-            }
-            br.close();
-            String requestBody = body.toString();
-            System.out.println("ExpensesHandler requestBody: " + requestBody);
-            String dateValue = getJsonValue(requestBody, "date");
-            String nameValue = getJsonValue(requestBody, "name");
-            String catValue = getJsonValue(requestBody, "category");
-            String totalValue = getJsonValue(requestBody, "total");
-            double amount;
-            try {
-                amount = Double.parseDouble(totalValue);
-            } catch (Exception e) {
-                System.out.println("400 - invalid totalValue format");
-                exchange.sendResponseHeaders(400, -1);
-                return;
-            }
-            String firestoreUrl = "https://firestore.googleapis.com/v1/projects/cashclimb-d162c/databases/(default)/documents/Users/"
-                    + localId + "/Expenses";
-            System.out.println("Firestore URL (POST): " + firestoreUrl);
-            URL url = new URL(firestoreUrl);
-            HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-            conn.setRequestMethod("POST");
-            conn.setRequestProperty("Content-Type", "application/json");
-            conn.setRequestProperty("Authorization", "Bearer " + idToken);
-            conn.setDoOutput(true);
-            String jsonToFirestore = "{\"fields\":{"
-                    + "\"date\":{\"stringValue\":\"" + dateValue + "\"},"
-                    + "\"name\":{\"stringValue\":\"" + nameValue + "\"},"
-                    + "\"category\":{\"stringValue\":\"" + catValue + "\"},"
-                    + "\"total\":{\"doubleValue\":" + amount + "}"
-                    + "}}";
-            System.out.println("jsonToFirestore: " + jsonToFirestore);
-            OutputStream os = conn.getOutputStream();
-            os.write(jsonToFirestore.getBytes(StandardCharsets.UTF_8));
-            os.close();
-            int responseCodePost = conn.getResponseCode();
-            System.out.println("Firestore POST response code: " + responseCodePost);
-            if (responseCodePost == 200 || responseCodePost == 201) {
-                String success = "Expense added successfully.";
-                exchange.sendResponseHeaders(200, success.length());
-                OutputStream respOs = exchange.getResponseBody();
-                respOs.write(success.getBytes(StandardCharsets.UTF_8));
-                respOs.close();
-            } else {
-                InputStream errorStream = conn.getErrorStream();
-                if (errorStream != null) {
-                    BufferedReader errBr = new BufferedReader(new InputStreamReader(errorStream, StandardCharsets.UTF_8));
-                    StringBuilder errBody = new StringBuilder();
-                    String ln;
-                    while ((ln = errBr.readLine()) != null) {
-                        errBody.append(ln);
-                    }
-                    errBr.close();
-                    System.out.println("Firestore error body: " + errBody.toString());
-                }
-                exchange.sendResponseHeaders(responseCodePost, -1);
-            }
+
+        String method = exchange.getRequestMethod();
+        if ("GET".equalsIgnoreCase(method)) {
+            handleGet(exchange, idToken, localId);
+        } else if ("POST".equalsIgnoreCase(method)) {
+            handlePost(exchange, idToken, localId);
+        } else if ("DELETE".equalsIgnoreCase(method)) {
+            handleDelete(exchange, idToken, localId);
         } else {
             exchange.sendResponseHeaders(405, -1);
         }
     }
 
+    private void handleGet(HttpExchange exchange, String idToken, String localId) throws IOException {
+        String urlStr = "https://firestore.googleapis.com/v1/projects/cashclimb-d162c/databases/(default)/documents/Users/"
+                + localId + "/Expenses";
+        HttpURLConnection conn = openFirestoreConnection(urlStr, "GET", idToken);
+        int code = conn.getResponseCode();
+        System.out.println("Firestore GET response code: " + code);
+        if (code == 200) {
+            byte[] resp = readAll(conn.getInputStream()).getBytes(StandardCharsets.UTF_8);
+            exchange.getResponseHeaders().set("Content-Type", "application/json; charset=UTF-8");
+            exchange.sendResponseHeaders(200, resp.length);
+            exchange.getResponseBody().write(resp);
+        } else {
+            exchange.sendResponseHeaders(code, -1);
+        }
+    }
+
+    private void handlePost(HttpExchange exchange, String idToken, String localId) throws IOException {
+        String body = readAll(exchange.getRequestBody());
+        String date = getJsonValue(body, "date");
+        String name = getJsonValue(body, "name");
+        String category = getJsonValue(body, "category");
+        String totalStr = getJsonValue(body, "total");
+        double total;
+        try {
+            total = Double.parseDouble(totalStr);
+        } catch (Exception e) {
+            exchange.sendResponseHeaders(400, -1);
+            return;
+        }
+        String json = "{\"fields\":{"
+                + "\"date\":{\"stringValue\":\"" + date + "\"},"
+                + "\"name\":{\"stringValue\":\"" + name + "\"},"
+                + "\"category\":{\"stringValue\":\"" + category + "\"},"
+                + "\"total\":{\"doubleValue\":" + total + "}"
+                + "}}";
+
+        String urlStr = "https://firestore.googleapis.com/v1/projects/cashclimb-d162c/databases/(default)/documents/Users/"
+                + localId + "/Expenses";
+        HttpURLConnection conn = openFirestoreConnection(urlStr, "POST", idToken);
+        conn.setRequestProperty("Content-Type", "application/json");
+        conn.setDoOutput(true);
+        conn.getOutputStream().write(json.getBytes(StandardCharsets.UTF_8));
+
+        int code = conn.getResponseCode();
+        System.out.println("Firestore POST response code: " + code);
+        if (code == 200 || code == 201) {
+            byte[] msg = "Expense added successfully.".getBytes(StandardCharsets.UTF_8);
+            exchange.sendResponseHeaders(200, msg.length);
+            exchange.getResponseBody().write(msg);
+        } else {
+            logError(conn);
+            exchange.sendResponseHeaders(code, -1);
+        }
+    }
+
+    private void handleDelete(HttpExchange exchange, String idToken, String localId) throws IOException {
+        String query = exchange.getRequestURI().getQuery();
+        String docId = null;
+        if (query != null) {
+            for (String param : query.split("&")) {
+                if (param.startsWith("docId=")) {
+                    docId = URLDecoder.decode(param.substring(6), "UTF-8");
+                    break;
+                }
+            }
+        }
+        if (docId == null || docId.isEmpty()) {
+            System.out.println("DELETE missing docId parameter");
+            exchange.sendResponseHeaders(400, -1);
+            return;
+        }
+        String urlStr = "https://firestore.googleapis.com/v1/projects/cashclimb-d162c/databases/(default)/documents/Users/"
+                + localId + "/Expenses/" + docId;
+        System.out.println("Firestore DELETE URL: " + urlStr);
+        HttpURLConnection conn = openFirestoreConnection(urlStr, "DELETE", idToken);
+        int code = conn.getResponseCode();
+        System.out.println("Firestore DELETE response code: " + code);
+        if (code == 200 || code == 204) {
+            exchange.sendResponseHeaders(200, -1);
+        } else {
+            logError(conn);
+            exchange.sendResponseHeaders(code, -1);
+        }
+    }
+
+    private HttpURLConnection openFirestoreConnection(String urlStr, String method, String idToken) throws IOException {
+        URL url = new URL(urlStr);
+        HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+        conn.setRequestMethod(method);
+        conn.setRequestProperty("Authorization", "Bearer " + idToken);
+        return conn;
+    }
+
+    private String readAll(InputStream in) throws IOException {
+        BufferedReader br = new BufferedReader(new InputStreamReader(in, StandardCharsets.UTF_8));
+        StringBuilder sb = new StringBuilder();
+        String line;
+        while ((line = br.readLine()) != null) sb.append(line);
+        return sb.toString();
+    }
+
+    private void logError(HttpURLConnection conn) throws IOException {
+        InputStream err = conn.getErrorStream();
+        if (err != null) {
+            System.out.println("Firestore error: " + readAll(err));
+        }
+    }
+
     private static String extractCookieValue(String cookies, String name) {
-        String[] parts = cookies.split(";");
-        for (String part : parts) {
-            String trimmed = part.trim();
-            if (trimmed.startsWith(name + "=")) {
-                return trimmed.substring((name + "=").length());
+        for (String part : cookies.split(";")) {
+            String t = part.trim();
+            if (t.startsWith(name + "=")) {
+                return t.substring(name.length() + 1);
             }
         }
         return null;
     }
 
     private static String getJsonValue(String json, String key) {
-        Pattern pattern = Pattern.compile("\"" + key + "\"\\s*:\\s*(?:\"([^\"]*)\"|([\\d.-]+))");
-        Matcher matcher = pattern.matcher(json);
-        if (matcher.find()) {
-            if (matcher.group(1) != null) {
-                return matcher.group(1);
-            } else if (matcher.group(2) != null) {
-                return matcher.group(2);
-            }
+        Pattern p = Pattern.compile("\"" + key + "\"\\s*:\\s*(?:\\\"([^\\\"]*)\\\"|([\\d.-]+))");
+        Matcher m = p.matcher(json);
+        if (m.find()) {
+            if (m.group(1) != null) return m.group(1);
+            if (m.group(2) != null) return m.group(2);
         }
         return "";
     }
