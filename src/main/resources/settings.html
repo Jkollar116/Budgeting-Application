@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Chatbot</title>
+    <link rel="stylesheet" href="style.css">
+
+    <!-- Firebase SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+
+    <script>
+        // Replace with your actual Firebase project config
+        const firebaseConfig = {
+            apiKey: "AIzaSyCMA1F8Xd4rCxGXssXIs8Da80qqP6jien8",
+            authDomain: "cashclimb-d162c.firebaseapp.com",
+            projectId: "cashclimb-d162c",
+            storageBucket: "cashclimb-d162c.firebasestorage.app",
+            messagingSenderId: "538805427495",
+            appId: "1:538805427495:web:868215aa93eea1c3af9d02",
+            measurementId: "G-L8RWHZG3VS"
+        };
+
+        firebase.initializeApp(firebaseConfig);
+    </script>
+</head>
+<body class="default-mode">
+<header>
+    <div class="logo">CashClimb</div>
+    <nav>
+        <ul>
+            <li><a href="profile.html">Profile</a></li>
+        </ul>
+    </nav>
+</header>
+<button class="drawer-toggle" onclick="toggleDrawer()">☰</button>
+<nav class="drawer" id="sideDrawer">
+    <ul>
+        <li><a href="home.html">Dashboard</a></li>
+        <li><a href="expenses.html">Expenses</a></li>
+        <li><a href="income.html">Income</a></li>
+        <li><a href="crypto.html">Crypto</a></li>
+        <li><a href="stocks.html">Stocks</a></li>
+        <li><a href="chat.html">Chat</a></li>
+        <!--
+        Add net worth amount to profile
+        -->
+        <li><a href="#">Profile</a></li>
+        <li><a href="settings.html">Settings</a></li>
+        <!--
+        This is not working as it's supposed to
+        -->
+        <li><a href="index.html">Logout</a></li>
+        <li><a href="bills.html">Bills Page (Not Done)</a></li>
+        <!--
+        Everything Below this is incomplete, add as its completed, the page below this comment
+        section that actually works, has a template for including the side drawer, and relevant
+        javascript for the theme change. Copy and paste that to any html and you should be fine
+        <li><a href="leaderboard.html">Leaderboard</a></li>
+        <li><a href="reminders.html">Set Reminders</a></li>
+        <li><a href="alerts.html">Alerts</a></li>
+        <li><a href="assetsLiabilities.html">Assets & Liabilities</a></li>
+        <li><a href="reports.html">Reports</a></li>
+        <li><a href="netWorth.html">Net Worth</a></li>
+        <li><a href="financialTips.html">Financial Tips</a></li>
+        <li><a href="goals.html">Goals and Limits</a></li>
+        -->
+        <li><a href="leaderboard.html">Leaderboard</a></li>
+    </ul>
+</nav>
+<div class="settings-page">
+    <h2 class="settings-header">Theme Settings</h2>
+    <div class="theme-options-group">
+        <label class="theme-option-label"><input type="radio" name="theme" value="default"> Default</label>
+        <label class="theme-option-label"><input type="radio" name="theme" value="dark"> Dark</label>
+        <label class="theme-option-label"><input type="radio" name="theme" value="light"> Light</label>
+    </div>
+    <button class="apply-theme-button">Apply Theme</button>
+    <hr>
+    <h2>Account Settings</h2>
+    <button onclick="deleteAccount()" class="apply-theme-button" style="background-color: red; color: white;">
+        Delete Account
+    </button>
+</div>
+
+<script>
+    function toggleDrawer() {
+        const drawer = document.getElementById('sideDrawer');
+        drawer.classList.toggle('collapsed');
+    }
+
+    function setThemePreference(name, value, days) {
+        const expires = new Date(Date.now() + days * 86400000).toUTCString();
+        document.cookie = `${name}=${value}; expires=${expires}; path=/`;
+    }
+
+    function getThemePreference(name) {
+        const match = document.cookie.match(new RegExp('(^| )' + name + '=([^;]+)'));
+        if (!match) return null;
+        return match[2];
+    }
+
+    window.addEventListener('DOMContentLoaded', () => {
+        const savedTheme = getThemePreference('theme');
+        const body = document.body;
+        if (savedTheme === 'light') {
+            body.classList.add('light-mode');
+        } else if (savedTheme === 'dark') {
+            body.classList.add('dark-mode');
+        }
+        if (savedTheme) {
+            const input = document.querySelector(`input[name="theme"][value="${savedTheme}"]`);
+            if (input) input.checked = true;
+        }
+    });
+
+    document.querySelector('.apply-theme-button').addEventListener('click', () => {
+        const selectedTheme = document.querySelector('input[name="theme"]:checked').value;
+        const body = document.body;
+        body.classList.remove('light-mode', 'dark-mode');
+        if (selectedTheme === 'light') {
+            body.classList.add('light-mode');
+        } else if (selectedTheme === 'dark') {
+            body.classList.add('dark-mode');
+        }
+        setThemePreference('theme', selectedTheme, 30);
+    });
+
+    function deleteAccount() {
+        if (confirm("Are you sure you want to delete your account?")) {
+            fetch('/deleteAccount', { method: 'POST' })
+                .then(res => {
+                    if (res.status === 302 || res.redirected) {
+                        window.location.href = "/home.html";
+                    } else if (res.status === 401) {
+                        alert("You're not signed in.");
+                    } else {
+                        alert("Account deletion failed.");
+                    }
+                });
+        }
+    }
+</script>
+</body>
+</html>

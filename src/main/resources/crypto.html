@@ -4,391 +4,52 @@
     <meta charset="UTF-8">
     <title>Crypto Wallet Manager</title>
     <link rel="stylesheet" href="style.css">
-    <style>
-        /* Main Layout */
-        .dashboard {
-            display: grid;
-            gap: 20px;
-            padding: 20px;
-            max-width: 1600px;
-            margin: 0 auto;
-            grid-template-columns: 1fr 1fr 1fr;
-            grid-template-areas:
-                "portfolio portfolio market"
-                "wallets wallets market"
-                "walletlist walletlist analytics";
-        }
 
-        /* Cards */
-        .card {
-            background: #3E1F5B;
-            border-radius: 12px;
-            padding: 20px;
-            color: white;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
-        }
-
-        .card h2 {
-            margin-top: 0;
-            color: #FF8C00;
-            font-size: 1.5em;
-            margin-bottom: 15px;
-            padding-bottom: 10px;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-        }
-
-        /* Portfolio Section */
-        .portfolio-section {
-            grid-area: portfolio;
-            display: flex;
-            flex-direction: column;
-        }
-
-        .portfolio-stats {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 15px;
-        }
-
-        .portfolio-chart {
-            flex: 1;
-            max-height: 220px;
-            margin-top: 15px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        /* Stats */
-        .stat {
-            background: rgba(62, 31, 91, 0.7);
-            border-radius: 10px;
-            padding: 15px;
-            text-align: center;
-            transition: transform 0.2s;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-        }
-
-        .stat:hover {
-            transform: translateY(-5px);
-        }
-
-        .stat-label {
-            color: rgba(255, 255, 255, 0.7);
-            font-size: 0.9em;
-            margin-bottom: 5px;
-            display: block;
-        }
-
-        .stat-value {
-            font-size: 1.6em;
-            font-weight: bold;
-            display: block;
-        }
-
-        /* Market Overview */
-        .market-section {
-            grid-area: market;
-        }
-
-        .market-card {
-            background: rgba(62, 31, 91, 0.7);
-            border-radius: 10px;
-            padding: 15px;
-            margin-bottom: 15px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-        }
-
-        .market-card h3 {
-            color: #FF8C00;
-            margin-top: 0;
-            margin-bottom: 10px;
-            font-size: 1.2em;
-        }
-
-        .market-stat {
-            display: flex;
-            justify-content: space-between;
-            padding: 8px 0;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-        }
-
-        .market-stat:last-child {
-            border-bottom: none;
-        }
-
-        /* Wallet Management */
-        .wallet-section {
-            grid-area: wallets;
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 20px;
-        }
-
-        .add-wallet-form {
-            background: rgba(62, 31, 91, 0.7);
-            border-radius: 10px;
-            padding: 20px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-        }
-
-        .add-wallet-form h3 {
-            color: #FF8C00;
-            margin-top: 0;
-            margin-bottom: 15px;
-            font-size: 1.2em;
-        }
-
-        .add-wallet-form input,
-        .add-wallet-form select {
-            width: 100%;
-            padding: 10px;
-            margin: 8px 0;
-            border: 1px solid #FF8C00;
-            border-radius: 6px;
-            background: rgba(255, 255, 255, 0.9);
-            color: #222;
-            font-size: 0.9em;
-        }
-
-        .test-buttons {
-            background: rgba(62, 31, 91, 0.7);
-            border-radius: 10px;
-            padding: 20px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-        }
-
-        .test-buttons h3 {
-            color: #FF8C00;
-            margin-top: 0;
-            margin-bottom: 15px;
-            font-size: 1.2em;
-        }
-
-        .btn-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 10px;
-        }
-
-        /* Wallet List */
-        .wallets-list-section {
-            grid-area: walletlist;
-        }
-
-        .wallet-list {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-            gap: 15px;
-            margin-top: 15px;
-        }
-
-        .wallet-card {
-            background: rgba(62, 31, 91, 0.7);
-            border-radius: 10px;
-            padding: 15px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-            transition: transform 0.3s;
-        }
-
-        .wallet-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 8px 15px rgba(0, 0, 0, 0.2);
-        }
-
-        .wallet-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 10px;
-        }
-
-        .wallet-header h3 {
-            color: #FF8C00;
-            margin: 0;
-            font-size: 1.2em;
-        }
-
-        .wallet-type {
-            background: #FF8C00;
-            color: white;
-            padding: 3px 8px;
-            border-radius: 20px;
-            font-size: 0.8em;
-            font-weight: bold;
-        }
-
-        .wallet-info {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 10px;
-            margin-bottom: 15px;
-        }
-
-        .wallet-info-item {
-            margin: 5px 0;
-            font-size: 0.9em;
-        }
-
-        .wallet-info-item .label {
-            color: rgba(255, 255, 255, 0.7);
-            display: block;
-            margin-bottom: 3px;
-        }
-
-        .wallet-info-item .value {
-            font-weight: bold;
-        }
-
-        .wallet-actions {
-            display: flex;
-            justify-content: flex-end;
-            gap: 8px;
-        }
-
-        /* Analytics Section */
-        .analytics-section {
-            grid-area: analytics;
-        }
-
-        .chart-container {
-            height: 200px;
-            margin-top: 15px;
-            background: rgba(62, 31, 91, 0.7);
-            border-radius: 10px;
-            padding: 15px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-        }
-
-        /* Buttons */
-        .btn {
-            background: #FF8C00;
-            color: white;
-            border: none;
-            padding: 8px 16px;
-            border-radius: 6px;
-            cursor: pointer;
-            transition: background 0.3s ease, transform 0.1s;
-            font-weight: bold;
-            font-size: 0.9em;
-            text-align: center;
-        }
-
-        .btn:hover {
-            background: #FFA500;
-            transform: translateY(-2px);
-        }
-
-        .btn:active {
-            transform: translateY(0);
-        }
-
-        .btn-small {
-            padding: 5px 10px;
-            font-size: 0.8em;
-        }
-
-        /* Status Colors */
-        .positive {
-            color: #32CD32;
-        }
-
-        .negative {
-            color: #FF4444;
-        }
-
-        /* QR Code Modal */
-        .qr-modal {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: rgba(0,0,0,0.85);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            z-index: 1000;
-        }
-
-        .qr-content {
-            background: #3E1F5B;
-            padding: 25px;
-            border-radius: 10px;
-            box-shadow: 0 4px 25px rgba(0, 0, 0, 0.4);
-            text-align: center;
-            max-width: 350px;
-            width: 100%;
-        }
-
-        .qr-code img {
-            margin: 20px auto;
-            padding: 15px;
-            background: white;
-            border-radius: 5px;
-            display: block;
-        }
-
-        /* Messages */
-        .error-message {
-            color: #ff4444;
-            padding: 10px;
-            margin: 10px 0;
-            background: rgba(255,0,0,0.1);
-            border-radius: 6px;
-            text-align: center;
-        }
-
-        /* Responsive Design */
-        @media (max-width: 1200px) {
-            .dashboard {
-                grid-template-columns: 1fr 1fr;
-                grid-template-areas:
-                    "portfolio market"
-                    "wallets wallets"
-                    "walletlist walletlist"
-                    "analytics analytics";
-            }
-        }
-
-        @media (max-width: 768px) {
-            .dashboard {
-                grid-template-columns: 1fr;
-                grid-template-areas:
-                    "portfolio"
-                    "market"
-                    "wallets"
-                    "walletlist"
-                    "analytics";
-            }
-
-            .wallet-section {
-                grid-template-columns: 1fr;
-            }
-
-            .portfolio-stats {
-                grid-template-columns: 1fr;
-            }
-
-            .wallet-info {
-                grid-template-columns: 1fr;
-            }
-        }
-    </style>
 </head>
-<body>
+<body class = "crypto-page">
 <header>
     <div class="logo">CashClimb</div>
     <nav>
         <ul>
-            <li><a href="home.html">Dashboard</a></li>
-            <li><a href="crypto.html">Crypto</a></li>
-            <li><a href="chat.html">Chat</a></li>
-            <li><a href="index.html">Log Out</a></li>
+            <li><a href="profile.html">Profile</a></li>
         </ul>
     </nav>
 </header>
-
+<button class="drawer-toggle" onclick="toggleDrawer()">☰</button>
+<nav class="drawer" id="sideDrawer">
+    <ul>
+        <li><a href="home.html">Dashboard</a></li>
+        <li><a href="expenses.html">Expenses</a></li>
+        <li><a href="income.html">Income</a></li>
+        <li><a href="crypto.html">Crypto</a></li>
+        <li><a href="stocks.html">Stocks</a></li>
+        <li><a href="chat.html">Chat</a></li>
+        <!--
+        Add net worth amount to profile
+        -->
+        <li><a href="#">Profile</a></li>
+        <li><a href="settings.html">Settings</a></li>
+        <!--
+        This is not working as it's supposed to
+        -->
+        <li><a href="index.html">Logout</a></li>
+        <li><a href="bills.html">Bills Page (Not Done)</a></li>
+        <!--
+        Everything Below this is incomplete, add as its completed, the page below this comment
+        section that actually works, has a template for including the side drawer, and relevant
+        javascript for the theme change. Copy and paste that to any html and you should be fine
+        <li><a href="leaderboard.html">Leaderboard</a></li>
+        <li><a href="reminders.html">Set Reminders</a></li>
+        <li><a href="alerts.html">Alerts</a></li>
+        <li><a href="assetsLiabilities.html">Assets & Liabilities</a></li>
+        <li><a href="reports.html">Reports</a></li>
+        <li><a href="netWorth.html">Net Worth</a></li>
+        <li><a href="financialTips.html">Financial Tips</a></li>
+        <li><a href="goals.html">Goals and Limits</a></li>
+        -->
+        <li><a href="leaderboard.html">Leaderboard</a></li>
+    </ul>
+</nav>
 <div class="dashboard">
     <!-- Portfolio Summary Section - More Compact -->
     <div class="card portfolio-section">
@@ -468,7 +129,7 @@
     <!-- Analytics Section -->
     <div class="card analytics-section">
         <h2>Performance Analytics</h2>
-        <select id="timeframe-selector" style="padding: 8px; border-radius: 5px; background: rgba(62, 31, 91, 0.7); color: white; border: 1px solid #FF8C00; margin-bottom: 10px;">
+        <select id="timeframe-selector">
             <option value="24h">24 Hours</option>
             <option value="7d">7 Days</option>
             <option value="30d">30 Days</option>
@@ -488,6 +149,26 @@
 <script src="https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.min.js"></script>
 
 <script>
+    function toggleDrawer() {
+        const drawer = document.getElementById('sideDrawer');
+        drawer.classList.toggle('collapsed');
+    }
+    function getThemePreference(name) {
+        const match = document.cookie.match(new RegExp('(^| )' + name + '=([^;]+)'));
+        if (!match) return null;
+        return match[2];
+    }
+    window.addEventListener('DOMContentLoaded', () => {
+        const savedTheme = getThemePreference('theme');
+        const body = document.body;
+
+        body.classList.remove('light-mode', 'dark-mode');
+        if (savedTheme === 'light') {
+            body.classList.add('light-mode');
+        } else if (savedTheme === 'dark') {
+            body.classList.add('dark-mode');
+        }
+    });
     // Constants and Variables
     const TEST_WALLETS = {
         BTC: [
@@ -578,7 +259,7 @@
         container.innerHTML = '';
 
         if (wallets.length === 0) {
-            container.innerHTML = '<div style="text-align: center; padding: 30px; color: rgba(255,255,255,0.7);">No wallets added. Add a wallet to get started.</div>';
+            container.innerHTML = '<div class="wallets-empty-message"></div>';
             return;
         }
 
@@ -749,9 +430,10 @@
 
         if (wallets.length === 0) {
             ctx.font = '14px Arial';
-            ctx.fillStyle = 'rgba(255,255,255,0.7)';
             ctx.textAlign = 'center';
-            ctx.fillText('No wallet data to display', ctx.canvas.width/2, ctx.canvas.height/2);
+            const isDark = document.body.classList.contains('dark-mode');
+            ctx.fillStyle = isDark ? 'rgba(255,255,255,0.7)' : '#444';
+            ctx.fillText('No wallet data to display', ctx.canvas.width / 2, ctx.canvas.height / 2);
             return;
         }
 
@@ -1292,9 +974,10 @@
 
         if (wallets.length === 0) {
             ctx.font = '14px Arial';
-            ctx.fillStyle = 'rgba(255,255,255,0.7)';
             ctx.textAlign = 'center';
-            ctx.fillText('No wallet data to display', ctx.canvas.width/2, ctx.canvas.height/2);
+            const isDark = document.body.classList.contains('dark-mode');
+            ctx.fillStyle = isDark ? 'rgba(255,255,255,0.7)' : '#444';
+            ctx.fillText('No wallet data to display', ctx.canvas.width / 2, ctx.canvas.height / 2);
             return;
         }
 
@@ -1390,9 +1073,10 @@
 
         if (wallets.length === 0) {
             ctx.font = '14px Arial';
-            ctx.fillStyle = 'rgba(255,255,255,0.7)';
             ctx.textAlign = 'center';
-            ctx.fillText('No wallet data to display', ctx.canvas.width/2, ctx.canvas.height/2);
+            const isDark = document.body.classList.contains('dark-mode');
+            ctx.fillStyle = isDark ? 'rgba(255,255,255,0.7)' : '#444';
+            ctx.fillText('No wallet data to display', ctx.canvas.width / 2, ctx.canvas.height / 2);
             return;
         }
 
