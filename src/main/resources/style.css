@@ -552,6 +552,7 @@ th {
 }
 .expenses-header,
 .expenses-subheader {
+    font-size: 1rem;
     text-align: center;
 }
 .expenses-file-input {
@@ -748,7 +749,7 @@ TAX PAGE, moved over from tax css
 }
 .tax-page .hero {
     text-align: center;
-    padding: 80px 20px;
+    padding: 20px 20px;
     background-color: #3E1F5B;
 }
 .tax-page .hero h1 {
@@ -2306,17 +2307,6 @@ body.light-mode .crypto-page .wallets-empty-message {
 }
 
 /* PROFILE PAGE STYLES */
-.profile-container {
-    max-width: 600px;
-    margin: 80px auto;
-    background: linear-gradient(135deg, #2C003E, #4A1D5A);
-    padding: 30px;
-    border-radius: 12px;
-    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
-    color: #F5F5F5;
-    border: 1px solid #FF8C00;
-}
-
 .profile-header {
     text-align: center;
     margin-bottom: 30px;
@@ -2420,7 +2410,6 @@ body.light-mode .crypto-page .wallets-empty-message {
 .form-group input,
 .form-group select,
 .form-group textarea {
-    width: 100%;
     padding: 12px 15px;
     background-color: #3E1F5B;
     border: 1px solid #FF8C00;
@@ -2484,7 +2473,6 @@ body.light-mode .crypto-page .wallets-empty-message {
     text-decoration: underline;
 }
 
-/* Responsive adjustments */
 @media (max-width: 768px) {
     .profile-container {
         margin: 40px 20px;
@@ -2527,7 +2515,6 @@ body.light-mode .crypto-page .wallets-empty-message {
     }
 }
 
-/* Dark mode styles (matches your existing dark mode) */
 body.dark-mode .profile-container {
     background: linear-gradient(135deg, #1a1a1a, #2e2e2e);
     border: 1px solid #FF8C00;
@@ -2544,7 +2531,6 @@ body.dark-mode .form-group textarea {
     color: #f0f0f0;
 }
 
-/* Light mode styles (matches your existing light mode) */
 body.light-mode .profile-container {
     background: linear-gradient(135deg, #ffffff, #eaeaea);
     border: 1px solid #FF8C00;
@@ -2580,3 +2566,136 @@ body.light-mode .form-group textarea {
     border: 1px solid #FF8C00;
 }
 
+/* PROFILE*/
+.profile-form {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.profile-container h1 {
+    text-align: center;
+    font-size: 1.8rem;
+    font-weight: bold;
+    margin-bottom: 30px;
+}
+
+.profile-picture-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 15px;
+}
+
+.profile-picture-preview {
+    width: 150px;
+    height: 150px;
+    border-radius: 50%;
+    background-color: #eee;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    overflow: hidden;
+    border: 3px solid #ddd;
+}
+
+.profile-picture-preview img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.profile-form label {
+    font-weight: bold;
+    text-align: center;
+}
+
+.profile-form input[type="text"],
+.profile-form input[type="file"] {
+    padding: 12px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    font-size: 1rem;
+}
+
+.upload-btn {
+    background-color: #4CAF50;
+    color: white;
+    padding: 12px 20px;
+    border: none;
+    border-radius: 6px;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.upload-btn:hover {
+    background-color: #45a049;
+}
+
+.submit-btn {
+    background-color: #FF8C00;
+    color: white;
+    padding: 14px;
+    border: none;
+    border-radius: 6px;
+    font-size: 1rem;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background-color 0.3s;
+    margin-top: 20px;
+}
+
+.submit-btn:hover {
+    background-color: #e07a00;
+}
+
+body.light-mode .profile-container {
+    background: linear-gradient(135deg, #ffffff, #f3f3f3);
+    color: #000;
+}
+
+body.light-mode .profile-container h1,
+body.light-mode .profile-form label {
+    color: #222;
+}
+
+body.light-mode .profile-picture-preview {
+    background-color: #f0f0f0;
+    border-color: #ccc;
+}
+
+body.light-mode .profile-form input[type="text"],
+body.light-mode .profile-form input[type="file"] {
+    background-color: #ffffff;
+    color: #000;
+    border: 1px solid #ccc;
+}
+
+body.dark-mode .profile-container {
+    background: linear-gradient(135deg, #1e1e1e, #2c2c2c);
+    color: #fff;
+}
+
+body.dark-mode .profile-container h1,
+body.dark-mode .profile-form label {
+    color: #f5f5f5;
+}
+
+body.dark-mode .profile-picture-preview {
+    background-color: #444;
+    border-color: #666;
+}
+
+body.dark-mode .profile-form input[type="text"],
+body.dark-mode .profile-form input[type="file"] {
+    background-color: #333;
+    color: #fff;
+    border: 1px solid #666;
+}

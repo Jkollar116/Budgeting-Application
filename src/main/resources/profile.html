@@ -1,143 +1,106 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Profile Setup</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #f4f4f9;
-            margin: 0;
-            padding: 0;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-        }
-
-        .profile-container {
-            background-color: white;
-            border-radius: 8px;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-            padding: 30px;
-            width: 100%;
-            max-width: 500px;
-        }
-
-        h1 {
-            text-align: center;
-            color: #333;
-            margin-bottom: 30px;
-        }
-
-        .profile-form {
-            display: flex;
-            flex-direction: column;
-            gap: 20px;
-        }
-
-        .form-group {
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-        }
-
-        label {
-            font-weight: bold;
-            color: #555;
-        }
-
-        input[type="text"],
-        input[type="file"] {
-            padding: 12px;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-            font-size: 16px;
-        }
-
-        .profile-picture-container {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 15px;
-        }
-
-        .profile-picture-preview {
-            width: 150px;
-            height: 150px;
-            border-radius: 50%;
-            background-color: #eee;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            overflow: hidden;
-            border: 3px solid #ddd;
-        }
-
-        .profile-picture-preview img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-        }
-
-        .upload-btn {
-            background-color: #4CAF50;
-            color: white;
-            padding: 12px 20px;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 16px;
-            transition: background-color 0.3s;
-        }
-
-        .upload-btn:hover {
-            background-color: #45a049;
-        }
-
-        .submit-btn {
-            background-color: #4285f4;
-            color: white;
-            padding: 14px;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 16px;
-            font-weight: bold;
-            transition: background-color 0.3s;
-            margin-top: 20px;
-        }
-
-        .submit-btn:hover {
-            background-color: #3367d6;
-        }
-    </style>
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
-<div class="profile-container">
-    <h1>Complete Your Profile</h1>
-    <form class="profile-form" id="profileForm">
-        <div class="profile-picture-container">
-            <div class="profile-picture-preview" id="imagePreview">
-                <span>No image selected</span>
+<header>
+    <div class="logo">CashClimb</div>
+    <nav>
+        <ul>
+            <li><a href="profile.html">Profile</a></li>
+        </ul>
+    </nav>
+</header>
+<button class="drawer-toggle" onclick="toggleDrawer()">☰</button>
+<nav class="drawer" id="sideDrawer">
+    <ul>
+        <li><a href="home.html">Dashboard</a></li>
+        <li><a href="expenses.html">Expenses</a></li>
+        <li><a href="income.html">Income</a></li>
+        <li><a href="tax.html">Tax</a></li>
+        <li><a href="crypto.html">Crypto</a></li>
+        <li><a href="stocks.html">Stocks</a></li>
+        <li><a href="chat.html">Chat</a></li>
+        <!--
+        Add net worth amount to profile
+        -->
+        <li><a href="#">Profile</a></li>
+        <li><a href="settings.html">Settings</a></li>
+        <!--
+        This is not working as it's supposed to
+        -->
+        <li><a href="index.html">Logout</a></li>
+        <li><a href="bills.html">Bills Page (Not Done)</a></li>
+        <!--
+        Everything Below this is incomplete, add as its completed, the page below this comment
+        section that actually works, has a template for including the side drawer, and relevant
+        javascript for the theme change. Copy and paste that to any html and you should be fine
+        <li><a href="leaderboard.html">Leaderboard</a></li>
+        <li><a href="reminders.html">Set Reminders</a></li>
+        <li><a href="alerts.html">Alerts</a></li>
+        <li><a href="assetsLiabilities.html">Assets & Liabilities</a></li>
+        <li><a href="reports.html">Reports</a></li>
+        <li><a href="netWorth.html">Net Worth</a></li>
+        <li><a href="financialTips.html">Financial Tips</a></li>
+        <li><a href="goals.html">Goals and Limits</a></li>
+        -->
+        <li><a href="leaderboard.html">Leaderboard</a></li>
+    </ul>
+</nav>
+<main>
+    <div class="hero">
+        <div class="header-content">
+            <h1>Profile Management</h1>
+            <p>Manage Your Profile Below</p>
+        </div>
+    </div>
+    <div class="profile-container">
+        <h1 class="profile-header">Complete Your Profile</h1>
+        <form class="profile-form" id="profileForm">
+            <div class="profile-picture-container">
+                <div class="profile-picture-preview" id="imagePreview">
+                    <span>No image selected</span>
+                </div>
+                <div class="form-group">
+                    <label for="profileImage">Profile Picture</label>
+                    <input type="file" id="profileImage" name="profileImage" accept="image/*" class="upload-btn">
+                </div>
             </div>
             <div class="form-group">
-                <label for="profileImage">Profile Picture</label>
-                <input type="file" id="profileImage" name="profileImage" accept="image/*" class="upload-btn">
+                <label for="fullName">Full Name</label>
+                <input type="text" id="fullName" name="fullName" placeholder="Enter your full name" required>
             </div>
-        </div>
-
-        <div class="form-group">
-            <label for="fullName">Full Name</label>
-            <input type="text" id="fullName" name="fullName" placeholder="Enter your full name" required>
-        </div>
-
-        <button type="submit" class="submit-btn">Save Profile</button>
-    </form>
-</div>
-
+            <button type="submit" class="submit-btn">Save Profile</button>
+        </form>
+    </div>
+</main>
+</body>
 <script>
+    function toggleDrawer() {
+        const drawer = document.getElementById('sideDrawer');
+        drawer.classList.toggle('collapsed');
+    }
+    function getThemePreference(name) {
+        const match = document.cookie.match(new RegExp('(^| )' + name + '=([^;]+)'));
+        if (!match) return null;
+        return match[2];
+    }
+    window.addEventListener('DOMContentLoaded', () => {
+        const savedTheme = getThemePreference('theme');
+        const body = document.body;
+        if (savedTheme === 'light') {
+            body.classList.add('light-mode');
+        } else if (savedTheme === 'dark') {
+            body.classList.add('dark-mode');
+        }
+        if (savedTheme) {
+            const input = document.querySelector(`input[name="theme"][value="${savedTheme}"]`);
+            if (input) input.checked = true;
+        }
+    });
     // Preview the selected profile image
     document.getElementById('profileImage').addEventListener('change', function(event) {
         const file = event.target.files[0];
@@ -164,5 +127,4 @@
         // window.location.href = '/dashboard.html'; // Redirect after save
     });
 </script>
-</body>
 </html>
