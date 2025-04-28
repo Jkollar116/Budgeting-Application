@@ -32,7 +32,7 @@
         <!--
         This is not working as it's supposed to
         -->
-        <li><a href="index.html">Logout</a></li>
+        <li><a href="/logout">Logout</a></li>
         <li><a href="bills.html">Bills Page (Not Done)</a></li>
         <!--
         Everything Below this is incomplete, add as its completed, the page below this comment
@@ -93,6 +93,9 @@
         if (!match) return null;
         return match[2];
     }
+    window.addEventListener('pageshow', function(event) {
+        if (event.persisted) window.location.reload();
+    });
     window.addEventListener('DOMContentLoaded', () => {
         const savedTheme = getThemePreference('theme');
         const body = document.body;

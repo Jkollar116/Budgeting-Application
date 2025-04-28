@@ -73,6 +73,9 @@
         if (!match) return null;
         return match[2];
     }
+    window.addEventListener('pageshow', function(event) {
+        if (event.persisted) window.location.reload();
+    });
     window.addEventListener('DOMContentLoaded', () => {
         const savedTheme = getThemePreference('theme');
         const body = document.body;

@@ -4,12 +4,21 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="e72c0420-fe48-4af3-a363-18d6d8618447" name="Changes" comment="Added the drawer and updated the header for all html pages, moved over the css elements from the html pages over to the style.css file instead. Added the settings page, this currently only has one setting, to change the theme. Using cookies, the users preference of the theme is set across the page. The tax.css and chat.css was also deleted. There are still some bugs in light and dark mode, and some bugs with how the html is organized in general">
-      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
+    <list default="true" id="e72c0420-fe48-4af3-a363-18d6d8618447" name="Changes" comment="More minor css and html fixes. Adjusted some of the pages to be more consistent with the others, still a work in progress.">
+      <change afterPath="$PROJECT_DIR$/src/main/resources/invalidSession.html" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/example/Login.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/example/Login.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/chat.html" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/chat.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/crypto.html" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/crypto.html" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/resources/expenses.html" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/expenses.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/forgot.html" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/forgot.html" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/resources/home.html" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/home.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/income.html" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/income.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/index.html" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/index.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/leaderboard.html" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/leaderboard.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/login.html" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/login.html" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/resources/profile.html" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/profile.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/settings.html" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/settings.html" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/resources/style.css" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/style.css" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -162,7 +171,7 @@
       <workItem from="1744377711711" duration="2881000" />
       <workItem from="1744382133023" duration="3395000" />
       <workItem from="1744583582140" duration="394000" />
-      <workItem from="1745612065335" duration="8473000" />
+      <workItem from="1745612065335" duration="18925000" />
     </task>
     <task id="LOCAL-00001" summary="First Commit of login">
       <option name="closed" value="true" />
@@ -356,7 +365,15 @@
       <option name="project" value="LOCAL" />
       <updated>1743558255871</updated>
     </task>
-    <option name="localTasksCounter" value="25" />
+    <task id="LOCAL-00025" summary="More minor css and html fixes. Adjusted some of the pages to be more consistent with the others, still a work in progress.">
+      <option name="closed" value="true" />
+      <created>1745732128086</created>
+      <option name="number" value="00025" />
+      <option name="presentableId" value="LOCAL-00025" />
+      <option name="project" value="LOCAL" />
+      <updated>1745732128086</updated>
+    </task>
+    <option name="localTasksCounter" value="26" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -394,7 +411,8 @@
     <MESSAGE value="do login home page" />
     <MESSAGE value="updated it so now it shows the charts" />
     <MESSAGE value="Preliminary changes to the dashboard" />
-    <option name="LAST_COMMIT_MESSAGE" value="Preliminary changes to the dashboard" />
+    <MESSAGE value="More minor css and html fixes. Adjusted some of the pages to be more consistent with the others, still a work in progress." />
+    <option name="LAST_COMMIT_MESSAGE" value="More minor css and html fixes. Adjusted some of the pages to be more consistent with the others, still a work in progress." />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>

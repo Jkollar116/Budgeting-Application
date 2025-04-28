@@ -51,5 +51,28 @@
 <footer class="footer">
     &copy; 2025 CashClimb. All rights reserved.
 </footer>
+<script>
+    function getThemePreference(name) {
+        const match = document.cookie.match(new RegExp('(^| )' + name + '=([^;]+)'));
+        if (!match) return null;
+        return match[2];
+    }
+    window.addEventListener('pageshow', function(event) {
+        if (event.persisted) window.location.reload();
+    });
+    window.addEventListener('DOMContentLoaded', () => {
+        const savedTheme = getThemePreference('theme');
+        const body = document.body;
+        if (savedTheme === 'light') {
+            body.classList.add('light-mode');
+        } else if (savedTheme === 'dark') {
+            body.classList.add('dark-mode');
+        }
+        if (savedTheme) {
+            const input = document.querySelector(`input[name="theme"][value="${savedTheme}"]`);
+            if (input) input.checked = true;
+        }
+    });
+</script>
 </body>
 </html>
