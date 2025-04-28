@@ -50,6 +50,26 @@ public class Login {
         HttpContext apiIncomeContext = server.createContext("/api/income", new IncomeHandler());
         apiIncomeContext.getFilters().add(new AuthFilter());
 
+        HttpContext cryptoContext = server.createContext("/crypto.html", new StaticFileHandler());
+        cryptoContext.getFilters().add(new AuthFilter());
+        HttpContext stocksContext = server.createContext("/stocks.html", new StaticFileHandler());
+        stocksContext.getFilters().add(new AuthFilter());
+        HttpContext expensesContext = server.createContext("/expenses.html", new StaticFileHandler());
+        expensesContext.getFilters().add(new AuthFilter());
+        HttpContext incomeContext = server.createContext("/income.html", new StaticFileHandler());
+        incomeContext.getFilters().add(new AuthFilter());
+        HttpContext profileContext = server.createContext("/profile.html", new StaticFileHandler());
+        profileContext.getFilters().add(new AuthFilter());
+        HttpContext taxContext = server.createContext("/tax.html", new StaticFileHandler());
+        taxContext.getFilters().add(new AuthFilter());
+        HttpContext settingsContext = server.createContext("/settings.html", new StaticFileHandler());
+        settingsContext.getFilters().add(new AuthFilter());
+        HttpContext chatContext = server.createContext("/chat.html", new StaticFileHandler());
+        chatContext.getFilters().add(new AuthFilter());
+        HttpContext leaderboardContext = server.createContext("/leaderboard.html", new StaticFileHandler());
+        leaderboardContext.getFilters().add(new AuthFilter());
+        HttpContext billsContext = server.createContext("/bills.html", new StaticFileHandler());
+        billsContext.getFilters().add(new AuthFilter());
         server.setExecutor(null);
         server.start();
         if (Desktop.isDesktopSupported()) {
@@ -400,7 +420,7 @@ public class Login {
         public void doFilter(HttpExchange exchange, Chain chain) throws IOException {
             String cookies = exchange.getRequestHeaders().getFirst("Cookie");
             if (cookies == null || !cookies.contains("session=valid")) {
-                exchange.getResponseHeaders().set("Location", "/index.html");
+                exchange.getResponseHeaders().set("Location", "/invalidSession.html");
                 exchange.sendResponseHeaders(302, -1);
                 return;
             }

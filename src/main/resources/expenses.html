@@ -66,12 +66,13 @@
     function toggleDrawer() {
       document.getElementById('sideDrawer').classList.toggle('collapsed');
     }
-
     function getThemePreference(name) {
       var match = document.cookie.match(new RegExp('(^| )' + name + '=([^;]+)'));
       return match ? match[2] : null;
     }
-
+    window.addEventListener('pageshow', function(event) {
+      if (event.persisted) window.location.reload();
+    });
     window.addEventListener('DOMContentLoaded', () => {
       var body = document.body;
       body.classList.remove('light-mode', 'dark-mode');
@@ -80,7 +81,6 @@
       else if (theme === 'dark') body.classList.add('dark-mode');
       loadExpenses();
     });
-
     document.getElementById('excelFileInput').addEventListener('change', function(e) {
       var files = e.target.files;
       if (!files.length) return;

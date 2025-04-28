@@ -101,6 +101,9 @@
     }
 
     window.addEventListener('DOMContentLoaded', () => {
+        window.addEventListener('pageshow', function(event) {
+            if (event.persisted) window.location.reload();
+        });
         const savedTheme = getThemePreference('theme');
         const body = document.body;
         if (savedTheme === 'light') {
