@@ -51,3 +51,7 @@ temp_backup/
 *.class
 src/main/resources/serviceAccountKey.json
 src/main/resources/keys.json
+/src/main/resources/serviceAccountKey.json
+/src/main/resources/keys.template.json
+/logs
+/docs/api.md
