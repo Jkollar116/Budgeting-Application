@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Profile Setup</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header>
+    <div class="logo">CashClimb</div>
+    <nav>
+        <ul>
+            <li><a href="profile.html">Profile</a></li>
+        </ul>
+    </nav>
+</header>
+<button class="drawer-toggle" onclick="toggleDrawer()">☰</button>
+<nav class="drawer" id="sideDrawer">
+    <ul>
+        <li><a href="home.html">Dashboard</a></li>
+        <li><a href="expenses.html">Expenses</a></li>
+        <li><a href="income.html">Income</a></li>
+        <li><a href="tax.html">Tax</a></li>
+        <li><a href="crypto.html">Crypto</a></li>
+        <li><a href="stocks.html">Stocks</a></li>
+        <li><a href="chat.html">Chat</a></li>
+        <li><a href="profile.html">Profile</a></li>
+        <li><a href="settings.html">Settings</a></li>
+        <li><a href="/logout">Logout</a></li>
+        <li><a href="bills.html">Bills Page</a></li>
+        <li><a href="leaderboard.html">Leaderboard</a></li>
+    </ul>
+</nav>
+<main>
+    <div class="hero">
+        <div class="header-content">
+            <h1>Profile Management</h1>
+            <p>Manage Your Profile Below</p>
+        </div>
+    </div>
+    <div class="profile-container">
+        <h1 class="profile-header">Complete Your Profile</h1>
+        <form class="profile-form" id="profileForm">
+            <div class="profile-picture-container">
+                <div class="profile-picture-preview" id="imagePreview">
+                    <span>No image selected</span>
+                </div>
+                <div class="form-group">
+                    <label for="profileImage">Profile Picture</label>
+                    <input type="file" id="profileImage" name="profileImage" accept="image/*" class="upload-btn">
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="fullName">Full Name</label>
+                <input type="text" id="fullName" name="fullName" placeholder="Enter your full name" required>
+            </div>
+            <div class="form-group">
+                <label for="careerDescription">Career Description</label>
+                <textarea id="careerDescription" name="careerDescription" placeholder="Tell us about your career (e.g., job title, industry, goals)" rows="4"></textarea>
+            </div>
+            <button type="submit" class="submit-btn">Save Profile</button>
+        </form>
+    </div>
+</main>
+</body>
+<script>
+    function toggleDrawer() {
+        const drawer = document.getElementById('sideDrawer');
+        drawer.classList.toggle('collapsed');
+    }
+    function getThemePreference(name) {
+        const match = document.cookie.match(new RegExp('(^| )' + name + '=([^;]+)'));
+        if (!match) return null;
+        return match[2];
+    }
+    window.addEventListener('pageshow', function(event) {
+        if (event.persisted) window.location.reload();
+    });
+    window.addEventListener('DOMContentLoaded', () => {
+        const savedTheme = getThemePreference('theme');
+        const body = document.body;
+        if (savedTheme === 'light') {
+            body.classList.add('light-mode');
+        } else if (savedTheme === 'dark') {
+            body.classList.add('dark-mode');
+        }
+        if (savedTheme) {
+            const input = document.querySelector(`input[name="theme"][value="${savedTheme}"]`);
+            if (input) input.checked = true;
+        }
+    });
+    document.getElementById('profileImage').addEventListener('change', function(event) {
+        const file = event.target.files[0];
+        const preview = document.getElementById('imagePreview');
+
+        if (file) {
+            const reader = new FileReader();
+
+            reader.onload = function(e) {
+                preview.innerHTML = `<img src="${e.target.result}" alt="Profile Preview">`;
+            }
+
+            reader.readAsDataURL(file);
+        } else {
+            preview.innerHTML = '<span>No image selected</span>';
+        }
+    });
+
+    document.getElementById('profileForm').addEventListener('submit', function(event) {
+        event.preventDefault();
+        alert('Profile saved successfully!');
+    });
+</script>
+</html>

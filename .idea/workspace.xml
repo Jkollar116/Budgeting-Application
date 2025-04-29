@@ -4,7 +4,7 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="e72c0420-fe48-4af3-a363-18d6d8618447" name="Changes" comment="delete expenses" />
+    <list default="true" id="e72c0420-fe48-4af3-a363-18d6d8618447" name="Changes" comment="Added the theme change for the forgot password and register." />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -44,6 +44,9 @@
 }</component>
   <component name="MarkdownSettingsMigration">
     <option name="stateVersion" value="1" />
+  </component>
+  <component name="ProblemsViewState">
+    <option name="selectedTabId" value="CurrentFile" />
   </component>
   <component name="ProjectColorInfo">{
   &quot;associatedIndex&quot;: 0
@@ -113,6 +116,14 @@
       </list>
     </recent_temporary>
   </component>
+  <component name="SharedIndexes">
+    <attachedChunks>
+      <set>
+        <option value="bundled-jdk-9823dce3aa75-a94e463ab2e7-intellij.indexing.shared.core-IU-243.26053.27" />
+        <option value="bundled-js-predefined-d6986cc7102b-1632447f56bf-JavaScript-IU-243.26053.27" />
+      </set>
+    </attachedChunks>
+  </component>
   <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
   <component name="TaskManager">
     <task active="true" id="Default" summary="Default task">
@@ -147,7 +158,7 @@
       <workItem from="1744377711711" duration="2881000" />
       <workItem from="1744382133023" duration="3395000" />
       <workItem from="1744583582140" duration="394000" />
-      <workItem from="1745587806774" duration="2496000" />
+      <workItem from="1745612065335" duration="19232000" />
     </task>
     <task id="LOCAL-00001" summary="First Commit of login">
       <option name="closed" value="true" />
@@ -341,15 +352,31 @@
       <option name="project" value="LOCAL" />
       <updated>1743558255871</updated>
     </task>
-    <task id="LOCAL-00025" summary="delete expenses">
+    <task id="LOCAL-00025" summary="More minor css and html fixes. Adjusted some of the pages to be more consistent with the others, still a work in progress.">
       <option name="closed" value="true" />
-      <created>1745594527328</created>
+      <created>1745732128086</created>
       <option name="number" value="00025" />
       <option name="presentableId" value="LOCAL-00025" />
       <option name="project" value="LOCAL" />
-      <updated>1745594527329</updated>
+      <updated>1745732128086</updated>
     </task>
-    <option name="localTasksCounter" value="26" />
+    <task id="LOCAL-00026" summary="Fixed the logout button, it actually logs you out now. &#10;Made it so that if you are not logged in, you cannot go to any of the inner html pages, such as typing it in the search bar. If you hit the back button you will also not be able to go back to the page after being logged out. &#10;Added event listener to make sure that the theme is loaded in even if you hit the back button&#10;Added theme change for the splash screen and login page. &#10;Added screen for invalid session requests, such as trying to access a page while not being logged in">
+      <option name="closed" value="true" />
+      <created>1745819618244</created>
+      <option name="number" value="00026" />
+      <option name="presentableId" value="LOCAL-00026" />
+      <option name="project" value="LOCAL" />
+      <updated>1745819618244</updated>
+    </task>
+    <task id="LOCAL-00027" summary="Added the theme change for the forgot password and register.">
+      <option name="closed" value="true" />
+      <created>1745819794939</created>
+      <option name="number" value="00027" />
+      <option name="presentableId" value="LOCAL-00027" />
+      <option name="project" value="LOCAL" />
+      <updated>1745819794939</updated>
+    </task>
+    <option name="localTasksCounter" value="28" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -387,8 +414,10 @@
     <MESSAGE value="do login home page" />
     <MESSAGE value="updated it so now it shows the charts" />
     <MESSAGE value="Preliminary changes to the dashboard" />
-    <MESSAGE value="delete expenses" />
-    <option name="LAST_COMMIT_MESSAGE" value="delete expenses" />
+    <MESSAGE value="More minor css and html fixes. Adjusted some of the pages to be more consistent with the others, still a work in progress." />
+    <MESSAGE value="Fixed the logout button, it actually logs you out now. &#10;Made it so that if you are not logged in, you cannot go to any of the inner html pages, such as typing it in the search bar. If you hit the back button you will also not be able to go back to the page after being logged out. &#10;Added event listener to make sure that the theme is loaded in even if you hit the back button&#10;Added theme change for the splash screen and login page. &#10;Added screen for invalid session requests, such as trying to access a page while not being logged in" />
+    <MESSAGE value="Added the theme change for the forgot password and register." />
+    <option name="LAST_COMMIT_MESSAGE" value="Added the theme change for the forgot password and register." />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>

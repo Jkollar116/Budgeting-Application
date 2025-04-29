@@ -12,7 +12,28 @@
         <input type="email" name="email" placeholder="Enter your email" required>
         <button type="submit">Reset Password</button>
     </form>
-    <p><a href="/index.html">Back to Login</a></p>
+    <p><a href="/login.html">Login</a></p>
 </div>
 </body>
+<script>
+    function getThemePreference(name) {
+        const match = document.cookie.match(new RegExp('(^| )' + name + '=([^;]+)'));
+        if (!match) return null;
+        return match[2];
+    }
+    window.addEventListener('pageshow', function(event) {
+        if (event.persisted) window.location.reload();
+    });
+    window.addEventListener('DOMContentLoaded', () => {
+        const savedTheme = getThemePreference('theme');
+        const body = document.body;
+
+        body.classList.remove('light-mode', 'dark-mode');
+        if (savedTheme === 'light') {
+            body.classList.add('light-mode');
+        } else if (savedTheme === 'dark') {
+            body.classList.add('dark-mode');
+        }
+    });
+</script>
 </html>
