@@ -21,27 +21,45 @@
     <li><a href="home.html">Dashboard</a></li>
     <li><a href="expenses.html">Expenses</a></li>
     <li><a href="income.html">Income</a></li>
+    <li><a href="tax.html">Tax</a></li>
     <li><a href="crypto.html">Crypto</a></li>
     <li><a href="stocks.html">Stocks</a></li>
     <li><a href="chat.html">Chat</a></li>
-    <li><a href="#">Profile</a></li>
+    <!--
+    Add net worth amount to profile
+    -->
+    <li><a href="profile.html">Profile</a></li>
     <li><a href="settings.html">Settings</a></li>
-    <li><a href="index.html">Logout</a></li>
+    <!--
+    This is not working as it's supposed to
+    -->
+    <li><a href="/logout">Logout</a></li>
     <li><a href="bills.html">Bills Page (Not Done)</a></li>
+    <!--
+    Everything Below this is incomplete, add as its completed, the page below this comment
+    section that actually works, has a template for including the side drawer, and relevant
+    javascript for the theme change. Copy and paste that to any html and you should be fine
+    <li><a href="leaderboard.html">Leaderboard</a></li>
+    <li><a href="reminders.html">Set Reminders</a></li>
+    <li><a href="alerts.html">Alerts</a></li>
+    <li><a href="assetsLiabilities.html">Assets & Liabilities</a></li>
+    <li><a href="reports.html">Reports</a></li>
+    <li><a href="netWorth.html">Net Worth</a></li>
+    <li><a href="financialTips.html">Financial Tips</a></li>
+    <li><a href="goals.html">Goals and Limits</a></li>
+    -->
     <li><a href="leaderboard.html">Leaderboard</a></li>
   </ul>
 </nav>
 <main>
-  <h1 class="expenses-header">Upload Your Expenses Excel File(s)</h1>
-  <input
-          type="file"
-          id="excelFileInput"
-          accept=".xlsx, .xls"
-          multiple
-          class="expenses-file-input"
-  >
+  <div class="hero">
+    <div class="header-content">
+      <h1>Expenses Tracker</h1>
+      <p>Add and track your expenses below</p>
+    </div>
+  </div>
   <div id="output"></div>
-
+  <h1 class="expenses-header">Enter Your Expenses Manually</h1>
   <form id="expenseForm">
     <label for="date">Date</label>
     <input type="date" id="date" name="date" required>
@@ -53,19 +71,28 @@
     <input type="number" step="0.01" id="total" name="total" required>
     <button type="submit">Add Expense</button>
   </form>
-
+  <h1 class="expenses-header">Upload Your Expenses (CSV Files)</h1>
+  <input
+          type="file"
+          id="excelFileInput"
+          accept=".xlsx, .xls"
+          multiple
+          class="expenses-file-input"
+  >
   <div id="expensesList"></div>
-
+  </main>
+</body>
   <script>
     function toggleDrawer() {
       document.getElementById('sideDrawer').classList.toggle('collapsed');
     }
-
     function getThemePreference(name) {
       var match = document.cookie.match(new RegExp('(^| )' + name + '=([^;]+)'));
       return match ? match[2] : null;
     }
-
+    window.addEventListener('pageshow', function(event) {
+      if (event.persisted) window.location.reload();
+    });
     window.addEventListener('DOMContentLoaded', () => {
       var body = document.body;
       body.classList.remove('light-mode', 'dark-mode');
@@ -74,7 +101,6 @@
       else if (theme === 'dark') body.classList.add('dark-mode');
       loadExpenses();
     });
-
     document.getElementById('excelFileInput').addEventListener('change', function(e) {
       var files = e.target.files;
       if (!files.length) return;
@@ -209,6 +235,4 @@
       return null;
     }
   </script>
-</main>
-</body>
 </html>
