@@ -24,29 +24,10 @@
         <li><a href="crypto.html">Crypto</a></li>
         <li><a href="stocks.html">Stocks</a></li>
         <li><a href="chat.html">Chat</a></li>
-        <!--
-        Add net worth amount to profile
-        -->
         <li><a href="profile.html">Profile</a></li>
         <li><a href="settings.html">Settings</a></li>
-        <!--
-        This is not working as it's supposed to
-        -->
         <li><a href="/logout">Logout</a></li>
-        <li><a href="bills.html">Bills Page (Not Done)</a></li>
-        <!--
-        Everything Below this is incomplete, add as its completed, the page below this comment
-        section that actually works, has a template for including the side drawer, and relevant
-        javascript for the theme change. Copy and paste that to any html and you should be fine
-        <li><a href="leaderboard.html">Leaderboard</a></li>
-        <li><a href="reminders.html">Set Reminders</a></li>
-        <li><a href="alerts.html">Alerts</a></li>
-        <li><a href="assetsLiabilities.html">Assets & Liabilities</a></li>
-        <li><a href="reports.html">Reports</a></li>
-        <li><a href="netWorth.html">Net Worth</a></li>
-        <li><a href="financialTips.html">Financial Tips</a></li>
-        <li><a href="goals.html">Goals and Limits</a></li>
-        -->
+        <li><a href="bills.html">Bills Page</a></li>
         <li><a href="leaderboard.html">Leaderboard</a></li>
     </ul>
 </nav>
@@ -72,6 +53,10 @@
             <div class="form-group">
                 <label for="fullName">Full Name</label>
                 <input type="text" id="fullName" name="fullName" placeholder="Enter your full name" required>
+            </div>
+            <div class="form-group">
+                <label for="careerDescription">Career Description</label>
+                <textarea id="careerDescription" name="careerDescription" placeholder="Tell us about your career (e.g., job title, industry, goals)" rows="4"></textarea>
             </div>
             <button type="submit" class="submit-btn">Save Profile</button>
         </form>
@@ -104,7 +89,6 @@
             if (input) input.checked = true;
         }
     });
-    // Preview the selected profile image
     document.getElementById('profileImage').addEventListener('change', function(event) {
         const file = event.target.files[0];
         const preview = document.getElementById('imagePreview');
@@ -122,12 +106,9 @@
         }
     });
 
-    // Form submission handler
     document.getElementById('profileForm').addEventListener('submit', function(event) {
         event.preventDefault();
-        // Here you would typically send the data to a server
         alert('Profile saved successfully!');
-        // window.location.href = '/dashboard.html'; // Redirect after save
     });
 </script>
 </html>
