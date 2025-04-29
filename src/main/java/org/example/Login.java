@@ -338,6 +338,6 @@ public class Login {
             os.write(response.getBytes());
             os.close();
         }
-    }
+    }       
     // Removed stub CryptoApiHandler implementation since we're using the full implementation from org.example.CryptoApiHandler
 }

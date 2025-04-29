@@ -39,8 +39,8 @@ build/
 
 ### Sensitive files ###
 src/main/resources/serviceAccountKey.json
-serviceAccountKey.json
-firebase-credentials.json
+src/main/serviceAccountKey.json
+src/main/firebase-credentials.json
 src/main/resources/keys.json
 
 ### Backups ###
@@ -49,3 +49,5 @@ temp_backup/
 
 ### Compiled class files ###
 *.class
+src/main/resources/serviceAccountKey.json
+src/main/resources/keys.json
