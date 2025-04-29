@@ -51,7 +51,7 @@ public class FirebaseDiagnosticHandler implements HttpHandler {
             String userId = "test-user-diagnostic";
             Map<String, Object> userProfile = FirestoreService.getInstance().getUserProfile(userId);
             System.out.println("Read user profile for test-user-diagnostic: " + (userProfile != null ? "Success" : "Failed"));
-            System.out.println("Profile contents: " + (userProfile.isEmpty() ? "Empty" : userProfile.toString()));
+            System.out.println("Profile contents: " + (userProfile != null ? (userProfile.isEmpty() ? "Empty" : userProfile.toString()) : "Null"));
             
             // Test write operation through service
             System.out.println("\n============ FIRESTORE WRITE TEST ============");

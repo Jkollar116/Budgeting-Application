@@ -12,3 +12,27 @@
 2025-04-17 21:31:06 [HTTP-Dispatcher] INFO  org.example.StockApiService - Using local cached quote data for MSFT
 2025-04-17 21:31:06 [HTTP-Dispatcher] INFO  org.example.StockApiService - Using local cached quote data for NVDA
 2025-04-17 21:31:06 [HTTP-Dispatcher] INFO  org.example.StockApiService - Using local cached quote data for AAPL
+2025-04-29 18:47:10 [main] INFO  org.example.ConfigManager - Configuration file loaded successfully from file path
+2025-04-29 18:47:10 [main] INFO  org.example.ConfigManager - Loaded key: coinMarketCapApiKey = e2fa...ab0d
+2025-04-29 18:47:10 [main] INFO  org.example.ConfigManager - Loaded key: etherscanApiKey = G6YJ...YAUQ
+2025-04-29 18:47:36 [main] WARN  org.example.ConfigManager - API key 'redis.enabled' not found in any configuration source
+2025-04-29 18:47:36 [main] INFO  org.example.StockApiService - Redis caching disabled, using local memory cache only
+2025-04-29 18:47:54 [HTTP-Dispatcher] INFO  org.example.StockApiService - Fetching stock quote from API for symbol: MSFT
+2025-04-29 18:47:54 [HTTP-Dispatcher] INFO  org.example.StockApiService - Successfully retrieved stock quote for MSFT: $394.04
+2025-04-29 18:47:54 [HTTP-Dispatcher] INFO  org.example.StockApiService - Fetching stock quote from API for symbol: NVDA
+2025-04-29 18:47:54 [HTTP-Dispatcher] INFO  org.example.StockApiService - Successfully retrieved stock quote for NVDA: $109.02
+2025-04-29 18:47:54 [HTTP-Dispatcher] INFO  org.example.StockApiService - Fetching stock quote from API for symbol: AAPL
+2025-04-29 18:47:54 [HTTP-Dispatcher] INFO  org.example.StockApiService - Successfully retrieved stock quote for AAPL: $211.21
+2025-04-29 18:47:54 [HTTP-Dispatcher] INFO  org.example.StockApiService - Using local cached quote data for MSFT
+2025-04-29 18:47:54 [HTTP-Dispatcher] INFO  org.example.StockApiService - Using local cached quote data for NVDA
+2025-04-29 18:47:54 [HTTP-Dispatcher] INFO  org.example.StockApiService - Using local cached quote data for AAPL
+2025-04-29 18:51:41 [main] INFO  org.example.ConfigManager - Configuration file loaded successfully from file path
+2025-04-29 18:51:41 [main] INFO  org.example.ConfigManager - Loaded key: coinMarketCapApiKey = e2fa...ab0d
+2025-04-29 18:51:41 [main] INFO  org.example.ConfigManager - Loaded key: etherscanApiKey = G6YJ...YAUQ
+2025-04-29 18:52:22 [main] WARN  org.example.ConfigManager - API key 'redis.enabled' not found in any configuration source
+2025-04-29 18:52:22 [main] INFO  org.example.StockApiService - Redis caching disabled, using local memory cache only
+2025-04-29 19:02:52 [main] INFO  org.example.ConfigManager - Configuration file loaded successfully from file path
+2025-04-29 19:02:52 [main] INFO  org.example.ConfigManager - Loaded key: coinMarketCapApiKey = e2fa...ab0d
+2025-04-29 19:02:52 [main] INFO  org.example.ConfigManager - Loaded key: etherscanApiKey = G6YJ...YAUQ
+2025-04-29 19:03:28 [main] WARN  org.example.ConfigManager - API key 'redis.enabled' not found in any configuration source
+2025-04-29 19:03:28 [main] INFO  org.example.StockApiService - Redis caching disabled, using local memory cache only

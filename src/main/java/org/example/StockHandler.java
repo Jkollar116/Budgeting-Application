@@ -71,37 +71,7 @@ public class StockHandler implements HttpHandler {
             }
             
         // Check if the path starts with our API prefix
-        if (!path.startsWith("/api/stocks")) {
-            // For development: Handle direct file requests to resources
-            if (path.endsWith(".html") || path.endsWith(".js") || path.endsWith(".css")) {
-                String filePath = "src/main/resources" + path;
-                try {
-                    java.nio.file.Path resourcePath = java.nio.file.Paths.get(filePath);
-                    if (java.nio.file.Files.exists(resourcePath)) {
-                        String contentType = "text/plain";
-                        if (path.endsWith(".html")) contentType = "text/html";
-                        if (path.endsWith(".js")) contentType = "application/javascript";
-                        if (path.endsWith(".css")) contentType = "text/css";
-                        
-                        exchange.getResponseHeaders().set("Content-Type", contentType);
-                        exchange.sendResponseHeaders(200, java.nio.file.Files.size(resourcePath));
-                        
-                        try (OutputStream os = exchange.getResponseBody()) {
-                            java.nio.file.Files.copy(resourcePath, os);
-                        }
-                        return;
-                    }
-                } catch (Exception e) {
-                    LOGGER.warning("Error serving file: " + e.getMessage());
-                }
-            }
-            
-            // Not a path we should handle
-            exchange.getResponseHeaders().set("Location", "/");
-            exchange.sendResponseHeaders(302, -1);
-            return;
-        }
-            
+        if (path.startsWith("/api/stocks")) {
             // Handle our specific endpoints
             if (path.equals("/api/stocks/account")) {
                 handleAccountRequest(exchange, userId);
@@ -128,6 +98,37 @@ public class StockHandler implements HttpHandler {
             } else {
                 sendResponse(exchange, 404, "{ \"error\": \"Not found\" }");
             }
+            return;
+        }
+        
+        // For development: Handle direct file requests to resources
+        if (path.endsWith(".html") || path.endsWith(".js") || path.endsWith(".css")) {
+            String filePath = "src/main/resources" + path;
+            try {
+                java.nio.file.Path resourcePath = java.nio.file.Paths.get(filePath);
+                if (java.nio.file.Files.exists(resourcePath)) {
+                    String contentType = "text/plain";
+                    if (path.endsWith(".html")) contentType = "text/html";
+                    if (path.endsWith(".js")) contentType = "application/javascript";
+                    if (path.endsWith(".css")) contentType = "text/css";
+                    
+                    exchange.getResponseHeaders().set("Content-Type", contentType);
+                    exchange.sendResponseHeaders(200, java.nio.file.Files.size(resourcePath));
+                    
+                    try (OutputStream os = exchange.getResponseBody()) {
+                        java.nio.file.Files.copy(resourcePath, os);
+                    }
+                    return;
+                }
+            } catch (Exception e) {
+                LOGGER.warning("Error serving file: " + e.getMessage());
+            }
+        }
+        
+        // Not a path we should handle
+        exchange.getResponseHeaders().set("Location", "/");
+        exchange.sendResponseHeaders(302, -1);
+            
         } catch (Exception e) {
             LOGGER.severe("Error handling request: " + e.getMessage());
             e.printStackTrace();
@@ -243,14 +244,16 @@ public class StockHandler implements HttpHandler {
     }
     
     private void handlePlaceOrderRequest(HttpExchange exchange, String userId) throws IOException {
-        String requestBody = new BufferedReader(new InputStreamReader(exchange.getRequestBody()))
-                .lines().collect(Collectors.joining("\n"));
+        String requestBody;
+        try (BufferedReader reader = new BufferedReader(new InputStreamReader(exchange.getRequestBody()))) {
+            requestBody = reader.lines().collect(Collectors.joining("\n"));
+        }
         
         JsonObject orderData = gson.fromJson(requestBody, JsonObject.class);
         String symbol = orderData.get("symbol").getAsString();
         int quantity = orderData.get("quantity").getAsInt();
         String orderType = orderData.get("orderType").getAsString();
-        String timeInForce = orderData.get("timeInForce").getAsString();
+        // timeInForce is not used in this method
         
         // For demo purposes, we'll execute all orders immediately
         boolean isBuy = quantity > 0;

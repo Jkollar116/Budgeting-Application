@@ -2,7 +2,6 @@ package org.example;
 
 import com.sun.net.httpserver.HttpHandler;
 import com.sun.net.httpserver.HttpExchange;
-import org.json.JSONArray;
 import org.json.JSONObject;
 
 import java.io.*;

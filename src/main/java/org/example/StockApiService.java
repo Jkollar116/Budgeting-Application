@@ -4,7 +4,6 @@ import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
@@ -34,8 +33,7 @@ public class StockApiService {
     
     // Alpha Vantage API settings
     private static final String BASE_URL = "https://www.alphavantage.co/query";
-    private static final int LOCAL_CACHE_EXPIRY_SECONDS = 60; // Local cache expiry (1 minute)
-    private static final int REDIS_CACHE_EXPIRY_SECONDS = 300; // Redis cache expiry (5 minutes)
+    private static final int CACHE_EXPIRY_SECONDS = 60; // Cache expiry (1 minute)
     
     // API rate limiting - Alpha Vantage free tier limits
     private static final int MAX_REQUESTS_PER_MINUTE = 5;
@@ -49,43 +47,13 @@ public class StockApiService {
     
     // Dependencies
     private final ConfigManager configManager;
-    private RedisTemplate<String, Object> redisTemplate;
-    private boolean useRedisCache = false;
     
     /**
      * Constructor with required dependencies
      */
     public StockApiService() {
         this.configManager = ConfigManager.getInstance();
-        
-        // Try to enable Redis if configured
-        String redisEnabled = configManager.getConfigValue("redis.enabled", "false");
-        if ("true".equalsIgnoreCase(redisEnabled)) {
-            try {
-                initializeRedisCache();
-            } catch (Exception e) {
-                logger.error("Failed to initialize Redis cache: {}", e.getMessage(), e);
-                logger.info("Falling back to local memory cache only");
-            }
-        } else {
-            logger.info("Redis caching disabled, using local memory cache only");
-        }
-    }
-    
-    /**
-     * Initialize Redis connection if available
-     */
-    private void initializeRedisCache() {
-        if (RedisConfig.isRedisAvailable()) {
-            try {
-                this.redisTemplate = RedisConfig.getRedisTemplate();
-                this.useRedisCache = true;
-                logger.info("Redis cache initialized successfully");
-            } catch (Exception e) {
-                logger.error("Error initializing Redis: {}", e.getMessage(), e);
-                this.useRedisCache = false;
-            }
-        }
+        logger.info("StockApiService initialized with local memory cache");
     }
     
     /**
@@ -101,53 +69,7 @@ public class StockApiService {
         }
         
         boolean isExpired() {
-            return Duration.between(timestamp, Instant.now()).getSeconds() > LOCAL_CACHE_EXPIRY_SECONDS;
-        }
-    }
-    
-    /**
-     * Gets an object from Redis cache
-     * @param key The cache key
-     * @param clazz The expected class type
-     * @return The cached object or null if not found
-     */
-    @SuppressWarnings("unchecked")
-    private <T> T getFromRedisCache(String key, Class<T> clazz) {
-        if (!useRedisCache || redisTemplate == null) {
-            return null;
-        }
-        
-        try {
-            Object value = redisTemplate.opsForValue().get(key);
-            if (value != null) {
-                if (clazz.isInstance(value)) {
-                    return (T) value;
-                } else {
-                    logger.warn("Type mismatch in Redis cache for key '{}': expected {}, got {}", 
-                            key, clazz.getName(), value.getClass().getName());
-                }
-            }
-        } catch (Exception e) {
-            logger.error("Error retrieving from Redis cache: {}", e.getMessage(), e);
-        }
-        return null;
-    }
-    
-    /**
-     * Saves an object to Redis cache with expiration
-     * @param key The cache key
-     * @param value The object to cache
-     */
-    private void saveToRedisCache(String key, Object value) {
-        if (!useRedisCache || redisTemplate == null || value == null) {
-            return;
-        }
-        
-        try {
-            redisTemplate.opsForValue().set(key, value, REDIS_CACHE_EXPIRY_SECONDS, TimeUnit.SECONDS);
-            logger.debug("Saved to Redis cache: {}", key);
-        } catch (Exception e) {
-            logger.error("Error saving to Redis cache: {}", e.getMessage(), e);
+            return Duration.between(timestamp, Instant.now()).getSeconds() > CACHE_EXPIRY_SECONDS;
         }
     }
     
@@ -216,16 +138,7 @@ public class StockApiService {
         symbol = symbol.trim().toUpperCase();
         String cacheKey = "quote_" + symbol;
         
-        // Check Redis cache first if available
-        if (useRedisCache) {
-            Stock cachedStock = getFromRedisCache(cacheKey, Stock.class);
-            if (cachedStock != null) {
-                logger.info("Using Redis cached quote data for {}", symbol);
-                return cachedStock;
-            }
-        }
-        
-        // Then check local cache
+        // Check local cache
         CachedResponse cached = localCache.get(cacheKey);
         if (cached != null && !cached.isExpired()) {
             logger.info("Using local cached quote data for {}", symbol);
@@ -299,11 +212,6 @@ public class StockApiService {
             // Cache the response in local memory
             localCache.put(cacheKey, new CachedResponse(stock));
             
-            // Cache in Redis if available
-            if (useRedisCache) {
-                saveToRedisCache(cacheKey, stock);
-            }
-            
             logger.info("Successfully retrieved stock quote for {}: ${}", symbol, stock.getPrice());
             return stock;
             
@@ -338,20 +246,13 @@ public class StockApiService {
         timeframe = timeframe.trim();
         String cacheKey = "history_" + symbol + "_" + timeframe;
         
-        // Check Redis cache first if available
-        if (useRedisCache) {
-            List<Map<String, Object>> cachedHistory = getFromRedisCache(cacheKey, List.class);
-            if (cachedHistory != null && !cachedHistory.isEmpty()) {
-                logger.info("Using Redis cached history data for {} ({})", symbol, timeframe);
-                return cachedHistory;
-            }
-        }
-        
-        // Then check local cache
+        // Check local cache
         CachedResponse cached = localCache.get(cacheKey);
         if (cached != null && !cached.isExpired()) {
             logger.info("Using local cached history data for {} ({})", symbol, timeframe);
-            return (List<Map<String, Object>>) cached.data;
+            @SuppressWarnings("unchecked")
+            List<Map<String, Object>> result = (List<Map<String, Object>>) cached.data;
+            return result;
         }
         
         // Check rate limits before making API call
@@ -519,11 +420,6 @@ public class StockApiService {
             
             // Cache the response in local memory
             localCache.put(cacheKey, new CachedResponse(historyData));
-            
-            // Cache in Redis if available
-            if (useRedisCache) {
-                saveToRedisCache(cacheKey, historyData);
-            }
             
             logger.info("Successfully retrieved {} history points for {} ({})", historyData.size(), symbol, timeframe);
             return historyData;
