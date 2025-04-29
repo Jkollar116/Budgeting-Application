@@ -12,7 +12,7 @@
     <properties>
         <!-- Using Java 17 which is an LTS and supported by Heroku -->
         <java.version>17</java.version>
-        <spring-boot.version>2.7.5</spring-boot.version>
+        <spring-boot.version>3.4.5</spring-boot.version>
     </properties>
 
     <dependencyManagement>
@@ -49,14 +49,13 @@
         </dependency>
         <dependency>
             <groupId>ch.qos.logback</groupId>
-            <artifactId>logback-classic</artifactId>
+            <artifactId>logback-core</artifactId>
             <version>1.2.11</version>
         </dependency>
-        
-        <!-- Redis for distributed caching -->
         <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-data-redis</artifactId>
+            <groupId>ch.qos.logback</groupId>
+            <artifactId>logback-classic</artifactId>
+            <version>1.2.11</version>
         </dependency>
 
         <!-- Firebase Admin SDK -->
