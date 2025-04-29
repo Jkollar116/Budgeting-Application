@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Assets &amp; Liabilities</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        .container { max-width: 1200px; margin: 1rem auto; padding: 1rem; }
+        .grid { display: flex; gap: 1rem; flex-wrap: wrap; }
+        .grid-2 > * { flex: 1; min-width: 300px; }
+        .card { background: #fff; border: 1px solid #ddd; border-radius: 8px; padding: 1rem; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        .form-group { margin-bottom: 1rem; }
+        .form-group label { display: block; margin-bottom: 0.5rem; font-weight: bold; }
+        .btn { padding: 0.5rem 1rem; border: none; border-radius: 4px; cursor: pointer; }
+        .btn-primary { background-color: #007bff; color: #fff; }
+        .summary-grid { display: flex; justify-content: space-between; gap: 1rem; }
+        table { width: 100%; border-collapse: collapse; }
+        table th, table td { padding: 0.75rem; border-bottom: 1px solid #eee; text-align: left; }
+        body.assets-liabilities-page,
+        #assetsList, #liabilitiesList,
+        table, table th, table td {
+            color: #333 !important;
+        }
+        header, nav { background-color: #f8f9fa; padding: 0.75rem 1rem; }
+        header .logo { font-size: 1.5rem; font-weight: bold; }
+        nav ul { list-style: none; display: flex; gap: 1rem; margin: 0; padding: 0; }
+        nav a { text-decoration: none; color: #333; }
+        nav a.active { font-weight: bold; }
+    </style>
+</head>
+<body class="assets-liabilities-page">
+<header>
+    <div class="logo">CashClimb</div>
+    <nav>
+        <ul>
+            <li><a href="home.html">Dashboard</a></li>
+            <li><a href="expenses.html">Expenses</a></li>
+            <li><a href="income.html">Income</a></li>
+            <li><a href="assetsLiabilities.html" class="active">Assets &amp; Liabilities</a></li>
+            <li><a href="profile.html">Profile</a></li>
+        </ul>
+    </nav>
+</header>
+
+<main class="container">
+    <h2>Manage Your Assets &amp; Liabilities</h2>
+
+    <div class="grid grid-2">
+        <div class="card">
+            <h3>Add Asset</h3>
+            <form id="assetForm">
+                <div class="form-group">
+                    <label for="assetName">Name</label>
+                    <input type="text" id="assetName" required placeholder="e.g. Savings Account">
+                </div>
+                <div class="form-group">
+                    <label for="assetAmount">Amount</label>
+                    <input type="number" step="0.01" id="assetAmount" required placeholder="0.00">
+                </div>
+                <button class="btn btn-primary" type="submit">Add Asset</button>
+            </form>
+        </div>
+        <div class="card">
+            <h3>Your Assets</h3>
+            <div id="assetsList">Loading...</div>
+        </div>
+    </div>
+
+    <div class="grid grid-2" style="margin-top:1.5rem;">
+        <div class="card">
+            <h3>Add Liability</h3>
+            <form id="liabilityForm">
+                <div class="form-group">
+                    <label for="liabilityName">Name</label>
+                    <input type="text" id="liabilityName" required placeholder="e.g. Credit Card">
+                </div>
+                <div class="form-group">
+                    <label for="liabilityAmount">Amount</label>
+                    <input type="number" step="0.01" id="liabilityAmount" required placeholder="0.00">
+                </div>
+                <button class="btn btn-primary" type="submit">Add Liability</button>
+            </form>
+        </div>
+        <div class="card">
+            <h3>Your Liabilities</h3>
+            <div id="liabilitiesList">Loading...</div>
+        </div>
+    </div>
+
+    <div class="card summary-card" style="margin-top:1.5rem;">
+        <h3>Summary</h3>
+        <div class="summary-grid">
+            <div><strong>Total Assets:</strong> <span id="totalAssets">$0.00</span></div>
+            <div><strong>Total Liabilities:</strong> <span id="totalLiabilities">$0.00</span></div>
+            <div><strong>Net Worth:</strong> <span id="netWorth">$0.00</span></div>
+        </div>
+    </div>
+</main>
+
+<script>
+    console.log(" AssetsLiabilities.js loaded");
+
+    function fmt(v) { return '$' + v.toFixed(2); }
+
+    async function loadAssets() {
+        console.log(" loadAssets()");
+        try {
+            const res = await fetch('/api/assets', { credentials: 'include' });
+            console.log("↪ GET /api/assets →", res.status);
+            if (!res.ok) throw new Error(res.status);
+            const { documents } = await res.json();
+            console.log(" Assets:", documents);
+            renderList(documents, 'assetsList');
+        } catch (e) {
+            console.error(" loadAssets error:", e);
+            document.getElementById('assetsList').innerHTML = '<p>Error loading assets</p>';
+        }
+        updateSummary();
+    }
+
+    async function loadLiabilities() {
+        console.log(" loadLiabilities()");
+        try {
+            const res = await fetch('/api/liabilities', { credentials: 'include' });
+            console.log("↪ GET /api/liabilities →", res.status);
+            if (!res.ok) throw new Error(res.status);
+            const { documents } = await res.json();
+            console.log(" Liabilities:", documents);
+            renderList(documents, 'liabilitiesList');
+        } catch (e) {
+            console.error(" loadLiabilities error:", e);
+            document.getElementById('liabilitiesList').innerHTML = '<p>Error loading liabilities</p>';
+        }
+        updateSummary();
+    }
+
+    function renderList(docs, elmId) {
+        const c = document.getElementById(elmId);
+        if (!docs || docs.length === 0) {
+            c.innerHTML = '<p>No items found.</p>';
+            return;
+        }
+        let html = '<table><thead><tr><th>Name</th><th>Amount</th></tr></thead><tbody>';
+        docs.forEach(d => {
+            const f = d.fields || {};
+            const name = f.name?.stringValue || '';
+            const amt  = +f.amount?.doubleValue || 0;
+            html += `<tr><td>${name}</td><td>${fmt(amt)}</td></tr>`;
+        });
+        c.innerHTML = html + '</tbody></table>';
+    }
+
+    function updateSummary() {
+        const sumFor = id => Array.from(
+            document.querySelectorAll(`#${id} td:nth-child(2)`)
+        ).reduce((s, el) => s + parseFloat(el.textContent.replace('$','') || 0), 0);
+        const a = sumFor('assetsList'), l = sumFor('liabilitiesList');
+        document.getElementById('totalAssets').textContent     = fmt(a);
+        document.getElementById('totalLiabilities').textContent = fmt(l);
+        document.getElementById('netWorth').textContent         = fmt(a - l);
+        console.log(`Summary → assets=${a}, liabilities=${l}, net=${a - l}`);
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+        const assetForm       = document.getElementById('assetForm');
+        const assetNameInput  = document.getElementById('assetName');
+        const assetAmountInput= document.getElementById('assetAmount');
+        const liabilityForm       = document.getElementById('liabilityForm');
+        const liabilityNameInput  = document.getElementById('liabilityName');
+        const liabilityAmountInput= document.getElementById('liabilityAmount');
+
+        loadAssets();
+        loadLiabilities();
+
+        assetForm.addEventListener('submit', async e => {
+            e.preventDefault();
+            const name   = assetNameInput.value.trim();
+            const amount = +assetAmountInput.value;
+            console.log(" addAsset", name, amount);
+            try {
+                const res = await fetch('/api/assets', {
+                    method: 'POST',
+                    credentials: 'include',
+                    headers: { 'Content-Type':'application/json' },
+                    body: JSON.stringify({ name, amount })
+                });
+                console.log("↪ POST /api/assets →", res.status);
+                if (!res.ok) throw new Error(res.status);
+                assetForm.reset();
+                loadAssets();
+            } catch (err) {
+                console.error(" addAsset error:", err);
+                alert('Error adding asset');
+            }
+        });
+
+        liabilityForm.addEventListener('submit', async e => {
+            e.preventDefault();
+            const name   = liabilityNameInput.value.trim();
+            const amount = +liabilityAmountInput.value;
+            console.log(" addLiability", name, amount);
+            try {
+                const res = await fetch('/api/liabilities', {
+                    method: 'POST',
+                    credentials: 'include',
+                    headers: { 'Content-Type':'application/json' },
+                    body: JSON.stringify({ name, amount })
+                });
+                console.log("↪ POST /api/liabilities →", res.status);
+                if (!res.ok) throw new Error(res.status);
+                liabilityForm.reset();
+                loadLiabilities();
+            } catch (err) {
+                console.error(" addLiability error:", err);
+                alert('Error adding liability');
+            }
+        });
+    });
+</script>
+</body>
+</html>
