@@ -64,6 +64,49 @@
             border-radius: 10px;
         }
         
+        /* Chart filter styles */
+        .chart-filters {
+            margin-bottom: 15px;
+        }
+        
+        .chart-filter {
+            background-color: rgba(62, 31, 91, 0.7);
+            color: white;
+            border: 1px solid rgba(255, 140, 0, 0.5);
+            padding: 5px 10px;
+            border-radius: 4px;
+            width: 100%;
+            max-width: 200px;
+            font-size: 0.9em;
+        }
+        
+        .filter-buttons {
+            display: flex;
+            gap: 5px;
+            flex-wrap: wrap;
+        }
+        
+        .filter-btn {
+            background-color: rgba(62, 31, 91, 0.7);
+            color: white;
+            border: 1px solid rgba(255, 140, 0, 0.5);
+            padding: 5px 10px;
+            border-radius: 4px;
+            font-size: 0.8em;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        
+        .filter-btn:hover {
+            background-color: rgba(255, 140, 0, 0.2);
+        }
+        
+        .filter-btn.active {
+            background-color: #FF8C00;
+            color: white;
+            border-color: #FF8C00;
+        }
+        
         .goal-item {
             background: rgba(62, 31, 91, 0.5);
             padding: 15px;
@@ -141,6 +184,16 @@
         <div class="card" id="netWorthCard">
             <h2>💰 Net Worth</h2>
             <p id="netWorthDisplay">$0</p>
+            <!-- Time period filter for net worth -->
+            <div class="chart-filters">
+                <select id="netWorthPeriod" class="chart-filter">
+                    <option value="1m">1 Month</option>
+                    <option value="3m">3 Months</option>
+                    <option value="6m">6 Months</option>
+                    <option value="1y" selected>1 Year</option>
+                    <option value="all">All Time</option>
+                </select>
+            </div>
             <div class="chart-container">
                 <canvas id="netWorthChart"></canvas>
             </div>
@@ -149,6 +202,15 @@
         <div class="card" id="incomeCard">
             <h2>💵 Total Income</h2>
             <p id="totalIncomeDisplay">$0</p>
+            <!-- Income type filter -->
+            <div class="chart-filters">
+                <div class="filter-buttons" id="incomeTypeFilter">
+                    <button class="filter-btn active" data-value="all">All</button>
+                    <button class="filter-btn" data-value="salary">Salary</button>
+                    <button class="filter-btn" data-value="bonus">Bonus</button>
+                    <button class="filter-btn" data-value="other">Other</button>
+                </div>
+            </div>
             <div class="chart-container">
                 <canvas id="incomeChart"></canvas>
             </div>
@@ -157,6 +219,14 @@
         <div class="card" id="expensesCard">
             <h2>📊 Total Expenses</h2>
             <p id="totalExpensesDisplay">$0</p>
+            <!-- Expense category filter -->
+            <div class="chart-filters">
+                <select id="expenseViewType" class="chart-filter">
+                    <option value="category" selected>By Category</option>
+                    <option value="monthly">By Month</option>
+                    <option value="weekly">By Week</option>
+                </select>
+            </div>
             <div class="chart-container">
                 <canvas id="expensesPieChart"></canvas>
             </div>
@@ -169,6 +239,14 @@
         
         <div class="card" id="chartCard">
             <h2>📈 Monthly Expenses</h2>
+            <!-- Time period filter for monthly expenses -->
+            <div class="chart-filters">
+                <div class="filter-buttons" id="monthlyExpensesPeriod">
+                    <button class="filter-btn" data-value="3m">3 Months</button>
+                    <button class="filter-btn active" data-value="6m">6 Months</button>
+                    <button class="filter-btn" data-value="1y">1 Year</button>
+                </div>
+            </div>
             <div class="chart-container">
                 <canvas id="monthlyExpensesChart"></canvas>
             </div>
@@ -322,15 +400,306 @@
         goalsContainer.insertBefore(goalItem, addButton);
     }
     
+    // Helper functions
+    function getInt(field) {
+        return field && field.integerValue ? parseInt(field.integerValue) : 0;
+    }
+    
+    function getArray(arrayField) {
+        return arrayField && arrayField.arrayValue && arrayField.arrayValue.values ? arrayField.arrayValue.values : [];
+    }
+    
+    // Setup chart filters function
+    function setupChartFilters() {
+        // 1. Net Worth Period Selector
+        const netWorthPeriod = document.getElementById('netWorthPeriod');
+        if (netWorthPeriod) {
+            netWorthPeriod.addEventListener('change', function() {
+                const period = this.value;
+                console.log(`Net Worth period changed to: ${period}`);
+                updateNetWorthChart(period);
+            });
+        }
+        
+        // 2. Income Type Filter
+        const incomeFilterButtons = document.querySelectorAll('#incomeTypeFilter .filter-btn');
+        incomeFilterButtons.forEach(button => {
+            button.addEventListener('click', function() {
+                // Remove active class from all buttons
+                incomeFilterButtons.forEach(btn => btn.classList.remove('active'));
+                // Add active class to clicked button
+                this.classList.add('active');
+                
+                const type = this.getAttribute('data-value');
+                console.log(`Income type filter changed to: ${type}`);
+                updateIncomeChart(type);
+            });
+        });
+        
+        // 3. Expense View Type
+        const expenseViewType = document.getElementById('expenseViewType');
+        if (expenseViewType) {
+            expenseViewType.addEventListener('change', function() {
+                const viewType = this.value;
+                console.log(`Expense view type changed to: ${viewType}`);
+                updateExpenseChart(viewType);
+            });
+        }
+        
+        // 4. Monthly Expenses Period
+        const monthlyExpensesButtons = document.querySelectorAll('#monthlyExpensesPeriod .filter-btn');
+        monthlyExpensesButtons.forEach(button => {
+            button.addEventListener('click', function() {
+                // Remove active class from all buttons
+                monthlyExpensesButtons.forEach(btn => btn.classList.remove('active'));
+                // Add active class to clicked button
+                this.classList.add('active');
+                
+                const period = this.getAttribute('data-value');
+                console.log(`Monthly expenses period changed to: ${period}`);
+                updateMonthlyExpensesChart(period);
+            });
+        });
+    }
+    
+    // Update Functions for Each Chart
+    
+    function updateNetWorthChart(period) {
+        // Sample data for different time periods
+        const data = {
+            '1m': { cash: 4500, equity: 115000, investments: 42000 },
+            '3m': { cash: 4800, equity: 118000, investments: 43500 },
+            '6m': { cash: 5000, equity: 120000, investments: 45000 },
+            '1y': { cash: 5500, equity: 125000, investments: 48000 },
+            'all': { cash: 6000, equity: 130000, investments: 50000 }
+        };
+        
+        // Get data for selected period
+        const breakdownData = data[period] || data['1y'];
+        
+        // Update chart
+        if (netWorthChart) {
+            netWorthChart.data.datasets[0].data = Object.values(breakdownData);
+            netWorthChart.update();
+        } else {
+            createNetWorthChart({ netWorthBreakdown: { stringValue: JSON.stringify(breakdownData) } });
+        }
+        
+        // Update total net worth display
+        const totalNetWorth = Object.values(breakdownData).reduce((sum, val) => sum + val, 0);
+        document.getElementById('netWorthDisplay').textContent = '$' + totalNetWorth.toLocaleString();
+    }
+    
+    function updateIncomeChart(type) {
+        // Full income breakdown
+        const fullBreakdown = { salary: 60000, bonus: 5000, other: 2000 };
+        
+        // Filter based on selected type
+        let filteredBreakdown;
+        if (type === 'all') {
+            filteredBreakdown = fullBreakdown;
+        } else {
+            filteredBreakdown = {};
+            if (type in fullBreakdown) {
+                filteredBreakdown[type] = fullBreakdown[type];
+            }
+        }
+        
+        // Update chart
+        if (incomeChart) {
+            incomeChart.data.labels = Object.keys(filteredBreakdown).map(k => k.charAt(0).toUpperCase() + k.slice(1));
+            incomeChart.data.datasets[0].data = Object.values(filteredBreakdown);
+            incomeChart.update();
+        } else {
+            createIncomeChart({ totalIncomeBreakdown: { stringValue: JSON.stringify(filteredBreakdown) } });
+        }
+        
+        // Update total income display
+        const totalIncome = Object.values(filteredBreakdown).reduce((sum, val) => sum + val, 0);
+        document.getElementById('totalIncomeDisplay').textContent = '$' + totalIncome.toLocaleString();
+    }
+    
+    function updateExpenseChart(viewType) {
+        // Get expenses container and clear it
+        const container = document.getElementById('expensesPieChart');
+        
+        if (expensesPieChart) {
+            expensesPieChart.destroy();
+        }
+        
+        // Sample data
+        const categoryData = {
+            'Housing': 1200,
+            'Food': 450,
+            'Transportation': 350,
+            'Entertainment': 200,
+            'Utilities': 180
+        };
+        
+        const monthlyData = {
+            'January': 2100,
+            'February': 2200,
+            'March': 2300,
+            'April': 2150,
+            'May': 2050,
+            'June': 1980
+        };
+        
+        const weeklyData = {
+            'Week 1': 550,
+            'Week 2': 480,
+            'Week 3': 520,
+            'Week 4': 430
+        };
+        
+        // Choose data based on view type
+        let chartData, chartType;
+        switch(viewType) {
+            case 'monthly':
+                chartData = monthlyData;
+                chartType = 'bar';
+                break;
+            case 'weekly':
+                chartData = weeklyData;
+                chartType = 'bar';
+                break;
+            default: // 'category'
+                chartData = categoryData;
+                chartType = 'pie';
+        }
+        
+        // Create chart with selected data
+        const ctx = container.getContext('2d');
+        
+        // Generate colors based on number of data points
+        const numItems = Object.keys(chartData).length;
+        const backgroundColors = [];
+        const borderColors = [];
+        
+        for(let i = 0; i < numItems; i++) {
+            const hue = (i * 360 / numItems) % 360;
+            backgroundColors.push(`hsla(${hue}, 70%, 60%, 0.7)`);
+            borderColors.push(`hsl(${hue}, 70%, 60%)`);
+        }
+        
+        // Create new chart
+        expensesPieChart = new Chart(ctx, {
+            type: chartType,
+            data: {
+                labels: Object.keys(chartData),
+                datasets: [{
+                    data: Object.values(chartData),
+                    backgroundColor: backgroundColors,
+                    borderColor: borderColors,
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                const label = context.label || '';
+                                const value = context.raw || 0;
+                                const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                                const percentage = total > 0 ? Math.round((value / total) * 100) : 0;
+                                return label + ': $' + value.toLocaleString() + (chartType === 'pie' ? ` (${percentage}%)` : '');
+                            }
+                        }
+                    }
+                },
+                scales: chartType !== 'pie' ? {
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            callback: function(value) {
+                                return '$' + value.toLocaleString();
+                            }
+                        }
+                    }
+                } : {}
+            }
+        });
+        
+        // Update total expenses display
+        const totalExpenses = Object.values(chartData).reduce((sum, val) => sum + val, 0);
+        document.getElementById('totalExpensesDisplay').textContent = '$' + totalExpenses.toLocaleString();
+    }
+    
+    function updateMonthlyExpensesChart(period) {
+        const monthNames = [
+            'January', 'February', 'March', 'April', 'May', 'June',
+            'July', 'August', 'September', 'October', 'November', 'December'
+        ];
+        
+        // Sample data for each period (3m, 6m, 1y)
+        const data = {
+            '3m': [2200, 2100, 1950],
+            '6m': [2500, 2300, 2200, 2100, 1950, 1800],
+            '1y': [2800, 2700, 2600, 2500, 2300, 2200, 2100, 1950, 1800, 1700, 1600, 1500]
+        };
+        
+        // Get data for selected period
+        const periodData = data[period] || data['6m'];
+        
+        // Determine how many months to show
+        let numMonths;
+        switch(period) {
+            case '3m': numMonths = 3; break;
+            case '6m': numMonths = 6; break;
+            case '1y': numMonths = 12; break;
+            default: numMonths = 6;
+        }
+        
+        // Get current month index (0-11)
+        const currentMonth = new Date().getMonth();
+        
+        // Calculate month labels working backwards from current month
+        const labels = [];
+        for (let i = 0; i < numMonths; i++) {
+            const monthIndex = (currentMonth - i + 12) % 12; // Handle wrapping around to previous year
+            labels.unshift(monthNames[monthIndex]);
+        }
+        
+        // Update chart
+        if (monthlyExpensesChart) {
+            monthlyExpensesChart.data.labels = labels;
+            monthlyExpensesChart.data.datasets[0].data = periodData;
+            monthlyExpensesChart.update();
+        } else {
+            createMonthlyExpensesChart(periodData);
+        }
+    }
+    
+    // Main initialization on page load
     document.addEventListener("DOMContentLoaded", function() {
-        function getInt(field) {
-            return field && field.integerValue ? parseInt(field.integerValue) : 0;
+        // Set up chart filter event listeners
+        setupChartFilters();
+        
+        // Apply theme from cookies
+        const savedTheme = getThemePreference('theme');
+        const body = document.body;
+        if (savedTheme === 'light') {
+            body.classList.add('light-mode');
+        } else if (savedTheme === 'dark') {
+            body.classList.add('dark-mode');
+        }
+        if (savedTheme) {
+            const input = document.querySelector(`input[name="theme"][value="${savedTheme}"]`);
+            if (input) input.checked = true;
         }
         
-        function getArray(arrayField) {
-            return arrayField && arrayField.arrayValue && arrayField.arrayValue.values ? arrayField.arrayValue.values : [];
+        // Setup goal button click handler
+        const addGoalBtn = document.getElementById('add-goal-btn');
+        if (addGoalBtn) {
+            addGoalBtn.addEventListener('click', function() {
+                showAddGoalForm();
+            });
         }
         
+        // Fetch dashboard data
         fetch('/api/getData')
             .then(response => response.json())
             .then(data => {
@@ -365,8 +734,6 @@
                 });
             });
     });
-    
-    // Create Net Worth Chart
     function createNetWorthChart(fields) {
         const ctx = document.getElementById('netWorthChart').getContext('2d');
         
