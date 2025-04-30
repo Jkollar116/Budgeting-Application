@@ -2,15 +2,103 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>BudgetApp Home</title>
+    <title>CashClimb Dashboard</title>
     <link rel="stylesheet" href="style.css">
+    <style>
+        /* Dashboard specific styles */
+        .dashboard {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+            padding: 20px;
+            max-width: 1600px;
+            margin: 0 auto;
+        }
+        
+        .card {
+            background: #3E1F5B;
+            border-radius: 12px;
+            padding: 20px;
+            color: white;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        }
+        
+        .card h2 {
+            margin-top: 0;
+            color: #FF8C00;
+            font-size: 1.5em;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .card h2 i {
+            font-size: 1.2em;
+        }
+        
+        .progress-bar {
+            width: 100%;
+            height: 20px;
+            background-color: #e0e0e0;
+            border-radius: 10px;
+            margin: 10px 0;
+            overflow: hidden;
+        }
+        
+        .progress {
+            height: 100%;
+            background-color: #FF8C00;
+            border-radius: 10px;
+        }
+        
+        .goal-item {
+            background: rgba(62, 31, 91, 0.5);
+            padding: 15px;
+            margin-bottom: 15px;
+            border-radius: 8px;
+        }
+        
+        .btn-add-goal {
+            background: #FF8C00;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 6px;
+            cursor: pointer;
+            margin-top: 15px;
+            font-weight: bold;
+        }
+        
+        .btn-add-goal:hover {
+            background: #ff9d2d;
+        }
+        
+        /* Responsive grid */
+        @media (max-width: 1200px) {
+            .dashboard {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .dashboard {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
 </head>
 <body>
 <header>
     <div class="logo">CashClimb</div>
     <nav>
         <ul>
-            <li><a href="profile.html">Profile</a></li>
+            <li><a href="home.html">Dashboard</a></li>
+            <li><a href="crypto.html">Crypto</a></li>
+            <li><a href="chat.html">Chat</a></li>
+            <li><a href="/logout">Log Out</a></li>
         </ul>
     </nav>
 </header>
@@ -24,63 +112,60 @@
         <li><a href="crypto.html">Crypto</a></li>
         <li><a href="stocks.html">Stocks</a></li>
         <li><a href="chat.html">Chat</a></li>
-        <li><a href="assetsLiabilities.html">Assets &amp; Liabilities</a></li>
-        <!--
-        Add net worth amount to profile
-        -->
         <li><a href="profile.html">Profile</a></li>
         <li><a href="settings.html">Settings</a></li>
-        <!--
-        This is not working as it's supposed to
-        -->
-        <li><a href="/logout">Logout</a></li>
-        <li><a href="bills.html">Bills Page (Not Done)</a></li>
-        <!--
-        Everything Below this is incomplete, add as its completed, the page below this comment
-        section that actually works, has a template for including the side drawer, and relevant
-        javascript for the theme change. Copy and paste that to any html and you should be fine
-        <li><a href="leaderboard.html">Leaderboard</a></li>
-        <li><a href="reminders.html">Set Reminders</a></li>
-        <li><a href="alerts.html">Alerts</a></li>
-        <li><a href="assetsLiabilities.html">Assets & Liabilities</a></li>
-        <li><a href="reports.html">Reports</a></li>
-        <li><a href="netWorth.html">Net Worth</a></li>
-        <li><a href="financialTips.html">Financial Tips</a></li>
-        <li><a href="goals.html">Goals and Limits</a></li>
-        -->
+        <li><a href="/logout">Log Out</a></li>
+        <li><a href="bills.html">Bills Page</a></li>
         <li><a href="leaderboard.html">Leaderboard</a></li>
     </ul>
 </nav>
 <main>
-    <section class="hero">
-        <div class="hero-content">
-            <h1>Dashboard</h1>
-            <p>Your financial overview</p>
-        </div>
-    </section>
     <div class="dashboard">
         <div class="card" id="netWorthCard">
-            <h2>Net Worth</h2>
-            <p id="netWorthDisplay"></p>
+            <h2>💰 Net Worth</h2>
+            <p id="netWorthDisplay">$0</p>
             <div id="netWorthChart"></div>
         </div>
+        
         <div class="card" id="incomeCard">
-            <h2>Total Income</h2>
-            <p id="totalIncomeDisplay"></p>
+            <h2>💵 Total Income</h2>
+            <p id="totalIncomeDisplay">$0</p>
             <div id="incomeChart"></div>
         </div>
+        
         <div class="card" id="expensesCard">
-            <h2>Total Expenses</h2>
-            <p id="totalExpensesDisplay"></p>
+            <h2>📊 Total Expenses</h2>
+            <p id="totalExpensesDisplay">$0</p>
             <div id="expensesPieChart"></div>
         </div>
+        
         <div class="card" id="billsCard">
-            <h2>Bills Due</h2>
-            <div id="billRemindersDisplay"></div>
+            <h2>📅 Bills Due</h2>
+            <div id="billRemindersDisplay"><h1>0</h1></div>
         </div>
+        
         <div class="card" id="chartCard">
-            <h2>Monthly Expenses</h2>
+            <h2>📈 Monthly Expenses</h2>
             <div id="chartContainer"></div>
+        </div>
+        
+        <div class="card" id="goalsCard">
+            <h2>🎯 Financial Goals</h2>
+            <div id="goals-container">
+                <div class="goal-item">
+                    <p>Emergency Fund $2,500 / $5,000</p>
+                    <div class="progress-bar">
+                        <div class="progress" style="width: 50%"></div>
+                    </div>
+                </div>
+                <div class="goal-item">
+                    <p>Vacation Savings $800 / $2,000</p>
+                    <div class="progress-bar">
+                        <div class="progress" style="width: 40%"></div>
+                    </div>
+                </div>
+                <button class="btn-add-goal" id="add-goal-btn">Add New Goal</button>
+            </div>
         </div>
     </div>
 </main>
@@ -109,7 +194,101 @@
             const input = document.querySelector(`input[name="theme"][value="${savedTheme}"]`);
             if (input) input.checked = true;
         }
+        
+        // Add Goal Button Functionality
+        const addGoalBtn = document.getElementById('add-goal-btn');
+        if (addGoalBtn) {
+            addGoalBtn.addEventListener('click', function() {
+                showAddGoalForm();
+            });
+        }
     });
+    
+    function showAddGoalForm() {
+        // Create modal for adding a new goal
+        const modal = document.createElement('div');
+        modal.className = 'modal';
+        modal.style.position = 'fixed';
+        modal.style.top = '0';
+        modal.style.left = '0';
+        modal.style.width = '100%';
+        modal.style.height = '100%';
+        modal.style.backgroundColor = 'rgba(0,0,0,0.7)';
+        modal.style.display = 'flex';
+        modal.style.justifyContent = 'center';
+        modal.style.alignItems = 'center';
+        modal.style.zIndex = '1000';
+        
+        // Create form container
+        const formContainer = document.createElement('div');
+        formContainer.className = 'form-container';
+        formContainer.style.backgroundColor = '#3E1F5B';
+        formContainer.style.padding = '20px';
+        formContainer.style.borderRadius = '10px';
+        formContainer.style.width = '90%';
+        formContainer.style.maxWidth = '500px';
+        
+        // Create form content
+        formContainer.innerHTML = `
+            <h3 style="color: #FF8C00; margin-top: 0;">Add New Financial Goal</h3>
+            <div style="margin-bottom: 15px;">
+                <label style="display: block; margin-bottom: 5px; color: white;">Goal Name</label>
+                <input type="text" id="goal-name" style="width: 100%; padding: 8px; border-radius: 5px; border: 1px solid #ddd;">
+            </div>
+            <div style="margin-bottom: 15px;">
+                <label style="display: block; margin-bottom: 5px; color: white;">Target Amount ($)</label>
+                <input type="number" id="goal-amount" style="width: 100%; padding: 8px; border-radius: 5px; border: 1px solid #ddd;" min="1">
+            </div>
+            <div style="margin-bottom: 15px;">
+                <label style="display: block; margin-bottom: 5px; color: white;">Current Progress ($)</label>
+                <input type="number" id="goal-progress" style="width: 100%; padding: 8px; border-radius: 5px; border: 1px solid #ddd;" min="0">
+            </div>
+            <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px;">
+                <button id="cancel-goal" style="padding: 8px 15px; border-radius: 5px; border: none; background-color: #6c757d; color: white; cursor: pointer;">Cancel</button>
+                <button id="save-goal" style="padding: 8px 15px; border-radius: 5px; border: none; background-color: #FF8C00; color: white; cursor: pointer;">Save Goal</button>
+            </div>
+        `;
+        
+        modal.appendChild(formContainer);
+        document.body.appendChild(modal);
+        
+        // Add event listeners to buttons
+        document.getElementById('cancel-goal').addEventListener('click', function() {
+            document.body.removeChild(modal);
+        });
+        
+        document.getElementById('save-goal').addEventListener('click', function() {
+            const name = document.getElementById('goal-name').value;
+            const amount = document.getElementById('goal-amount').value;
+            const progress = document.getElementById('goal-progress').value;
+            
+            if (!name || !amount) {
+                alert('Please fill out all required fields');
+                return;
+            }
+            
+            addGoalToList(name, parseFloat(progress) || 0, parseFloat(amount));
+            document.body.removeChild(modal);
+        });
+    }
+    
+    function addGoalToList(name, progress, target) {
+        const goalsContainer = document.getElementById('goals-container');
+        const percent = Math.min(100, Math.round((progress / target) * 100));
+        
+        const goalItem = document.createElement('div');
+        goalItem.className = 'goal-item';
+        goalItem.innerHTML = `
+            <p>${name} $${progress.toFixed(2)} / $${target.toFixed(2)}</p>
+            <div class="progress-bar">
+                <div class="progress" style="width: ${percent}%"></div>
+            </div>
+        `;
+        
+        // Insert the new goal before the add button
+        const addButton = document.getElementById('add-goal-btn');
+        goalsContainer.insertBefore(goalItem, addButton);
+    }
     document.addEventListener("DOMContentLoaded", function() {
         console.log("home.html: DOMContentLoaded");
 
