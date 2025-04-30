@@ -1,4 +1,5 @@
 {
   "etherscanApiKey": "G6YJ1PGVSDWY8VP11ZKYPQJ78VWIE7YAUQ",
-  "coinMarketCapApiKey": "e2fa2fa3-ef84-4e08-8a73-ae43c073ab0d"
+  "coinMarketCapApiKey": "e2fa2fa3-ef84-4e08-8a73-ae43c073ab0d",
+  "alphaVantageApiKey": "DEMO_API_KEY_REPLACE_THIS"
 }
