@@ -46,11 +46,14 @@ public class Login {
         HttpContext apiStockSymbolContext = server.createContext("/api/stocks/", new StockHandler());
         apiStockSymbolContext.getFilters().add(new AuthFilter());
         server.createContext("/logout", new LogoutHandler());
-
+        HttpContext apiBudgetsContext = server.createContext("/api/budgets", new BudgetHandler());
+        apiBudgetsContext.getFilters().add(new AuthFilter());
         HttpContext apiIncomeContext = server.createContext("/api/income", new IncomeHandler());
         apiIncomeContext.getFilters().add(new AuthFilter());
         HttpContext assetsLiabilitiesPage = server.createContext("/assetsLiabilities.html", new StaticFileHandler());
         assetsLiabilitiesPage.getFilters().add(new AuthFilter());
+        HttpContext apiTipsContext = server.createContext("/api/tips", new TipsHandler());
+        apiTipsContext.getFilters().add(new AuthFilter());
 
         HttpContext apiAssets = server.createContext("/api/assets", new AssetsLiabilitiesHandler("Assets"));
         apiAssets.getFilters().add(new AuthFilter());
@@ -78,6 +81,10 @@ public class Login {
         leaderboardContext.getFilters().add(new AuthFilter());
         HttpContext billsContext = server.createContext("/bills.html", new StaticFileHandler());
         billsContext.getFilters().add(new AuthFilter());
+        HttpContext tipsContext = server.createContext("/tips.html", new StaticFileHandler());
+        tipsContext.getFilters().add(new AuthFilter());
+        HttpContext budgetContext = server.createContext("/budget.html", new StaticFileHandler());
+        budgetContext.getFilters().add(new AuthFilter());
         server.setExecutor(null);
         server.start();
         if (Desktop.isDesktopSupported()) {

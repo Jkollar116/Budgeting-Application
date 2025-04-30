@@ -6,64 +6,35 @@
     <link rel="stylesheet" href="style.css">
     <!-- Add Chart.js library -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <style>
-        /* Custom styles for charts */
-        .chart-container {
-            position: relative;
-            height: 220px;
-            width: 100%;
-        }
-
-        /* Goal progress bar styles */
-        .goal-container {
-            border: 1px solid #ddd;
-            border-radius: 8px;
-            padding: 10px;
-            margin-bottom: 10px;
-        }
-
-        .goal-title {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 5px;
-        }
-
-        .progress-bar {
-            height: 12px;
-            background-color: #eee;
-            border-radius: 6px;
-            overflow: hidden;
-        }
-
-        .progress-fill {
-            height: 100%;
-            background-color: #FF8C00;
-            border-radius: 6px;
-            transition: width 0.5s;
-        }
-    </style>
 </head>
 <body>
-<div class="topbar">
-    <button class="drawer-toggle" onclick="toggleDrawer()">☰</button>
+<header>
     <div class="logo">CashClimb</div>
-    <div class="profile">👤Profile</div>
-</div>
+    <nav>
+        <ul>
+            <li><a href="profile.html">Profile</a></li>
+        </ul>
+    </nav>
+</header>
 <button class="drawer-toggle" onclick="toggleDrawer()">☰</button>
 <nav class="drawer" id="sideDrawer">
     <ul>
-        <li><a href=""></a></li>
-        <li><a href=""></a></li>
-        <li><a href="home.html"> Dashboard</a></li>
-        <li><a href="budgeting.html"> Budgeting</a></li>
-        <li><a href="expenses.html"> Expenses</a></li>
-        <li><a href="crypto.html"> Crypto</a></li>
-        <li><a href="stocks.html"> Stocks</a></li>
-        <li><a href="chat.html"> Chat</a></li>
-        <li><a href="tax.html"> Tax</a></li>
-        <li><a href="#">👤 Profile</a></li>
-        <li><a href="#">⚙️ Settings</a></li>
-        <li><a href="#">🚪 Log Out</a></li>
+        <li><a href="home.html">Dashboard</a></li>
+        <li><a href="expenses.html">Expenses</a></li>
+        <li><a href="income.html">Income</a></li>
+        <li><a href="tax.html">Tax</a></li>
+        <li><a href="crypto.html">Crypto</a></li>
+        <li><a href="stocks.html">Stocks</a></li>
+        <li><a href="chat.html">Chat</a></li>
+        <li><a href="tips.html">Tips</a></li>
+        <li><a href="savedTips.html">Saved Tips</a></li>
+        <li><a href="assetsLiabilities.html" class="active">Assets &amp; Liabilities</a></li>
+        <li><a href="budget.html">Budget</a></li>
+        <li><a href="profile.html">Profile</a></li>
+        <li><a href="settings.html">Settings</a></li>
+        <li><a href="/logout">Logout</a></li>
+        <li><a href="bills.html">Bills Page (Not Done)</a></li>
+        <li><a href="leaderboard.html">Leaderboard</a></li>
     </ul>
 </nav>
 <main>
@@ -141,6 +112,24 @@
         const drawer = document.getElementById('sideDrawer');
         drawer.classList.toggle('collapsed');
     }
+
+    function getThemePreference(name) {
+        const match = document.cookie.match(new RegExp('(^| )' + name + '=([^;]+)'));
+        return match ? match[2] : null;
+    }
+
+    window.addEventListener('pageshow', function(event) {
+        if (event.persisted) window.location.reload();
+    });
+
+    window.addEventListener('DOMContentLoaded', () => {
+        const body = document.body;
+        const theme = getThemePreference('theme');
+        if (theme === 'light') body.classList.add('light-mode');
+        else if (theme === 'dark') body.classList.add('dark-mode');
+
+        loadTips();
+    });
     
     // Chart objects to track and update
     let netWorthChart, incomeChart, expensesPieChart, monthlyExpensesChart;

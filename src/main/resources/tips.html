@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Tips</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header>
+  <div class="logo">CashClimb</div>
+  <nav>
+    <ul>
+      <li><a href="profile.html">Profile</a></li>
+    </ul>
+  </nav>
+</header>
+<button class="drawer-toggle" onclick="toggleDrawer()">☰</button>
+<nav class="drawer" id="sideDrawer">
+  <ul>
+    <li><a href="home.html">Dashboard</a></li>
+    <li><a href="expenses.html">Expenses</a></li>
+    <li><a href="income.html">Income</a></li>
+    <li><a href="tax.html">Tax</a></li>
+    <li><a href="crypto.html">Crypto</a></li>
+    <li><a href="stocks.html">Stocks</a></li>
+    <li><a href="chat.html">Chat</a></li>
+    <li><a href="tips.html">Tips</a></li>
+    <li><a href="savedTips.html">Saved Tips</a></li>
+    <li><a href="assetsLiabilities.html" class="active">Assets &amp; Liabilities</a></li>
+    <li><a href="budget.html">Budget</a></li>
+    <li><a href="profile.html">Profile</a></li>
+    <li><a href="settings.html">Settings</a></li>
+    <li><a href="/logout">Logout</a></li>
+    <li><a href="bills.html">Bills Page (Not Done)</a></li>
+    <li><a href="leaderboard.html">Leaderboard</a></li>
+  </ul>
+</nav>
+
+<main class="tips-page">
+  <div class="tips-header">
+    <h1>Financial Tips</h1>
+    <p>Get personalized tips to improve your finances.</p>
+    <button onclick="showRandomTip()" class="cta-button">Random Tip</button>
+    <div id="randomTip" class="random-tip"></div>
+  </div>
+
+  <div class="filter-container">
+    <label for="categoryFilter">Filter by Category:</label>
+    <select id="categoryFilter" onchange="filterTips()">
+      <option value="All">All</option>
+      <option value="Students">Students</option>
+      <option value="Workers">Workers</option>
+      <option value="Seniors">Seniors</option>
+      <option value="Low Income">Low Income</option>
+      <option value="High Income">High Income</option>
+      <option value="New Earners">New Earners</option>
+      <option value="Families">Families</option>
+      <option value="Debt Management">Debt Management</option>
+      <option value="Investment">Investment</option>
+      <option value="Small Business">Small Business</option>
+    </select>
+  </div>
+
+  <div id="tipsList" class="tip-section-list"></div>
+</main>
+
+<script>
+  function toggleDrawer() {
+    const drawer = document.getElementById('sideDrawer');
+    drawer.classList.toggle('collapsed');
+  }
+
+  function getThemePreference(name) {
+    const match = document.cookie.match(new RegExp('(^| )' + name + '=([^;]+)'));
+    return match ? match[2] : null;
+  }
+
+  window.addEventListener('pageshow', function(event) {
+    if (event.persisted) window.location.reload();
+  });
+
+  window.addEventListener('DOMContentLoaded', () => {
+    const body = document.body;
+    const theme = getThemePreference('theme');
+    if (theme === 'light') body.classList.add('light-mode');
+    else if (theme === 'dark') body.classList.add('dark-mode');
+
+    loadTips();
+  });
+
+  let tipsData = [];
+  async function loadTips() {
+    try {
+      const res = await fetch('tips.json');
+      tipsData = await res.json();
+      displayTips(tipsData);
+      filterTips();
+    } catch (e) {
+      console.error("Failed to load tips.json", e);
+    }
+  }
+  function displayTips(tips) {
+    const list = document.getElementById('tipsList');
+    list.innerHTML = '';
+    tips.forEach(tip => {
+      const li = document.createElement('li');
+      li.textContent = `${tip.text} [${tip.category}]`;
+      list.appendChild(li);
+    });
+  }
+  function filterTips() {
+    const selectedCategory = document.getElementById('categoryFilter').value;
+    const tipsList = document.getElementById('tipsList');
+    tipsList.innerHTML = '';
+    const filtered = selectedCategory === "All"
+            ? tipsData
+            : tipsData.filter(t => t.category.toLowerCase() === selectedCategory.toLowerCase());
+    const grouped = {};
+    filtered.forEach(tip => {
+      const cat = tip.category;
+      if (!grouped[cat]) grouped[cat] = [];
+      grouped[cat].push(tip);
+    });
+    for (const [category, tips] of Object.entries(grouped)) {
+      const section = document.createElement('div');
+      section.className = 'tip-category-block';
+
+      const header = document.createElement('h3');
+      header.className = 'tip-category-title';
+      header.textContent = category;
+      section.appendChild(header);
+
+      const ul = document.createElement('ul');
+      ul.className = 'tip-category-list';
+
+      tips.forEach(tip => {
+        const li = document.createElement('li');
+        li.className = 'tip-item';
+
+        const text = document.createElement('p');
+        text.textContent = `- ${tip.text}`;
+        li.appendChild(text);
+
+        const saveBtn = document.createElement('button');
+        saveBtn.textContent = 'Save Tip';
+        saveBtn.className = 'save-tip-btn';
+        saveBtn.onclick = () => saveTipToFirebase(tip);
+        li.appendChild(saveBtn);
+        ul.appendChild(li);
+      });
+      section.appendChild(ul);
+      tipsList.appendChild(section);
+    }
+  }
+  function showRandomTip() {
+    if (tipsData.length === 0) return;
+    const tip = tipsData[Math.floor(Math.random() * tipsData.length)];
+    document.getElementById('randomTip').textContent = tip.text;
+  }
+  function saveTipToFirebase(tip) {
+    fetch('/api/tips', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        id: tip.id,
+        category: tip.category,
+        text: tip.text
+      })
+    })
+            .then(res => {
+              if (res.ok) {
+                alert("Tip saved successfully.");
+              } else {
+                alert("Failed to save tip.");
+                return res.text().then(console.error);
+              }
+            })
+            .catch(err => {
+              console.error("Error saving tip:", err);
+              alert("Failed to save tip.");
+            });
+  }
+</script>
+</body>
+</html>
