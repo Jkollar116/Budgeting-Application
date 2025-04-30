@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Budget Tracker</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header>
+  <div class="logo">CashClimb</div>
+  <nav>
+    <ul>
+      <li><a href="profile.html">Profile</a></li>
+    </ul>
+  </nav>
+</header>
+<button class="drawer-toggle" onclick="toggleDrawer()">☰</button>
+<nav class="drawer" id="sideDrawer">
+  <ul>
+    <li><a href="home.html">Dashboard</a></li>
+    <li><a href="expenses.html">Expenses</a></li>
+    <li><a href="income.html">Income</a></li>
+    <li><a href="tax.html">Tax</a></li>
+    <li><a href="crypto.html">Crypto</a></li>
+    <li><a href="stocks.html">Stocks</a></li>
+    <li><a href="chat.html">Chat</a></li>
+    <li><a href="tips.html">Tips</a></li>
+    <li><a href="savedTips.html">Saved Tips</a></li>
+    <li><a href="assetsLiabilities.html" class="active">Assets &amp; Liabilities</a></li>
+    <li><a href="budget.html">Budget</a></li>
+    <li><a href="profile.html">Profile</a></li>
+    <li><a href="settings.html">Settings</a></li>
+    <li><a href="/logout">Logout</a></li>
+    <li><a href="bills.html">Bills Page (Not Done)</a></li>
+    <li><a href="leaderboard.html">Leaderboard</a></li>
+  </ul>
+</nav>
+
+<main class="budget-page">
+  <div class="hero">
+    <div class="header-content">
+      <h1>Budget Tracker</h1>
+      <p>Set and monitor your monthly budgets below</p>
+    </div>
+  </div>
+
+  <h1 class="expenses-header">Set Monthly Budget</h1>
+
+  <form id="budgetForm" class="budget-form">
+    <label for="monthSelect">Month</label>
+    <select id="monthSelect" name="monthSelect" required>
+      <option value="">Select Month</option>
+      <option value="01">January</option>
+      <option value="02">February</option>
+      <option value="03">March</option>
+      <option value="04">April</option>
+      <option value="05">May</option>
+      <option value="06">June</option>
+      <option value="07">July</option>
+      <option value="08">August</option>
+      <option value="09">September</option>
+      <option value="10">October</option>
+      <option value="11">November</option>
+      <option value="12">December</option>
+    </select>
+
+    <label for="yearSelect">Year</label>
+    <select id="yearSelect" name="yearSelect" required>
+      <option value="">Select Year</option>
+      <option value="2024">2024</option>
+      <option value="2025">2025</option>
+      <option value="2026">2026</option>
+      <option value="2027">2027</option>
+      <option value="2028">2028</option>
+      <option value="2029">2029</option>
+      <option value="2030">2030</option>
+    </select>
+
+    <label for="budgetAmount">Budget Amount</label>
+    <input type="number" step="0.01" id="budgetAmount" name="budgetAmount" required>
+
+    <button type="submit">Add Budget</button>
+  </form>
+
+
+  <div id="budgetList"></div>
+</main>
+</body>
+<script>
+  function toggleDrawer() {
+    document.getElementById('sideDrawer').classList.toggle('collapsed');
+  }
+
+  function getThemePreference(name) {
+    var match = document.cookie.match(new RegExp('(^| )' + name + '=([^;]+)'));
+    return match ? match[2] : null;
+  }
+
+  window.addEventListener('pageshow', function(event) {
+    if (event.persisted) window.location.reload();
+  });
+
+  window.addEventListener('DOMContentLoaded', () => {
+    var body = document.body;
+    body.classList.remove('light-mode', 'dark-mode');
+    var theme = getThemePreference('theme');
+    if (theme === 'light') body.classList.add('light-mode');
+    else if (theme === 'dark') body.classList.add('dark-mode');
+    loadBudgets();
+  });
+
+  function loadBudgets() {
+    let budgets = [];
+    let expensesTotals = {};
+
+    fetch('/api/budgets')
+            .then(res => {
+              console.log('Budget fetch status:', res.status);
+              if (!res.ok) throw Error('Budget fetch failed');
+              return res.json();
+            })
+            .then(data => {
+              console.log('Budgets data:', data);
+              budgets = data.documents || [];
+              return fetch('/api/expenses');
+            })
+            .then(res => {
+              console.log('Expenses fetch status:', res.status);
+              if (!res.ok) throw Error('Expenses fetch failed');
+              return res.json();
+            })
+            .then(expenseData => {
+              console.log('Expenses data:', expenseData);
+              var docs = expenseData.documents || [];
+              docs.forEach(doc => {
+                var f = doc.fields;
+                if (!f.date || !f.total) {
+                  console.warn('Missing date or total in expense document:', doc);
+                  return;
+                }
+                var date = f.date.stringValue;
+                var amount = f.total.doubleValue;
+                var dt = new Date(date);
+                if (!isNaN(dt)) {
+                  var key = dt.getFullYear() + '-' + ('0' + (dt.getMonth() + 1)).slice(-2);
+                  expensesTotals[key] = (expensesTotals[key] || 0) + amount;
+                } else {
+                  console.warn('Invalid date format in expense:', date);
+                }
+              });
+              console.log('Expenses totals per month:', expensesTotals);
+
+              var html = '<table><thead><tr>'
+                      + '<th>Month</th><th>Budget</th><th>Expenses</th><th>Remove</th>'
+                      + '</tr></thead><tbody>';
+              budgets.forEach(doc => {
+                var f = doc.fields;
+                if (!f.month || !f.amount) {
+                  console.warn('Missing month or amount in budget document:', doc);
+                  return;
+                }
+                var month = f.month.stringValue;
+                var amount = f.amount.doubleValue;
+                var id = doc.name.split('/').pop();
+                var expensesForMonth = expensesTotals[month] || 0;
+
+                html += `<tr><td>${formatMonth(month)}</td><td>$${amount.toFixed(2)}</td><td>$${expensesForMonth.toFixed(2)}</td>`
+                        + `<td><button class="remove-btn" data-id="${id}">Remove</button></td></tr>`;
+              });
+              html += '</tbody></table>';
+              var container = document.getElementById('budgetList');
+              container.innerHTML = html;
+              container.querySelectorAll('.remove-btn').forEach(btn => {
+                btn.addEventListener('click', () => removeBudget(btn.dataset.id));
+              });
+            })
+            .catch(err => {
+              console.error('Error during budget+expense load:', err);
+              document.getElementById('budgetList').innerHTML = '<p>Error loading data</p>';
+            });
+  }
+
+  document.getElementById('budgetForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    var monthSelect = this.monthSelect.value;
+    var yearSelect = this.yearSelect.value;
+    var budgetAmount = parseFloat(this.budgetAmount.value);
+
+    if (!monthSelect || !yearSelect) {
+      alert('Please select both month and year.');
+      return;
+    }
+    var monthFormatted = yearSelect + '-' + monthSelect;
+    fetch('/api/budgets', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ month: monthFormatted, amount: budgetAmount })
+    }).then(res => {
+      if (res.ok) {
+        this.reset();
+        setTimeout(loadBudgets, 300);
+      } else {
+        alert('Error adding budget');
+      }
+    }).catch(() => alert('Error adding budget'));
+  });
+  function removeBudget(id) {
+    fetch('/api/budgets?docId=' + encodeURIComponent(id), { method: 'DELETE' })
+            .then(res => {
+              if (res.ok) loadBudgets();
+              else alert('Error removing budget');
+            })
+            .catch(() => alert('Error removing budget'));
+  }
+  function formatMonth(monthString) {
+    if (!monthString.includes('-')) {
+      console.warn('Invalid month format:', monthString);
+      return monthString;
+    }
+    const [year, month] = monthString.split('-');
+    const date = new Date(year, month - 1);
+    return date.toLocaleString('default', { month: 'long', year: 'numeric' });
+  }
+</script>
+</html>
+
+
+

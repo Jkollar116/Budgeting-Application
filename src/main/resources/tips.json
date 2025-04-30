@@ -1,0 +1,67 @@
+[
+  {
+    "id": "tip-student-001",
+    "category": "Students",
+    "text": "Track your expenses throughout the semester with a spreadsheet or budgeting app like this one!"
+  },
+  {
+    "id": "tip-workers-001",
+    "category": "Workers",
+    "text": "Set aside a fixed percentage of every paycheck for emergencies."
+  },
+  {
+    "id": "tip-seniors-001",
+    "category": "Seniors",
+    "text": "Review your healthcare and insurance plans annually to ensure you're not overpaying or under-covered."
+  },
+  {
+    "id": "tip-low-income-001",
+    "category": "Low Income",
+    "text": "Prioritize necessities using a needs vs wants list."
+  },
+  {
+    "id": "tip-low-income-002",
+    "category": "Low Income",
+    "text": "Look into local community programs for financial support."
+  },
+  {
+    "id": "tip-high-income-001",
+    "category": "High Income",
+    "text": "Avoid lifestyle inflation, do not spend more as your income rises"
+  },
+  {
+    "id": "tip-high-income-002",
+    "category": "High Income",
+    "text": "Ensure that your investments and your savings rise as your income does"
+  },
+  {
+    "id": "tip-new-earners-001",
+    "category": "New Earners",
+    "text": "Start building credit early with a credit card and pay off the full balance monthly on time."
+  },
+  {
+    "id": "tip-families-001",
+    "category": "Families",
+    "text": "Meal planning can save hundreds per month, shop with a list and limit takeout to special occasions if possible."
+  },
+  {
+    "id": "tip-debt-001",
+    "category": "Debt Management",
+    "text": "Tackle debt using the snowball or avalanche method — choose the one that keeps you motivated to stick with it."
+  },
+  {
+    "id": "tip-smallbiz-001",
+    "category": "Small Business",
+    "text": "Open a dedicated business account to simplify taxes and budgeting."
+  },
+  {
+    "id": "tip-smallbiz-002",
+    "category": "Small Business",
+    "text": "Keep your personal and business finances separate"
+  },
+  {
+    "id": "tip-investment-001",
+    "category": "Investment",
+    "text": "Diversify your portfolio to manage risk"
+  }
+]

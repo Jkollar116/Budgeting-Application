@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Saved Tips</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header>
+  <div class="logo">CashClimb</div>
+  <nav>
+    <ul>
+      <li><a href="profile.html">Profile</a></li>
+    </ul>
+  </nav>
+</header>
+<button class="drawer-toggle" onclick="toggleDrawer()">☰</button>
+<nav class="drawer" id="sideDrawer">
+  <ul>
+    <li><a href="home.html">Dashboard</a></li>
+    <li><a href="expenses.html">Expenses</a></li>
+    <li><a href="income.html">Income</a></li>
+    <li><a href="tax.html">Tax</a></li>
+    <li><a href="crypto.html">Crypto</a></li>
+    <li><a href="stocks.html">Stocks</a></li>
+    <li><a href="chat.html">Chat</a></li>
+    <li><a href="tips.html">Tips</a></li>
+    <li><a href="savedTips.html">Saved Tips</a></li>
+    <li><a href="assetsLiabilities.html" class="active">Assets &amp; Liabilities</a></li>
+    <li><a href="budget.html">Budget</a></li>
+    <li><a href="profile.html">Profile</a></li>
+    <li><a href="settings.html">Settings</a></li>
+    <li><a href="/logout">Logout</a></li>
+    <li><a href="bills.html">Bills Page (Not Done)</a></li>
+    <li><a href="leaderboard.html">Leaderboard</a></li>
+  </ul>
+</nav>
+
+<main class="tips-page">
+  <div class="tips-header">
+    <h1>Your Saved Tips</h1>
+    <p>These are the financial tips you saved.</p>
+  </div>
+
+  <div id="savedTipsList" class="tip-section-list"></div>
+</main>
+
+<script>
+  function toggleDrawer() {
+    const drawer = document.getElementById('sideDrawer');
+    drawer.classList.toggle('collapsed');
+  }
+
+  function getThemePreference(name) {
+    const match = document.cookie.match(new RegExp('(^| )' + name + '=([^;]+)'));
+    return match ? match[2] : null;
+  }
+
+  window.addEventListener('pageshow', function(event) {
+    if (event.persisted) window.location.reload();
+  });
+
+  window.addEventListener('DOMContentLoaded', () => {
+    const body = document.body;
+    const theme = getThemePreference('theme');
+    if (theme === 'light') body.classList.add('light-mode');
+    else if (theme === 'dark') body.classList.add('dark-mode');
+
+    loadSavedTips();
+  });
+
+  function loadSavedTips() {
+    fetch('/api/tips')
+            .then(res => {
+              if (!res.ok) throw new Error('Failed to load saved tips');
+              return res.json();
+            })
+            .then(data => {
+              const docs = data.documents || [];
+              const tipsByCategory = {};
+
+              docs.forEach(doc => {
+                const f = doc.fields;
+                const cat = f.category.stringValue;
+                const txt = f.text.stringValue;
+                if (!tipsByCategory[cat]) tipsByCategory[cat] = [];
+                tipsByCategory[cat].push(txt);
+              });
+
+              const container = document.getElementById('savedTipsList');
+              container.innerHTML = '';
+
+              for (const [category, tips] of Object.entries(tipsByCategory)) {
+                const section = document.createElement('div');
+                section.className = 'tip-category-block';
+
+                const header = document.createElement('h3');
+                header.className = 'tip-category-title';
+                header.textContent = category;
+                section.appendChild(header);
+
+                const ul = document.createElement('ul');
+                ul.className = 'tip-category-list';
+
+                tips.forEach(text => {
+                  const li = document.createElement('li');
+                  li.className = 'tip-item';
+
+                  const p = document.createElement('p');
+                  p.textContent = `- ${text}`;
+                  li.appendChild(p);
+                  ul.appendChild(li);
+                });
+
+                section.appendChild(ul);
+                container.appendChild(section);
+              }
+            })
+            .catch(err => {
+              document.getElementById('savedTipsList').innerHTML = '<p>Error loading saved tips.</p>';
+              console.error(err);
+            });
+  }
+</script>
+</body>
+</html>
