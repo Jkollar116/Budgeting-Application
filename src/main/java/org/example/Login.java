@@ -448,14 +448,5 @@ public class Login {
         }
     }
 
-    static class CryptoApiHandler implements HttpHandler {
-        @Override
-        public void handle(HttpExchange exchange) throws IOException {
-            String response = "Protected crypto data";
-            exchange.sendResponseHeaders(200, response.length());
-            OutputStream os = exchange.getResponseBody();
-            os.write(response.getBytes());
-            os.close();
-        }
-    }
+    // Using the full CryptoApiHandler implementation from org.example.CryptoApiHandler
 }
