@@ -49,6 +49,14 @@ public class Login {
 
         HttpContext apiIncomeContext = server.createContext("/api/income", new IncomeHandler());
         apiIncomeContext.getFilters().add(new AuthFilter());
+        HttpContext assetsLiabilitiesPage = server.createContext("/assetsLiabilities.html", new StaticFileHandler());
+        assetsLiabilitiesPage.getFilters().add(new AuthFilter());
+
+        HttpContext apiAssets = server.createContext("/api/assets", new AssetsLiabilitiesHandler("Assets"));
+        apiAssets.getFilters().add(new AuthFilter());
+
+        HttpContext apiLiabilities = server.createContext("/api/liabilities", new AssetsLiabilitiesHandler("Liabilities"));
+        apiLiabilities.getFilters().add(new AuthFilter());
 
         HttpContext cryptoContext = server.createContext("/crypto.html", new StaticFileHandler());
         cryptoContext.getFilters().add(new AuthFilter());
