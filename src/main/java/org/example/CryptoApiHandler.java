@@ -7,8 +7,6 @@ import java.nio.charset.StandardCharsets;
 import org.json.JSONObject;
 import org.json.JSONArray;
 import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -125,10 +123,14 @@ public class CryptoApiHandler implements HttpHandler {
      * This endpoint serves the frontend's refreshWallet API call
      */
     private void handleGetWalletInfo(HttpExchange exchange) throws IOException {
+        // Declare variables at method scope so they're accessible in the catch block
+        String query = exchange.getRequestURI().getQuery();
+        String address = null;
+        String type = null;
+        WalletInfo info = null;
+        
         try {
-            String query = exchange.getRequestURI().getQuery();
-            String address = null;
-            String type = null;
+            System.out.println("Processing wallet info request: " + query);
             
             // Parse query parameters
             if (query != null) {
@@ -155,35 +157,48 @@ public class CryptoApiHandler implements HttpHandler {
                 return;
             }
             
-            WalletInfo info;
-            
-            // If address is not provided, just get price info
-            if (address == null || address.isEmpty()) {
-                // If only type is provided, get just the price information
-                // This is useful for market data display without a specific wallet
-                if (type.equals("BTC")) {
-                    // For BTC, get a minimal wallet info with just price data
-                    info = walletService.getBitcoinPriceInfo();
-                } else if (type.equals("ETH")) {
-                    // For ETH, get a minimal wallet info with just price data
-                    info = walletService.getEthereumPriceInfo();
-                } else {
-                    sendResponse(exchange, new JSONObject()
-                        .put("error", "Unsupported cryptocurrency type")
-                        .toString(), 400);
+            try {
+                // If address is not provided, just get price info
+                if (address == null || address.isEmpty()) {
+                    System.out.println("Getting price info for: " + type);
+                    
+                    // If only type is provided, get just the price information
+                    // This is useful for market data display without a specific wallet
+                    if (type.equals("BTC")) {
+                        // For BTC, get a minimal wallet info with just price data
+                        info = walletService.getBitcoinPriceInfo();
+                    } else if (type.equals("ETH")) {
+                        // For ETH, get a minimal wallet info with just price data
+                        info = walletService.getEthereumPriceInfo();
+                    } else {
+                        sendResponse(exchange, new JSONObject()
+                            .put("error", "Unsupported cryptocurrency type")
+                            .toString(), 400);
+                        return;
+                    }
+                    
+                    // Create a simplified response with market data
+                    JSONObject response = new JSONObject();
+                    response.put("currentPrice", info.currentPrice());
+                    response.put("priceChange24h", info.priceChange24h());
+                    response.put("marketCap", info.marketCap());
+                    response.put("volume24h", info.volume24h());
+                    
+                    System.out.println("Successfully generated price response for " + type + ": " + 
+                                    "Price=" + info.currentPrice() + ", Change=" + info.priceChange24h());
+                    
+                    sendResponse(exchange, response.toString(), 200);
                     return;
                 }
                 
-                // Create a simplified response with just price data
-                JSONObject response = new JSONObject();
-                response.put("currentPrice", info.currentPrice());
-                response.put("priceChange24h", info.priceChange24h());
-                sendResponse(exchange, response.toString(), 200);
-                return;
+                // If we have an address, get the full wallet info
+                System.out.println("Getting full wallet info for: " + address + " (" + type + ")");
+                info = walletService.getWalletInfo(address, type);
+            } catch (Exception e) {
+                // Throw the error to be handled by the outer catch block
+                System.err.println("Error getting wallet info: " + e.getMessage());
+                throw e;
             }
-            
-            // If we have an address, get the full wallet info
-            info = walletService.getWalletInfo(address, type);
             
             // Create response JSON with all wallet fields
             JSONObject response = new JSONObject();
@@ -191,6 +206,8 @@ public class CryptoApiHandler implements HttpHandler {
             response.put("value", info.balance() * info.currentPrice());
             response.put("change24h", info.priceChange24h());
             response.put("currentPrice", info.currentPrice());
+            response.put("marketCap", info.marketCap());
+            response.put("volume24h", info.volume24h());
             
             JSONArray txArray = new JSONArray();
             for (Transaction tx : info.transactions()) {
@@ -207,13 +224,19 @@ public class CryptoApiHandler implements HttpHandler {
                 }
             }
             
+            System.out.println("Successfully generated wallet response for " + address + " (" + type + ")");
             sendResponse(exchange, response.toString(), 200);
+            
         } catch (Exception e) {
-            System.err.println("Error getting wallet info: " + e.getMessage());
+            System.err.println("Critical error in handleGetWalletInfo: " + e.getMessage());
             e.printStackTrace();
-            sendResponse(exchange, new JSONObject()
-                .put("error", "Failed to get wallet info: " + e.getMessage())
-                .toString(), 500);
+            
+            // Send an error response with the actual error message
+            JSONObject errorResponse = new JSONObject();
+            errorResponse.put("error", "Unable to fetch real-time data: " + e.getMessage());
+            
+            System.out.println("Sending error response to client");
+            sendResponse(exchange, errorResponse.toString(), 500);
         }
     }
     

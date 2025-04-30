@@ -4,53 +4,391 @@
     <meta charset="UTF-8">
     <title>Crypto Wallet Manager</title>
     <link rel="stylesheet" href="style.css">
+    <style>
+        /* Main Layout */
+        .dashboard {
+            display: grid;
+            gap: 20px;
+            padding: 20px;
+            max-width: 1600px;
+            margin: 0 auto;
+            grid-template-columns: 1fr 1fr 1fr;
+            grid-template-areas:
+                "portfolio portfolio market"
+                "wallets wallets market"
+                "walletlist walletlist analytics";
+        }
 
+        /* Cards */
+        .card {
+            background: #3E1F5B;
+            border-radius: 12px;
+            padding: 20px;
+            color: white;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .card h2 {
+            margin-top: 0;
+            color: #FF8C00;
+            font-size: 1.5em;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        /* Portfolio Section */
+        .portfolio-section {
+            grid-area: portfolio;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .portfolio-stats {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+        }
+
+        .portfolio-chart {
+            flex: 1;
+            max-height: 220px;
+            margin-top: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* Stats */
+        .stat {
+            background: rgba(62, 31, 91, 0.7);
+            border-radius: 10px;
+            padding: 15px;
+            text-align: center;
+            transition: transform 0.2s;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .stat:hover {
+            transform: translateY(-5px);
+        }
+
+        .stat-label {
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 0.9em;
+            margin-bottom: 5px;
+            display: block;
+        }
+
+        .stat-value {
+            font-size: 1.6em;
+            font-weight: bold;
+            display: block;
+        }
+
+        /* Market Overview */
+        .market-section {
+            grid-area: market;
+        }
+
+        .market-card {
+            background: rgba(62, 31, 91, 0.7);
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 15px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .market-card h3 {
+            color: #FF8C00;
+            margin-top: 0;
+            margin-bottom: 10px;
+            font-size: 1.2em;
+        }
+
+        .market-stat {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .market-stat:last-child {
+            border-bottom: none;
+        }
+
+        /* Wallet Management */
+        .wallet-section {
+            grid-area: wallets;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        .add-wallet-form {
+            background: rgba(62, 31, 91, 0.7);
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .add-wallet-form h3 {
+            color: #FF8C00;
+            margin-top: 0;
+            margin-bottom: 15px;
+            font-size: 1.2em;
+        }
+
+        .add-wallet-form input,
+        .add-wallet-form select {
+            width: 100%;
+            padding: 10px;
+            margin: 8px 0;
+            border: 1px solid #FF8C00;
+            border-radius: 6px;
+            background: rgba(255, 255, 255, 0.9);
+            color: #222;
+            font-size: 0.9em;
+        }
+
+        .test-buttons {
+            background: rgba(62, 31, 91, 0.7);
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .test-buttons h3 {
+            color: #FF8C00;
+            margin-top: 0;
+            margin-bottom: 15px;
+            font-size: 1.2em;
+        }
+
+        .btn-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+
+        /* Wallet List */
+        .wallets-list-section {
+            grid-area: walletlist;
+        }
+
+        .wallet-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 15px;
+            margin-top: 15px;
+        }
+
+        .wallet-card {
+            background: rgba(62, 31, 91, 0.7);
+            border-radius: 10px;
+            padding: 15px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s;
+        }
+
+        .wallet-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .wallet-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .wallet-header h3 {
+            color: #FF8C00;
+            margin: 0;
+            font-size: 1.2em;
+        }
+
+        .wallet-type {
+            background: #FF8C00;
+            color: white;
+            padding: 3px 8px;
+            border-radius: 20px;
+            font-size: 0.8em;
+            font-weight: bold;
+        }
+
+        .wallet-info {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .wallet-info-item {
+            margin: 5px 0;
+            font-size: 0.9em;
+        }
+
+        .wallet-info-item .label {
+            color: rgba(255, 255, 255, 0.7);
+            display: block;
+            margin-bottom: 3px;
+        }
+
+        .wallet-info-item .value {
+            font-weight: bold;
+        }
+
+        .wallet-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 8px;
+        }
+
+        /* Analytics Section */
+        .analytics-section {
+            grid-area: analytics;
+        }
+
+        .chart-container {
+            height: 200px;
+            margin-top: 15px;
+            background: rgba(62, 31, 91, 0.7);
+            border-radius: 10px;
+            padding: 15px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Buttons */
+        .btn {
+            background: #FF8C00;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: background 0.3s ease, transform 0.1s;
+            font-weight: bold;
+            font-size: 0.9em;
+            text-align: center;
+        }
+
+        .btn:hover {
+            background: #FFA500;
+            transform: translateY(-2px);
+        }
+
+        .btn:active {
+            transform: translateY(0);
+        }
+
+        .btn-small {
+            padding: 5px 10px;
+            font-size: 0.8em;
+        }
+
+        /* Status Colors */
+        .positive {
+            color: #32CD32;
+        }
+
+        .negative {
+            color: #FF4444;
+        }
+
+        /* QR Code Modal */
+        .qr-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.85);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .qr-content {
+            background: #3E1F5B;
+            padding: 25px;
+            border-radius: 10px;
+            box-shadow: 0 4px 25px rgba(0, 0, 0, 0.4);
+            text-align: center;
+            max-width: 350px;
+            width: 100%;
+        }
+
+        .qr-code img {
+            margin: 20px auto;
+            padding: 15px;
+            background: white;
+            border-radius: 5px;
+            display: block;
+        }
+
+        /* Messages */
+        .error-message {
+            color: #ff4444;
+            padding: 10px;
+            margin: 10px 0;
+            background: rgba(255,0,0,0.1);
+            border-radius: 6px;
+            text-align: center;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 1200px) {
+            .dashboard {
+                grid-template-columns: 1fr 1fr;
+                grid-template-areas:
+                    "portfolio market"
+                    "wallets wallets"
+                    "walletlist walletlist"
+                    "analytics analytics";
+            }
+        }
+
+        @media (max-width: 768px) {
+            .dashboard {
+                grid-template-columns: 1fr;
+                grid-template-areas:
+                    "portfolio"
+                    "market"
+                    "wallets"
+                    "walletlist"
+                    "analytics";
+            }
+
+            .wallet-section {
+                grid-template-columns: 1fr;
+            }
+
+            .portfolio-stats {
+                grid-template-columns: 1fr;
+            }
+
+            .wallet-info {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
 </head>
-<body class = "crypto-page">
+<body>
 <header>
     <div class="logo">CashClimb</div>
     <nav>
         <ul>
-            <li><a href="profile.html">Profile</a></li>
+            <li><a href="home.html">Dashboard</a></li>
+            <li><a href="crypto.html">Crypto</a></li>
+            <li><a href="chat.html">Chat</a></li>
+            <li><a href="index.html">Log Out</a></li>
         </ul>
     </nav>
 </header>
-<button class="drawer-toggle" onclick="toggleDrawer()">☰</button>
-<nav class="drawer" id="sideDrawer">
-    <ul>
-        <li><a href="home.html">Dashboard</a></li>
-        <li><a href="expenses.html">Expenses</a></li>
-        <li><a href="income.html">Income</a></li>
-        <li><a href="tax.html">Tax</a></li>
-        <li><a href="crypto.html">Crypto</a></li>
-        <li><a href="stocks.html">Stocks</a></li>
-        <li><a href="chat.html">Chat</a></li>
-        <!--
-        Add net worth amount to profile
-        -->
-        <li><a href="profile.html">Profile</a></li>
-        <li><a href="settings.html">Settings</a></li>
-        <!--
-        This is not working as it's supposed to
-        -->
-        <li><a href="/logout">Logout</a></li>
-        <li><a href="bills.html">Bills Page (Not Done)</a></li>
-        <!--
-        Everything Below this is incomplete, add as its completed, the page below this comment
-        section that actually works, has a template for including the side drawer, and relevant
-        javascript for the theme change. Copy and paste that to any html and you should be fine
-        <li><a href="leaderboard.html">Leaderboard</a></li>
-        <li><a href="reminders.html">Set Reminders</a></li>
-        <li><a href="alerts.html">Alerts</a></li>
-        <li><a href="assetsLiabilities.html">Assets & Liabilities</a></li>
-        <li><a href="reports.html">Reports</a></li>
-        <li><a href="netWorth.html">Net Worth</a></li>
-        <li><a href="financialTips.html">Financial Tips</a></li>
-        <li><a href="goals.html">Goals and Limits</a></li>
-        -->
-        <li><a href="leaderboard.html">Leaderboard</a></li>
-    </ul>
-</nav>
+
 <div class="dashboard">
     <!-- Portfolio Summary Section - More Compact -->
     <div class="card portfolio-section">
@@ -130,7 +468,7 @@
     <!-- Analytics Section -->
     <div class="card analytics-section">
         <h2>Performance Analytics</h2>
-        <select id="timeframe-selector">
+        <select id="timeframe-selector" style="padding: 8px; border-radius: 5px; background: rgba(62, 31, 91, 0.7); color: white; border: 1px solid #FF8C00; margin-bottom: 10px;">
             <option value="24h">24 Hours</option>
             <option value="7d">7 Days</option>
             <option value="30d">30 Days</option>
@@ -150,29 +488,6 @@
 <script src="https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.min.js"></script>
 
 <script>
-    function toggleDrawer() {
-        const drawer = document.getElementById('sideDrawer');
-        drawer.classList.toggle('collapsed');
-    }
-    function getThemePreference(name) {
-        const match = document.cookie.match(new RegExp('(^| )' + name + '=([^;]+)'));
-        if (!match) return null;
-        return match[2];
-    }
-    window.addEventListener('pageshow', function(event) {
-        if (event.persisted) window.location.reload();
-    });
-    window.addEventListener('DOMContentLoaded', () => {
-        const savedTheme = getThemePreference('theme');
-        const body = document.body;
-
-        body.classList.remove('light-mode', 'dark-mode');
-        if (savedTheme === 'light') {
-            body.classList.add('light-mode');
-        } else if (savedTheme === 'dark') {
-            body.classList.add('dark-mode');
-        }
-    });
     // Constants and Variables
     const TEST_WALLETS = {
         BTC: [
@@ -224,14 +539,15 @@
     function addWallet(label, address, cryptoType) {
         console.log(`Adding wallet: ${label}, ${address}, ${cryptoType}`);
 
-        const newWallet = {
+        // Create wallet with temporary placeholder data first
+        const temporaryWallet = {
             id: Date.now().toString(), // Add unique ID for each wallet
             label: label,
             address: address,
             cryptoType: cryptoType,
-            balance: cryptoType === 'BTC' ? 3084.31624354 : 150.45678912,
-            value: cryptoType === 'BTC' ? 290852227.31 : 450678.23,
-            change24h: cryptoType === 'BTC' ? -1.38 : 2.45,
+            balance: 0,
+            value: 0,
+            change24h: 0,
             lastUpdated: new Date().toISOString()
         };
 
@@ -243,12 +559,50 @@
             return;
         }
 
-        wallets.push(newWallet);
+        // Add temporary wallet first so the UI updates immediately
+        wallets.push(temporaryWallet);
         localStorage.setItem('wallets', JSON.stringify(wallets));
         loadWallets();
-
-        // Show success message
-        showMessage(`Added ${cryptoType} wallet: ${label}`);
+        
+        showMessage(`Adding wallet ${label}, fetching real-time data...`);
+        
+        // Fetch real-time data for the new wallet
+        const apiUrl = `/api/wallet?address=${encodeURIComponent(address)}&type=${encodeURIComponent(cryptoType)}`;
+        
+        fetch(apiUrl)
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`API call failed: ${response.status}`);
+                }
+                return response.json();
+            })
+            .then(data => {
+                // Update wallet with real data from API
+                let updatedWallets = JSON.parse(localStorage.getItem('wallets') || '[]');
+                const walletIndex = updatedWallets.findIndex(w => w.id === temporaryWallet.id);
+                
+                if (walletIndex !== -1) {
+                    // Update with real data
+                    updatedWallets[walletIndex].balance = data.balance;
+                    updatedWallets[walletIndex].value = data.value;
+                    updatedWallets[walletIndex].change24h = data.priceChange24h || data.change24h;
+                    updatedWallets[walletIndex].lastUpdated = new Date().toISOString();
+                    
+                    if (data.transactions && data.transactions.length > 0) {
+                        updatedWallets[walletIndex].transactions = data.transactions;
+                    }
+                    
+                    // Save updated wallets
+                    localStorage.setItem('wallets', JSON.stringify(updatedWallets));
+                    loadWallets();
+                    
+                    showMessage(`${cryptoType} wallet added with real-time data`);
+                }
+            })
+            .catch(error => {
+                console.error(`Error adding wallet with real-time data:`, error);
+                showError(`Added wallet with placeholder data. Real-time data could not be fetched.`);
+            });
     }
 
     function loadWallets() {
@@ -263,7 +617,7 @@
         container.innerHTML = '';
 
         if (wallets.length === 0) {
-            container.innerHTML = '<div class="wallets-empty-message"></div>';
+            container.innerHTML = '<div style="text-align: center; padding: 30px; color: rgba(255,255,255,0.7);">No wallets added. Add a wallet to get started.</div>';
             return;
         }
 
@@ -434,10 +788,9 @@
 
         if (wallets.length === 0) {
             ctx.font = '14px Arial';
+            ctx.fillStyle = 'rgba(255,255,255,0.7)';
             ctx.textAlign = 'center';
-            const isDark = document.body.classList.contains('dark-mode');
-            ctx.fillStyle = isDark ? 'rgba(255,255,255,0.7)' : '#444';
-            ctx.fillText('No wallet data to display', ctx.canvas.width / 2, ctx.canvas.height / 2);
+            ctx.fillText('No wallet data to display', ctx.canvas.width/2, ctx.canvas.height/2);
             return;
         }
 
@@ -531,9 +884,9 @@
         const wallet = TEST_WALLETS.BTC[currentBTCIndex % TEST_WALLETS.BTC.length];
         currentBTCIndex++;
         
-        // Add unique suffix to make the address unique each time
-        const uniqueAddress = wallet.address + "-" + Date.now().toString().substr(-6);
-        addWallet(wallet.label + " " + currentBTCIndex, uniqueAddress, "BTC");
+        // Use the actual wallet address without modification
+        // This ensures it's a valid address for the blockchain API
+        addWallet(wallet.label + " " + currentBTCIndex, wallet.address, "BTC");
     }
 
     function addTestEthereumWallet() {
@@ -541,9 +894,9 @@
         const wallet = TEST_WALLETS.ETH[currentETHIndex % TEST_WALLETS.ETH.length];
         currentETHIndex++;
         
-        // Add unique suffix to make the address unique each time
-        const uniqueAddress = wallet.address + "-" + Date.now().toString().substr(-6);
-        addWallet(wallet.label + " " + currentETHIndex, uniqueAddress, "ETH");
+        // Use the actual wallet address without modification
+        // This ensures it's a valid address for the blockchain API
+        addWallet(wallet.label + " " + currentETHIndex, wallet.address, "ETH");
     }
 
     function refreshAllWallets() {
@@ -554,50 +907,77 @@
             return;
         }
 
-        wallets.forEach(wallet => {
-            const changePercent = (Math.random() * 4) - 2; // Random change between -2% and 2%
-            wallet.value = wallet.value * (1 + (changePercent / 100));
-            wallet.change24h = changePercent;
-            wallet.lastUpdated = new Date().toISOString();
+        showMessage(`Refreshing ${wallets.length} wallets with real-time data...`);
+        
+        // Count how many wallets have been refreshed
+        let refreshedCount = 0;
+        let errorCount = 0;
+        
+        // Create a promise for each wallet refresh
+        const refreshPromises = wallets.map(wallet => {
+            // Create API URL for this wallet
+            const apiUrl = `/api/wallet?address=${encodeURIComponent(wallet.address)}&type=${encodeURIComponent(wallet.cryptoType)}`;
+            
+            // Return a promise for this wallet refresh
+            return fetch(apiUrl)
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error(`API call failed: ${response.status}`);
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    // Update wallet with real data from API
+                    wallet.balance = data.balance;
+                    wallet.value = data.value;
+                    wallet.change24h = data.priceChange24h || data.change24h;
+                    wallet.lastUpdated = new Date().toISOString();
+                    
+                    if (data.transactions && data.transactions.length > 0) {
+                        wallet.transactions = data.transactions;
+                    }
+                    
+                    refreshedCount++;
+                    return wallet;
+                })
+                .catch(error => {
+                    console.error(`Error refreshing wallet ${wallet.label}:`, error);
+                    errorCount++;
+                    return wallet; // Return wallet unmodified on error
+                });
         });
-
-        localStorage.setItem('wallets', JSON.stringify(wallets));
-        loadWallets();
-        showMessage(`Refreshed ${wallets.length} wallets`);
+        
+        // Wait for all refresh operations to complete
+        Promise.all(refreshPromises)
+            .then(updatedWallets => {
+                // Save all updated wallets
+                localStorage.setItem('wallets', JSON.stringify(updatedWallets));
+                loadWallets();
+                
+                // Show appropriate message based on refresh results
+                if (errorCount === 0) {
+                    showMessage(`Successfully refreshed all ${wallets.length} wallets with real-time data`);
+                } else if (refreshedCount > 0) {
+                    showMessage(`Refreshed ${refreshedCount} wallets, ${errorCount} failed`);
+                } else {
+                    showMessage(`Could not refresh any wallets with real-time data`);
+                }
+            });
     }
 
-    // Market Data Implementation - Fetches real data from APIs with fallback
+    // Market Data Implementation - Fetches real-time data from APIs
     function loadMarketData() {
         const marketDataDiv = document.getElementById('market-data');
-        marketDataDiv.innerHTML = '<div style="text-align: center; padding: 20px;">Loading market data...</div>';
-
-        // Fallback data for when API calls fail
-        const fallbackData = {
-            BTC: {
-                currentPrice: 68452.75,
-                priceChange24h: 2.34,
-                marketCap: 1330000000000,
-                volume24h: 46000000000
-            },
-            ETH: {
-                currentPrice: 3890.42,
-                priceChange24h: 1.76,
-                marketCap: 467000000000,
-                volume24h: 21000000000
-            }
-        };
+        marketDataDiv.innerHTML = '<div style="text-align: center; padding: 20px;">Loading real-time market data...</div>';
 
         // Create API URLs to fetch market data from our backend
         const btcApiUrl = `/api/wallet?type=BTC`;
         const ethApiUrl = `/api/wallet?type=ETH`;
         
-        // Keep track of successful API calls
-        let btcDataFetched = false;
-        let ethDataFetched = false;
+        // Keep track of API call status
         let btcData, ethData;
         
         // Function to display market data once both crypto data points are available
-        // (either from API or fallback)
         function displayMarketData() {
             if (btcData && ethData) {
                 marketDataDiv.innerHTML = ''; // Clear loading message
@@ -605,120 +985,136 @@
                 marketDataDiv.appendChild(createCryptoMarketCard('Ethereum (ETH)', ethData));
                 createTrendChart();
                 
-                // If we're using fallback data, show a notice
-                if (!btcDataFetched || !ethDataFetched) {
-                    const fallbackNotice = document.createElement('div');
-                    fallbackNotice.className = 'market-card';
-                    fallbackNotice.innerHTML = `
-                        <div style="font-size: 0.8em; color: #FFA500; text-align: center; padding: 5px;">
-                            <i>Using cached market data. Real-time updates unavailable.</i>
-                        </div>
-                    `;
-                    marketDataDiv.appendChild(fallbackNotice);
-                }
+                // Add a last updated timestamp
+                const updateInfo = document.createElement('div');
+                updateInfo.className = 'market-card';
+                updateInfo.innerHTML = `
+                    <div style="font-size: 0.8em; text-align: center; padding: 5px;">
+                        <i>Last updated: ${new Date().toLocaleTimeString()}</i>
+                        <button id="refresh-market-btn" class="btn btn-small" style="margin-left: 10px;">↻ Refresh</button>
+                    </div>
+                `;
+                marketDataDiv.appendChild(updateInfo);
+                
+                // Add refresh button event listener
+                document.getElementById('refresh-market-btn').addEventListener('click', function() {
+                    this.textContent = "Refreshing...";
+                    this.disabled = true;
+                    loadMarketData();
+                });
             }
         }
         
-        // Fetch BTC market data with timeout and fallback
-        const btcPromise = new Promise((resolve) => {
-            const timeoutId = setTimeout(() => {
-                console.log("BTC data fetch timed out, using fallback");
-                resolve({ useFallback: true });
-            }, 5000); // 5 second timeout
+        // Function to fetch data with retry capability
+        function fetchWithRetry(url, maxRetries = 3) {
+            let retryCount = 0;
             
-            fetch(btcApiUrl)
-                .then(response => {
-                    clearTimeout(timeoutId);
-                    if (!response.ok) {
-                        throw new Error(`API call failed: ${response.status}`);
-                    }
-                    return response.json();
-                })
-                .then(data => {
-                    resolve({ useFallback: false, data: data });
-                })
-                .catch(error => {
-                    clearTimeout(timeoutId);
-                    console.error("Error fetching BTC data:", error);
-                    resolve({ useFallback: true });
-                });
-        });
-        
-        // Fetch ETH market data with timeout and fallback
-        const ethPromise = new Promise((resolve) => {
-            const timeoutId = setTimeout(() => {
-                console.log("ETH data fetch timed out, using fallback");
-                resolve({ useFallback: true });
-            }, 5000); // 5 second timeout
+            function tryFetch() {
+                return fetch(url, { timeout: 10000 }) // Add timeout to prevent long hanging requests
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error(`API call failed: ${response.status}`);
+                        }
+                        return response.json();
+                    })
+                    .catch(error => {
+                        console.error(`Error fetching data (attempt ${retryCount + 1}):`, error);
+                        if (retryCount < maxRetries) {
+                            retryCount++;
+                            // Exponential backoff retry
+                            const backoff = Math.min(1000 * Math.pow(2, retryCount), 10000);
+                            console.log(`Retrying in ${backoff}ms...`);
+                            return new Promise(resolve => setTimeout(() => resolve(tryFetch()), backoff));
+                        }
+                        throw error;
+                    });
+            }
             
-            fetch(ethApiUrl)
-                .then(response => {
-                    clearTimeout(timeoutId);
-                    if (!response.ok) {
-                        throw new Error(`API call failed: ${response.status}`);
-                    }
-                    return response.json();
-                })
-                .then(data => {
-                    resolve({ useFallback: false, data: data });
-                })
-                .catch(error => {
-                    clearTimeout(timeoutId);
-                    console.error("Error fetching ETH data:", error);
-                    resolve({ useFallback: true });
+            return tryFetch();
+        }
+        
+        // Fetch BTC market data
+        fetchWithRetry(btcApiUrl, 3)
+            .then(data => {
+                btcData = data;
+                displayMarketData();
+            })
+            .catch(() => {
+                // If all retries failed, show error UI
+                const errorCard = document.createElement('div');
+                errorCard.className = 'market-card';
+                errorCard.innerHTML = `
+                    <h3>Bitcoin (BTC)</h3>
+                    <div style="text-align:center; padding:10px; color:#ff4444;">
+                        Unable to fetch real-time data.<br>
+                        <button id="retry-btc-btn" class="btn btn-small" style="margin-top:10px;">Retry</button>
+                    </div>
+                `;
+                marketDataDiv.innerHTML = ''; // Clear loading if this is first response
+                marketDataDiv.appendChild(errorCard);
+                
+                document.getElementById('retry-btc-btn').addEventListener('click', function() {
+                    this.textContent = "Retrying...";
+                    this.disabled = true;
+                    fetchWithRetry(btcApiUrl, 3)
+                        .then(data => {
+                            btcData = data;
+                            displayMarketData();
+                        })
+                        .catch(e => {
+                            console.error("Retry failed:", e);
+                        });
                 });
-        });
+            });
         
-        // Process BTC data
-        btcPromise.then(result => {
-            if (result.useFallback) {
-                btcData = fallbackData.BTC;
-                btcDataFetched = false;
-            } else {
-                btcData = result.data;
-                btcDataFetched = true;
-            }
-            displayMarketData();
-        });
-        
-        // Process ETH data
-        ethPromise.then(result => {
-            if (result.useFallback) {
-                ethData = fallbackData.ETH;
-                ethDataFetched = false;
-            } else {
-                ethData = result.data;
-                ethDataFetched = true;
-            }
-            displayMarketData();
-        });
+        // Fetch ETH market data
+        fetchWithRetry(ethApiUrl, 3)
+            .then(data => {
+                ethData = data;
+                displayMarketData();
+            })
+            .catch(() => {
+                // If all retries failed, show error UI
+                if (marketDataDiv.innerHTML.includes('Loading')) {
+                    marketDataDiv.innerHTML = '';
+                }
+                
+                const errorCard = document.createElement('div');
+                errorCard.className = 'market-card';
+                errorCard.innerHTML = `
+                    <h3>Ethereum (ETH)</h3>
+                    <div style="text-align:center; padding:10px; color:#ff4444;">
+                        Unable to fetch real-time data.<br>
+                        <button id="retry-eth-btn" class="btn btn-small" style="margin-top:10px;">Retry</button>
+                    </div>
+                `;
+                marketDataDiv.appendChild(errorCard);
+                
+                document.getElementById('retry-eth-btn').addEventListener('click', function() {
+                    this.textContent = "Retrying...";
+                    this.disabled = true;
+                    fetchWithRetry(ethApiUrl, 3)
+                        .then(data => {
+                            ethData = data;
+                            displayMarketData();
+                        })
+                        .catch(e => {
+                            console.error("Retry failed:", e);
+                        });
+                });
+            });
     }
     
-    // Helper function to create a crypto market card - enhanced with error handling
+    // Helper function to create a crypto market card with real-time data
     function createCryptoMarketCard(name, data) {
         const card = document.createElement('div');
         card.className = 'market-card';
         
-        // Extract price data from API response with fallbacks for any missing fields
-        const price = data.currentPrice !== undefined ? data.currentPrice : 0;
-        const change24h = data.priceChange24h !== undefined ? data.priceChange24h : 0;
-        
-        // Use provided market cap and volume if available, otherwise calculate
-        let marketCap, volume24h;
-        
-        if (data.marketCap !== undefined) {
-            marketCap = data.marketCap;
-        } else {
-            // Fallback calculation
-            marketCap = price * (name.includes('BTC') ? 19000000 : 120000000);
-        }
-        
-        if (data.volume24h !== undefined) {
-            volume24h = data.volume24h;
-        } else {
-            // Fallback calculation
-            volume24h = marketCap * 0.05;
-        }
+        // Extract market data from API response
+        const price = data.currentPrice;
+        const change24h = data.priceChange24h;
+        const marketCap = data.marketCap;
+        const volume24h = data.volume24h;
         
         // Add a subtle animation to draw attention to the card
         card.style.animation = 'fadeIn 0.5s ease-in';
@@ -746,7 +1142,7 @@
         return card;
     }
 
-    // Function to create trend chart with improved robustness
+    // Function to create trend chart with real-time data
     function createTrendChart() {
         try {
             // Create chart container
@@ -757,9 +1153,7 @@
             trendContainer.innerHTML = '<canvas id="trend-chart"></canvas>';
             marketDataDiv.appendChild(trendContainer);
     
-            // Try to get data from multiple sources, with fallbacks at each step
-            
-            // 1. Try market data from DOM
+            // Extract prices from DOM
             let btcPrice = 0;
             let ethPrice = 0;
             
@@ -777,100 +1171,64 @@
                 }
             } catch (e) {
                 console.warn("Could not extract prices from DOM:", e);
+                // If we can't extract prices, don't show the chart
+                return;
             }
             
-            // 2. If DOM extraction failed, try wallet collection
-            if (!btcPrice || !ethPrice) {
-                const wallets = JSON.parse(localStorage.getItem('wallets') || '[]');
-                const btcWallets = wallets.filter(w => w.cryptoType === 'BTC');
-                const ethWallets = wallets.filter(w => w.cryptoType === 'ETH');
-                
-                if (btcWallets.length > 0 && btcPrice === 0) {
-                    btcPrice = btcWallets[0].value / btcWallets[0].balance;
-                }
-                
-                if (ethWallets.length > 0 && ethPrice === 0) {
-                    ethPrice = ethWallets[0].value / ethWallets[0].balance;
-                }
+            // If we couldn't get prices, don't show chart
+            if (!btcPrice || !ethPrice || btcPrice === 0 || ethPrice === 0) {
+                console.warn("Invalid price data, cannot create chart");
+                return;
             }
             
-            // 3. Final fallback - use reasonable values if all else fails
-            if (!btcPrice || btcPrice === 0) {
-                btcPrice = 68452.75;
-            }
-            
-            if (!ethPrice || ethPrice === 0) {
-                ethPrice = 3890.42;
-            }
-                
-            // Generate trend data based on prices
-            const hours = Array.from({length: 24}, (_, i) => `${i}h`);
-            
-            // Use more realistic trend generation
-            // Start with yesterday's price and work forward to today's price
-            // For BTC (more volatile)
-            let lastBtcPrice = btcPrice * 0.97; // Start 3% lower than current
-            const btcTrend = [];
-            for (let i = 0; i < 24; i++) {
-                // More realistic hourly movements
-                const hourlyChange = (Math.random() * 0.015) - 0.007; // -0.7% to +0.7%
-                lastBtcPrice = lastBtcPrice * (1 + hourlyChange);
-                
-                // Gradual trend toward current price
-                const currentPricePull = (btcPrice - lastBtcPrice) * (i / 120); // Gentle pull toward target
-                lastBtcPrice += currentPricePull;
-                
-                btcTrend.push(lastBtcPrice);
-            }
-            
-            // For ETH (less volatile than BTC)
-            let lastEthPrice = ethPrice * 0.98; // Start 2% lower than current
-            const ethTrend = [];
-            for (let i = 0; i < 24; i++) {
-                // More realistic hourly movements
-                const hourlyChange = (Math.random() * 0.01) - 0.005; // -0.5% to +0.5%
-                lastEthPrice = lastEthPrice * (1 + hourlyChange);
-                
-                // Gradual trend toward current price
-                const currentPricePull = (ethPrice - lastEthPrice) * (i / 150); // Gentle pull toward target
-                lastEthPrice += currentPricePull;
-                
-                ethTrend.push(lastEthPrice);
-            }
-            
-            // Create the chart
+            // Instead of generating mock trend data, show just the current prices
+            // as a simple comparison chart
             const trendCtx = document.getElementById('trend-chart').getContext('2d');
             new Chart(trendCtx, {
-                type: 'line',
+                type: 'bar',
                 data: {
-                    labels: hours,
+                    labels: ['Current Prices (USD)'],
                     datasets: [
                         {
                             label: 'BTC',
-                            data: btcTrend,
+                            data: [btcPrice],
+                            backgroundColor: 'rgba(255, 140, 0, 0.7)',
                             borderColor: '#FF8C00',
-                            backgroundColor: 'rgba(255, 140, 0, 0.1)',
-                            borderWidth: 2,
-                            tension: 0.4,
-                            yAxisID: 'y-btc'
+                            borderWidth: 1
                         },
                         {
                             label: 'ETH',
-                            data: ethTrend,
+                            data: [ethPrice],
+                            backgroundColor: 'rgba(30, 144, 255, 0.7)',
                             borderColor: '#1E90FF',
-                            backgroundColor: 'rgba(30, 144, 255, 0.1)',
-                            borderWidth: 2,
-                            tension: 0.4,
-                            yAxisID: 'y-eth'
+                            borderWidth: 1
                         }
                     ]
                 },
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
-                    interaction: {
-                        mode: 'index',
-                        intersect: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                callback: function(value) {
+                                    return '$' + value.toLocaleString();
+                                },
+                                color: 'rgba(255, 255, 255, 0.7)'
+                            },
+                            grid: {
+                                color: 'rgba(255, 255, 255, 0.05)'
+                            }
+                        },
+                        x: {
+                            ticks: {
+                                color: 'rgba(255, 255, 255, 0.7)'
+                            },
+                            grid: {
+                                display: false
+                            }
+                        }
                     },
                     plugins: {
                         legend: {
@@ -881,60 +1239,26 @@
                                 padding: 10
                             }
                         },
-                        title: {
-                            display: true,
-                            text: '24h Price Trends',
-                            color: 'white',
-                            font: {
-                                size: 14
-                            }
-                        }
-                    },
-                    scales: {
-                        x: {
-                            display: false
-                        },
-                        'y-btc': {
-                            type: 'linear',
-                            display: true,
-                            position: 'left',
-                            ticks: {
-                                callback: function(value) {
-                                    return '$' + parseInt(value).toLocaleString();
-                                },
-                                color: '#FF8C00'
-                            },
-                            grid: {
-                                display: false
-                            }
-                        },
-                        'y-eth': {
-                            type: 'linear',
-                            display: true,
-                            position: 'right',
-                            ticks: {
-                                callback: function(value) {
-                                    return '$' + parseInt(value).toLocaleString();
-                                },
-                                color: '#1E90FF'
-                            },
-                            grid: {
-                                display: false
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return context.dataset.label + ': $' + context.raw.toLocaleString();
+                                }
                             }
                         }
                     }
                 }
             });
         } catch (error) {
-            console.error("Error creating trend chart:", error);
+            console.error("Error creating price comparison chart:", error);
             
-            // Add error recovery - insert a simplified no-chart message if chart creation fails
+            // Add error recovery
             const marketDataDiv = document.getElementById('market-data');
             const errorNotice = document.createElement('div');
             errorNotice.className = 'market-card';
             errorNotice.innerHTML = `
                 <div style="text-align: center; padding: 10px;">
-                    <p>Price trend chart unavailable</p>
+                    <p>Price chart unavailable</p>
                     <button id="retry-chart-btn" class="btn btn-small">Retry</button>
                 </div>
             `;
@@ -978,37 +1302,27 @@
 
         if (wallets.length === 0) {
             ctx.font = '14px Arial';
+            ctx.fillStyle = 'rgba(255,255,255,0.7)';
             ctx.textAlign = 'center';
-            const isDark = document.body.classList.contains('dark-mode');
-            ctx.fillStyle = isDark ? 'rgba(255,255,255,0.7)' : '#444';
-            ctx.fillText('No wallet data to display', ctx.canvas.width / 2, ctx.canvas.height / 2);
+            ctx.fillText('No wallet data to display', ctx.canvas.width/2, ctx.canvas.height/2);
             return;
         }
-
-        // Generate mock historical data
-        const timeframe = document.getElementById('timeframe-selector').value;
-        const dataPoints = timeframe === '24h' ? 24 : timeframe === '7d' ? 7 : timeframe === '30d' ? 30 : 12;
-        const labels = Array.from({length: dataPoints}, (_, i) => {
-            if (timeframe === '24h') return `${23-i}h ago`;
-            if (timeframe === '7d') return `${6-i}d ago`;
-            if (timeframe === '30d') return `${29-i}d ago`;
-            return `${11-i}mo ago`;
-        }).reverse();
-
+        
+        // We don't have historical data available yet, so display info message
         const totalValue = wallets.reduce((sum, wallet) => sum + wallet.value, 0);
-        const values = [];
-
-        // Create more realistic trend data
-        let currentValue = totalValue * 0.85; // Start lower than current
-        for (let i = 0; i < dataPoints; i++) {
-            // Gradual uptrend with random noise
-            const growthFactor = 1 + (Math.random() * 0.03);
-            currentValue *= growthFactor;
-
-            // Add some realistic volatility
-            const volatility = Math.random() * 0.05 - 0.025;
-            values.push(currentValue * (1 + volatility));
-        }
+        
+        ctx.font = '14px Arial';
+        ctx.fillStyle = 'rgba(255,255,255,0.7)';
+        ctx.textAlign = 'center';
+        ctx.fillText('Historical data not available - Only current data is shown', ctx.canvas.width/2, ctx.canvas.height/2);
+        
+        // Instead of generating mock data, just show the current value
+        const timeframe = document.getElementById('timeframe-selector').value;
+        const labels = [timeframe === '24h' ? 'Current' : 
+                       timeframe === '7d' ? 'This Week' : 
+                       timeframe === '30d' ? 'This Month' : 'This Year'];
+        
+        const values = [totalValue];
 
         performanceChart = new Chart(ctx, {
             type: 'line',
@@ -1077,10 +1391,9 @@
 
         if (wallets.length === 0) {
             ctx.font = '14px Arial';
+            ctx.fillStyle = 'rgba(255,255,255,0.7)';
             ctx.textAlign = 'center';
-            const isDark = document.body.classList.contains('dark-mode');
-            ctx.fillStyle = isDark ? 'rgba(255,255,255,0.7)' : '#444';
-            ctx.fillText('No wallet data to display', ctx.canvas.width / 2, ctx.canvas.height / 2);
+            ctx.fillText('No wallet data to display', ctx.canvas.width/2, ctx.canvas.height/2);
             return;
         }
 
