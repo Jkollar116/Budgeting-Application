@@ -85,4 +85,13 @@ public class ConfigManager {
     public String getCoinMarketCapApiKey() {
         return getApiKey("coinMarketCapApiKey");
     }
+    
+    /**
+     * Gets the Alpha Vantage API key from configuration.
+     * 
+     * @return The Alpha Vantage API key
+     */
+    public String getAlphaVantageApiKey() {
+        return getApiKey("alphaVantageApiKey");
+    }
 }
