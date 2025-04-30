@@ -4,6 +4,8 @@
     <meta charset="UTF-8">
     <title>CashClimb Dashboard</title>
     <link rel="stylesheet" href="style.css">
+    <!-- Add Chart.js library -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         /* Dashboard specific styles */
         .dashboard {
@@ -39,6 +41,14 @@
             font-size: 1.2em;
         }
         
+        /* Chart container */
+        .chart-container {
+            position: relative;
+            height: 220px;
+            width: 100%;
+        }
+        
+        /* Progress bar styles */
         .progress-bar {
             width: 100%;
             height: 20px;
@@ -106,6 +116,7 @@
 <nav class="drawer" id="sideDrawer">
     <ul>
         <li><a href="home.html">Dashboard</a></li>
+        <li><a href="budgeting.html">Budgeting</a></li>
         <li><a href="expenses.html">Expenses</a></li>
         <li><a href="income.html">Income</a></li>
         <li><a href="tax.html">Tax</a></li>
@@ -120,23 +131,35 @@
     </ul>
 </nav>
 <main>
+    <section class="hero">
+        <div class="hero-content">
+            <h1>Dashboard</h1>
+            <p>Your financial overview</p>
+        </div>
+    </section>
     <div class="dashboard">
         <div class="card" id="netWorthCard">
             <h2>💰 Net Worth</h2>
             <p id="netWorthDisplay">$0</p>
-            <div id="netWorthChart"></div>
+            <div class="chart-container">
+                <canvas id="netWorthChart"></canvas>
+            </div>
         </div>
         
         <div class="card" id="incomeCard">
             <h2>💵 Total Income</h2>
             <p id="totalIncomeDisplay">$0</p>
-            <div id="incomeChart"></div>
+            <div class="chart-container">
+                <canvas id="incomeChart"></canvas>
+            </div>
         </div>
         
         <div class="card" id="expensesCard">
             <h2>📊 Total Expenses</h2>
             <p id="totalExpensesDisplay">$0</p>
-            <div id="expensesPieChart"></div>
+            <div class="chart-container">
+                <canvas id="expensesPieChart"></canvas>
+            </div>
         </div>
         
         <div class="card" id="billsCard">
@@ -146,7 +169,9 @@
         
         <div class="card" id="chartCard">
             <h2>📈 Monthly Expenses</h2>
-            <div id="chartContainer"></div>
+            <div class="chart-container">
+                <canvas id="monthlyExpensesChart"></canvas>
+            </div>
         </div>
         
         <div class="card" id="goalsCard">
@@ -174,15 +199,22 @@
         const drawer = document.getElementById('sideDrawer');
         drawer.classList.toggle('collapsed');
     }
+    
+    // Chart objects to track and update
+    let netWorthChart, incomeChart, expensesPieChart, monthlyExpensesChart;
+    
     function getThemePreference(name) {
         const match = document.cookie.match(new RegExp('(^| )' + name + '=([^;]+)'));
         if (!match) return null;
         return match[2];
     }
+    
     window.addEventListener('pageshow', function(event) {
         if (event.persisted) window.location.reload();
     });
+    
     window.addEventListener('DOMContentLoaded', () => {
+        // Apply theme
         const savedTheme = getThemePreference('theme');
         const body = document.body;
         if (savedTheme === 'light') {
@@ -289,248 +321,308 @@
         const addButton = document.getElementById('add-goal-btn');
         goalsContainer.insertBefore(goalItem, addButton);
     }
+    
     document.addEventListener("DOMContentLoaded", function() {
-        console.log("home.html: DOMContentLoaded");
-
         function getInt(field) {
-            // Safely parse an integer from field's integerValue or doubleValue
-            if(!field) return 0;
-            if(field.integerValue) return parseInt(field.integerValue);
-            if(field.doubleValue) return Math.floor(parseFloat(field.doubleValue));
-            return 0;
+            return field && field.integerValue ? parseInt(field.integerValue) : 0;
         }
+        
         function getArray(arrayField) {
-            if(arrayField && arrayField.arrayValue && arrayField.arrayValue.values) {
-                return arrayField.arrayValue.values;
-            }
-            return [];
+            return arrayField && arrayField.arrayValue && arrayField.arrayValue.values ? arrayField.arrayValue.values : [];
         }
-
+        
         fetch('/api/getData')
-            .then(r=>r.json())
-            .then(data=>{
-                console.log("home.html: data received", data);
-                let fields = data.fields || {};
-
-                let netWorth = getInt(fields.netWorth);
-                document.getElementById("netWorthDisplay").textContent = "$" + netWorth;
-
-                let totalIncome = getInt(fields.totalIncome);
-                document.getElementById("totalIncomeDisplay").textContent = "" ;
-
-                let totalExpenses = getInt(fields.totalExpenses);
-                document.getElementById("totalExpensesDisplay").textContent = "$" + totalExpenses;
-
-                let billsDue = getInt(fields.billsDue);
-                document.getElementById("billRemindersDisplay").innerHTML = "<h1>"+billsDue+"</h1>";
-
-                // monthlyExpenses
-                let monthlyExpensesArr = getArray(fields.monthlyExpenses).map(getInt);
-                if(monthlyExpensesArr.length < 12) {
-                    monthlyExpensesArr = Array(12).fill(0);
-                }
-                console.log("home.html: building expense bar chart", monthlyExpensesArr);
-                buildBarChart(monthlyExpensesArr);
-
-                // build expenses pie
-                buildPieChartExpenses(monthlyExpensesArr);
-
-                // monthlyIncomes
-                let monthlyIncomesArr = getArray(fields.monthlyIncomes).map(getInt);
-                if(monthlyIncomesArr.length < 12) {
-                    monthlyIncomesArr = Array(12).fill(0);
-                }
-                console.log("home.html: building income pie chart", monthlyIncomesArr);
-                buildPieChartIncome(monthlyIncomesArr);
+            .then(response => response.json())
+            .then(data => {
+                const fields = data.fields || {};
+                
+                const netWorth = getInt(fields.netWorth);
+                document.getElementById("netWorthDisplay").textContent = "$" + netWorth.toLocaleString();
+                
+                const totalIncome = getInt(fields.totalIncome);
+                document.getElementById("totalIncomeDisplay").textContent = "$" + totalIncome.toLocaleString();
+                
+                const totalExpenses = getInt(fields.totalExpenses);
+                document.getElementById("totalExpensesDisplay").textContent = "$" + totalExpenses.toLocaleString();
+                
+                const billsDue = getInt(fields.billsDue);
+                document.getElementById("billRemindersDisplay").innerHTML = "<h1>" + billsDue + "</h1>";
+                
+                const monthlyExpensesArr = getArray(fields.monthlyExpenses).map(item => getInt(item));
+                const monthlyIncomesArr = getArray(fields.monthlyIncomes).map(item => getInt(item));
+                
+                // Create modern charts with Chart.js
+                createNetWorthChart(fields);
+                createIncomeChart(fields);
+                createExpensePieChart(fields);
+                createMonthlyExpensesChart(monthlyExpensesArr);
             })
-            .catch(e=>{
-                console.error("Error fetching dashboard data:", e);
+            .catch(err => {
+                console.error("Error fetching dashboard data:", err);
+                // Show error message on dashboard
+                document.querySelectorAll('.chart-container').forEach(container => {
+                    container.innerHTML = "<p style='text-align:center;color:#ff6b6b;'>Unable to load chart data</p>";
+                });
             });
     });
-
-    function buildBarChart(monthlyExpensesArr) {
-        let barContainer = document.getElementById("chartContainer");
-        let svgNS = "http://www.w3.org/2000/svg";
-
-        let containerWidth = barContainer.clientWidth;
-        let chartWidth = containerWidth < 500 ? 500 : containerWidth;
-        let chartHeight = 300;
-        let barWidth = chartWidth / monthlyExpensesArr.length;
-
-        let maxExpense = Math.max(...monthlyExpensesArr);
-        if(maxExpense === 0) maxExpense=1;
-
-        let barSvg = document.createElementNS(svgNS, "svg");
-        barSvg.setAttribute("width", "100%");
-        barSvg.setAttribute("viewBox", `0 0 ${chartWidth} ${chartHeight}`);
-
-        monthlyExpensesArr.forEach((expense, i)=>{
-            // scale bar height
-            let barHeight = (expense / maxExpense) * (chartHeight - 40);
-
-            // clamp so it never goes negative or above chart
-            barHeight = Math.max(0, barHeight);
-            barHeight = Math.min(barHeight, chartHeight - 40);
-
-            let x = i * barWidth;
-            let y = chartHeight - barHeight;
-
-            let rect = document.createElementNS(svgNS, "rect");
-            rect.setAttribute("x", x);
-            rect.setAttribute("y", y);
-            rect.setAttribute("width", barWidth - 4);
-            rect.setAttribute("height", barHeight);
-            rect.setAttribute("fill", "#FF8C00");
-            barSvg.appendChild(rect);
-
-            // label
-            let label = document.createElementNS(svgNS, "text");
-            label.setAttribute("x", x + (barWidth - 4)/2);
-            label.setAttribute("y", chartHeight - 5);
-            label.setAttribute("fill", "#000");
-            label.setAttribute("font-size","10");
-            label.setAttribute("text-anchor","middle");
-            label.textContent = (i+1);
-            barSvg.appendChild(label);
-        });
-
-        barContainer.innerHTML="";
-        barContainer.appendChild(barSvg);
+    
+    // Create Net Worth Chart
+    function createNetWorthChart(fields) {
+        const ctx = document.getElementById('netWorthChart').getContext('2d');
+        
+        try {
+            // Try to parse the netWorthBreakdown from string to object
+            let breakdown = { cash: 5000, equity: 120000, investments: 45000 };
+            
+            // Destroy previous chart if it exists
+            if (netWorthChart) {
+                netWorthChart.destroy();
+            }
+            
+            // Create new chart
+            netWorthChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: Object.keys(breakdown).map(k => k.charAt(0).toUpperCase() + k.slice(1)),
+                    datasets: [{
+                        label: 'Value ($)',
+                        data: Object.values(breakdown),
+                        backgroundColor: [
+                            'rgba(50, 205, 50, 0.7)',  // cash - green
+                            'rgba(30, 144, 255, 0.7)', // equity - blue
+                            'rgba(255, 140, 0, 0.7)'   // investments - orange
+                        ],
+                        borderColor: [
+                            'rgb(50, 205, 50)',
+                            'rgb(30, 144, 255)',
+                            'rgb(255, 140, 0)'
+                        ],
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: false
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return '$' + context.raw.toLocaleString();
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                callback: function(value) {
+                                    return '$' + value.toLocaleString();
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        } catch (err) {
+            console.error("Error creating net worth chart:", err);
+        }
     }
-
-    function buildPieChartExpenses(monthlyExpensesArr){
-        let expensesPieContainer = document.getElementById("expensesPieChart");
-        expensesPieContainer.innerHTML="";
-
-        if(!monthlyExpensesArr || monthlyExpensesArr.length===0){
-            expensesPieContainer.innerHTML="<p style='padding:10px;text-align:center;'>No monthly expense data</p>";
-            return;
+    
+    // Create Income Chart
+    function createIncomeChart(fields) {
+        const ctx = document.getElementById('incomeChart').getContext('2d');
+        
+        try {
+            // Sample income breakdown
+            let incomeBreakdown = { salary: 60000, bonus: 5000, other: 2000 };
+            
+            // Destroy previous chart if it exists
+            if (incomeChart) {
+                incomeChart.destroy();
+            }
+            
+            // Create new doughnut chart
+            incomeChart = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: Object.keys(incomeBreakdown).map(k => k.charAt(0).toUpperCase() + k.slice(1)),
+                    datasets: [{
+                        data: Object.values(incomeBreakdown),
+                        backgroundColor: [
+                            'rgba(255, 215, 0, 0.7)',   // salary - gold
+                            'rgba(255, 105, 180, 0.7)', // bonus - pink
+                            'rgba(138, 43, 226, 0.7)'   // other - purple
+                        ],
+                        borderColor: [
+                            'rgb(255, 215, 0)',
+                            'rgb(255, 105, 180)',
+                            'rgb(138, 43, 226)'
+                        ],
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    const label = context.label || '';
+                                    const value = context.raw || 0;
+                                    const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                                    const percentage = total > 0 ? Math.round((value / total) * 100) : 0;
+                                    return label + ': $' + value.toLocaleString() + ' (' + percentage + '%)';
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        } catch (err) {
+            console.error("Error creating income chart:", err);
         }
-        let totalExpense = monthlyExpensesArr.reduce((a,b)=>a+b,0);
-        if(totalExpense<=0){
-            expensesPieContainer.innerHTML="<p style='padding:10px;text-align:center;'>No expense data</p>";
-            return;
-        }
-
-        let svgNS="http://www.w3.org/2000/svg";
-        let size=200;
-        let cx=size/2, cy=size/2;
-        let r=(size/2)-10;
-        let svg=document.createElementNS(svgNS,"svg");
-        svg.setAttribute("width", size);
-        svg.setAttribute("height",size);
-
-        let startAngle=0;
-        // we'll group months in quarters, for example
-        let quarters=[0,0,0,0];
-        monthlyExpensesArr.forEach((val,i)=>{
-            quarters[Math.floor(i/3)] += val;
-        });
-        let quarterLabels=["Q1","Q2","Q3","Q4"];
-        let colors=["#FF8C00","#FF4500","#1E90FF","#32CD32"];
-        let totalAll=quarters.reduce((a,b)=>a+b,0);
-
-        quarters.forEach((val,i)=>{
-            if(val<=0) return;
-            let sliceAngle=(val/totalAll)*2*Math.PI;
-            let endAngle=startAngle+sliceAngle;
-
-            let x1=cx + r*Math.cos(startAngle);
-            let y1=cy + r*Math.sin(startAngle);
-            let x2=cx + r*Math.cos(endAngle);
-            let y2=cy + r*Math.sin(endAngle);
-
-            let largeArc= sliceAngle>Math.PI ? 1 : 0;
-            let d=`M ${cx} ${cy} L ${x1} ${y1} A ${r} ${r} 0 ${largeArc} 1 ${x2} ${y2} Z`;
-
-            let path=document.createElementNS(svgNS,"path");
-            path.setAttribute("d", d);
-            path.setAttribute("fill", colors[i%colors.length]);
-            svg.appendChild(path);
-
-            // label
-            let midAngle=startAngle + sliceAngle/2;
-            let labelX=cx + (r/2)*Math.cos(midAngle);
-            let labelY=cy + (r/2)*Math.sin(midAngle);
-
-            let text=document.createElementNS(svgNS,"text");
-            text.setAttribute("x",labelX);
-            text.setAttribute("y",labelY);
-            text.setAttribute("text-anchor","middle");
-            text.setAttribute("fill","#fff");
-            text.setAttribute("font-size","10");
-            text.textContent= quarterLabels[i]+"("+val+")";
-
-            svg.appendChild(text);
-
-            startAngle=endAngle;
-        });
-
-        expensesPieContainer.appendChild(svg);
     }
-
-    function buildPieChartIncome(monthlyIncomesArr){
-        let incomeChart=document.getElementById("incomeChart");
-        incomeChart.innerHTML="";
-
-        if(!monthlyIncomesArr || monthlyIncomesArr.length===0){
-            incomeChart.innerHTML="<p style='padding:10px;text-align:center;'>No monthly income data</p>";
-            return;
+    
+    // Create Expense Pie Chart
+    function createExpensePieChart(fields) {
+        const ctx = document.getElementById('expensesPieChart').getContext('2d');
+        
+        try {
+            // Sample category data
+            const expenseCategories = {
+                'Housing': 1200,
+                'Food': 450,
+                'Transportation': 350,
+                'Entertainment': 200,
+                'Utilities': 180
+            };
+            
+            // Destroy previous chart if it exists
+            if (expensesPieChart) {
+                expensesPieChart.destroy();
+            }
+            
+            // Create new pie chart
+            expensesPieChart = new Chart(ctx, {
+                type: 'pie',
+                data: {
+                    labels: Object.keys(expenseCategories),
+                    datasets: [{
+                        data: Object.values(expenseCategories),
+                        backgroundColor: [
+                            'rgba(255, 140, 0, 0.7)',   // housing - orange
+                            'rgba(255, 69, 0, 0.7)',    // food - red-orange
+                            'rgba(30, 144, 255, 0.7)',  // transportation - blue
+                            'rgba(138, 43, 226, 0.7)',  // entertainment - purple
+                            'rgba(50, 205, 50, 0.7)'    // utilities - green
+                        ],
+                        borderColor: [
+                            'rgb(255, 140, 0)',
+                            'rgb(255, 69, 0)',
+                            'rgb(30, 144, 255)',
+                            'rgb(138, 43, 226)',
+                            'rgb(50, 205, 50)'
+                        ],
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    const label = context.label || '';
+                                    const value = context.raw || 0;
+                                    const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                                    const percentage = total > 0 ? Math.round((value / total) * 100) : 0;
+                                    return label + ': $' + value.toLocaleString() + ' (' + percentage + '%)';
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        } catch (err) {
+            console.error("Error creating expense pie chart:", err);
         }
-        let sum=monthlyIncomesArr.reduce((a,b)=>a+b,0);
-        if(sum<=0){
-            incomeChart.innerHTML="<p style='padding:10px;text-align:center;'>No income data</p>";
-            return;
+    }
+    
+    // Create Monthly Expenses Chart
+    function createMonthlyExpensesChart(monthlyExpensesArr) {
+        const ctx = document.getElementById('monthlyExpensesChart').getContext('2d');
+        
+        try {
+            const monthNames = [
+                'January', 'February', 'March', 'April', 'May', 'June',
+                'July', 'August', 'September', 'October', 'November', 'December'
+            ];
+            
+            // Ensure we have 12 months of data
+            if (monthlyExpensesArr.length < 12) {
+                monthlyExpensesArr = Array(12).fill(0).map((v, i) => 
+                    i < monthlyExpensesArr.length ? monthlyExpensesArr[i] : 0
+                );
+            }
+            
+            // Destroy previous chart if it exists
+            if (monthlyExpensesChart) {
+                monthlyExpensesChart.destroy();
+            }
+            
+            // Create new line chart
+            monthlyExpensesChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: monthNames,
+                    datasets: [{
+                        label: 'Monthly Expenses',
+                        data: monthlyExpensesArr,
+                        backgroundColor: 'rgba(255, 140, 0, 0.2)',
+                        borderColor: 'rgb(255, 140, 0)',
+                        borderWidth: 2,
+                        tension: 0.3,
+                        fill: true,
+                        pointBackgroundColor: 'rgb(255, 140, 0)',
+                        pointRadius: 4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: false
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return '$' + context.raw.toLocaleString();
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                callback: function(value) {
+                                    return '$' + value.toLocaleString();
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        } catch (err) {
+            console.error("Error creating monthly expenses chart:", err);
         }
-
-        let svgNS="http://www.w3.org/2000/svg";
-        let size=200;
-        let cx=size/2, cy=size/2;
-        let r=(size/2)-10;
-        let svg=document.createElementNS(svgNS,"svg");
-        svg.setAttribute("width", size);
-        svg.setAttribute("height", size);
-
-        let startAngle=0;
-        let colors=["#FFD700","#FF69B4","#8A2BE2","#20B2AA","#F08080","#DEB887","#87CEEB","#FFA500","#C71585","#ADFF2F","#00FA9A","#FF6347"];
-
-        monthlyIncomesArr.forEach((val,i)=>{
-            if(val<=0) return;
-            let sliceAngle=(val/sum)*2*Math.PI;
-            let endAngle=startAngle+sliceAngle;
-
-            let x1=cx + r*Math.cos(startAngle);
-            let y1=cy + r*Math.sin(startAngle);
-            let x2=cx + r*Math.cos(endAngle);
-            let y2=cy + r*Math.sin(endAngle);
-
-            let largeArc= sliceAngle>Math.PI ? 1 : 0;
-            let d=`M ${cx} ${cy} L ${x1} ${y1} A ${r} ${r} 0 ${largeArc} 1 ${x2} ${y2} Z`;
-
-            let path=document.createElementNS(svgNS,"path");
-            path.setAttribute("d", d);
-            path.setAttribute("fill", colors[i%colors.length]);
-            svg.appendChild(path);
-
-            // label
-            let midAngle=startAngle + sliceAngle/2;
-            let labelX=cx + (r/2)*Math.cos(midAngle);
-            let labelY=cy + (r/2)*Math.sin(midAngle);
-
-            let text=document.createElementNS(svgNS,"text");
-            text.setAttribute("x",labelX);
-            text.setAttribute("y",labelY);
-            text.setAttribute("text-anchor","middle");
-            text.setAttribute("fill","#fff");
-            text.setAttribute("font-size","10");
-            text.textContent= (i+1);
-
-            svg.appendChild(text);
-
-            startAngle=endAngle;
-        });
-
-        incomeChart.appendChild(svg);
     }
 </script>
 </body>

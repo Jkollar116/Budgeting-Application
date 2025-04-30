@@ -13,10 +13,6 @@ import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-/**
- * Service for interacting with blockchain APIs to retrieve wallet information.
- * Supports Bitcoin and Ethereum blockchains.
- */
 public class BlockchainApiService {
     private static final Logger LOGGER = Logger.getLogger(BlockchainApiService.class.getName());
     
@@ -31,15 +27,14 @@ public class BlockchainApiService {
     private static final String BLOCKCHAIN_INFO_API = "https://blockchain.info";
     private static final String ETHERSCAN_API = "https://api.etherscan.io/api";
     private static final String COINGECKO_API = "https://api.coingecko.com/api/v3";
+    private static final String COINGECKO_BTC_ID = "bitcoin";
+    private static final String COINGECKO_ETH_ID = "ethereum";
 
     // Cache control - store last update time for each endpoint to avoid hitting rate limits
     private final java.util.Map<String, Long> lastUpdateTime = new java.util.concurrent.ConcurrentHashMap<>();
     private final java.util.Map<String, JSONObject> responseCache = new java.util.concurrent.ConcurrentHashMap<>();
-    private static final long CACHE_DURATION = 30 * 1000; // 30 seconds in milliseconds for fresher data
+    private static final long CACHE_DURATION = 60 * 1000; // Increase cache to 60 seconds to reduce API call frequency
 
-    /**
-     * Constructs a BlockchainApiService with API keys from configuration.
-     */
     public BlockchainApiService() {
         ConfigManager configManager = ConfigManager.getInstance();
         this.etherscanApiKey = configManager.getEtherscanApiKey();
@@ -48,14 +43,11 @@ public class BlockchainApiService {
         }
     }
 
-    /**
-     * Retrieves Bitcoin wallet information for a given address.
-     *
-     * @param address Bitcoin wallet address to query
-     * @return WalletInfo containing balance and transaction history
-     * @throws IOException if there's an error communicating with the API
-     * @throws IllegalArgumentException if the address is invalid
-     */
+    private JSONObject getMarketData(String coinId) throws IOException {
+        String coinGeckoUrl = COINGECKO_API + "/coins/" + coinId + "?localization=false&tickers=false&community_data=false&developer_data=false";
+        return makeApiCall(coinGeckoUrl, null);
+    }
+    
     public WalletInfo getBitcoinWalletInfo(String address) throws IOException, IllegalArgumentException {
         if (address == null || address.trim().isEmpty()) {
             throw new IllegalArgumentException("Bitcoin address cannot be null or empty");
@@ -73,6 +65,8 @@ public class BlockchainApiService {
             // Get current BTC price from blockchain.info ticker API
             double currentPrice = 0.0;
             double priceChange = 0.0;
+            double marketCap = 0.0;
+            double volume24h = 0.0;
 
             // Always get data from the API, no hardcoded fallbacks
             String tickerUrl = BLOCKCHAIN_INFO_API + "/ticker";
@@ -83,6 +77,30 @@ public class BlockchainApiService {
             priceChange = usdData.has("24h") ?
                 usdData.getDouble("24h") :
                 ((usdData.getDouble("last") / usdData.getDouble("15m")) - 1) * 100;
+                
+            // Get additional market data from CoinGecko
+            try {
+                JSONObject marketData = getMarketData(COINGECKO_BTC_ID);
+                
+                if (marketData.has("market_data")) {
+                    JSONObject market = marketData.getJSONObject("market_data");
+                    
+                    if (market.has("market_cap") && market.getJSONObject("market_cap").has("usd")) {
+                        marketCap = market.getJSONObject("market_cap").getDouble("usd");
+                    }
+                    
+                    if (market.has("total_volume") && market.getJSONObject("total_volume").has("usd")) {
+                        volume24h = market.getJSONObject("total_volume").getDouble("usd");
+                    }
+                    
+                    // If the price change from blockchain.info is unavailable, use CoinGecko's
+                    if (priceChange == 0.0 && market.has("price_change_percentage_24h")) {
+                        priceChange = market.getDouble("price_change_percentage_24h");
+                    }
+                }
+            } catch (Exception e) {
+                LOGGER.log(Level.WARNING, "Error fetching Bitcoin market data from CoinGecko: " + e.getMessage());
+            }
 
             // Get transactions
             List<Transaction> transactions = new ArrayList<>();
@@ -94,21 +112,26 @@ public class BlockchainApiService {
                 }
             }
 
-            return new WalletInfo(balance.doubleValue(), transactions, currentPrice, priceChange);
+            return new WalletInfo(balance.doubleValue(), transactions, currentPrice, priceChange, marketCap, volume24h);
         } catch (Exception e) {
             LOGGER.log(Level.SEVERE, "Error fetching Bitcoin wallet info: " + e.getMessage(), e);
-            return new WalletInfo(0.0, new ArrayList<>(), 0.0, 0.0);
+            
+            // Attempt to get minimal price data from CoinMarketCap as a fallback
+            try {
+                // Use CoinMarketCapService directly as a fallback
+                CoinMarketCapService cmcService = new CoinMarketCapService();
+                CoinPrice coinPrice = cmcService.getPrice("BTC");
+                
+                // Return minimal data with just price info
+                return new WalletInfo(0.0, new ArrayList<>(), coinPrice.currentPrice(), 
+                                      coinPrice.priceChangePercentage24h(), 0.0, 0.0);
+            } catch (Exception fallbackEx) {
+                LOGGER.log(Level.SEVERE, "Fallback to CoinMarketCap also failed: " + fallbackEx.getMessage(), fallbackEx);
+                throw new IOException("All API attempts failed and no real-time data is available");
+            }
         }
     }
 
-    /**
-     * Retrieves Ethereum wallet information for a given address.
-     *
-     * @param address Ethereum wallet address to query
-     * @return WalletInfo containing balance and transaction history
-     * @throws IOException if there's an error communicating with the API
-     * @throws IllegalArgumentException if the address is invalid or API key is missing
-     */
     public WalletInfo getEthereumWalletInfo(String address) throws IOException, IllegalArgumentException {
         if (address == null || address.trim().isEmpty()) {
             throw new IllegalArgumentException("Ethereum address cannot be null or empty");
@@ -133,6 +156,8 @@ public class BlockchainApiService {
             // Get ETH price from Etherscan
             double currentPrice = 0.0;
             double priceChange = 0.0;
+            double marketCap = 0.0;
+            double volume24h = 0.0;
 
             // Always get price from API
             String priceUrl = String.format("%s?module=stats&action=ethprice&apikey=%s",
@@ -142,20 +167,31 @@ public class BlockchainApiService {
             if (priceResponse.getString("status").equals("1")) {
                 JSONObject result = priceResponse.getJSONObject("result");
                 currentPrice = Double.parseDouble(result.getString("ethusd"));
-
-                // Get 24h change from a third-party API that provides this data
-                // Since Etherscan doesn't provide 24h change directly we could use CoinGecko
-                // CoinMarketCap or a similar API in a real implementation
-
-                // For now we'll use a secondary API call
-                // This is a placeholder for your preferred price API
-                String changeUrl = String.format("%s?module=stats&action=ethsupply&apikey=%s",
-                        ETHERSCAN_API, etherscanApiKey);
-                JSONObject changeResponse = makeApiCall(changeUrl, null);
-
-                // In a real implementation parse the 24h change from the API response
-                // For this demo we're generating a random value for 24h change
-                priceChange = (Math.random() * 10) - 5; // Random value between -5% and +5%
+            }
+            
+            // Get additional market data from CoinGecko
+            try {
+                JSONObject marketData = getMarketData(COINGECKO_ETH_ID);
+                
+                if (marketData.has("market_data")) {
+                    JSONObject market = marketData.getJSONObject("market_data");
+                    
+                    if (market.has("market_cap") && market.getJSONObject("market_cap").has("usd")) {
+                        marketCap = market.getJSONObject("market_cap").getDouble("usd");
+                    }
+                    
+                    if (market.has("total_volume") && market.getJSONObject("total_volume").has("usd")) {
+                        volume24h = market.getJSONObject("total_volume").getDouble("usd");
+                    }
+                    
+                    // Get 24h price change from CoinGecko since Etherscan doesn't provide it
+                    if (market.has("price_change_percentage_24h")) {
+                        priceChange = market.getDouble("price_change_percentage_24h");
+                    }
+                }
+            } catch (Exception e) {
+                LOGGER.log(Level.WARNING, "Error fetching Ethereum market data from CoinGecko: " + e.getMessage());
+                // No longer using random fallback values
             }
 
             // Get transactions
@@ -172,10 +208,23 @@ public class BlockchainApiService {
                 }
             }
 
-            return new WalletInfo(balance.doubleValue(), transactions, currentPrice, priceChange);
+            return new WalletInfo(balance.doubleValue(), transactions, currentPrice, priceChange, marketCap, volume24h);
         } catch (Exception e) {
             LOGGER.log(Level.SEVERE, "Error fetching Ethereum wallet info: " + e.getMessage(), e);
-            return new WalletInfo(0.0, new ArrayList<>(), 0.0, 0.0);
+            
+            // Attempt to get minimal price data from CoinMarketCap as a fallback
+            try {
+                // Use CoinMarketCapService directly as a fallback
+                CoinMarketCapService cmcService = new CoinMarketCapService();
+                CoinPrice coinPrice = cmcService.getPrice("ETH");
+                
+                // Return minimal data with just price info
+                return new WalletInfo(0.0, new ArrayList<>(), coinPrice.currentPrice(), 
+                                     coinPrice.priceChangePercentage24h(), 0.0, 0.0);
+            } catch (Exception fallbackEx) {
+                LOGGER.log(Level.SEVERE, "Fallback to CoinMarketCap also failed: " + fallbackEx.getMessage(), fallbackEx);
+                throw new IOException("All API attempts failed and no real-time data is available for Ethereum");
+            }
         }
     }
 
@@ -240,58 +289,84 @@ public class BlockchainApiService {
         }
     }
 
-    /**
-     * Makes an API call to the specified URL with optional API key
-     * Uses caching to avoid hitting API rate limits
-     *
-     * @param url The API endpoint URL
-     * @param apiKey Optional API key to include in headers
-     * @return JSONObject containing the API response
-     * @throws IOException If the request fails
-     */
     private JSONObject makeApiCall(String url, String apiKey) throws IOException {
+        // Include request endpoint in log for debugging
+        String endpoint = url.split("\\?")[0]; // Get the base URL without query parameters for logging
+        LOGGER.info("Making API call to: " + endpoint);
+        
         // Check cache first
         long currentTime = System.currentTimeMillis();
         if (lastUpdateTime.containsKey(url)) {
             long lastUpdate = lastUpdateTime.get(url);
             if (currentTime - lastUpdate < CACHE_DURATION && responseCache.containsKey(url)) {
                 // Return cached response if it's still valid
+                LOGGER.info("Using cached response for: " + endpoint);
                 return new JSONObject(responseCache.get(url).toString()); // Deep copy to avoid mutation issues
             }
+        }
+
+        // Ensure we're using the correct Etherscan API key if needed
+        String effectiveApiKey = apiKey;
+        if (url.contains("etherscan.io") && (effectiveApiKey == null || effectiveApiKey.isEmpty())) {
+            // Use hardcoded Etherscan API key as backup
+            effectiveApiKey = "G6YJ1PGVSDWY8VP11ZKYPQJ78VWIE7YAUQ";
+            LOGGER.info("Using hardcoded Etherscan API key");
         }
 
         // Cache miss or expired, make a new API call
         Request.Builder requestBuilder = new Request.Builder()
                 .url(url)
-                .addHeader("Accept", "application/json");
+                .addHeader("Accept", "application/json")
+                .addHeader("User-Agent", "CashClimb/1.0");  // Add user agent to avoid certain API blocks
 
-        if (apiKey != null) {
-            requestBuilder.addHeader("X-CMC_PRO_API_KEY", apiKey);
+        // Use appropriate header based on the API we're calling
+        if (effectiveApiKey != null) {
+            if (url.contains("pro-api.coinmarketcap.com")) {
+                requestBuilder.addHeader("X-CMC_PRO_API_KEY", effectiveApiKey);
+            } else if (url.contains("etherscan.io")) {
+                // The API key is already in the URL for Etherscan
+            }
         }
 
         Request request = requestBuilder.build();
 
         // Add retry logic
-        int maxRetries = 3;
+        int maxRetries = 5; // Increase max retries to 5
         int retryCount = 0;
-        IOException lastException = null;
+        Exception lastException = null;
 
         while (retryCount < maxRetries) {
             try {
+                LOGGER.info("Executing request to " + endpoint + " (Attempt " + (retryCount + 1) + "/" + maxRetries + ")");
                 Response response = client.newCall(request).execute();
+                
                 if (!response.isSuccessful()) {
                     String errorBody = response.body() != null ? response.body().string() : "No response body";
-                    if (response.code() == 429) {
-                        // Rate limit hit, wait and retry
+                    LOGGER.warning("API request failed with code " + response.code() + ": " + errorBody);
+                    
+                    if (response.code() == 429 || response.code() >= 500) {
+                        // Rate limit hit or server error, wait and retry
                         retryCount++;
-                        Thread.sleep(1000 * retryCount); // Exponential backoff
+                        if (retryCount >= maxRetries) break;
+                        
+                        int sleepTime = 1000 * (1 << retryCount); // Exponential backoff (1s, 2s, 4s, 8s, 16s)
+                        LOGGER.info("Rate limit or server error, retrying in " + sleepTime/1000 + " seconds...");
+                        Thread.sleep(sleepTime);
                         continue;
                     }
                     throw new IOException("API request failed with code " + response.code() + ": " + errorBody);
                 }
 
                 String responseBody = response.body().string();
+                
+                // For debugging - log response for successful calls
+                LOGGER.info("Received response from " + endpoint + ": " + 
+                           (responseBody.length() > 100 ? responseBody.substring(0, 100) + "..." : responseBody));
+                
                 JSONObject jsonResponse = new JSONObject(responseBody);
+                
+                // Log success without sensitive data
+                LOGGER.info("API call to " + endpoint + " successful");
 
                 // Cache successful response
                 lastUpdateTime.put(url, currentTime);
@@ -300,34 +375,97 @@ public class BlockchainApiService {
                 return jsonResponse;
             } catch (IOException e) {
                 lastException = e;
+                LOGGER.warning("IO exception calling " + endpoint + ": " + e.getMessage());
                 retryCount++;
                 if (retryCount >= maxRetries) {
                     break;
                 }
                 // Wait before retrying (exponential backoff)
                 try {
-                    Thread.sleep(1000 * retryCount);
+                    int sleepTime = 1000 * (1 << retryCount); // Exponential backoff (1s, 2s, 4s)
+                    LOGGER.info("IO error, retrying in " + sleepTime/1000 + " seconds...");
+                    Thread.sleep(sleepTime);
                 } catch (InterruptedException ie) {
                     Thread.currentThread().interrupt();
                     throw new IOException("API call interrupted", ie);
                 }
-            } catch (InterruptedException e) {
-                Thread.currentThread().interrupt();
-                throw new IOException("API call interrupted", e);
+            } catch (Exception e) {
+                // Catch broader exceptions (JSON parsing, etc.)
+                lastException = e;
+                LOGGER.warning("Unexpected error calling " + endpoint + ": " + e.getMessage());
+                retryCount++;
+                if (retryCount >= maxRetries) {
+                    break;
+                }
+                try {
+                    Thread.sleep(1000 * retryCount);
+                } catch (InterruptedException ie) {
+                    Thread.currentThread().interrupt();
+                    break;
+                }
             }
         }
 
-        // If we failed all retry attempts, log error
-        LOGGER.log(Level.SEVERE, "API call failed for URL " + url + " after " + maxRetries + " retries: " +
+        // If we failed all retry attempts, try cached response
+        LOGGER.severe("API call failed for " + endpoint + " after " + maxRetries + " retries: " +
                 (lastException != null ? lastException.getMessage() : "Unknown error"));
 
         // Check if we have a cached response we can use as fallback
         if (responseCache.containsKey(url)) {
-            LOGGER.log(Level.INFO, "Using cached response as fallback for URL: " + url);
+            LOGGER.info("Using cached response as fallback for URL: " + endpoint);
             return new JSONObject(responseCache.get(url).toString());
         }
-
-        // If no cached fallback, throw exception
+        
+        // If no cached response and the endpoint is for blockchain.info, try an alternative endpoint
+        if (url.contains("blockchain.info")) {
+            try {
+                // Try alternative API (CoinGecko) for Bitcoin price data
+                if (url.contains("/ticker")) {
+                    String alternativeUrl = "https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=usd&include_24hr_change=true";
+                    LOGGER.info("Trying alternative API (CoinGecko) for Bitcoin price data: " + alternativeUrl);
+                    
+                    Request altRequest = new Request.Builder()
+                        .url(alternativeUrl)
+                        .addHeader("Accept", "application/json")
+                        .build();
+                    
+                    Response altResponse = client.newCall(altRequest).execute();
+                    if (altResponse.isSuccessful() && altResponse.body() != null) {
+                        String altBody = altResponse.body().string();
+                        JSONObject altJson = new JSONObject(altBody);
+                        
+                        // Convert CoinGecko format to blockchain.info format
+                        JSONObject mockTicker = new JSONObject();
+                        JSONObject usdData = new JSONObject();
+                        
+                        if (altJson.has("bitcoin") && altJson.getJSONObject("bitcoin").has("usd")) {
+                            double price = altJson.getJSONObject("bitcoin").getDouble("usd");
+                            double change = 0;
+                            if (altJson.getJSONObject("bitcoin").has("usd_24h_change")) {
+                                change = altJson.getJSONObject("bitcoin").getDouble("usd_24h_change");
+                            }
+                            
+                            usdData.put("15m", price);
+                            usdData.put("last", price);
+                            usdData.put("buy", price * 0.995); // Approximate
+                            usdData.put("sell", price * 1.005); // Approximate
+                            usdData.put("symbol", "$");
+                            usdData.put("24h", change);
+                            
+                            mockTicker.put("USD", usdData);
+                            
+                            LOGGER.info("Successfully fetched alternative Bitcoin price data: " + price);
+                            return mockTicker;
+                        }
+                    }
+                }
+            } catch (Exception e) {
+                LOGGER.warning("Failed to fetch from alternative API: " + e.getMessage());
+            }
+        }
+        
+        // No more mock data - throw exception indicating the real API call failed
         throw new IOException("API call failed after multiple retries and no fallback available");
     }
+    
 }

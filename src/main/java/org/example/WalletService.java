@@ -61,11 +61,13 @@ public class WalletService {
                     blockchainInfo.balance(),
                     blockchainInfo.transactions(),
                     coinPrice.currentPrice(),
-                    coinPrice.priceChangePercentage24h()
+                    coinPrice.priceChangePercentage24h(),
+                    blockchainInfo.marketCap(),
+                    blockchainInfo.volume24h()
             );
         } catch (Exception e) {
             LOGGER.log(Level.SEVERE, "Error fetching wallet info: " + e.getMessage(), e);
-            return new WalletInfo(0.0, new ArrayList<>(), 0.0, 0.0);
+            return new WalletInfo(0.0, new ArrayList<>(), 0.0, 0.0, 0.0, 0.0);
         }
     }
     
@@ -80,29 +82,23 @@ public class WalletService {
         try {
             LOGGER.info("Fetching Bitcoin price info without wallet address");
             
-            // Get price data from API
-            double currentPrice = 0.0;
-            double priceChange = 0.0;
+            // Get price data directly from CoinMarketCap API
+            LOGGER.info("Getting Bitcoin price directly from CoinMarketCap API");
+            CoinPrice coinPrice = cmcService.getPrice("BTC");
+            double currentPrice = coinPrice.currentPrice();
+            double priceChange = coinPrice.priceChangePercentage24h();
             
-            try {
-                // Try to get from our custom BlockchainApiService first
-                String dummyAddress = "1A1zP1eP5QGefi2DMPTfTL5SLmv7DivfNa"; // Bitcoin genesis block address
-                WalletInfo info = blockchainApi.getBitcoinWalletInfo(dummyAddress);
-                currentPrice = info.currentPrice();
-                priceChange = info.priceChange24h();
-            } catch (Exception e) {
-                LOGGER.log(Level.WARNING, "Failed to get Bitcoin price from BlockchainApi, falling back to CoinMarketCap: " + e.getMessage());
-                // Fall back to CoinMarketCap if blockchain.info fails
-                CoinPrice coinPrice = cmcService.getPrice("BTC");
-                currentPrice = coinPrice.currentPrice();
-                priceChange = coinPrice.priceChangePercentage24h();
-            }
+            // Estimate market cap and volume based on current price
+            double marketCap = currentPrice * 19850000; // Approximate circulating supply
+            double volume24h = currentPrice * 300000; // Rough daily volume
+            
+            LOGGER.info("Successfully got Bitcoin price from CoinMarketCap API: " + currentPrice);
             
             // Return a wallet info with only price data (balance=0, empty transactions)
-            return new WalletInfo(0.0, new ArrayList<>(), currentPrice, priceChange);
+            return new WalletInfo(0.0, new ArrayList<>(), currentPrice, priceChange, marketCap, volume24h);
         } catch (Exception e) {
-            LOGGER.log(Level.SEVERE, "Error fetching Bitcoin price info: " + e.getMessage(), e);
-            return new WalletInfo(0.0, new ArrayList<>(), 0.0, 0.0);
+            LOGGER.log(Level.SEVERE, "Error fetching Bitcoin price from CoinMarketCap API: " + e.getMessage(), e);
+            throw new IOException("Failed to fetch real-time Bitcoin price data: " + e.getMessage());
         }
     }
     
@@ -117,29 +113,23 @@ public class WalletService {
         try {
             LOGGER.info("Fetching Ethereum price info without wallet address");
             
-            // Get price data from API
-            double currentPrice = 0.0;
-            double priceChange = 0.0;
+            // Get price data directly from CoinMarketCap API
+            LOGGER.info("Getting Ethereum price directly from CoinMarketCap API");
+            CoinPrice coinPrice = cmcService.getPrice("ETH");
+            double currentPrice = coinPrice.currentPrice();
+            double priceChange = coinPrice.priceChangePercentage24h();
             
-            try {
-                // Try to get from our custom BlockchainApiService first
-                String dummyAddress = "0xde0b295669a9fd93d5f28d9ec85e40f4cb697bae"; // Ethereum Foundation address
-                WalletInfo info = blockchainApi.getEthereumWalletInfo(dummyAddress);
-                currentPrice = info.currentPrice();
-                priceChange = info.priceChange24h();
-            } catch (Exception e) {
-                LOGGER.log(Level.WARNING, "Failed to get Ethereum price from BlockchainApi, falling back to CoinMarketCap: " + e.getMessage());
-                // Fall back to CoinMarketCap if Etherscan fails
-                CoinPrice coinPrice = cmcService.getPrice("ETH");
-                currentPrice = coinPrice.currentPrice();
-                priceChange = coinPrice.priceChangePercentage24h();
-            }
+            // Estimate market cap and volume based on current price
+            double marketCap = currentPrice * 120000000; // Approximate circulating supply
+            double volume24h = currentPrice * 6000000; // Rough daily volume
+            
+            LOGGER.info("Successfully got Ethereum price from CoinMarketCap API: " + currentPrice);
             
             // Return a wallet info with only price data (balance=0, empty transactions)
-            return new WalletInfo(0.0, new ArrayList<>(), currentPrice, priceChange);
+            return new WalletInfo(0.0, new ArrayList<>(), currentPrice, priceChange, marketCap, volume24h);
         } catch (Exception e) {
-            LOGGER.log(Level.SEVERE, "Error fetching Ethereum price info: " + e.getMessage(), e);
-            return new WalletInfo(0.0, new ArrayList<>(), 0.0, 0.0);
+            LOGGER.log(Level.SEVERE, "Error fetching Ethereum price from CoinMarketCap API: " + e.getMessage(), e);
+            throw new IOException("Failed to fetch real-time Ethereum price data: " + e.getMessage());
         }
     }
 }
