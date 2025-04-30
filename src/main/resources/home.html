@@ -16,7 +16,7 @@
             max-width: 1600px;
             margin: 0 auto;
         }
-        
+
         .card {
             background: #3E1F5B;
             border-radius: 12px;
@@ -24,7 +24,7 @@
             color: white;
             box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
         }
-        
+
         .card h2 {
             margin-top: 0;
             color: #FF8C00;
@@ -36,18 +36,18 @@
             align-items: center;
             gap: 10px;
         }
-        
+
         .card h2 i {
             font-size: 1.2em;
         }
-        
+
         /* Chart container */
         .chart-container {
             position: relative;
             height: 220px;
             width: 100%;
         }
-        
+
         /* Progress bar styles */
         .progress-bar {
             width: 100%;
@@ -57,18 +57,18 @@
             margin: 10px 0;
             overflow: hidden;
         }
-        
+
         .progress {
             height: 100%;
             background-color: #FF8C00;
             border-radius: 10px;
         }
-        
+
         /* Chart filter styles */
         .chart-filters {
             margin-bottom: 15px;
         }
-        
+
         .chart-filter {
             background-color: rgba(62, 31, 91, 0.7);
             color: white;
@@ -79,13 +79,13 @@
             max-width: 200px;
             font-size: 0.9em;
         }
-        
+
         .filter-buttons {
             display: flex;
             gap: 5px;
             flex-wrap: wrap;
         }
-        
+
         .filter-btn {
             background-color: rgba(62, 31, 91, 0.7);
             color: white;
@@ -96,17 +96,17 @@
             cursor: pointer;
             transition: all 0.2s ease;
         }
-        
+
         .filter-btn:hover {
             background-color: rgba(255, 140, 0, 0.2);
         }
-        
+
         .filter-btn.active {
             background-color: #FF8C00;
             color: white;
             border-color: #FF8C00;
         }
-        
+
         .goal-item {
             background: rgba(62, 31, 91, 0.5);
             padding: 15px;
@@ -116,30 +116,30 @@
             border: 1px solid rgba(255, 255, 255, 0.1);
             transition: all 0.3s ease;
         }
-        
+
         .goal-item:hover {
             box-shadow: 0 2px 8px rgba(255, 140, 0, 0.3);
             border-color: rgba(255, 140, 0, 0.3);
         }
-        
+
         .goal-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
             margin-bottom: 8px;
         }
-        
+
         .goal-header h3 {
             margin: 0;
             color: #FF8C00;
             font-size: 1.1em;
         }
-        
+
         .goal-actions {
             display: flex;
             gap: 5px;
         }
-        
+
         .goal-edit-btn, .goal-delete-btn {
             background: none;
             border: none;
@@ -150,11 +150,11 @@
             opacity: 0.7;
             transition: opacity 0.2s ease;
         }
-        
+
         .goal-edit-btn:hover, .goal-delete-btn:hover {
             opacity: 1;
         }
-        
+
         .goal-info {
             display: flex;
             justify-content: space-between;
@@ -162,19 +162,19 @@
             font-size: 0.9em;
             color: #e0e0e0;
         }
-        
+
         .goal-percentage {
             font-weight: bold;
             color: #FF8C00;
         }
-        
+
         .goal-estimate {
             font-size: 0.8em;
             color: #aaa;
             margin-top: 5px;
             text-align: right;
         }
-        
+
         .btn-add-goal {
             background: #FF8C00;
             color: white;
@@ -185,18 +185,18 @@
             margin-top: 15px;
             font-weight: bold;
         }
-        
+
         .btn-add-goal:hover {
             background: #ff9d2d;
         }
-        
+
         /* Responsive grid */
         @media (max-width: 1200px) {
             .dashboard {
                 grid-template-columns: repeat(2, 1fr);
             }
         }
-        
+
         @media (max-width: 768px) {
             .dashboard {
                 grid-template-columns: 1fr;
@@ -209,10 +209,7 @@
     <div class="logo">CashClimb</div>
     <nav>
         <ul>
-            <li><a href="home.html">Dashboard</a></li>
-            <li><a href="crypto.html">Crypto</a></li>
-            <li><a href="chat.html">Chat</a></li>
-            <li><a href="/logout">Log Out</a></li>
+            <li><a href="profile.html">Profile</a></li>
         </ul>
     </nav>
 </header>
@@ -220,17 +217,20 @@
 <nav class="drawer" id="sideDrawer">
     <ul>
         <li><a href="home.html">Dashboard</a></li>
-        <li><a href="budgeting.html">Budgeting</a></li>
         <li><a href="expenses.html">Expenses</a></li>
         <li><a href="income.html">Income</a></li>
         <li><a href="tax.html">Tax</a></li>
         <li><a href="crypto.html">Crypto</a></li>
         <li><a href="stocks.html">Stocks</a></li>
         <li><a href="chat.html">Chat</a></li>
+        <li><a href="tips.html">Tips</a></li>
+        <li><a href="savedTips.html">Saved Tips</a></li>
+        <li><a href="assetsLiabilities.html" class="active">Assets &amp; Liabilities</a></li>
+        <li><a href="budget.html">Budget</a></li>
         <li><a href="profile.html">Profile</a></li>
         <li><a href="settings.html">Settings</a></li>
-        <li><a href="/logout">Log Out</a></li>
-        <li><a href="bills.html">Bills Page</a></li>
+        <li><a href="/logout">Logout</a></li>
+        <li><a href="bills.html">Bills Page (Not Done)</a></li>
         <li><a href="leaderboard.html">Leaderboard</a></li>
     </ul>
 </nav>
