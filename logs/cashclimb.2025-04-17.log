@@ -1,0 +1,14 @@
+2025-04-17 21:28:04 [main] INFO  org.example.ConfigManager - Configuration file loaded successfully from file path
+2025-04-17 21:28:04 [main] INFO  org.example.ConfigManager - Loaded key: coinMarketCapApiKey = e2fa...ab0d
+2025-04-17 21:28:04 [main] INFO  org.example.ConfigManager - Loaded key: etherscanApiKey = G6YJ...YAUQ
+2025-04-17 21:28:44 [main] WARN  org.example.ConfigManager - API key 'redis.enabled' not found in any configuration source
+2025-04-17 21:28:44 [main] INFO  org.example.StockApiService - Redis caching disabled, using local memory cache only
+2025-04-17 21:31:06 [HTTP-Dispatcher] INFO  org.example.StockApiService - Fetching stock quote from API for symbol: MSFT
+2025-04-17 21:31:06 [HTTP-Dispatcher] INFO  org.example.StockApiService - Successfully retrieved stock quote for MSFT: $367.78
+2025-04-17 21:31:06 [HTTP-Dispatcher] INFO  org.example.StockApiService - Fetching stock quote from API for symbol: NVDA
+2025-04-17 21:31:06 [HTTP-Dispatcher] INFO  org.example.StockApiService - Successfully retrieved stock quote for NVDA: $101.49
+2025-04-17 21:31:06 [HTTP-Dispatcher] INFO  org.example.StockApiService - Fetching stock quote from API for symbol: AAPL
+2025-04-17 21:31:06 [HTTP-Dispatcher] INFO  org.example.StockApiService - Successfully retrieved stock quote for AAPL: $196.98
+2025-04-17 21:31:06 [HTTP-Dispatcher] INFO  org.example.StockApiService - Using local cached quote data for MSFT
+2025-04-17 21:31:06 [HTTP-Dispatcher] INFO  org.example.StockApiService - Using local cached quote data for NVDA
+2025-04-17 21:31:06 [HTTP-Dispatcher] INFO  org.example.StockApiService - Using local cached quote data for AAPL
