@@ -782,58 +782,89 @@
     // Update Functions for Each Chart
     
     function updateNetWorthChart(period) {
-        // Sample data for different time periods
-        const data = {
-            '1m': { cash: 4500, equity: 115000, investments: 42000 },
-            '3m': { cash: 4800, equity: 118000, investments: 43500 },
-            '6m': { cash: 5000, equity: 120000, investments: 45000 },
-            '1y': { cash: 5500, equity: 125000, investments: 48000 },
-            'all': { cash: 6000, equity: 130000, investments: 50000 }
-        };
-        
-        // Get data for selected period
-        const breakdownData = data[period] || data['1y'];
-        
-        // Update chart
-        if (netWorthChart) {
-            netWorthChart.data.datasets[0].data = Object.values(breakdownData);
-            netWorthChart.update();
-        } else {
-            createNetWorthChart({ netWorthBreakdown: { stringValue: JSON.stringify(breakdownData) } });
-        }
-        
-        // Update total net worth display
-        const totalNetWorth = Object.values(breakdownData).reduce((sum, val) => sum + val, 0);
-        document.getElementById('netWorthDisplay').textContent = '$' + totalNetWorth.toLocaleString();
+        // Fetch the latest data
+        fetch('/api/getData')
+            .then(response => response.json())
+            .then(data => {
+                const fields = data.fields || {};
+                
+                // Try to parse the netWorthBreakdown from string to object
+                let breakdown = { cash: 0, equity: 0, investments: 0 };
+                
+                // Parse the netWorthBreakdown from Firebase
+                if (fields.netWorthBreakdown && fields.netWorthBreakdown.stringValue) {
+                    try {
+                        breakdown = JSON.parse(fields.netWorthBreakdown.stringValue);
+                    } catch (err) {
+                        console.error("Error parsing netWorthBreakdown:", err);
+                    }
+                }
+                
+                // Apply period filter (in a real app, this might be different for each period)
+                // For now we're just using the same data for all periods since this is a demo
+                
+                // Update chart
+                if (netWorthChart) {
+                    netWorthChart.data.datasets[0].data = Object.values(breakdown);
+                    netWorthChart.update();
+                } else {
+                    createNetWorthChart({ netWorthBreakdown: { stringValue: JSON.stringify(breakdown) } });
+                }
+                
+                // Update total net worth display
+                const totalNetWorth = Object.values(breakdown).reduce((sum, val) => sum + val, 0);
+                document.getElementById('netWorthDisplay').textContent = '$' + totalNetWorth.toLocaleString();
+            })
+            .catch(err => {
+                console.error("Error fetching net worth data:", err);
+            });
     }
     
     function updateIncomeChart(type) {
-        // Full income breakdown
-        const fullBreakdown = { salary: 60000, bonus: 5000, other: 2000 };
-        
-        // Filter based on selected type
-        let filteredBreakdown;
-        if (type === 'all') {
-            filteredBreakdown = fullBreakdown;
-        } else {
-            filteredBreakdown = {};
-            if (type in fullBreakdown) {
-                filteredBreakdown[type] = fullBreakdown[type];
-            }
-        }
-        
-        // Update chart
-        if (incomeChart) {
-            incomeChart.data.labels = Object.keys(filteredBreakdown).map(k => k.charAt(0).toUpperCase() + k.slice(1));
-            incomeChart.data.datasets[0].data = Object.values(filteredBreakdown);
-            incomeChart.update();
-        } else {
-            createIncomeChart({ totalIncomeBreakdown: { stringValue: JSON.stringify(filteredBreakdown) } });
-        }
-        
-        // Update total income display
-        const totalIncome = Object.values(filteredBreakdown).reduce((sum, val) => sum + val, 0);
-        document.getElementById('totalIncomeDisplay').textContent = '$' + totalIncome.toLocaleString();
+        // Fetch the latest data
+        fetch('/api/getData')
+            .then(response => response.json())
+            .then(data => {
+                const fields = data.fields || {};
+                
+                // Try to parse the income breakdown from Firebase
+                let fullBreakdown = { salary: 0, bonus: 0, other: 0 };
+                
+                if (fields.totalIncomeBreakdown && fields.totalIncomeBreakdown.stringValue) {
+                    try {
+                        fullBreakdown = JSON.parse(fields.totalIncomeBreakdown.stringValue);
+                    } catch (err) {
+                        console.error("Error parsing totalIncomeBreakdown:", err);
+                    }
+                }
+                
+                // Filter based on selected type
+                let filteredBreakdown;
+                if (type === 'all') {
+                    filteredBreakdown = fullBreakdown;
+                } else {
+                    filteredBreakdown = {};
+                    if (type in fullBreakdown) {
+                        filteredBreakdown[type] = fullBreakdown[type];
+                    }
+                }
+                
+                // Update chart
+                if (incomeChart) {
+                    incomeChart.data.labels = Object.keys(filteredBreakdown).map(k => k.charAt(0).toUpperCase() + k.slice(1));
+                    incomeChart.data.datasets[0].data = Object.values(filteredBreakdown);
+                    incomeChart.update();
+                } else {
+                    createIncomeChart({ totalIncomeBreakdown: { stringValue: JSON.stringify(filteredBreakdown) } });
+                }
+                
+                // Update total income display
+                const totalIncome = Object.values(filteredBreakdown).reduce((sum, val) => sum + val, 0);
+                document.getElementById('totalIncomeDisplay').textContent = '$' + totalIncome.toLocaleString();
+            })
+            .catch(err => {
+                console.error("Error fetching income data:", err);
+            });
     }
     
     function updateExpenseChart(viewType) {
@@ -844,150 +875,194 @@
             expensesPieChart.destroy();
         }
         
-        // Sample data
-        const categoryData = {
-            'Housing': 1200,
-            'Food': 450,
-            'Transportation': 350,
-            'Entertainment': 200,
-            'Utilities': 180
-        };
-        
-        const monthlyData = {
-            'January': 2100,
-            'February': 2200,
-            'March': 2300,
-            'April': 2150,
-            'May': 2050,
-            'June': 1980
-        };
-        
-        const weeklyData = {
-            'Week 1': 550,
-            'Week 2': 480,
-            'Week 3': 520,
-            'Week 4': 430
-        };
-        
-        // Choose data based on view type
-        let chartData, chartType;
-        switch(viewType) {
-            case 'monthly':
-                chartData = monthlyData;
-                chartType = 'bar';
-                break;
-            case 'weekly':
-                chartData = weeklyData;
-                chartType = 'bar';
-                break;
-            default: // 'category'
-                chartData = categoryData;
-                chartType = 'pie';
-        }
-        
-        // Create chart with selected data
-        const ctx = container.getContext('2d');
-        
-        // Generate colors based on number of data points
-        const numItems = Object.keys(chartData).length;
-        const backgroundColors = [];
-        const borderColors = [];
-        
-        for(let i = 0; i < numItems; i++) {
-            const hue = (i * 360 / numItems) % 360;
-            backgroundColors.push(`hsla(${hue}, 70%, 60%, 0.7)`);
-            borderColors.push(`hsl(${hue}, 70%, 60%)`);
-        }
-        
-        // Create new chart
-        expensesPieChart = new Chart(ctx, {
-            type: chartType,
-            data: {
-                labels: Object.keys(chartData),
-                datasets: [{
-                    data: Object.values(chartData),
-                    backgroundColor: backgroundColors,
-                    borderColor: borderColors,
-                    borderWidth: 1
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                    tooltip: {
-                        callbacks: {
-                            label: function(context) {
-                                const label = context.label || '';
-                                const value = context.raw || 0;
-                                const total = context.dataset.data.reduce((a, b) => a + b, 0);
-                                const percentage = total > 0 ? Math.round((value / total) * 100) : 0;
-                                return label + ': $' + value.toLocaleString() + (chartType === 'pie' ? ` (${percentage}%)` : '');
+        // Fetch data from API
+        fetch('/api/expenses')
+            .then(response => {
+                if (!response.ok) throw new Error("Failed to fetch expenses");
+                return response.json();
+            })
+            .then(data => {
+                const docs = data.documents || [];
+                const monthNames = [
+                    'January', 'February', 'March', 'April', 'May', 'June',
+                    'July', 'August', 'September', 'October', 'November', 'December'
+                ];
+                
+                // Different data organization based on view type
+                let chartData = {}, chartType;
+                
+                if (viewType === 'category') {
+                    // Group by category
+                    docs.forEach(doc => {
+                        const category = doc.fields.category.stringValue;
+                        const amount = parseFloat(doc.fields.total.doubleValue) || 0;
+                        
+                        if (category) {
+                            chartData[category] = (chartData[category] || 0) + amount;
+                        }
+                    });
+                    chartType = 'pie';
+                } 
+                else if (viewType === 'monthly') {
+                    // Group by month
+                    const monthlyTotals = Array(12).fill(0);
+                    
+                    docs.forEach(doc => {
+                        const dateStr = doc.fields.date.stringValue;
+                        const amount = parseFloat(doc.fields.total.doubleValue) || 0;
+                        
+                        if (dateStr) {
+                            const date = new Date(dateStr);
+                            if (!isNaN(date)) {
+                                const month = date.getMonth();
+                                monthlyTotals[month] += amount;
                             }
                         }
-                    }
-                },
-                scales: chartType !== 'pie' ? {
-                    y: {
-                        beginAtZero: true,
-                        ticks: {
-                            callback: function(value) {
-                                return '$' + value.toLocaleString();
+                    });
+                    
+                    // Create chart data object with month names
+                    monthNames.forEach((name, index) => {
+                        if (monthlyTotals[index] > 0) {
+                            chartData[name] = monthlyTotals[index];
+                        }
+                    });
+                    chartType = 'bar';
+                }
+                else if (viewType === 'weekly') {
+                    // Group by week (simplified: just last 4 weeks)
+                    const weeksData = {'Week 1': 0, 'Week 2': 0, 'Week 3': 0, 'Week 4': 0};
+                    const today = new Date();
+                    
+                    docs.forEach(doc => {
+                        const dateStr = doc.fields.date.stringValue;
+                        const amount = parseFloat(doc.fields.total.doubleValue) || 0;
+                        
+                        if (dateStr) {
+                            const date = new Date(dateStr);
+                            if (!isNaN(date)) {
+                                const daysDiff = Math.floor((today - date) / (1000 * 60 * 60 * 24));
+                                
+                                if (daysDiff <= 7) weeksData['Week 1'] += amount;
+                                else if (daysDiff <= 14) weeksData['Week 2'] += amount;
+                                else if (daysDiff <= 21) weeksData['Week 3'] += amount;
+                                else if (daysDiff <= 28) weeksData['Week 4'] += amount;
                             }
                         }
+                    });
+                    
+                    chartData = weeksData;
+                    chartType = 'bar';
+                }
+                
+                // If no data found, show empty state
+                if (Object.keys(chartData).length === 0) {
+                    chartData = {'No Data': 0};
+                }
+                
+                // Create chart with selected data
+                const ctx = container.getContext('2d');
+                
+                // Generate colors based on number of data points
+                const numItems = Object.keys(chartData).length;
+                const backgroundColors = [];
+                const borderColors = [];
+                
+                for(let i = 0; i < numItems; i++) {
+                    const hue = (i * 360 / numItems) % 360;
+                    backgroundColors.push(`hsla(${hue}, 70%, 60%, 0.7)`);
+                    borderColors.push(`hsl(${hue}, 70%, 60%)`);
+                }
+                
+                // Create new chart
+                expensesPieChart = new Chart(ctx, {
+                    type: chartType,
+                    data: {
+                        labels: Object.keys(chartData),
+                        datasets: [{
+                            data: Object.values(chartData),
+                            backgroundColor: backgroundColors,
+                            borderColor: borderColors,
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            tooltip: {
+                                callbacks: {
+                                    label: function(context) {
+                                        const label = context.label || '';
+                                        const value = context.raw || 0;
+                                        const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                                        const percentage = total > 0 ? Math.round((value / total) * 100) : 0;
+                                        return label + ': $' + value.toLocaleString() + (chartType === 'pie' ? ` (${percentage}%)` : '');
+                                    }
+                                }
+                            }
+                        },
+                        scales: chartType !== 'pie' ? {
+                            y: {
+                                beginAtZero: true,
+                                ticks: {
+                                    callback: function(value) {
+                                        return '$' + value.toLocaleString();
+                                    }
+                                }
+                            }
+                        } : {}
                     }
-                } : {}
-            }
-        });
-        
-        // Update total expenses display
-        const totalExpenses = Object.values(chartData).reduce((sum, val) => sum + val, 0);
-        document.getElementById('totalExpensesDisplay').textContent = '$' + totalExpenses.toLocaleString();
-    }
-    
-    function updateMonthlyExpensesChart(period) {
-        const monthNames = [
-            'January', 'February', 'March', 'April', 'May', 'June',
-            'July', 'August', 'September', 'October', 'November', 'December'
-        ];
-        
-        // Sample data for each period (3m, 6m, 1y)
-        const data = {
-            '3m': [2200, 2100, 1950],
-            '6m': [2500, 2300, 2200, 2100, 1950, 1800],
-            '1y': [2800, 2700, 2600, 2500, 2300, 2200, 2100, 1950, 1800, 1700, 1600, 1500]
-        };
-        
-        // Get data for selected period
-        const periodData = data[period] || data['6m'];
-        
-        // Determine how many months to show
-        let numMonths;
-        switch(period) {
-            case '3m': numMonths = 3; break;
-            case '6m': numMonths = 6; break;
-            case '1y': numMonths = 12; break;
-            default: numMonths = 6;
-        }
-        
-        // Get current month index (0-11)
-        const currentMonth = new Date().getMonth();
-        
-        // Calculate month labels working backwards from current month
-        const labels = [];
-        for (let i = 0; i < numMonths; i++) {
-            const monthIndex = (currentMonth - i + 12) % 12; // Handle wrapping around to previous year
-            labels.unshift(monthNames[monthIndex]);
-        }
-        
-        // Update chart
-        if (monthlyExpensesChart) {
-            monthlyExpensesChart.data.labels = labels;
-            monthlyExpensesChart.data.datasets[0].data = periodData;
-            monthlyExpensesChart.update();
-        } else {
-            createMonthlyExpensesChart(periodData);
-        }
+                });
+                
+                // Update total expenses display
+                const totalExpenses = Object.values(chartData).reduce((sum, val) => sum + val, 0);
+                document.getElementById('totalExpensesDisplay').textContent = '$' + totalExpenses.toLocaleString();
+            })
+            .catch(err => {
+                console.error("Error processing expense data:", err);
+                // On error, create empty chart
+                const ctx = container.getContext('2d');
+                expensesPieChart = new Chart(ctx, {
+                    type: 'pie',
+                    data: {
+                        labels: ['No Data'],
+                        datasets: [{
+                            data: [0],
+                            backgroundColor: ['rgba(200, 200, 200, 0.5)'],
+                            borderColor: ['rgb(200, 200, 200)']
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false
+                    }
+                });
+                    case '1y': numMonths = 12; break;
+                    default: numMonths = 6;
+                }
+                
+                // Get current month index (0-11)
+                const currentMonth = new Date().getMonth();
+                
+                // Calculate month labels working backwards from current month
+                const labels = [];
+                for (let i = 0; i < numMonths; i++) {
+                    const monthIndex = (currentMonth - i + 12) % 12; // Handle wrapping around to previous year
+                    labels.unshift(monthNames[monthIndex]);
+                }
+                
+                // Update chart
+                if (monthlyExpensesChart) {
+                    monthlyExpensesChart.data.labels = labels;
+                    monthlyExpensesChart.data.datasets[0].data = monthlyExpensesArr.slice(-numMonths);
+                    monthlyExpensesChart.update();
+                } else {
+                    createMonthlyExpensesChart(monthlyExpensesArr);
+                }
+            })
+            .catch(err => {
+                console.error("Error fetching monthly expenses data:", err);
+            });
     }
     
     // Main initialization on page load
@@ -1056,7 +1131,16 @@
         
         try {
             // Try to parse the netWorthBreakdown from string to object
-            let breakdown = { cash: 5000, equity: 120000, investments: 45000 };
+            let breakdown = { cash: 0, equity: 0, investments: 0 };
+            
+            // Parse the netWorthBreakdown from Firebase
+            if (fields.netWorthBreakdown && fields.netWorthBreakdown.stringValue) {
+                try {
+                    breakdown = JSON.parse(fields.netWorthBreakdown.stringValue);
+                } catch (err) {
+                    console.error("Error parsing netWorthBreakdown:", err);
+                }
+            }
             
             // Destroy previous chart if it exists
             if (netWorthChart) {
@@ -1121,8 +1205,17 @@
         const ctx = document.getElementById('incomeChart').getContext('2d');
         
         try {
-            // Sample income breakdown
-            let incomeBreakdown = { salary: 60000, bonus: 5000, other: 2000 };
+            // Default empty income breakdown
+            let incomeBreakdown = { salary: 0, bonus: 0, other: 0 };
+            
+            // Parse the totalIncomeBreakdown from Firebase
+            if (fields.totalIncomeBreakdown && fields.totalIncomeBreakdown.stringValue) {
+                try {
+                    incomeBreakdown = JSON.parse(fields.totalIncomeBreakdown.stringValue);
+                } catch (err) {
+                    console.error("Error parsing totalIncomeBreakdown:", err);
+                }
+            }
             
             // Destroy previous chart if it exists
             if (incomeChart) {
@@ -1177,18 +1270,63 @@
         const ctx = document.getElementById('expensesPieChart').getContext('2d');
         
         try {
-            // Sample category data
-            const expenseCategories = {
-                'Housing': 1200,
-                'Food': 450,
-                'Transportation': 350,
-                'Entertainment': 200,
-                'Utilities': 180
-            };
+            // Fetch expense data from API
+            fetch('/api/expenses')
+                .then(response => {
+                    if (!response.ok) throw new Error("Failed to fetch expenses");
+                    return response.json();
+                })
+                .then(data => {
+                    const docs = data.documents || [];
+                    
+                    // Group expenses by category
+                    const expenseCategories = {};
+                    docs.forEach(doc => {
+                        const category = doc.fields.category.stringValue;
+                        const amount = parseFloat(doc.fields.total.doubleValue) || 0;
+                        
+                        if (category) {
+                            expenseCategories[category] = (expenseCategories[category] || 0) + amount;
+                        }
+                    });
+                    
+                    // If no categories found, show empty state
+                    if (Object.keys(expenseCategories).length === 0) {
+                        expenseCategories['No Data'] = 0;
+                    }
+                    
+                    // Destroy previous chart if it exists
+                    if (expensesPieChart) {
+                        expensesPieChart.destroy();
+                    }
+                    
+                    // Create new pie chart
+                    createExpensePieChartWithData(expenseCategories);
+                })
+                .catch(err => {
+                    console.error("Error fetching expense categories:", err);
+                    // On error, create empty chart
+                    createExpensePieChartWithData({'No Data': 0});
+                });
+        } catch (err) {
+            console.error("Error in createExpensePieChart:", err);
+            createExpensePieChartWithData({'Error': 0});
+        }
+    }
+    
+    function createExpensePieChartWithData(expenseCategories) {
+        const ctx = document.getElementById('expensesPieChart').getContext('2d');
+        
+        try {
+            // Generate colors based on number of data points
+            const numItems = Object.keys(expenseCategories).length;
+            const backgroundColors = [];
+            const borderColors = [];
             
-            // Destroy previous chart if it exists
-            if (expensesPieChart) {
-                expensesPieChart.destroy();
+            for(let i = 0; i < numItems; i++) {
+                const hue = (i * 360 / numItems) % 360;
+                backgroundColors.push(`hsla(${hue}, 70%, 60%, 0.7)`);
+                borderColors.push(`hsl(${hue}, 70%, 60%)`);
             }
             
             // Create new pie chart
@@ -1198,20 +1336,8 @@
                     labels: Object.keys(expenseCategories),
                     datasets: [{
                         data: Object.values(expenseCategories),
-                        backgroundColor: [
-                            'rgba(255, 140, 0, 0.7)',   // housing - orange
-                            'rgba(255, 69, 0, 0.7)',    // food - red-orange
-                            'rgba(30, 144, 255, 0.7)',  // transportation - blue
-                            'rgba(138, 43, 226, 0.7)',  // entertainment - purple
-                            'rgba(50, 205, 50, 0.7)'    // utilities - green
-                        ],
-                        borderColor: [
-                            'rgb(255, 140, 0)',
-                            'rgb(255, 69, 0)',
-                            'rgb(30, 144, 255)',
-                            'rgb(138, 43, 226)',
-                            'rgb(50, 205, 50)'
-                        ],
+                        backgroundColor: backgroundColors,
+                        borderColor: borderColors,
                         borderWidth: 1
                     }]
                 },
