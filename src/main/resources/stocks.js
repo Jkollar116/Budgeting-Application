@@ -1,3 +1,4 @@
+
 document.addEventListener('DOMContentLoaded', function() {
     // Initialize the tabs functionality
     const tabs = document.querySelectorAll('.tab');
@@ -40,10 +41,8 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
 
-    // API URLs
-    const API_BASE = '/api/stocks'; // For account/orders/portfolio data 
-    const ALPHA_VANTAGE_API = 'https://www.alphavantage.co/query';
-    const ALPHA_VANTAGE_KEY = window.alphaVantageKey || '2470IDOB57MHSDPZ'; // Allow key to be provided from server
+    // API URLs - use our backend API instead of direct Alpha Vantage calls
+    const API_BASE = '/api/stocks'; 
 
     // Current selected stock
     let currentSymbol = '';
@@ -288,7 +287,7 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    // Search for a stock
+    // Search for a stock - USE OUR BACKEND API INSTEAD OF DIRECT API CALL
     function searchStock(symbol) {
         if (!symbol) {
             symbol = document.getElementById('stock-search-input').value.trim().toUpperCase();
@@ -303,8 +302,8 @@ document.addEventListener('DOMContentLoaded', function() {
         hideError('stock-search-error');
         document.getElementById('stock-details').style.display = 'none';
 
-        // Use Alpha Vantage API directly
-        fetch(`${ALPHA_VANTAGE_API}?function=GLOBAL_QUOTE&symbol=${symbol}&apikey=${ALPHA_VANTAGE_KEY}`)
+        // Use our backend API endpoint instead of direct Alpha Vantage call
+        fetch(`${API_BASE}/${symbol}`)
             .then(response => {
                 if (!response.ok) {
                     throw new Error(`API error: ${response.status} ${response.statusText}`);
@@ -315,33 +314,27 @@ document.addEventListener('DOMContentLoaded', function() {
                 currentSymbol = symbol;
                 currentStockDetails = data;
 
-                // Make sure we have Global Quote data
-                if (!data['Global Quote'] || Object.keys(data['Global Quote']).length === 0) {
-                    throw new Error('No stock data available for symbol: ' + symbol);
-                }
-
-                const quote = data['Global Quote'];
-                
                 // Update stock details
-                document.getElementById('stock-symbol').textContent = quote['01. symbol'] || symbol;
-                // Get company name - for simplicity we'll just use the symbol
-                document.getElementById('stock-name').textContent = getCompanyName(symbol);
+                document.getElementById('stock-symbol').textContent = data.symbol || symbol;
+                document.getElementById('stock-name').textContent = data.name || getCompanyName(symbol);
 
-                // Update price info
-                const price = parseFloat(quote['05. price']);
-                const prevClose = parseFloat(quote['08. previous close']);
-                const change = parseFloat(quote['09. change']);
-                const changePercent = parseFloat(quote['10. change percent'].replace('%', ''));
-                const volume = parseInt(quote['06. volume']);
+                // Update price info - structure based on our backend API
+                if (data.quote) {
+                    const quote = data.quote;
+                    const price = parseFloat(quote.price);
+                    const change = parseFloat(quote.change);
+                    const changePercent = parseFloat(quote.changePercent);
+                    const volume = parseInt(quote.volume);
 
-                document.getElementById('stock-price').textContent = formatCurrency(price);
+                    document.getElementById('stock-price').textContent = formatCurrency(price);
 
-                const changeElement = document.getElementById('stock-change');
-                const changeSign = change >= 0 ? '+' : '';
-                changeElement.textContent = `${changeSign}${change.toFixed(2)} (${changeSign}${changePercent.toFixed(2)}%)`;
-                changeElement.className = change >= 0 ? 'profit' : 'loss';
+                    const changeElement = document.getElementById('stock-change');
+                    const changeSign = change >= 0 ? '+' : '';
+                    changeElement.textContent = `${changeSign}${change.toFixed(2)} (${changeSign}${changePercent.toFixed(2)}%)`;
+                    changeElement.className = change >= 0 ? 'profit' : 'loss';
 
-                document.getElementById('stock-volume').textContent = formatNumber(volume);
+                    document.getElementById('stock-volume').textContent = formatNumber(volume);
+                }
 
                 // Show stock details
                 document.getElementById('stock-details').style.display = 'block';
@@ -359,7 +352,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 let errorMessage = error.message;
                 
                 // Add debugging info to console
-                console.log('Search URL:', `${API_BASE}/stocks/${symbol}`);
+                console.log('Search URL:', `${API_BASE}/${symbol}`);
                 console.log('Error details:', error);
                 
                 // Show user-friendly message
@@ -373,44 +366,12 @@ document.addEventListener('DOMContentLoaded', function() {
             });
     }
 
-    // Fetch stock history for chart
+    // Fetch stock history for chart - USE OUR BACKEND API INSTEAD OF DIRECT API CALL
     function fetchStockHistory(symbol, timeframe) {
         console.log(`Fetching history for ${symbol} (${timeframe})`);
         
-        // Map timeframe to Alpha Vantage parameters
-        let timeSeriesFunction, interval;
-        switch(timeframe) {
-            case '1D':
-                timeSeriesFunction = 'TIME_SERIES_INTRADAY';
-                interval = '5min';
-                break;
-            case '1W':
-                timeSeriesFunction = 'TIME_SERIES_INTRADAY';
-                interval = '60min';
-                break;
-            case '1M':
-            case '3M':
-                timeSeriesFunction = 'TIME_SERIES_DAILY';
-                interval = null;
-                break;
-            case '1Y':
-            case 'ALL':
-                timeSeriesFunction = 'TIME_SERIES_WEEKLY';
-                interval = null;
-                break;
-            default:
-                timeSeriesFunction = 'TIME_SERIES_DAILY';
-                interval = null;
-        }
-        
-        // Construct URL based on function and interval
-        let apiUrl = `${ALPHA_VANTAGE_API}?function=${timeSeriesFunction}&symbol=${symbol}`;
-        if (interval) {
-            apiUrl += `&interval=${interval}`;
-        }
-        apiUrl += `&apikey=${ALPHA_VANTAGE_KEY}`;
-        
-        fetch(apiUrl)
+        // Use our backend API endpoint instead of direct Alpha Vantage call
+        fetch(`${API_BASE}/${symbol}/history?timeframe=${timeframe}`)
             .then(response => {
                 // Check for API rate limit errors (status 429)
                 if (response.status === 429) {
@@ -425,41 +386,9 @@ document.addEventListener('DOMContentLoaded', function() {
                 return response.json();
             })
             .then(data => {
-                // Check if we received an error message from Alpha Vantage
-                if (data.Note && data.Note.includes('call frequency')) {
-                    throw new Error('API rate limit reached. Please try again in a minute.');
-                }
-                
-                // Find the time series data key
-                let timeSeriesKey = Object.keys(data).find(key => key.includes('Time Series') || key.includes('Weekly') || key.includes('Daily'));
-                
-                if (!timeSeriesKey || !data[timeSeriesKey] || Object.keys(data[timeSeriesKey]).length === 0) {
-                    throw new Error('No historical data available for this symbol');
-                }
+                const historyData = data.history || [];
                 
                 console.log('Received history data');
-                
-                // Create simplified data structure for chart
-                const historyData = [];
-                const timeSeries = data[timeSeriesKey];
-                const timestamps = Object.keys(timeSeries).sort();
-                
-                // Limit to max 100 points
-                const maxPoints = Math.min(timestamps.length, 100);
-                
-                for (let i = 0; i < maxPoints; i++) {
-                    const timestamp = timestamps[i];
-                    const dataPoint = timeSeries[timestamp];
-                    const closePrice = parseFloat(dataPoint['4. close'] || dataPoint['4: close'] || 0);
-                    
-                    historyData.push({
-                        timestamp: timestamp,
-                        price: closePrice
-                    });
-                }
-                
-                // In a real application you would render the chart here
-                // using a library like Chart.js, D3.js, or another charting library
                 console.log('Processed history data points:', historyData.length);
 
                 // For this demo we'll just display a placeholder
@@ -472,7 +401,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 console.error('Error fetching stock history:', error);
                 
                 // Add debugging info to console
-                console.log('History URL:', `${API_BASE}/stocks/${symbol}/history?timeframe=${timeframe}`);
+                console.log('History URL:', `${API_BASE}/${symbol}/history?timeframe=${timeframe}`);
                 console.log('Error details:', error);
                 
                 // Display error in chart area
@@ -509,8 +438,8 @@ document.addEventListener('DOMContentLoaded', function() {
         switch (orderType) {
             case 'market':
                 // For market orders, use current price from the stock details
-                if (currentStockDetails && currentStockDetails['Global Quote']) {
-                    orderPrice = parseFloat(currentStockDetails['Global Quote']['05. price']);
+                if (currentStockDetails && currentStockDetails.quote) {
+                    orderPrice = parseFloat(currentStockDetails.quote.price);
                     priceDescription = "MARKET";
                 } else {
                     showError('order-error', 'Cannot place market order - current price not available.');
@@ -555,8 +484,8 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
                 
                 // Calculate trail amount based on current price
-                if (currentStockDetails && currentStockDetails['Global Quote']) {
-                    const currentPrice = parseFloat(currentStockDetails['Global Quote']['05. price']);
+                if (currentStockDetails && currentStockDetails.quote) {
+                    const currentPrice = parseFloat(currentStockDetails.quote.price);
                     const trailAmount = currentPrice * (trailPercent / 100);
                     orderPrice = side === 'buy' ? currentPrice + trailAmount : currentPrice - trailAmount;
                     priceDescription = `TRAILING-STOP ${trailPercent}%`;
@@ -728,8 +657,8 @@ document.addEventListener('DOMContentLoaded', function() {
                 // Get current price from stored stock details or use average price as fallback
                 let currentPrice = avgPrice;
                 if (currentStockDetails && symbol === currentSymbol && 
-                    currentStockDetails['Global Quote']) {
-                    currentPrice = parseFloat(currentStockDetails['Global Quote']['05. price']);
+                    currentStockDetails.quote) {
+                    currentPrice = parseFloat(currentStockDetails.quote.price);
                 }
                 
                 const marketValue = quantity * currentPrice;
@@ -889,89 +818,57 @@ document.addEventListener('DOMContentLoaded', function() {
     document.getElementById('stock-search-button').addEventListener('click', function() {
         searchStock();
     });
-
+    
+    // Enable pressing Enter in the search input
     document.getElementById('stock-search-input').addEventListener('keypress', function(e) {
         if (e.key === 'Enter') {
             searchStock();
         }
     });
-
-    // Market order buttons
+    
+    // Set up event listeners for order buttons
     document.getElementById('market-buy-button').addEventListener('click', function() {
         placeOrder('market', 'buy', 'market-order-form');
     });
-
+    
     document.getElementById('market-sell-button').addEventListener('click', function() {
         placeOrder('market', 'sell', 'market-order-form');
     });
-
-    // Limit order buttons
+    
     document.getElementById('limit-buy-button').addEventListener('click', function() {
         placeOrder('limit', 'buy', 'limit-order-form');
     });
-
+    
     document.getElementById('limit-sell-button').addEventListener('click', function() {
         placeOrder('limit', 'sell', 'limit-order-form');
     });
-
-    // Stop order buttons
+    
     document.getElementById('stop-buy-button').addEventListener('click', function() {
         placeOrder('stop', 'buy', 'stop-order-form');
     });
-
+    
     document.getElementById('stop-sell-button').addEventListener('click', function() {
         placeOrder('stop', 'sell', 'stop-order-form');
     });
-
-    // Stop-limit order buttons
+    
     document.getElementById('stop-limit-buy-button').addEventListener('click', function() {
         placeOrder('stop-limit', 'buy', 'stop-limit-order-form');
     });
-
+    
     document.getElementById('stop-limit-sell-button').addEventListener('click', function() {
         placeOrder('stop-limit', 'sell', 'stop-limit-order-form');
     });
-
-    // Trailing stop order buttons
+    
     document.getElementById('trailing-stop-buy-button').addEventListener('click', function() {
         placeOrder('trailing-stop', 'buy', 'trailing-stop-order-form');
     });
-
+    
     document.getElementById('trailing-stop-sell-button').addEventListener('click', function() {
         placeOrder('trailing-stop', 'sell', 'trailing-stop-order-form');
     });
-
-    // Initialize mock data
-    if (!window.mockOrderHistory) {
-        window.mockOrderHistory = [];
-    }
     
-    if (!window.mockPortfolio) {
-        window.mockPortfolio = {
-            'AAPL': {
-                symbol: 'AAPL',
-                qty: 10,
-                avg_entry_price: 170.25,
-                total_cost: 1702.50
-            },
-            'MSFT': {
-                symbol: 'MSFT',
-                qty: 5,
-                avg_entry_price: 410.50,
-                total_cost: 2052.50
-            }
-        };
-    }
-    
-    // Initialize data on page load
-    setTimeout(() => {
-        // Skip server API calls that might fail
-        // fetchAccountInfo();
-        // fetchPortfolio();
-        // fetchOrders('open');
-        
-        // Use our mock data instead
-        updatePortfolioDisplay();
-        updateOrdersDisplay();
-    }, 500);
+    // Initialize with sample data
+    fetchAccountInfo();
+    fetchPortfolio();
+    fetchOrders('open');
 });
