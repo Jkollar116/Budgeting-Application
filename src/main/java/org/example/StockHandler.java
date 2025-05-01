@@ -9,6 +9,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
+import java.text.SimpleDateFormat;
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
@@ -285,75 +286,28 @@ public class StockHandler implements HttpHandler {
         String path = exchange.getRequestURI().getPath();
         String symbol = path.substring(path.lastIndexOf('/') + 1);
 
-        // Create a manual JSON response since we're having issues with the Gson library
         try {
-            // Use the direct HTTP request approach from SimpleStockApiTest
-            HttpClient client = HttpClient.newBuilder()
-                    .connectTimeout(Duration.ofSeconds(10))
-                    .build();
-                    
-            String apiUrl = "https://www.alphavantage.co/query?function=GLOBAL_QUOTE&symbol=" + symbol + "&apikey=2470IDOB57MHSDPZ";
-            
-            HttpRequest request = HttpRequest.newBuilder()
-                    .uri(URI.create(apiUrl))
-                    .GET()
-                    .build();
-                
-            HttpResponse<String> apiResponse = client.send(request, HttpResponse.BodyHandlers.ofString());
-            String responseBody = apiResponse.body();
-            
-            // Check for error conditions in the API response
-            if (apiResponse.statusCode() != 200) {
-                String errorJson = "{\"error\": \"API returned status code " + apiResponse.statusCode() + "\", \"symbol\": \"" + symbol + "\"}";
-                sendResponse(exchange, apiResponse.statusCode(), errorJson);
-                return;
-            }
-            
-            // Check for API limit messages
-            if (responseBody.contains("Note") && responseBody.contains("API call frequency")) {
-                String errorJson = "{\"error\": \"API rate limit reached. Please try again in a moment.\", \"symbol\": \"" + symbol + "\"}";
-                sendResponse(exchange, 429, errorJson);
-                return;
-            }
-            
-            // Check for empty response or invalid data
-            if (!responseBody.contains("Global Quote") || responseBody.contains("{}")) {
-                String errorJson = "{\"error\": \"Stock symbol '" + symbol + "' not found or API limit reached\", \"symbol\": \"" + symbol + "\"}";
-                sendResponse(exchange, 404, errorJson);
-                return;
-            }
-            
-            // Extract stock price and other data using string operations
-            String price = extractJsonValue(responseBody, "05. price");
-            String previousClose = extractJsonValue(responseBody, "08. previous close");
-            String volume = extractJsonValue(responseBody, "06. volume");
-            String change = extractJsonValue(responseBody, "09. change");
-            String changePercent = extractJsonValue(responseBody, "10. change percent");
-            String latestDay = extractJsonValue(responseBody, "07. latest trading day");
+            // Use our StockApiService to get stock data
+            Stock stock = apiService.getStockQuote(symbol);
             
             // Build custom JSON response manually
             StringBuilder jsonBuilder = new StringBuilder();
             jsonBuilder.append("{");
             jsonBuilder.append("\"symbol\":\"").append(symbol).append("\",");
-            jsonBuilder.append("\"name\":\"").append(getCompanyName(symbol)).append("\",");
+            jsonBuilder.append("\"name\":\"").append(stock.getName()).append("\",");
             
             jsonBuilder.append("\"quote\":{");
-            jsonBuilder.append("\"price\":").append(price).append(",");
-            jsonBuilder.append("\"previousClose\":").append(previousClose).append(",");
-            jsonBuilder.append("\"volume\":").append(volume).append(",");
-            jsonBuilder.append("\"change\":").append(change).append(",");
-            jsonBuilder.append("\"changePercent\":").append(changePercent.replace("%", "")).append(",");
-            jsonBuilder.append("\"lastUpdated\":\"").append(latestDay).append("\"");
+            jsonBuilder.append("\"price\":").append(stock.getPrice()).append(",");
+            jsonBuilder.append("\"previousClose\":").append(stock.getPreviousClose()).append(",");
+            jsonBuilder.append("\"volume\":").append(stock.getVolume()).append(",");
+            jsonBuilder.append("\"change\":").append(stock.getChange()).append(",");
+            jsonBuilder.append("\"changePercent\":").append(stock.getChangePercent()).append(",");
+            jsonBuilder.append("\"lastUpdated\":\"").append(stock.getLastUpdated()).append("\"");
             jsonBuilder.append("}");
             
             jsonBuilder.append("}");
             
             sendResponse(exchange, 200, jsonBuilder.toString());
-            
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-            String errorJson = "{\"error\": \"Request interrupted: " + e.getMessage() + "\", \"symbol\": \"" + symbol + "\"}";
-            sendResponse(exchange, 500, errorJson);
         } catch (Exception e) {
             // Unexpected errors
             LOGGER.severe("Unexpected error when getting stock data: " + e.getMessage());
@@ -415,150 +369,39 @@ public class StockHandler implements HttpHandler {
         }
         
         try {
-            // Use the direct HTTP request approach
-            HttpClient client = HttpClient.newBuilder()
-                    .connectTimeout(Duration.ofSeconds(10))
-                    .build();
+            // Use our StockApiService for history data
+            List<Map<String, Object>> historyData = apiService.getStockHistory(symbol, timeframe);
             
-            // Map timeframe to API parameters
-            String function;
-            String interval = "";
-            
-            switch (timeframe) {
-                case "1D":
-                    function = "TIME_SERIES_INTRADAY";
-                    interval = "&interval=5min";
-                    break;
-                case "1W":
-                    function = "TIME_SERIES_INTRADAY";
-                    interval = "&interval=60min";
-                    break;
-                case "1M":
-                case "3M":
-                    function = "TIME_SERIES_DAILY";
-                    break;
-                case "1Y":
-                    function = "TIME_SERIES_WEEKLY";
-                    break;
-                default:
-                    function = "TIME_SERIES_DAILY";
-            }
-            
-            String apiUrl = "https://www.alphavantage.co/query?function=" + function + interval + "&symbol=" + symbol + "&apikey=2470IDOB57MHSDPZ";
-            
-            HttpRequest request = HttpRequest.newBuilder()
-                    .uri(URI.create(apiUrl))
-                    .GET()
-                    .build();
-                
-            HttpResponse<String> apiResponse = client.send(request, HttpResponse.BodyHandlers.ofString());
-            String responseBody = apiResponse.body();
-            
-            // Check for error conditions in the API response
-            if (apiResponse.statusCode() != 200) {
-                String errorJson = "{\"error\": \"API returned status code " + apiResponse.statusCode() + "\", \"symbol\": \"" + symbol + "\", \"timeframe\": \"" + timeframe + "\"}";
-                sendResponse(exchange, apiResponse.statusCode(), errorJson);
-                return;
-            }
-            
-            // Check for API limit messages
-            if (responseBody.contains("Note") && responseBody.contains("API call frequency")) {
-                String errorJson = "{\"error\": \"API rate limit reached. Please try again in a moment.\", \"symbol\": \"" + symbol + "\", \"timeframe\": \"" + timeframe + "\"}";
-                sendResponse(exchange, 429, errorJson);
-                return;
-            }
-            
-            // Check if valid time series data exists
-            boolean hasData = false;
-            for (String key : new String[]{"Time Series", "Weekly Time Series", "Daily Time Series"}) {
-                if (responseBody.contains(key)) {
-                    hasData = true;
-                    break;
-                }
-            }
-            
-            if (!hasData) {
-                String errorJson = "{\"error\": \"No historical data available for symbol '" + symbol + "' with timeframe '" + timeframe + "'\", \"symbol\": \"" + symbol + "\", \"timeframe\": \"" + timeframe + "\"}";
-                sendResponse(exchange, 404, errorJson);
-                return;
-            }
-            
-            // Create a simplified history response
-            // For this fix, we'll just return the raw API JSON with some formatting
-            // In a real solution, we would parse this properly
+            // Convert the history data to a JSON response
             StringBuilder jsonBuilder = new StringBuilder();
-            jsonBuilder.append("{\"history\": ");
+            jsonBuilder.append("{\"history\": [");
             
-            // Extract just the time series part for simplicity
-            int timeSeriesStart = responseBody.indexOf("Time Series");
-            if (timeSeriesStart < 0) timeSeriesStart = responseBody.indexOf("Weekly Time Series");
-            if (timeSeriesStart < 0) timeSeriesStart = responseBody.indexOf("Daily Time Series");
-            
-            if (timeSeriesStart > 0) {
-                // Find where the time series JSON object starts
-                int objStart = responseBody.indexOf("{", timeSeriesStart);
-                if (objStart > 0) {
-                    // Find matching closing brace - this is a simplified approach
-                    int objEnd = responseBody.lastIndexOf("}");
-                    if (objEnd > objStart) {
-                        jsonBuilder.append("[");
-                        
-                        // Create a simple array of price points
-                        String timeSeries = responseBody.substring(objStart, objEnd + 1);
-                        String[] dateTimes = timeSeries.split("\\{");
-                        
-                        for (int i = 1; i < dateTimes.length && i < 100; i++) { // Limit to 100 points
-                            if (i > 1) jsonBuilder.append(",");
-                            
-                            // Extract date
-                            String dateTime = dateTimes[i-1];
-                            int dateEnd = dateTime.lastIndexOf("\":");
-                            if (dateEnd > 0) {
-                                String date = dateTime.substring(0, dateEnd);
-                                date = date.substring(date.lastIndexOf("\"") + 1);
-                                
-                                // Extract price - use close value
-                                String priceKey = "4. close";
-                                if (dateTimes[i].contains(priceKey)) {
-                                    int priceStart = dateTimes[i].indexOf(priceKey) + priceKey.length() + 2;
-                                    int priceEnd = dateTimes[i].indexOf(",", priceStart);
-                                    if (priceEnd < 0) priceEnd = dateTimes[i].indexOf("}", priceStart);
-                                    
-                                    if (priceEnd > priceStart) {
-                                        String price = dateTimes[i].substring(priceStart, priceEnd).replace("\"", "").trim();
-                                        
-                                        // Add formatted point
-                                        jsonBuilder.append("{\"timestamp\":\"").append(date).append("\",");
-                                        jsonBuilder.append("\"price\":").append(price).append("}");
-                                    }
-                                }
-                            }
-                        }
-                        
-                        jsonBuilder.append("]");
-                    } else {
-                        jsonBuilder.append("[]"); // Empty array
-                    }
+            for (int i = 0; i < historyData.size(); i++) {
+                Map<String, Object> point = historyData.get(i);
+                if (i > 0) jsonBuilder.append(",");
+                
+                jsonBuilder.append("{");
+                // Format timestamp as ISO string if it's a long value
+                Object timestamp = point.get("timestamp");
+                if (timestamp instanceof Long) {
+                    Date date = new Date((Long) timestamp);
+                    SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'");
+                    dateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
+                    jsonBuilder.append("\"timestamp\":\"").append(dateFormat.format(date)).append("\",");
                 } else {
-                    jsonBuilder.append("[]"); // Empty array
+                    jsonBuilder.append("\"timestamp\":\"").append(timestamp).append("\",");
                 }
-            } else {
-                jsonBuilder.append("[]"); // Empty array
+                
+                jsonBuilder.append("\"price\":").append(point.get("price"));
+                jsonBuilder.append("}");
             }
             
-            jsonBuilder.append("}");
+            jsonBuilder.append("]}");
             
             sendResponse(exchange, 200, jsonBuilder.toString());
-            
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-            String errorJson = "{\"error\": \"Request interrupted: " + e.getMessage() + "\", \"symbol\": \"" + symbol + "\", \"timeframe\": \"" + timeframe + "\"}";
-            sendResponse(exchange, 500, errorJson);
         } catch (Exception e) {
-            // Unexpected errors
-            LOGGER.severe("Unexpected error when getting stock history: " + e.getMessage());
-            e.printStackTrace();
-            
+            // Handle error
+            LOGGER.severe("Error getting stock history: " + e.getMessage());
             String errorJson = "{\"error\": \"Failed to retrieve stock history: " + e.getMessage().replace("\"", "'") + "\", \"symbol\": \"" + symbol + "\", \"timeframe\": \"" + timeframe + "\"}";
             sendResponse(exchange, 500, errorJson);
         }

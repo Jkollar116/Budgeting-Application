@@ -52,3 +52,4 @@ temp_backup/
 /src/main/resources/serviceAccountKey.template.json
 /logs
 /docs
+src/main/resources/serviceAccountKey.json

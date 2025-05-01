@@ -135,13 +135,36 @@ public class IncomeHandler implements HttpHandler {
         conn.setRequestProperty("Authorization", "Bearer " + idToken);
         conn.setDoOutput(true);
 
-        // Construct JSON to store as doubleValue for total
+        // Parse date to extract year and month for easier querying
+        LocalDate parsedDate = tryParseDate(dateVal);
+        String yearMonthField = "";
+        String yearField = "";
+        
+        if (parsedDate != null) {
+            int year = parsedDate.getYear();
+            int month = parsedDate.getMonthValue();
+            yearMonthField = year + "_" + (month < 10 ? "0" : "") + month;
+            yearField = String.valueOf(year);
+        }
+        
+        // Generate a unique transaction ID for better tracking
+        String transactionId = "inc_" + System.currentTimeMillis() + "_" + Math.round(Math.random() * 1000);
+        
+        // Current timestamp for created/updated metadata
+        long currentTimestamp = System.currentTimeMillis();
+        
+        // Construct JSON to store as doubleValue for total, with enhanced metadata
         String jsonToFirestore = "{\"fields\":{"
                 + "\"date\":{\"stringValue\":\"" + dateVal + "\"},"
                 + "\"name\":{\"stringValue\":\"" + nameVal + "\"},"
                 + "\"frequency\":{\"stringValue\":\"" + freqVal + "\"},"
                 + "\"recurring\":{\"stringValue\":\"" + isRecurring + "\"},"
-                + "\"total\":{\"doubleValue\":" + totalVal + "}"
+                + "\"total\":{\"doubleValue\":" + totalVal + "},"
+                + "\"yearMonth\":{\"stringValue\":\"" + yearMonthField + "\"},"
+                + "\"year\":{\"stringValue\":\"" + yearField + "\"},"
+                + "\"transactionId\":{\"stringValue\":\"" + transactionId + "\"},"
+                + "\"createdAt\":{\"integerValue\":" + currentTimestamp + "},"
+                + "\"updatedAt\":{\"integerValue\":" + currentTimestamp + "}"
                 + "}}";
         System.out.println("jsonToFirestore: " + jsonToFirestore);
 
@@ -152,6 +175,9 @@ public class IncomeHandler implements HttpHandler {
         System.out.println("Firestore POST response code: " + responseCodePost);
 
         if (responseCodePost == 200 || responseCodePost == 201) {
+            // After successfully adding the income, update the monthly summary
+            updateMonthlySummary(idToken, localId, parsedDate, totalVal, isRecurring, freqVal);
+            
             String success = "Income added successfully.";
             exchange.sendResponseHeaders(200, success.length());
             try (OutputStream respOs = exchange.getResponseBody()) {
@@ -374,6 +400,126 @@ public class IncomeHandler implements HttpHandler {
         return null;
     }
 
+    /**
+     * Updates the monthly summary document in Firestore for faster dashboard reads.
+     * Creates or updates a document in the Summaries collection with pre-aggregated income data.
+     */
+    private void updateMonthlySummary(String idToken, String localId, LocalDate date, double amount,
+                                      boolean isRecurring, String frequency) {
+        if (date == null) {
+            System.out.println("Cannot update monthly summary: Invalid date");
+            return;
+        }
+        
+        try {
+            int year = date.getYear();
+            int month = date.getMonthValue();
+            String yearMonth = year + "_" + (month < 10 ? "0" : "") + month;
+            
+            // Firestore URL for the monthly summary document
+            String summaryUrl = "https://firestore.googleapis.com/v1/projects/cashclimb-d162c/databases/(default)/documents/Users/"
+                    + localId + "/Summaries/income_" + yearMonth;
+            
+            // First check if the document exists
+            URL getUrl = new URL(summaryUrl);
+            HttpURLConnection getConn = (HttpURLConnection) getUrl.openConnection();
+            getConn.setRequestMethod("GET");
+            getConn.setRequestProperty("Authorization", "Bearer " + idToken);
+            
+            boolean documentExists = false;
+            double existingTotal = 0.0;
+            int existingCount = 0;
+            
+            int getResponseCode = getConn.getResponseCode();
+            if (getResponseCode == 200) {
+                // Document exists, parse the current data
+                documentExists = true;
+                BufferedReader reader = new BufferedReader(new InputStreamReader(getConn.getInputStream()));
+                StringBuilder sb = new StringBuilder();
+                String line;
+                while ((line = reader.readLine()) != null) {
+                    sb.append(line);
+                }
+                reader.close();
+                
+                String response = sb.toString();
+                JsonObject root = JsonParser.parseString(response).getAsJsonObject();
+                if (root.has("fields")) {
+                    JsonObject fields = root.getAsJsonObject("fields");
+                    existingTotal = getDoubleField(fields, "totalIncome");
+                    existingCount = (int) getDoubleField(fields, "incomeCount");
+                }
+            }
+            
+            // Calculate new total and count
+            double newTotal = existingTotal + amount;
+            int newCount = existingCount + 1;
+            
+            // Current timestamp for metadata
+            long currentTimestamp = System.currentTimeMillis();
+            
+            // Build JSON for update/create
+            String jsonBody;
+            if (documentExists) {
+                // PATCH request for existing document
+                jsonBody = "{\"fields\":{"
+                        + "\"totalIncome\":{\"doubleValue\":" + newTotal + "},"
+                        + "\"incomeCount\":{\"integerValue\":" + newCount + "},"
+                        + "\"lastUpdated\":{\"integerValue\":" + currentTimestamp + "}"
+                        + "}}";
+            } else {
+                // Create new document with all fields
+                jsonBody = "{\"fields\":{"
+                        + "\"totalIncome\":{\"doubleValue\":" + amount + "},"
+                        + "\"incomeCount\":{\"integerValue\":1},"
+                        + "\"yearMonth\":{\"stringValue\":\"" + yearMonth + "\"},"
+                        + "\"year\":{\"stringValue\":\"" + year + "\"},"
+                        + "\"month\":{\"integerValue\":" + month + "},"
+                        + "\"createdAt\":{\"integerValue\":" + currentTimestamp + "},"
+                        + "\"lastUpdated\":{\"integerValue\":" + currentTimestamp + "}"
+                        + "}}";
+            }
+            
+            // Send the request to update or create the summary document
+            URL updateUrl = new URL(summaryUrl);
+            HttpURLConnection updateConn = (HttpURLConnection) updateUrl.openConnection();
+            updateConn.setRequestMethod(documentExists ? "PATCH" : "PUT");
+            updateConn.setRequestProperty("Content-Type", "application/json");
+            updateConn.setRequestProperty("Authorization", "Bearer " + idToken);
+            updateConn.setDoOutput(true);
+            
+            try (OutputStream os = updateConn.getOutputStream()) {
+                os.write(jsonBody.getBytes(StandardCharsets.UTF_8));
+            }
+            
+            int updateResponseCode = updateConn.getResponseCode();
+            if (updateResponseCode == 200 || updateResponseCode == 201) {
+                System.out.println("Monthly income summary updated successfully for " + yearMonth);
+            } else {
+                System.out.println("Failed to update monthly income summary. Response code: " + updateResponseCode);
+                
+                // Log error response if available
+                try (InputStream errorStream = updateConn.getErrorStream()) {
+                    if (errorStream != null) {
+                        BufferedReader errorReader = new BufferedReader(new InputStreamReader(errorStream));
+                        StringBuilder errorSb = new StringBuilder();
+                        String errorLine;
+                        while ((errorLine = errorReader.readLine()) != null) {
+                            errorSb.append(errorLine);
+                        }
+                        System.out.println("Error response: " + errorSb.toString());
+                    }
+                } catch (Exception e) {
+                    System.out.println("Error reading error stream: " + e.getMessage());
+                }
+            }
+            
+        } catch (Exception e) {
+            System.out.println("Exception in updateMonthlySummary: " + e.getMessage());
+            e.printStackTrace();
+        }
+    }
+    
     /**
      * Utility: Simple extraction of a JSON key's value from a JSON string using regex.
      * This supports both quoted strings and numeric/boolean values.
