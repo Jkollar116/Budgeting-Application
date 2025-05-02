@@ -48,3 +48,8 @@ temp_backup/
 
 ### Compiled class files ###
 *.class
+/src/main/resources/serviceAccountKey.json
+/src/main/resources/serviceAccountKey.template.json
+/logs
+/docs
+src/main/resources/serviceAccountKey.json

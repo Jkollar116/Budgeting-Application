@@ -28,9 +28,25 @@ public class StockApiService {
             .build();
     
     // Alpha Vantage API settings
-    private static final String API_KEY = "2470IDOB57MHSDPZ"; // Real API key
+    private static String apiKey;
     private static final String BASE_URL = "https://www.alphavantage.co/query";
-    private static final int CACHE_EXPIRY_SECONDS = 60; // Cache data for 1 minute to avoid hitting rate limits
+    private static final int CACHE_EXPIRY_SECONDS = 300; // Cache data for 5 minutes to avoid hitting rate limits
+    
+    // Static initializer to load API key
+    static {
+        try {
+            ConfigManager configManager = ConfigManager.getInstance();
+            apiKey = configManager.getAlphaVantageApiKey();
+            if (apiKey == null || apiKey.isEmpty()) {
+                LOGGER.severe("Alpha Vantage API key not found in configuration");
+            } else {
+                LOGGER.info("Alpha Vantage API initialized with key: " + 
+                    (apiKey.length() > 4 ? apiKey.substring(0, 4) + "..." : "****"));
+            }
+        } catch (Exception e) {
+            LOGGER.severe("Failed to initialize Alpha Vantage API key: " + e.getMessage());
+        }
+    }
     
     // API rate limiting - Alpha Vantage free tier limits
     private static final int MAX_REQUESTS_PER_MINUTE = 5;
@@ -105,7 +121,7 @@ public class StockApiService {
         }
         
         try {
-            String url = BASE_URL + "?function=GLOBAL_QUOTE&symbol=" + symbol + "&apikey=" + API_KEY;
+            String url = BASE_URL + "?function=GLOBAL_QUOTE&symbol=" + symbol + "&apikey=" + apiKey;
             
             HttpRequest request = HttpRequest.newBuilder()
                     .uri(URI.create(url))
@@ -204,7 +220,7 @@ public class StockApiService {
                     function = "TIME_SERIES_DAILY";
             }
             
-            String url = BASE_URL + "?function=" + function + "&symbol=" + symbol + "&apikey=" + API_KEY;
+            String url = BASE_URL + "?function=" + function + "&symbol=" + symbol + "&apikey=" + apiKey;
             if (function.contains("INTRADAY")) {
                 url += "&outputsize=full";
             }
