@@ -9,8 +9,13 @@
 <header>
     <div class="logo">CashClimb</div>
     <nav>
-        <ul>
-            <li><a href="profile.html">Profile</a></li>
+        <ul class="nav-items">
+            <li class="profile-link-container">
+                <a href="profile.html">
+                <img id="navProfileImage" class="nav-profile-img" alt="Profile" />
+                </a>
+                <a href="profile.html" class="active">Profile</a>
+            </li>
         </ul>
     </nav>
 </header>
@@ -26,15 +31,16 @@
         <li><a href="chat.html">Chat</a></li>
         <li><a href="tips.html">Tips</a></li>
         <li><a href="savedTips.html">Saved Tips</a></li>
-        <li><a href="assetsLiabilities.html" class="active">Assets &amp; Liabilities</a></li>
+        <li><a href="assetsLiabilities.html">Assets &amp; Liabilities</a></li>
         <li><a href="budget.html">Budget</a></li>
-        <li><a href="profile.html">Profile</a></li>
+        <li><a href="profile.html" class="active">Profile</a></li>
         <li><a href="settings.html">Settings</a></li>
         <li><a href="/logout">Logout</a></li>
         <li><a href="bills.html">Bills Page (Not Done)</a></li>
         <li><a href="leaderboard.html">Leaderboard</a></li>
     </ul>
 </nav>
+
 <main>
     <div class="hero">
         <div class="header-content">
@@ -60,13 +66,13 @@
             </div>
             <div class="form-group">
                 <label for="careerDescription">Career Description</label>
-                <textarea id="careerDescription" name="careerDescription" placeholder="Tell us about your career (e.g., job title, industry, goals)" rows="4"></textarea>
+                <textarea id="careerDescription" name="careerDescription" placeholder="Job title, industry, goals..." rows="4"></textarea>
             </div>
             <button type="submit" class="submit-btn">Save Profile</button>
         </form>
     </div>
 </main>
-</body>
+
 <script>
     function toggleDrawer() {
         const drawer = document.getElementById('sideDrawer');
@@ -81,38 +87,88 @@
         if (event.persisted) window.location.reload();
     });
     window.addEventListener('DOMContentLoaded', () => {
-        const savedTheme = getThemePreference('theme');
         const body = document.body;
-        if (savedTheme === 'light') {
-            body.classList.add('light-mode');
-        } else if (savedTheme === 'dark') {
-            body.classList.add('dark-mode');
-        }
-        if (savedTheme) {
-            const input = document.querySelector(`input[name="theme"][value="${savedTheme}"]`);
-            if (input) input.checked = true;
-        }
+        const theme = getThemePreference('theme');
+        if (theme === 'light') body.classList.add('light-mode');
+        else if (theme === 'dark') body.classList.add('dark-mode');
+        loadTips();
     });
-    document.getElementById('profileImage').addEventListener('change', function(event) {
+    let base64Image = "";
+
+    document.getElementById("profileImage").addEventListener("change", function (event) {
         const file = event.target.files[0];
-        const preview = document.getElementById('imagePreview');
+        const preview = document.getElementById("imagePreview");
 
-        if (file) {
+        if (file && file.size <= 1024 * 1024) {
             const reader = new FileReader();
-
-            reader.onload = function(e) {
-                preview.innerHTML = `<img src="${e.target.result}" alt="Profile Preview">`;
-            }
-
+            reader.onload = function (e) {
+                base64Image = e.target.result;
+                preview.innerHTML = `<img src="${base64Image}" alt="Profile Preview">`;
+            };
             reader.readAsDataURL(file);
         } else {
-            preview.innerHTML = '<span>No image selected</span>';
+            alert("Please select an image under 1MB.");
+            preview.innerHTML = "<span>No image selected</span>";
+            base64Image = "";
         }
     });
-
-    document.getElementById('profileForm').addEventListener('submit', function(event) {
+    function saveProfileToFirebase(fullName, careerDescription, base64Image) {
+        fetch("/api/profile", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                fullName: fullName,
+                careerDescription: careerDescription,
+                profileImage: base64Image
+            })
+        })
+            .then(res => {
+                if (res.ok) {
+                    alert("Profile saved successfully.");
+                } else {
+                    alert("Failed to save profile.");
+                }
+            })
+            .catch(() => {
+                alert("Error occurred.");
+            });
+    }
+    document.getElementById("profileForm").addEventListener("submit", function (event) {
         event.preventDefault();
-        alert('Profile saved successfully!');
+
+        const fullName = document.getElementById("fullName").value.trim();
+        const careerDescription = document.getElementById("careerDescription").value.trim();
+
+        if (!fullName || !careerDescription) {
+            alert("Please fill out all fields.");
+            return;
+        }
+
+        saveProfileToFirebase(fullName, careerDescription, base64Image);
+    });
+
+    window.addEventListener("DOMContentLoaded", function () {
+        fetch("/api/profile", {
+            method: "GET",
+            headers: { "Content-Type": "application/json" }
+        })
+            .then(res => res.json())
+            .then(data => {
+                const fields = data.fields || {};
+                if (fields.fullName) {
+                    document.getElementById("fullName").value = fields.fullName.stringValue;
+                }
+                if (fields.careerDescription) {
+                    document.getElementById("careerDescription").value = fields.careerDescription.stringValue;
+                }
+                if (fields.profileImage) {
+                    base64Image = fields.profileImage.stringValue;
+                    document.getElementById("imagePreview").innerHTML = `<img src="${base64Image}" alt="Profile Preview">`;
+                    const navImg = document.getElementById("navProfileImage");
+                    if (navImg) navImg.src = base64Image;
+                }
+            });
     });
 </script>
+</body>
 </html>

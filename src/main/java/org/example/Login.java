@@ -54,6 +54,8 @@ public class Login {
         assetsLiabilitiesPage.getFilters().add(new AuthFilter());
         HttpContext apiTipsContext = server.createContext("/api/tips", new TipsHandler());
         apiTipsContext.getFilters().add(new AuthFilter());
+        HttpContext apiProfileContext = server.createContext("/api/profile", new ProfileHandler());
+        apiProfileContext.getFilters().add(new AuthFilter());
 
         HttpContext apiAssets = server.createContext("/api/assets", new AssetsLiabilitiesHandler("Assets"));
         apiAssets.getFilters().add(new AuthFilter());

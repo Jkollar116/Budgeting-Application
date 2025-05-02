@@ -3323,4 +3323,12 @@ body.dark-mode .save-tip-btn:hover {
     border-radius: 6px;
     transition: width 0.5s;
 }
-
+.nav-profile-img {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    object-fit: cover;
+    margin-left: 8px;
+    vertical-align: middle;
+    margin-right: 8px;
+}
