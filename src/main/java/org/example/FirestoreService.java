@@ -15,31 +15,100 @@ import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.*;
-import java.util.concurrent.ExecutionException;
+import java.util.concurrent.*;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
- * Service for interacting with Firebase Firestore
+ * Enhanced service for interacting with Firebase Firestore
+ * This implementation includes:
+ * - Robust connection handling
+ * - Caching for frequently accessed data
+ * - Retry logic for resilience
+ * - Batch write operations
+ * - Comprehensive error handling
  */
 public class FirestoreService {
     private static final Logger LOGGER = Logger.getLogger(FirestoreService.class.getName());
     private static Firestore db;
     private static FirestoreService instance;
-    private static final String USERS_COLLECTION = "users";
-    private static final String WALLETS_COLLECTION = "wallets";
-    private static final String TRANSACTIONS_COLLECTION = "transactions";
-    private static final String PORTFOLIOS_COLLECTION = "portfolios";
-    private static final String SETTINGS_COLLECTION = "settings";
-    private static final String ACTIVITIES_COLLECTION = "activities";
+    private static final String USERS_COLLECTION = "Users"; // Changed to match Firebase naming
+    private static final String WALLETS_COLLECTION = "Wallets";
+    private static final String TRANSACTIONS_COLLECTION = "Transactions";
+    private static final String PORTFOLIOS_COLLECTION = "StockPositions"; // Changed to match Firebase naming
+    private static final String SETTINGS_COLLECTION = "Settings";
+    private static final String ACTIVITIES_COLLECTION = "Activities";
     private static boolean initializationAttempted = false;
     private static final String PROJECT_ID = "cashclimb-d162c";
+    
+    // Cache configuration
+    private static final int CACHE_SIZE = 100; // Maximum number of cached items
+    private static final long CACHE_EXPIRY_MINUTES = 15; // Cache expiry time in minutes
+    private final Map<String, CacheEntry<?>> cache = new ConcurrentHashMap<>();
+    private final ScheduledExecutorService cacheCleanupService = Executors.newSingleThreadScheduledExecutor();
+    
+    // Retry configuration
+    private static final int MAX_RETRIES = 3;
+    private static final int INITIAL_RETRY_DELAY_MS = 1000;
+    private static final int MAX_RETRY_DELAY_MS = 5000;
+    private static final double RETRY_BACKOFF_FACTOR = 1.5;
+    
+    // Connection pool configuration
+    private static final int MAX_CONCURRENT_OPERATIONS = 10;
+    private final Semaphore connectionSemaphore = new Semaphore(MAX_CONCURRENT_OPERATIONS);
+    private final AtomicInteger activeConnections = new AtomicInteger(0);
+    
+    /**
+     * Cache entry with expiry time
+     */
+    private static class CacheEntry<T> {
+        private final T data;
+        private final long expiryTimeMillis;
+        
+        public CacheEntry(T data, long expiryTimeMinutes) {
+            this.data = data;
+            this.expiryTimeMillis = System.currentTimeMillis() + (expiryTimeMinutes * 60 * 1000);
+        }
+        
+        public boolean isExpired() {
+            return System.currentTimeMillis() > expiryTimeMillis;
+        }
+        
+        public T getData() {
+            return data;
+        }
+    }
 
     /**
      * Private constructor to enforce singleton pattern
      */
     private FirestoreService() {
-        // Initialization is done in the initialize method
+        // Start cache cleanup task
+        cacheCleanupService.scheduleAtFixedRate(this::cleanupCache, 
+            CACHE_EXPIRY_MINUTES, CACHE_EXPIRY_MINUTES, TimeUnit.MINUTES);
+    }
+
+    /**
+     * Remove expired entries from the cache
+     */
+    private void cleanupCache() {
+        try {
+            List<String> keysToRemove = new ArrayList<>();
+            for (Map.Entry<String, CacheEntry<?>> entry : cache.entrySet()) {
+                if (entry.getValue().isExpired()) {
+                    keysToRemove.add(entry.getKey());
+                }
+            }
+            
+            for (String key : keysToRemove) {
+                cache.remove(key);
+            }
+            
+            LOGGER.fine("Cache cleanup completed. Removed " + keysToRemove.size() + " expired entries.");
+        } catch (Exception e) {
+            LOGGER.warning("Error during cache cleanup: " + e.getMessage());
+        }
     }
 
     /**
@@ -348,9 +417,128 @@ public class FirestoreService {
     public boolean isAvailable() {
         return db != null;
     }
+    
+    /**
+     * Check if Firestore is initialized
+     * Used by handlers to verify if Firebase is ready
+     * 
+     * @return true if Firestore is initialized, false otherwise
+     */
+    public boolean isInitialized() {
+        return db != null;
+    }
+    
+    /**
+     * Get Firestore database instance
+     * 
+     * @return Firestore database instance
+     */
+    public Firestore getDb() {
+        return db;
+    }
 
     /**
-     * Get a user's profile data
+     * Get a reference to a user document
+     * 
+     * @param userId The user ID
+     * @return DocumentReference to the user document
+     */
+    public DocumentReference getUserDocument(String userId) {
+        if (!isAvailable()) {
+            return null;
+        }
+        return db.collection(USERS_COLLECTION).document(userId);
+    }
+
+    /**
+     * Get a reference to a subcollection document
+     * 
+     * @param userId The user ID
+     * @param collectionName The subcollection name
+     * @param documentId The document ID
+     * @return DocumentReference to the specified document
+     */
+    public DocumentReference getSubcollectionDocument(String userId, String collectionName, String documentId) {
+        if (!isAvailable()) {
+            return null;
+        }
+        return db.collection(USERS_COLLECTION).document(userId)
+                .collection(collectionName).document(documentId);
+    }
+
+    /**
+     * Get a reference to a subcollection
+     * 
+     * @param userId The user ID
+     * @param collectionName The subcollection name
+     * @return CollectionReference to the specified subcollection
+     */
+    public CollectionReference getSubcollection(String userId, String collectionName) {
+        if (!isAvailable()) {
+            return null;
+        }
+        return db.collection(USERS_COLLECTION).document(userId).collection(collectionName);
+    }
+
+    /**
+     * Execute a Firestore operation with retry logic
+     * 
+     * @param operation The operation to execute
+     * @param errorMessage Error message for logging
+     * @param <T> Return type of the operation
+     * @return Result of the operation or null if failed
+     */
+    private <T> T executeWithRetry(Callable<T> operation, String errorMessage) {
+        int retryCount = 0;
+        int retryDelayMs = INITIAL_RETRY_DELAY_MS;
+        
+        while (retryCount <= MAX_RETRIES) {
+            try {
+                // Use semaphore to limit concurrent operations
+                connectionSemaphore.acquire();
+                activeConnections.incrementAndGet();
+                
+                try {
+                    return operation.call();
+                } finally {
+                    connectionSemaphore.release();
+                    activeConnections.decrementAndGet();
+                }
+            } catch (InterruptedException e) {
+                LOGGER.warning("Operation interrupted: " + errorMessage);
+                Thread.currentThread().interrupt();
+                return null;
+            } catch (Exception e) {
+                retryCount++;
+                
+                if (retryCount <= MAX_RETRIES) {
+                    LOGGER.warning("Attempt " + retryCount + " failed: " + errorMessage + ". Retrying in " + retryDelayMs + "ms. Error: " + e.getMessage());
+                    
+                    try {
+                        Thread.sleep(retryDelayMs);
+                    } catch (InterruptedException ie) {
+                        Thread.currentThread().interrupt();
+                        LOGGER.severe("Retry interrupted: " + errorMessage);
+                        return null;
+                    }
+                    
+                    // Exponential backoff with jitter
+                    retryDelayMs = Math.min(
+                        (int)(retryDelayMs * RETRY_BACKOFF_FACTOR * (1.0 + Math.random() * 0.1)), 
+                        MAX_RETRY_DELAY_MS
+                    );
+                } else {
+                    LOGGER.severe("Operation failed after " + MAX_RETRIES + " retries: " + errorMessage + ". Error: " + e.getMessage());
+                    return null;
+                }
+            }
+        }
+        
+        return null;
+    }
+
+    /**
+     * Get a user's profile data with caching
      * 
      * @param userId The user ID
      * @return Map containing user data
@@ -360,20 +548,35 @@ public class FirestoreService {
             return new HashMap<>();
         }
         
-        try {
+        // Check cache first
+        String cacheKey = "profile:" + userId;
+        CacheEntry<Map<String, Object>> cachedProfile = (CacheEntry<Map<String, Object>>) cache.get(cacheKey);
+        if (cachedProfile != null && !cachedProfile.isExpired()) {
+            LOGGER.fine("Retrieved user profile from cache for ID: " + userId);
+            return cachedProfile.getData();
+        }
+        
+        // Cache miss, load from Firestore
+        return executeWithRetry(() -> {
             LOGGER.info("Getting user profile for ID: " + userId);
             DocumentSnapshot document = db.collection(USERS_COLLECTION).document(userId).get().get();
+            Map<String, Object> profile;
+            
             if (document.exists()) {
                 LOGGER.info("Found user profile");
-                return document.getData();
+                profile = document.getData();
             } else {
                 LOGGER.info("User profile not found, returning empty map");
-                return new HashMap<>();
+                profile = new HashMap<>();
             }
-        } catch (InterruptedException | ExecutionException e) {
-            LOGGER.severe("Error getting user profile: " + e.getMessage());
-            return new HashMap<>();
-        }
+            
+            // Store in cache
+            if (profile != null && !profile.isEmpty()) {
+                cache.put(cacheKey, new CacheEntry<>(profile, CACHE_EXPIRY_MINUTES));
+            }
+            
+            return profile;
+        }, "Failed to get user profile");
     }
 
     /**
@@ -388,16 +591,19 @@ public class FirestoreService {
             return false;
         }
         
-        try {
+        Boolean result = executeWithRetry(() -> {
             LOGGER.info("Saving user profile for ID: " + userId);
             db.collection(USERS_COLLECTION).document(userId).set(data).get();
             LOGGER.info("User profile saved to Firestore with ID: " + userId);
+            
+            // Update cache
+            String cacheKey = "profile:" + userId;
+            cache.put(cacheKey, new CacheEntry<>(data, CACHE_EXPIRY_MINUTES));
+            
             return true;
-        } catch (InterruptedException | ExecutionException e) {
-            LOGGER.severe("Error saving user profile: " + e.getMessage());
-            LOGGER.severe("User profile failed to save to Firestore with ID: " + userId);
-            return false;
-        }
+        }, "Failed to save user profile");
+        
+        return result != null && result;
     }
 
     /**
@@ -411,7 +617,16 @@ public class FirestoreService {
             return new ArrayList<>();
         }
         
-        try {
+        // Check cache first
+        String cacheKey = "wallets:" + userId;
+        CacheEntry<List<Map<String, Object>>> cachedWallets = (CacheEntry<List<Map<String, Object>>>) cache.get(cacheKey);
+        if (cachedWallets != null && !cachedWallets.isExpired()) {
+            LOGGER.fine("Retrieved wallets from cache for user ID: " + userId);
+            return cachedWallets.getData();
+        }
+        
+        // Cache miss, load from Firestore
+        return executeWithRetry(() -> {
             LOGGER.info("Getting wallets for user ID: " + userId);
             QuerySnapshot querySnapshot = db.collection(USERS_COLLECTION)
                     .document(userId)
@@ -425,11 +640,12 @@ public class FirestoreService {
             }
             
             LOGGER.info("Found " + wallets.size() + " wallets for user: " + userId);
+            
+            // Store in cache
+            cache.put(cacheKey, new CacheEntry<>(wallets, CACHE_EXPIRY_MINUTES));
+            
             return wallets;
-        } catch (InterruptedException | ExecutionException e) {
-            LOGGER.severe("Error getting user wallets: " + e.getMessage());
-            return new ArrayList<>();
-        }
+        }, "Failed to get user wallets");
     }
 
     /**
@@ -445,7 +661,7 @@ public class FirestoreService {
             return false;
         }
         
-        try {
+        Boolean result = executeWithRetry(() -> {
             LOGGER.info("Saving wallet " + walletId + " for user: " + userId);
             db.collection(USERS_COLLECTION)
                     .document(userId)
@@ -455,11 +671,14 @@ public class FirestoreService {
                     .get();
             
             LOGGER.info("Wallet saved successfully");
+            
+            // Invalidate wallet cache
+            cache.remove("wallets:" + userId);
+            
             return true;
-        } catch (InterruptedException | ExecutionException e) {
-            LOGGER.severe("Error saving wallet: " + e.getMessage());
-            return false;
-        }
+        }, "Failed to save wallet");
+        
+        return result != null && result;
     }
 
     /**
@@ -474,7 +693,7 @@ public class FirestoreService {
             return false;
         }
         
-        try {
+        Boolean result = executeWithRetry(() -> {
             LOGGER.info("Deleting wallet " + walletId + " for user: " + userId);
             db.collection(USERS_COLLECTION)
                     .document(userId)
@@ -484,11 +703,14 @@ public class FirestoreService {
                     .get();
             
             LOGGER.info("Wallet deleted successfully");
+            
+            // Invalidate wallet cache
+            cache.remove("wallets:" + userId);
+            
             return true;
-        } catch (InterruptedException | ExecutionException e) {
-            LOGGER.severe("Error deleting wallet: " + e.getMessage());
-            return false;
-        }
+        }, "Failed to delete wallet");
+        
+        return result != null && result;
     }
 
     /**
@@ -502,7 +724,16 @@ public class FirestoreService {
             return new ArrayList<>();
         }
         
-        try {
+        // Check cache first
+        String cacheKey = "portfolio:" + userId;
+        CacheEntry<List<Map<String, Object>>> cachedPortfolio = (CacheEntry<List<Map<String, Object>>>) cache.get(cacheKey);
+        if (cachedPortfolio != null && !cachedPortfolio.isExpired()) {
+            LOGGER.fine("Retrieved portfolio from cache for user ID: " + userId);
+            return cachedPortfolio.getData();
+        }
+        
+        // Cache miss, load from Firestore
+        return executeWithRetry(() -> {
             LOGGER.info("Getting portfolio for user ID: " + userId);
             QuerySnapshot querySnapshot = db.collection(USERS_COLLECTION)
                     .document(userId)
@@ -516,11 +747,12 @@ public class FirestoreService {
             }
             
             LOGGER.info("Found " + positions.size() + " stock positions for user: " + userId);
+            
+            // Store in cache with short expiry (stock prices change frequently)
+            cache.put(cacheKey, new CacheEntry<>(positions, 5)); // 5 minutes
+            
             return positions;
-        } catch (InterruptedException | ExecutionException e) {
-            LOGGER.severe("Error getting user portfolio: " + e.getMessage());
-            return new ArrayList<>();
-        }
+        }, "Failed to get user portfolio");
     }
 
     /**
@@ -536,7 +768,7 @@ public class FirestoreService {
             return false;
         }
         
-        try {
+        Boolean result = executeWithRetry(() -> {
             LOGGER.info("Saving stock position " + symbol + " for user: " + userId);
             db.collection(USERS_COLLECTION)
                     .document(userId)
@@ -546,11 +778,54 @@ public class FirestoreService {
                     .get();
             
             LOGGER.info("Stock position saved successfully");
+            
+            // Invalidate portfolio cache
+            cache.remove("portfolio:" + userId);
+            
             return true;
-        } catch (InterruptedException | ExecutionException e) {
-            LOGGER.severe("Error saving stock position: " + e.getMessage());
+        }, "Failed to save stock position");
+        
+        return result != null && result;
+    }
+
+    /**
+     * Perform a batch update of stock positions
+     * 
+     * @param userId The user ID
+     * @param positions Map of symbol to position data
+     * @return true if successful, false otherwise
+     */
+    public boolean batchUpdatePositions(String userId, Map<String, Map<String, Object>> positions) {
+        if (!isAvailable() || positions.isEmpty()) {
             return false;
         }
+        
+        Boolean result = executeWithRetry(() -> {
+            LOGGER.info("Batch updating " + positions.size() + " stock positions for user: " + userId);
+            WriteBatch batch = db.batch();
+            
+            for (Map.Entry<String, Map<String, Object>> entry : positions.entrySet()) {
+                String symbol = entry.getKey();
+                Map<String, Object> positionData = entry.getValue();
+                
+                DocumentReference docRef = db.collection(USERS_COLLECTION)
+                        .document(userId)
+                        .collection(PORTFOLIOS_COLLECTION)
+                        .document(symbol);
+                
+                batch.set(docRef, positionData);
+            }
+            
+            batch.commit().get();
+            LOGGER.info("Batch update completed successfully");
+            
+            // Invalidate portfolio cache
+            cache.remove("portfolio:" + userId);
+            
+            return true;
+        }, "Failed to batch update stock positions");
+        
+        return result != null && result;
     }
 
     /**
@@ -565,7 +840,7 @@ public class FirestoreService {
             return "";
         }
         
-        try {
+        return executeWithRetry(() -> {
             LOGGER.info("Saving transaction for user: " + userId);
             // Generate a unique ID for the transaction
             DocumentReference docRef = db.collection(USERS_COLLECTION)
@@ -574,7 +849,8 @@ public class FirestoreService {
                     .document();
             
             // Add the transaction ID to the data
-            transactionData.put("id", docRef.getId());
+            String transactionId = docRef.getId();
+            transactionData.put("id", transactionId);
             
             // Add timestamp if not already present
             if (!transactionData.containsKey("timestamp")) {
@@ -584,150 +860,12 @@ public class FirestoreService {
             // Save the transaction
             docRef.set(transactionData).get();
             
-            LOGGER.info("Transaction saved with ID: " + docRef.getId());
-            return docRef.getId();
-        } catch (InterruptedException | ExecutionException e) {
-            LOGGER.severe("Error saving transaction: " + e.getMessage());
-            return "";
-        }
-    }
-
-    /**
-     * Get a user's transactions
-     * 
-     * @param userId The user ID
-     * @param limit Maximum number of transactions to return
-     * @return List of transaction data maps
-     */
-    public List<Map<String, Object>> getUserTransactions(String userId, int limit) {
-        if (!isAvailable()) {
-            return new ArrayList<>();
-        }
-        
-        try {
-            LOGGER.info("Getting transactions for user ID: " + userId + " with limit: " + limit);
-            // Order by timestamp descending (most recent first) and limit
-            Query query = db.collection(USERS_COLLECTION)
-                    .document(userId)
-                    .collection(TRANSACTIONS_COLLECTION)
-                    .orderBy("timestamp", Query.Direction.DESCENDING);
+            LOGGER.info("Transaction saved successfully with ID: " + transactionId);
             
-            if (limit > 0) {
-                query = query.limit(limit);
-            }
-            
-            QuerySnapshot querySnapshot = query.get().get();
-            
-            List<Map<String, Object>> transactions = new ArrayList<>();
-            for (QueryDocumentSnapshot document : querySnapshot.getDocuments()) {
-                transactions.add(document.getData());
-            }
-            
-            LOGGER.info("Found " + transactions.size() + " transactions for user: " + userId);
-            return transactions;
-        } catch (InterruptedException | ExecutionException e) {
-            LOGGER.severe("Error getting user transactions: " + e.getMessage());
-            return new ArrayList<>();
-        }
-    }
-
-    /**
-     * Get user settings
-     * 
-     * @param userId The user ID
-     * @return Map of settings
-     */
-    public Map<String, Object> getUserSettings(String userId) {
-        if (!isAvailable()) {
-            return new HashMap<>();
-        }
-        
-        try {
-            LOGGER.info("Getting settings for user ID: " + userId);
-            DocumentSnapshot document = db.collection(USERS_COLLECTION)
-                    .document(userId)
-                    .collection(SETTINGS_COLLECTION)
-                    .document("preferences")
-                    .get()
-                    .get();
-            
-            if (document.exists()) {
-                LOGGER.info("Found user settings");
-                return document.getData();
-            } else {
-                LOGGER.info("User settings not found, returning empty map");
-                return new HashMap<>();
-            }
-        } catch (InterruptedException | ExecutionException e) {
-            LOGGER.severe("Error getting user settings: " + e.getMessage());
-            return new HashMap<>();
-        }
-    }
-
-    /**
-     * Save user settings
-     * 
-     * @param userId The user ID
-     * @param settings The settings map
-     * @return true if successful, false otherwise
-     */
-    public boolean saveUserSettings(String userId, Map<String, Object> settings) {
-        if (!isAvailable()) {
-            return false;
-        }
-        
-        try {
-            LOGGER.info("Saving settings for user ID: " + userId);
-            db.collection(USERS_COLLECTION)
-                    .document(userId)
-                    .collection(SETTINGS_COLLECTION)
-                    .document("preferences")
-                    .set(settings)
-                    .get();
-            
-            LOGGER.info("User settings saved successfully");
-            return true;
-        } catch (InterruptedException | ExecutionException e) {
-            LOGGER.severe("Error saving user settings: " + e.getMessage());
-            return false;
-        }
+            return transactionId;
+        }, "Failed to save transaction");
     }
     
-    /**
-     * Save user activity for analytics and audit purposes
-     * 
-     * @param activityData The activity data to save
-     * @return true if successful, false otherwise
-     */
-    public boolean saveActivity(Map<String, Object> activityData) {
-        if (!isAvailable()) {
-            return false;
-        }
-        
-        try {
-            LOGGER.info("Saving user activity");
-            // Generate a unique ID for the activity
-            DocumentReference docRef = db.collection(ACTIVITIES_COLLECTION).document();
-            
-            // Add the activity ID to the data
-            activityData.put("id", docRef.getId());
-            
-            // Add timestamp if not already present
-            if (!activityData.containsKey("timestamp")) {
-                activityData.put("timestamp", FieldValue.serverTimestamp());
-            }
-            
-            // Save the activity
-            docRef.set(activityData).get();
-            
-            LOGGER.info("Activity saved with ID: " + docRef.getId());
-            return true;
-        } catch (InterruptedException | ExecutionException e) {
-            LOGGER.severe("Error saving activity: " + e.getMessage());
-            return false;
-        }
-    }
-
     /**
      * Convert a Wallet object to a Map
      * 
@@ -781,38 +919,4 @@ public class FirestoreService {
         
         return wallet;
     }
-
-    /**
-     * Convert a StockPosition object to a Map
-     * 
-     * @param position The StockPosition object
-     * @return Map representation of the position
-     */
-//    public static Map<String, Object> stockPositionToMap(StockPosition position) {
-//        Map<String, Object> map = new HashMap<>();
-//        map.put("symbol", position.getSymbol());
-//        map.put("qty", position.getQuantity());
-//        map.put("avgPrice", position.getAverageEntryPrice());
-//        map.put("marketValue", position.getMarketValue());
-//        map.put("costBasis", position.getQuantity() * position.getAverageEntryPrice()); // Calculate cost basis
-//        map.put("unrealizedPL", position.getUnrealizedProfitLoss());
-//        map.put("unrealizedPLPercent", position.getUnrealizedProfitLossPercent());
-//        map.put("assetId", position.getAssetId());
-//        map.put("lastUpdated", position.getLastUpdated());
-//        // Note: Exchange information not available in StockPosition class
-//
-//        return map;
-//    }
-
-    /**
-     * Convert a map to a StockPosition object
-     * 
-     * @param map The map representation of the position
-     * @return StockPosition object
-     */
-//    public static StockPosition mapToStockPosition(Map<String, Object> map) {
-//        // Create a JSON representation for the constructor
-//        JSONObject json = new JSONObject(map);
-//        return new StockPosition(json);
-//    }
 }

@@ -1,228 +1,1066 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>Budget Tracker</title>
-  <link rel="stylesheet" href="style.css">
+    <meta charset="UTF-8">
+    <title>Budget & Spending Limits</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        .budget-container {
+            padding: 20px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        .tabs {
+            display: flex;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #FF8C00;
+        }
+        
+        .tab {
+            padding: 10px 20px;
+            background-color: #3E1F5B;
+            color: #FF8C00;
+            cursor: pointer;
+            border: 1px solid #FF8C00;
+            border-bottom: none;
+            margin-right: 5px;
+        }
+        
+        .tab.active {
+            background-color: #FF8C00;
+            color: #3E1F5B;
+        }
+        
+        .tab-content {
+            display: none;
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+        
+        .budget-form {
+            background-color: #3E1F5B;
+            padding: 20px;
+            border: 1px solid #FF8C00;
+            border-radius: 5px;
+            margin-bottom: 20px;
+        }
+        
+        .spending-limit-form {
+            background-color: #3E1F5B;
+            padding: 20px;
+            border: 1px solid #FF8C00;
+            border-radius: 5px;
+            margin-bottom: 20px;
+        }
+        
+        .form-row {
+            display: flex;
+            flex-wrap: wrap;
+            margin-bottom: 15px;
+            gap: 15px;
+        }
+        
+        .form-group {
+            flex: 1;
+            min-width: 200px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            color: #FF8C00;
+            font-weight: bold;
+        }
+        
+        .form-group input, .form-group select {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #FF8C00;
+            background-color: #2C003E;
+            color: #fff;
+        }
+        
+        .submit-btn {
+            padding: 10px 20px;
+            background-color: #FF8C00;
+            color: #3E1F5B;
+            border: none;
+            cursor: pointer;
+            font-weight: bold;
+            margin-top: 10px;
+        }
+        
+        .budget-card {
+            background-color: #3E1F5B;
+            border: 1px solid #FF8C00;
+            border-radius: 5px;
+            padding: 15px;
+            margin-bottom: 15px;
+            position: relative;
+        }
+        
+        .budget-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 15px;
+        }
+        
+        .budget-title {
+            font-weight: bold;
+            color: #FF8C00;
+            font-size: 1.2em;
+        }
+        
+        .budget-amount {
+            font-weight: bold;
+        }
+        
+        .budget-progress {
+            margin-bottom: 15px;
+        }
+        
+        .progress-bar-container {
+            height: 20px;
+            background-color: #1E0F2D;
+            border-radius: 10px;
+            overflow: hidden;
+            margin-bottom: 5px;
+        }
+        
+        .progress-bar {
+            height: 100%;
+            background-color: #4CAF50; /* Green by default */
+            width: 0%;
+            transition: width 0.5s;
+        }
+        
+        .progress-bar.warning {
+            background-color: #FFC107; /* Yellow */
+        }
+        
+        .progress-bar.danger {
+            background-color: #F44336; /* Red */
+        }
+        
+        .progress-label {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.9em;
+            color: #ccc;
+        }
+        
+        .budget-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+        }
+        
+        .budget-action-btn {
+            padding: 5px 10px;
+            background-color: transparent;
+            color: #FF8C00;
+            border: 1px solid #FF8C00;
+            cursor: pointer;
+            border-radius: 3px;
+        }
+        
+        .delete-btn {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: none;
+            border: none;
+            color: #FF5555;
+            cursor: pointer;
+            font-size: 1.2em;
+        }
+        
+        .no-data {
+            text-align: center;
+            padding: 50px;
+            color: #ccc;
+        }
+        
+        .section-title {
+            color: #FF8C00;
+            margin-top: 30px;
+            margin-bottom: 15px;
+            font-size: 1.5em;
+        }
+        
+        .limits-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+        
+        .limit-card {
+            background-color: #3E1F5B;
+            border: 1px solid #FF8C00;
+            border-radius: 5px;
+            padding: 15px;
+            position: relative;
+            flex: 1;
+            min-width: 250px;
+            max-width: calc(33.333% - 20px);
+        }
+        
+        .limit-card.exceeded {
+            border-left: 5px solid #F44336;
+        }
+        
+        .limit-card.warning {
+            border-left: 5px solid #FFC107;
+        }
+        
+        .limit-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+        }
+        
+        .limit-title {
+            font-weight: bold;
+            color: #FF8C00;
+        }
+        
+        .limit-amount {
+            font-weight: bold;
+        }
+        
+        .limit-progress {
+            margin-bottom: 15px;
+        }
+        
+        .limit-detail {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 5px;
+            font-size: 0.9em;
+            color: #ccc;
+        }
+        
+        .limit-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+        }
+        
+        .limit-action-btn {
+            padding: 5px 10px;
+            background-color: transparent;
+            color: #FF8C00;
+            border: 1px solid #FF8C00;
+            cursor: pointer;
+            border-radius: 3px;
+            font-size: 0.9em;
+        }
+        
+        .info-box {
+            background-color: rgba(62, 31, 91, 0.8);
+            border-left: 4px solid #FF8C00;
+            padding: 15px;
+            margin-bottom: 20px;
+            border-radius: 0 5px 5px 0;
+        }
+        
+        .info-title {
+            font-weight: bold;
+            color: #FF8C00;
+            margin-bottom: 5px;
+        }
+        
+        .info-content {
+            font-size: 0.95em;
+            line-height: 1.5;
+        }
+        
+        @media (max-width: 768px) {
+            .limit-card {
+                max-width: 100%;
+            }
+        }
+    </style>
 </head>
 <body>
 <header>
-  <div class="logo">CashClimb</div>
-  <nav>
-    <ul>
-      <li><a href="profile.html">Profile</a></li>
-    </ul>
-  </nav>
+    <div class="logo">CashClimb</div>
+    <nav>
+        <ul>
+            <li><a href="home.html">Dashboard</a></li>
+            <li><a href="budget.html" class="active">Budget</a></li>
+            <li><a href="alerts.html">Alerts</a></li>
+        </ul>
+    </nav>
 </header>
 <button class="drawer-toggle" onclick="toggleDrawer()">☰</button>
 <nav class="drawer" id="sideDrawer">
-  <ul>
-    <li><a href="home.html">Dashboard</a></li>
-    <li><a href="expenses.html">Expenses</a></li>
-    <li><a href="income.html">Income</a></li>
-    <li><a href="tax.html">Tax</a></li>
-    <li><a href="crypto.html">Crypto</a></li>
-    <li><a href="stocks.html">Stocks</a></li>
-    <li><a href="chat.html">Chat</a></li>
-    <li><a href="tips.html">Tips</a></li>
-    <li><a href="savedTips.html">Saved Tips</a></li>
-    <li><a href="assetsLiabilities.html" class="active">Assets &amp; Liabilities</a></li>
-    <li><a href="budget.html">Budget</a></li>
-    <li><a href="profile.html">Profile</a></li>
-    <li><a href="settings.html">Settings</a></li>
-    <li><a href="/logout">Logout</a></li>
-    <li><a href="bills.html">Bills Page (Not Done)</a></li>
-    <li><a href="leaderboard.html">Leaderboard</a></li>
-  </ul>
+    <ul>
+        <li><a href="home.html">Dashboard</a></li>
+        <li><a href="expenses.html">Expenses</a></li>
+        <li><a href="income.html">Income</a></li>
+        <li><a href="tax.html">Tax</a></li>
+        <li><a href="crypto.html">Crypto</a></li>
+        <li><a href="stocks.html">Stocks</a></li>
+        <li><a href="chat.html">Chat</a></li>
+        <li><a href="tips.html">Tips</a></li>
+        <li><a href="savedTips.html">Saved Tips</a></li>
+        <li><a href="assetsLiabilities.html">Assets &amp; Liabilities</a></li>
+        <li><a href="budget.html" class="active">Budget</a></li>
+        <li><a href="alerts.html">Alerts</a></li>
+        <li><a href="bills.html">Bills</a></li>
+        <li><a href="leaderboard.html">Leaderboard</a></li>
+        <li><a href="profile.html">Profile</a></li>
+        <li><a href="settings.html">Settings</a></li>
+        <li><a href="/logout">Logout</a></li>
+    </ul>
 </nav>
-
-<main class="budget-page">
-  <div class="hero">
-    <div class="header-content">
-      <h1>Budget Tracker</h1>
-      <p>Set and monitor your monthly budgets below</p>
+<main>
+    <div class="hero">
+        <div class="header-content">
+            <h1>Budget & Spending Limits</h1>
+            <p>Set your financial boundaries and stay on track</p>
+        </div>
     </div>
-  </div>
-
-  <h1 class="expenses-header">Set Monthly Budget</h1>
-
-  <form id="budgetForm" class="budget-form">
-    <label for="monthSelect">Month</label>
-    <select id="monthSelect" name="monthSelect" required>
-      <option value="">Select Month</option>
-      <option value="01">January</option>
-      <option value="02">February</option>
-      <option value="03">March</option>
-      <option value="04">April</option>
-      <option value="05">May</option>
-      <option value="06">June</option>
-      <option value="07">July</option>
-      <option value="08">August</option>
-      <option value="09">September</option>
-      <option value="10">October</option>
-      <option value="11">November</option>
-      <option value="12">December</option>
-    </select>
-
-    <label for="yearSelect">Year</label>
-    <select id="yearSelect" name="yearSelect" required>
-      <option value="">Select Year</option>
-      <option value="2024">2024</option>
-      <option value="2025">2025</option>
-      <option value="2026">2026</option>
-      <option value="2027">2027</option>
-      <option value="2028">2028</option>
-      <option value="2029">2029</option>
-      <option value="2030">2030</option>
-    </select>
-
-    <label for="budgetAmount">Budget Amount</label>
-    <input type="number" step="0.01" id="budgetAmount" name="budgetAmount" required>
-
-    <button type="submit">Add Budget</button>
-  </form>
-
-
-  <div id="budgetList"></div>
+    
+    <div class="budget-container">
+        <div class="tabs">
+            <div class="tab active" data-tab="overview">Overview</div>
+            <div class="tab" data-tab="budget">Set Budget</div>
+            <div class="tab" data-tab="limits">Spending Limits</div>
+            <div class="tab" data-tab="paychecks">Paycheck Alerts</div>
+            <div class="tab" data-tab="goals">Financial Goals</div>
+        </div>
+        
+        <div class="tab-content active" id="overview-tab">
+            <div class="info-box">
+                <div class="info-title">Financial Management Insights</div>
+                <div class="info-content">
+                    <p>Setting a budget helps you plan your spending and track your progress towards financial goals. Spending limits can be used to set boundaries for specific categories, while paycheck alerts keep you informed about upcoming income.</p>
+                </div>
+            </div>
+            
+            <h2 class="section-title">Monthly Budget</h2>
+            <div id="budget-overview">
+                <div class="no-data">No budget data available. Set a budget to get started.</div>
+            </div>
+            
+            <h2 class="section-title">Spending Limits</h2>
+            <div id="limits-overview" class="limits-container">
+                <div class="no-data">No spending limits set. Create limits to track your category spending.</div>
+            </div>
+            
+            <h2 class="section-title">Upcoming Paychecks</h2>
+            <div id="paychecks-overview">
+                <div class="no-data">No paycheck alerts configured. Set up paycheck alerts to receive notifications.</div>
+            </div>
+            
+            <h2 class="section-title">Financial Goals</h2>
+            <div id="goals-overview">
+                <div class="no-data">No financial goals set. Define your financial goals to track your progress.</div>
+            </div>
+        </div>
+        
+        <div class="tab-content" id="budget-tab">
+            <div class="info-box">
+                <div class="info-title">About Budgeting</div>
+                <div class="info-content">
+                    <p>Your monthly budget helps you plan your overall spending. Set a target amount for the month and we'll track your progress. You'll receive alerts when you approach or exceed your budget.</p>
+                </div>
+            </div>
+            
+            <form id="budget-form" class="budget-form">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="budgetAmount">Monthly Budget Amount</label>
+                        <input type="number" id="budgetAmount" name="budgetAmount" step="0.01" required placeholder="0.00">
+                    </div>
+                    <div class="form-group">
+                        <label for="budgetStartDate">Budget Start Date</label>
+                        <input type="date" id="budgetStartDate" name="budgetStartDate" required>
+                    </div>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="budgetAlertThreshold">Alert Threshold (%)</label>
+                        <input type="number" id="budgetAlertThreshold" name="budgetAlertThreshold" min="1" max="100" value="80" required>
+                    </div>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="budgetNotes">Notes (Optional)</label>
+                        <input type="text" id="budgetNotes" name="budgetNotes" placeholder="Additional details about your budget">
+                    </div>
+                </div>
+                
+                <button type="submit" class="submit-btn">Set Budget</button>
+            </form>
+            
+            <h2 class="section-title">Current Budget</h2>
+            <div id="current-budget">
+                <div class="no-data">No budget data available.</div>
+            </div>
+        </div>
+        
+        <div class="tab-content" id="limits-tab">
+            <div class="info-box">
+                <div class="info-title">About Spending Limits</div>
+                <div class="info-content">
+                    <p>Spending limits allow you to set boundaries for specific expense categories. You'll receive alerts when you approach or exceed these limits, helping you maintain control over your spending.</p>
+                </div>
+            </div>
+            
+            <form id="limit-form" class="spending-limit-form">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="limitCategory">Expense Category</label>
+                        <select id="limitCategory" name="limitCategory" required>
+                            <option value="">Select a category</option>
+                            <option value="Food">Food</option>
+                            <option value="Transportation">Transportation</option>
+                            <option value="Entertainment">Entertainment</option>
+                            <option value="Shopping">Shopping</option>
+                            <option value="Utilities">Utilities</option>
+                            <option value="Housing">Housing</option>
+                            <option value="Healthcare">Healthcare</option>
+                            <option value="Personal">Personal</option>
+                            <option value="Education">Education</option>
+                            <option value="Travel">Travel</option>
+                            <option value="Other">Other</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="limitAmount">Limit Amount</label>
+                        <input type="number" id="limitAmount" name="limitAmount" step="0.01" required placeholder="0.00">
+                    </div>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="limitPeriod">Time Period</label>
+                        <select id="limitPeriod" name="limitPeriod" required>
+                            <option value="weekly">Weekly</option>
+                            <option value="monthly" selected>Monthly</option>
+                            <option value="yearly">Yearly</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="limitStartDate">Start Date</label>
+                        <input type="date" id="limitStartDate" name="limitStartDate" required>
+                    </div>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="limitAlertThreshold">Alert Threshold (%)</label>
+                        <input type="number" id="limitAlertThreshold" name="limitAlertThreshold" min="1" max="100" value="80" required>
+                    </div>
+                </div>
+                
+                <button type="submit" class="submit-btn">Add Spending Limit</button>
+            </form>
+            
+            <h2 class="section-title">Current Spending Limits</h2>
+            <div id="current-limits" class="limits-container">
+                <div class="no-data">No spending limits available.</div>
+            </div>
+        </div>
+        
+        <div class="tab-content" id="paychecks-tab">
+            <div class="info-box">
+                <div class="info-title">About Paycheck Alerts</div>
+                <div class="info-content">
+                    <p>Stay informed about your income by setting up paycheck alerts. These alerts will notify you when you're due to receive your paycheck, helping you better plan your finances.</p>
+                </div>
+            </div>
+            
+            <form id="paycheck-form" class="budget-form">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="paycheckSource">Income Source</label>
+                        <input type="text" id="paycheckSource" name="paycheckSource" required placeholder="e.g., Employer Name, Side Gig">
+                    </div>
+                    <div class="form-group">
+                        <label for="paycheckAmount">Expected Amount</label>
+                        <input type="number" id="paycheckAmount" name="paycheckAmount" step="0.01" required placeholder="0.00">
+                    </div>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="paycheckFrequency">Frequency</label>
+                        <select id="paycheckFrequency" name="paycheckFrequency" required>
+                            <option value="weekly">Weekly</option>
+                            <option value="biweekly">Bi-weekly</option>
+                            <option value="monthly">Monthly</option>
+                            <option value="semimonthly">Semi-monthly (15th & 30th)</option>
+                            <option value="onetime">One-time</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="paycheckNextDate">Next Payment Date</label>
+                        <input type="date" id="paycheckNextDate" name="paycheckNextDate" required>
+                    </div>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="paycheckAlertDays">Alert Days Before</label>
+                        <input type="number" id="paycheckAlertDays" name="paycheckAlertDays" min="0" max="14" value="2" required>
+                    </div>
+                </div>
+                
+                <button type="submit" class="submit-btn">Add Paycheck Alert</button>
+            </form>
+            
+            <h2 class="section-title">Upcoming Paychecks</h2>
+            <div id="upcoming-paychecks">
+                <div class="no-data">No paycheck alerts available.</div>
+            </div>
+        </div>
+        
+        <div class="tab-content" id="goals-tab">
+            <div class="info-box">
+                <div class="info-title">About Financial Goals</div>
+                <div class="info-content">
+                    <p>Setting financial goals can help you stay motivated and track your progress toward important milestones. Whether saving for a vacation, retirement, or building an emergency fund, goals keep you focused.</p>
+                </div>
+            </div>
+            
+            <form id="goal-form" class="budget-form">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="goalName">Goal Name</label>
+                        <input type="text" id="goalName" name="goalName" required placeholder="e.g., Emergency Fund, Down Payment">
+                    </div>
+                    <div class="form-group">
+                        <label for="goalTargetAmount">Target Amount</label>
+                        <input type="number" id="goalTargetAmount" name="goalTargetAmount" step="0.01" required placeholder="0.00">
+                    </div>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="goalCurrentAmount">Current Amount</label>
+                        <input type="number" id="goalCurrentAmount" name="goalCurrentAmount" step="0.01" value="0" required placeholder="0.00">
+                    </div>
+                    <div class="form-group">
+                        <label for="goalTargetDate">Target Date</label>
+                        <input type="date" id="goalTargetDate" name="goalTargetDate" required>
+                    </div>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="goalDescription">Description (Optional)</label>
+                        <input type="text" id="goalDescription" name="goalDescription" placeholder="Additional details about your goal">
+                    </div>
+                </div>
+                
+                <button type="submit" class="submit-btn">Add Financial Goal</button>
+            </form>
+            
+            <h2 class="section-title">Your Financial Goals</h2>
+            <div id="financial-goals">
+                <div class="no-data">No financial goals available.</div>
+            </div>
+        </div>
+    </div>
 </main>
-</body>
+
 <script>
-  function toggleDrawer() {
-    document.getElementById('sideDrawer').classList.toggle('collapsed');
-  }
-
-  function getThemePreference(name) {
-    var match = document.cookie.match(new RegExp('(^| )' + name + '=([^;]+)'));
-    return match ? match[2] : null;
-  }
-
-  window.addEventListener('pageshow', function(event) {
-    if (event.persisted) window.location.reload();
-  });
-
-  window.addEventListener('DOMContentLoaded', () => {
-    var body = document.body;
-    body.classList.remove('light-mode', 'dark-mode');
-    var theme = getThemePreference('theme');
-    if (theme === 'light') body.classList.add('light-mode');
-    else if (theme === 'dark') body.classList.add('dark-mode');
-    loadBudgets();
-  });
-
-  function loadBudgets() {
-    let budgets = [];
-    let expensesTotals = {};
-
-    fetch('/api/budgets')
-            .then(res => {
-              console.log('Budget fetch status:', res.status);
-              if (!res.ok) throw Error('Budget fetch failed');
-              return res.json();
+    function toggleDrawer() {
+        const drawer = document.getElementById('sideDrawer');
+        drawer.classList.toggle('collapsed');
+    }
+    
+    function getThemePreference(name) {
+        const match = document.cookie.match(new RegExp('(^| )' + name + '=([^;]+)'));
+        if (!match) return null;
+        return match[2];
+    }
+    
+    function formatDate(dateString) {
+        const date = new Date(dateString);
+        return date.toLocaleDateString();
+    }
+    
+    function formatCurrency(amount) {
+        return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(amount);
+    }
+    
+    // Budget Functions
+    function loadBudgetData() {
+        fetch('/api/budgets')
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Failed to fetch budget data');
+                }
+                return response.json();
             })
             .then(data => {
-              console.log('Budgets data:', data);
-              budgets = data.documents || [];
-              return fetch('/api/expenses');
-            })
-            .then(res => {
-              console.log('Expenses fetch status:', res.status);
-              if (!res.ok) throw Error('Expenses fetch failed');
-              return res.json();
-            })
-            .then(expenseData => {
-              console.log('Expenses data:', expenseData);
-              var docs = expenseData.documents || [];
-              docs.forEach(doc => {
-                var f = doc.fields;
-                if (!f.date || !f.total) {
-                  console.warn('Missing date or total in expense document:', doc);
-                  return;
+                const budgetOverview = document.getElementById('budget-overview');
+                const currentBudget = document.getElementById('current-budget');
+                
+                if (!data.documents || data.documents.length === 0) {
+                    budgetOverview.innerHTML = '<div class="no-data">No budget data available. Set a budget to get started.</div>';
+                    currentBudget.innerHTML = '<div class="no-data">No budget data available.</div>';
+                    return;
                 }
-                var date = f.date.stringValue;
-                var amount = f.total.doubleValue;
-                var dt = new Date(date);
-                if (!isNaN(dt)) {
-                  var key = dt.getFullYear() + '-' + ('0' + (dt.getMonth() + 1)).slice(-2);
-                  expensesTotals[key] = (expensesTotals[key] || 0) + amount;
-                } else {
-                  console.warn('Invalid date format in expense:', date);
-                }
-              });
-              console.log('Expenses totals per month:', expensesTotals);
-
-              var html = '<table><thead><tr>'
-                      + '<th>Month</th><th>Budget</th><th>Expenses</th><th>Remove</th>'
-                      + '</tr></thead><tbody>';
-              budgets.forEach(doc => {
-                var f = doc.fields;
-                if (!f.month || !f.amount) {
-                  console.warn('Missing month or amount in budget document:', doc);
-                  return;
-                }
-                var month = f.month.stringValue;
-                var amount = f.amount.doubleValue;
-                var id = doc.name.split('/').pop();
-                var expensesForMonth = expensesTotals[month] || 0;
-
-                html += `<tr><td>${formatMonth(month)}</td><td>$${amount.toFixed(2)}</td><td>$${expensesForMonth.toFixed(2)}</td>`
-                        + `<td><button class="remove-btn" data-id="${id}">Remove</button></td></tr>`;
-              });
-              html += '</tbody></table>';
-              var container = document.getElementById('budgetList');
-              container.innerHTML = html;
-              container.querySelectorAll('.remove-btn').forEach(btn => {
-                btn.addEventListener('click', () => removeBudget(btn.dataset.id));
-              });
+                
+                // Sort by start date (most recent first)
+                const budgets = data.documents.map(doc => {
+                    const fields = doc.fields;
+                    return {
+                        id: doc.name.split('/').pop(),
+                        amount: parseFloat(fields.amount.doubleValue),
+                        startDate: fields.startDate.timestampValue,
+                        alertThreshold: parseInt(fields.alertThreshold.integerValue),
+                        notes: fields.notes?.stringValue || '',
+                        spent: parseFloat(fields.spent?.doubleValue || 0)
+                    };
+                }).sort((a, b) => new Date(b.startDate) - new Date(a.startDate));
+                
+                const latestBudget = budgets[0];
+                const percentSpent = (latestBudget.spent / latestBudget.amount) * 100;
+                const progressClass = percentSpent >= 100 ? 'danger' : (percentSpent >= latestBudget.alertThreshold ? 'warning' : '');
+                
+                // Populate budget overview
+                budgetOverview.innerHTML = `
+                    <div class="budget-card">
+                        <div class="budget-header">
+                            <div class="budget-title">Monthly Budget</div>
+                            <div class="budget-amount">${formatCurrency(latestBudget.amount)}</div>
+                        </div>
+                        <div class="budget-progress">
+                            <div class="progress-bar-container">
+                                <div class="progress-bar ${progressClass}" style="width: ${Math.min(percentSpent, 100)}%"></div>
+                            </div>
+                            <div class="progress-label">
+                                <span>Spent: ${formatCurrency(latestBudget.spent)}</span>
+                                <span>${percentSpent.toFixed(1)}%</span>
+                                <span>Remaining: ${formatCurrency(latestBudget.amount - latestBudget.spent)}</span>
+                            </div>
+                        </div>
+                        <div class="budget-actions">
+                            <button class="budget-action-btn" onclick="editBudget('${latestBudget.id}')">Edit</button>
+                        </div>
+                    </div>
+                `;
+                
+                // Populate current budget tab
+                currentBudget.innerHTML = budgetOverview.innerHTML;
+                
+                // Pre-fill the budget form for updates
+                document.getElementById('budgetAmount').value = latestBudget.amount;
+                document.getElementById('budgetAlertThreshold').value = latestBudget.alertThreshold;
+                document.getElementById('budgetNotes').value = latestBudget.notes;
+                
+                const startDate = new Date(latestBudget.startDate);
+                const formattedDate = startDate.toISOString().split('T')[0];
+                document.getElementById('budgetStartDate').value = formattedDate;
             })
-            .catch(err => {
-              console.error('Error during budget+expense load:', err);
-              document.getElementById('budgetList').innerHTML = '<p>Error loading data</p>';
+            .catch(error => {
+                console.error('Error loading budget data:', error);
+                document.getElementById('budget-overview').innerHTML = 
+                    '<div class="no-data">Error loading budget data. Please try again later.</div>';
+                document.getElementById('current-budget').innerHTML = 
+                    '<div class="no-data">Error loading budget data. Please try again later.</div>';
             });
-  }
-
-  document.getElementById('budgetForm').addEventListener('submit', function(e) {
-    e.preventDefault();
-    var monthSelect = this.monthSelect.value;
-    var yearSelect = this.yearSelect.value;
-    var budgetAmount = parseFloat(this.budgetAmount.value);
-
-    if (!monthSelect || !yearSelect) {
-      alert('Please select both month and year.');
-      return;
     }
-    var monthFormatted = yearSelect + '-' + monthSelect;
-    fetch('/api/budgets', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ month: monthFormatted, amount: budgetAmount })
-    }).then(res => {
-      if (res.ok) {
-        this.reset();
-        setTimeout(loadBudgets, 300);
-      } else {
-        alert('Error adding budget');
-      }
-    }).catch(() => alert('Error adding budget'));
-  });
-  function removeBudget(id) {
-    fetch('/api/budgets?docId=' + encodeURIComponent(id), { method: 'DELETE' })
-            .then(res => {
-              if (res.ok) loadBudgets();
-              else alert('Error removing budget');
+    
+    function submitBudget(event) {
+        event.preventDefault();
+        
+        const budgetData = {
+            amount: parseFloat(document.getElementById('budgetAmount').value),
+            startDate: document.getElementById('budgetStartDate').value,
+            alertThreshold: parseInt(document.getElementById('budgetAlertThreshold').value),
+            notes: document.getElementById('budgetNotes').value || ''
+        };
+        
+        fetch('/api/budgets', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(budgetData)
+        })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Failed to set budget');
+                }
+                return response.json();
             })
-            .catch(() => alert('Error removing budget'));
-  }
-  function formatMonth(monthString) {
-    if (!monthString.includes('-')) {
-      console.warn('Invalid month format:', monthString);
-      return monthString;
+            .then(data => {
+                alert('Budget set successfully!');
+                loadBudgetData();
+                
+                // Switch to overview tab
+                document.querySelector('.tab[data-tab="overview"]').click();
+            })
+            .catch(error => {
+                console.error('Error setting budget:', error);
+                alert('Failed to set budget. Please try again.');
+            });
     }
-    const [year, month] = monthString.split('-');
-    const date = new Date(year, month - 1);
-    return date.toLocaleString('default', { month: 'long', year: 'numeric' });
-  }
-</script>
-</html>
-
-
-
+    
+    function editBudget(budgetId) {
+        // Switch to budget tab
+        document.querySelector('.tab[data-tab="budget"]').click();
+    }
+    
+    // Spending Limit Functions
+    function loadLimitsData() {
+        fetch('/api/limits')
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Failed to fetch spending limits');
+                }
+                return response.json();
+            })
+            .then(data => {
+                const limitsOverview = document.getElementById('limits-overview');
+                const currentLimits = document.getElementById('current-limits');
+                
+                if (!data.documents || data.documents.length === 0) {
+                    limitsOverview.innerHTML = '<div class="no-data">No spending limits set. Create limits to track your category spending.</div>';
+                    currentLimits.innerHTML = '<div class="no-data">No spending limits available.</div>';
+                    return;
+                }
+                
+                const limits = data.documents.map(doc => {
+                    const fields = doc.fields;
+                    return {
+                        id: doc.name.split('/').pop(),
+                        category: fields.category.stringValue,
+                        amount: parseFloat(fields.amount.doubleValue),
+                        period: fields.period.stringValue,
+                        startDate: fields.startDate.timestampValue,
+                        alertThreshold: parseInt(fields.alertThreshold.integerValue),
+                        spent: parseFloat(fields.spent?.doubleValue || 0)
+                    };
+                });
+                
+                const limitCards = limits.map(limit => {
+                    const percentSpent = (limit.spent / limit.amount) * 100;
+                    const limitClass = percentSpent >= 100 ? 'exceeded' : (percentSpent >= limit.alertThreshold ? 'warning' : '');
+                    
+                    return `
+                        <div class="limit-card ${limitClass}" data-id="${limit.id}">
+                            <button class="delete-btn" onclick="deleteLimit('${limit.id}')">✕</button>
+                            <div class="limit-header">
+                                <div class="limit-title">${limit.category}</div>
+                                <div class="limit-amount">${formatCurrency(limit.amount)}</div>
+                            </div>
+                            <div class="limit-progress">
+                                <div class="progress-bar-container">
+                                    <div class="progress-bar ${limitClass === 'exceeded' ? 'danger' : (limitClass === 'warning' ? 'warning' : '')}" style="width: ${Math.min(percentSpent, 100)}%"></div>
+                                </div>
+                                <div class="progress-label">
+                                    <span>Spent: ${formatCurrency(limit.spent)}</span>
+                                    <span>${percentSpent.toFixed(1)}%</span>
+                                    <span>Remaining: ${formatCurrency(limit.amount - limit.spent)}</span>
+                                </div>
+                            </div>
+                            <div class="limit-detail">
+                                <span>Period: ${limit.period.charAt(0).toUpperCase() + limit.period.slice(1)}</span>
+                                <span>Start: ${formatDate(limit.startDate)}</span>
+                            </div>
+                            <div class="limit-actions">
+                                <button class="limit-action-btn" onclick="editLimit('${limit.id}')">Edit</button>
+                            </div>
+                        </div>
+                    `;
+                });
+                
+                // Populate limits overview (up to 3 limits)
+                limitsOverview.innerHTML = limits.length > 0 ? 
+                    limitCards.slice(0, 3).join('') : 
+                    '<div class="no-data">No spending limits set. Create limits to track your category spending.</div>';
+                
+                // Populate current limits tab
+                currentLimits.innerHTML = limits.length > 0 ? 
+                    limitCards.join('') : 
+                    '<div class="no-data">No spending limits available.</div>';
+            })
+            .catch(error => {
+                console.error('Error loading limits data:', error);
+                document.getElementById('limits-overview').innerHTML = 
+                    '<div class="no-data">Error loading spending limits. Please try again later.</div>';
+                document.getElementById('current-limits').innerHTML = 
+                    '<div class="no-data">Error loading spending limits. Please try again later.</div>';
+            });
+    }
+    
+    function submitLimit(event) {
+        event.preventDefault();
+        
+        const limitData = {
+            category: document.getElementById('limitCategory').value,
+            amount: parseFloat(document.getElementById('limitAmount').value),
+            period: document.getElementById('limitPeriod').value,
+            startDate: document.getElementById('limitStartDate').value,
+            alertThreshold: parseInt(document.getElementById('limitAlertThreshold').value)
+        };
+        
+        fetch('/api/limits', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(limitData)
+        })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Failed to set spending limit');
+                }
+                return response.json();
+            })
+            .then(data => {
+                alert('Spending limit added successfully!');
+                loadLimitsData();
+                
+                // Reset form
+                document.getElementById('limit-form').reset();
+                
+                // Switch to overview tab
+                document.querySelector('.tab[data-tab="overview"]').click();
+            })
+            .catch(error => {
+                console.error('Error setting spending limit:', error);
+                alert('Failed to set spending limit. Please try again.');
+            });
+    }
+    
+    function deleteLimit(limitId) {
+        if (!confirm('Are you sure you want to delete this spending limit?')) {
+            return;
+        }
+        
+        fetch(`/api/limits/${limitId}`, {
+            method: 'DELETE'
+        })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Failed to delete spending limit');
+                }
+                return response.json();
+            })
+            .then(data => {
+                alert('Spending limit deleted successfully!');
+                loadLimitsData();
+            })
+            .catch(error => {
+                console.error('Error deleting spending limit:', error);
+                alert('Failed to delete spending limit. Please try again.');
+            });
+    }
+    
+    function editLimit(limitId) {
+        // TODO: Implement edit functionality
+        // Switch to limits tab
+        document.querySelector('.tab[data-tab="limits"]').click();
+    }
+    
+    // Paycheck Functions
+    function loadPaychecksData() {
+        fetch('/api/paychecks')
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Failed to fetch paycheck alerts');
+                }
+                return response.json();
+            })
+            .then(data => {
+                const paychecksOverview = document.getElementById('paychecks-overview');
+                const upcomingPaychecks = document.getElementById('upcoming-paychecks');
+                
+                if (!data.documents || data.documents.length === 0) {
+                    paychecksOverview.innerHTML = '<div class="no-data">No paycheck alerts configured. Set up paycheck alerts to receive notifications.</div>';
+                    upcomingPaychecks.innerHTML = '<div class="no-data">No paycheck alerts available.</div>';
+                    return;
+                }
+                
+                // TODO: Implement paycheck rendering
+            })
+            .catch(error => {
+                console.error('Error loading paycheck data:', error);
+                document.getElementById('paychecks-overview').innerHTML = 
+                    '<div class="no-data">Error loading paycheck alerts. Please try again later.</div>';
+                document.getElementById('upcoming-paychecks').innerHTML = 
+                    '<div class="no-data">Error loading paycheck alerts. Please try again later.</div>';
+            });
+    }
+    
+    function submitPaycheck(event) {
+        event.preventDefault();
+        
+        const paycheckData = {
+            source: document.getElementById('paycheckSource').value,
+            amount: parseFloat(document.getElementById('paycheckAmount').value),
+            frequency: document.getElementById('paycheckFrequency').value,
+            nextDate: document.getElementById('paycheckNextDate').value,
+            alertDays: parseInt(document.getElementById('paycheckAlertDays').value)
+        };
+        
+        fetch('/api/paychecks', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(paycheckData)
+        })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Failed to set paycheck alert');
+                }
+                return response.json();
+            })
+            .then(data => {
+                alert('Paycheck alert added successfully!');
+                loadPaychecksData();
+                
+                // Reset form
+                document.getElementById('paycheck-form').reset();
+                
+                // Switch to overview tab
+                document.querySelector('.tab[data-tab="overview"]').click();
+            })
+            .catch(error => {
+                console.error('Error setting paycheck alert:', error);
+                alert('Failed to set paycheck alert. Please try again.');
+            });
+    }
+    
+    // Financial Goals Functions
+    function loadGoalsData() {
+        fetch('/api/goals')
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Failed to fetch financial goals');
+                }
+                return response.json();
+            })
+            .then(data => {
+                const goalsOverview = document.getElementById('goals-overview');
+                const financialGoals = document.getElementById('financial-goals');
+                
+                if (!data.documents || data.documents.length === 0) {
+                    goalsOverview.innerHTML = '<div class="no-data">No financial goals set. Define your financial goals to track your progress.</div>';
+                    financialGoals.innerHTML = '<div class="no-data">No financial goals available.</div>';
+                    return;
+                }
+                
+                // TODO: Implement goals rendering
+            })
+            .catch(error => {
+                console.error('Error loading goals data:', error);
+                document.getElementById('goals-overview').innerHTML = 
+                    '<div class="no-data">Error loading financial goals. Please try again later.</div>';
+                document.getElementById('financial-goals').innerHTML = 
+                    '<div class="no-data">Error loading financial goals. Please try again later.</div>';
+            });
+    }
+    
+    function submitGoal(event) {
+        event.preventDefault();
+        
+        const goalData = {
+            name: document.getElementById('goalName').value,
+            targetAmount: parseFloat(document.getElementById('goalTargetAmount').value),
+            currentAmount: parseFloat(document.getElementById('goalCurrentAmount').value),
+            targetDate: document.getElementById('goalTargetDate').value,
+            description: document.getElementById('goalDescription').value || ''
+        };
+        
+        fetch('/api/goals', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(goalData)
+        })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Failed to set financial goal');
+                }
+                return response.json();
+            })
+            .then(data => {
+                alert('Financial goal added successfully!');
+                loadGoalsData();
+                
+                // Reset form
+                document.getElementById('goal-form').reset();
+                
+                // Switch to overview tab
+                document.querySelector('.tab[data-tab="overview"]').click();
+            })
+            .catch(error => {
+                console.error('Error setting financial goal:', error);
+                alert('Failed to set financial goal. Please try again.');
+            });
+    }
+    
+    // Set up UI event listeners
+    window.addEventListener('DOMContentLoaded', () => {
+        // Apply theme
+        const savedTheme = getThemePreference('theme');
+        const body = document.body;
+        if (savedTheme === 'light') {
+            body.classList.add('light-mode');
+        } else if (savedTheme === 'dark') {
+            body.classList.add('dark-mode');
+        }
+        
+        // Set up tab switching
+        const tabs = document.querySelectorAll('.tab');
+        const tabContents = document.querySelectorAll('.tab-content');
+        
+        tabs.forEach(tab => {
+            tab.addEventListener('click', function() {
+                const tabName = this.dataset.tab;
+                
+                // Update active tab
+                tabs.forEach(t => t.classList.remove('active'));
+                this.classList.add('active');
+                
+                // Show active tab content
+                tabContents.forEach(content => {
+                    content.classList.remove('active');
+                    if (content.id === tabName + '-tab') {
+                        content.classList.add('active');
+                    }
+                });
+            });
+        });
+        
+        // Set up form submissions
+        document.getElementById('budget-form').addEventListener('submit', submitBudget);
+        document.getElementById('limit-form').addEventListener('submit', submitLimit);
+        document.getElementById('paycheck-form').addEventListener('submit', submitPaycheck);
+        document.getElementById('goal-form').addEventListener('submit', submitGoal);
+        
+        // Set today's date as default for date inputs
+        const today = new Date().toISOString().split('T')[0];
+        document.getElementById('budgetStartDate').value = today;
+        document.getElementById('limitStartDate').value = today;
+        document.getElementById('paycheckNextDate').value = today;
+        
+        // Set future date (1 year from now) for goal target date
+        const oneYearFromNow = new Date();
+        oneYearFromNow.setFullYear(oneYearFromNow.getFullYear() + 1);
+        document.getElementById('goalTargetDate').value = oneYearFromNow.toISOString().split('T')[0];
+        
+        // Load initial data
+        loadBudgetData();
+        loadLimitsData();
+        loadPaychecksData();
+        loadGoalsData();
+    });

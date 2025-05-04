@@ -37,13 +37,25 @@ public class Login {
         apiWalletContext.getFilters().add(new AuthFilter());
         HttpContext apiExpensesContext = server.createContext("/api/expenses", new ExpensesHandler());
         apiExpensesContext.getFilters().add(new AuthFilter());
+        // Register stock API endpoints with more specific paths first
+        HttpContext apiStockOrderWithIdContext = server.createContext("/api/stocks/orders/", new StockHandler());
+        apiStockOrderWithIdContext.getFilters().add(new AuthFilter());
+        
+        HttpContext apiStockHistoryContext = server.createContext("/api/stocks/history", new StockHandler());
+        apiStockHistoryContext.getFilters().add(new AuthFilter());
+        
         HttpContext apiStockAccountContext = server.createContext("/api/stocks/account", new StockHandler());
         apiStockAccountContext.getFilters().add(new AuthFilter());
+        
         HttpContext apiStockPortfolioContext = server.createContext("/api/stocks/portfolio", new StockHandler());
         apiStockPortfolioContext.getFilters().add(new AuthFilter());
+        
         HttpContext apiStockOrdersContext = server.createContext("/api/stocks/orders", new StockHandler());
         apiStockOrdersContext.getFilters().add(new AuthFilter());
-        HttpContext apiStockSymbolContext = server.createContext("/api/stocks/", new StockHandler());
+        
+        // Register specific stock symbol route for getting individual stocks
+        // Using /api/stocks with explicit symbols rather than the overly broad /api/stocks/
+        HttpContext apiStockSymbolContext = server.createContext("/api/stocks", new StockHandler());
         apiStockSymbolContext.getFilters().add(new AuthFilter());
         server.createContext("/logout", new LogoutHandler());
         HttpContext apiBudgetsContext = server.createContext("/api/budgets", new BudgetHandler());
@@ -57,6 +69,23 @@ public class Login {
         HttpContext apiProfileContext = server.createContext("/api/profile", new ProfileHandler());
         apiProfileContext.getFilters().add(new AuthFilter());
 
+        HttpContext apiProfileContext = server.createContext("/api/profile", new ProfileHandler());
+        apiProfileContext.getFilters().add(new AuthFilter());
+
+        // Register AlertsHandler for all alert-related endpoints
+        HttpContext apiAlertsContext = server.createContext("/api/alerts", new AlertsHandler());
+        apiAlertsContext.getFilters().add(new AuthFilter());
+        
+        HttpContext apiAlertsReadContext = server.createContext("/api/alerts/read", new AlertsHandler());
+        apiAlertsReadContext.getFilters().add(new AuthFilter());
+        
+        HttpContext apiAlertsTriggerContext = server.createContext("/api/alerts/trigger/check", new AlertsHandler());
+        apiAlertsTriggerContext.getFilters().add(new AuthFilter());
+        
+        // This is for handling delete operations on specific alerts
+        HttpContext apiAlertsWithIdContext = server.createContext("/api/alerts/", new AlertsHandler());
+        apiAlertsWithIdContext.getFilters().add(new AuthFilter());
+        
         HttpContext apiAssets = server.createContext("/api/assets", new AssetsLiabilitiesHandler("Assets"));
         apiAssets.getFilters().add(new AuthFilter());
 
@@ -65,8 +94,13 @@ public class Login {
 
         HttpContext cryptoContext = server.createContext("/crypto.html", new StaticFileHandler());
         cryptoContext.getFilters().add(new AuthFilter());
+        // Return to using StaticFileHandler for stocks.html with proper auth filter
         HttpContext stocksContext = server.createContext("/stocks.html", new StaticFileHandler());
         stocksContext.getFilters().add(new AuthFilter());
+        
+        // Add our simplified stocks page for testing
+        HttpContext stocksSimpleContext = server.createContext("/stocks-simple.html", new StaticFileHandler());
+        stocksSimpleContext.getFilters().add(new AuthFilter());
         HttpContext expensesContext = server.createContext("/expenses.html", new StaticFileHandler());
         expensesContext.getFilters().add(new AuthFilter());
         HttpContext incomeContext = server.createContext("/income.html", new StaticFileHandler());
@@ -81,8 +115,29 @@ public class Login {
         chatContext.getFilters().add(new AuthFilter());
         HttpContext leaderboardContext = server.createContext("/leaderboard.html", new StaticFileHandler());
         leaderboardContext.getFilters().add(new AuthFilter());
+        HttpContext apiLeaderboardContext = server.createContext("/api/leaderboard", new LeaderboardHandler());
+        apiLeaderboardContext.getFilters().add(new AuthFilter());
+        
+        HttpContext apiNetworthContext = server.createContext("/api/networth", new NetWorthHandler());
+        apiNetworthContext.getFilters().add(new AuthFilter());
+        HttpContext apiNetworthCalculateContext = server.createContext("/api/networth/calculate", new NetWorthHandler());
+        apiNetworthCalculateContext.getFilters().add(new AuthFilter());
+        
+        HttpContext apiBillsContext = server.createContext("/api/bills", new BillsHandler());
+        apiBillsContext.getFilters().add(new AuthFilter());
+
         HttpContext billsContext = server.createContext("/bills.html", new StaticFileHandler());
         billsContext.getFilters().add(new AuthFilter());
+        
+        // Handle bills with IDs for update/delete operations
+        HttpContext apiBillsWithIdContext = server.createContext("/api/bills/", new BillsHandler());
+        apiBillsWithIdContext.getFilters().add(new AuthFilter());
+        
+        HttpContext alertsContext = server.createContext("/alerts.html", new StaticFileHandler());
+        alertsContext.getFilters().add(new AuthFilter());
+        
+        HttpContext savingsTipsContext = server.createContext("/savingsTips.html", new StaticFileHandler());
+        savingsTipsContext.getFilters().add(new AuthFilter());
         HttpContext tipsContext = server.createContext("/tips.html", new StaticFileHandler());
         tipsContext.getFilters().add(new AuthFilter());
         HttpContext budgetContext = server.createContext("/budget.html", new StaticFileHandler());
@@ -289,18 +344,33 @@ public class Login {
                     buf.append(line);
                 }
                 String formData = buf.toString();
-                String email = "", password = "", confirm = "";
+                String username = "", name = "", email = "", password = "", confirm = "";
                 String[] pairs = formData.split("&");
                 for (String pair : pairs) {
                     String[] parts = pair.split("=");
                     if (parts.length == 2) {
                         String key = URLDecoder.decode(parts[0], "UTF-8");
                         String value = URLDecoder.decode(parts[1], "UTF-8");
-                        if (key.equals("email")) email = value;
+                        if (key.equals("username")) username = value;
+                        else if (key.equals("name")) name = value;
+                        else if (key.equals("email")) email = value;
                         else if (key.equals("password")) password = value;
                         else if (key.equals("confirm")) confirm = value;
                     }
                 }
+                
+                // Validate required fields
+                if (username.isEmpty() || name.isEmpty() || email.isEmpty() || password.isEmpty() || confirm.isEmpty()) {
+                    String errorHtml = "<!DOCTYPE html><html lang=\"en\"><head><meta charset=\"UTF-8\"><title>Registration Error</title><link rel=\"stylesheet\" href=\"style.css\"></head><body><div class=\"login-container\"><h2>Registration Error</h2><p>All fields are required. Please complete the form.</p><a href='/register.html'>Try Again</a></div></body></html>";
+                    exchange.getResponseHeaders().set("Content-Type", "text/html; charset=UTF-8");
+                    byte[] errorBytes = errorHtml.getBytes(StandardCharsets.UTF_8);
+                    exchange.sendResponseHeaders(200, errorBytes.length);
+                    OutputStream osResp = exchange.getResponseBody();
+                    osResp.write(errorBytes);
+                    osResp.close();
+                    return;
+                }
+                
                 if (!password.equals(confirm)) {
                     String errorHtml = "<!DOCTYPE html><html lang=\"en\"><head><meta charset=\"UTF-8\"><title>Registration Error</title><link rel=\"stylesheet\" href=\"style.css\"></head><body><div class=\"login-container\"><h2>Registration Error</h2><p>Passwords do not match. Please try again.</p><a href='/register.html'>Try Again</a></div></body></html>";
                     exchange.getResponseHeaders().set("Content-Type", "text/html; charset=UTF-8");
@@ -311,6 +381,31 @@ public class Login {
                     osResp.close();
                     return;
                 }
+                
+                // Check if username is already taken
+                String checkUsernameUrl = "https://firestore.googleapis.com/v1/projects/cashclimb-d162c/databases/(default)/documents/Usernames/" + username;
+                URL usernameUrl = new URL(checkUsernameUrl);
+                HttpURLConnection usernameConn = (HttpURLConnection) usernameUrl.openConnection();
+                usernameConn.setRequestMethod("GET");
+                int usernameResponseCode = usernameConn.getResponseCode();
+                
+                if (usernameResponseCode == 200) {
+                    // Username exists
+                    String errorHtml = "<!DOCTYPE html><html lang=\"en\"><head><meta charset=\"UTF-8\"><title>Registration Error</title><link rel=\"stylesheet\" href=\"style.css\"></head><body><div class=\"login-container\"><h2>Registration Error</h2><p>Username already taken. Please choose another.</p><a href='/register.html'>Try Again</a></div></body></html>";
+                    exchange.getResponseHeaders().set("Content-Type", "text/html; charset=UTF-8");
+                    byte[] errorBytes = errorHtml.getBytes(StandardCharsets.UTF_8);
+                    exchange.sendResponseHeaders(200, errorBytes.length);
+                    OutputStream osResp = exchange.getResponseBody();
+                    osResp.write(errorBytes);
+                    osResp.close();
+                    return;
+                } else if (usernameResponseCode != 404) {
+                    // Unexpected error
+                    exchange.sendResponseHeaders(500, -1);
+                    return;
+                }
+                
+                // Username is available, create user
                 String firebaseUrl = "https://identitytoolkit.googleapis.com/v1/accounts:signUp?key=" + FIREBASE_API_KEY;
                 URL url = new URL(firebaseUrl);
                 HttpURLConnection conn = (HttpURLConnection) url.openConnection();
@@ -323,6 +418,75 @@ public class Login {
                 os.close();
                 int responseCode = conn.getResponseCode();
                 if (responseCode == 200) {
+                    // Read the response from Firebase
+                    BufferedReader in = new BufferedReader(new InputStreamReader(conn.getInputStream(), StandardCharsets.UTF_8));
+                    StringBuilder firebaseResponse = new StringBuilder();
+                    String ln;
+                    while ((ln = in.readLine()) != null) {
+                        firebaseResponse.append(ln);
+                    }
+                    in.close();
+                    
+                    JSONObject jsonObject = new JSONObject(firebaseResponse.toString());
+                    String idToken = jsonObject.getString("idToken");
+                    String localId = jsonObject.getString("localId");
+                    
+                    // Store username in Usernames collection to ensure uniqueness
+                    String usernameReserveUrl = "https://firestore.googleapis.com/v1/projects/cashclimb-d162c/databases/(default)/documents/Usernames/" + username;
+                    URL reserveUrl = new URL(usernameReserveUrl);
+                    HttpURLConnection reserveConn = (HttpURLConnection) reserveUrl.openConnection();
+                    reserveConn.setRequestMethod("PUT");
+                    reserveConn.setRequestProperty("Content-Type", "application/json");
+                    reserveConn.setRequestProperty("Authorization", "Bearer " + idToken);
+                    reserveConn.setDoOutput(true);
+                    String reservePayload = "{\"fields\":{\"userId\":{\"stringValue\":\"" + localId + "\"}}}";
+                    OutputStream reserveOs = reserveConn.getOutputStream();
+                    reserveOs.write(reservePayload.getBytes(StandardCharsets.UTF_8));
+                    reserveOs.close();
+                    
+                    // Create the entire user profile as a JSON string to avoid JSONObject ambiguities
+                    String userProfileJson = String.format(
+                        "{" +
+                            "\"fields\": {" +
+                                "\"username\": {\"stringValue\": \"%s\"}," +
+                                "\"name\": {\"stringValue\": \"%s\"}," +
+                                "\"email\": {\"stringValue\": \"%s\"}," +
+                                "\"age\": {\"nullValue\": null}," +
+                                "\"career\": {\"stringValue\": \"\"}," +
+                                "\"careerDescription\": {\"stringValue\": \"\"}," +
+                                "\"theme\": {\"stringValue\": \"dark\"}," +
+                                "\"netWorth\": {\"doubleValue\": 0.0}," +
+                                "\"netWorthLastUpdated\": {\"timestampValue\": \"%s\"}," +
+                                "\"settings\": {" +
+                                    "\"mapValue\": {" +
+                                        "\"fields\": {" +
+                                            "\"showOnLeaderboard\": {\"booleanValue\": true}," +
+                                            "\"receiveAlerts\": {\"booleanValue\": true}," +
+                                            "\"billAlertDays\": {\"integerValue\": 3}" +
+                                        "}" +
+                                    "}" +
+                                "}" +
+                            "}" +
+                        "}", 
+                        username.replace("\"", "\\\""), 
+                        name.replace("\"", "\\\""), 
+                        email.replace("\"", "\\\""), 
+                        java.time.Instant.now().toString()
+                    );
+                    
+                    // Store user profile information
+                    String profileUrl = "https://firestore.googleapis.com/v1/projects/cashclimb-d162c/databases/(default)/documents/Users/" + localId;
+                    URL userUrl = new URL(profileUrl);
+                    HttpURLConnection userConn = (HttpURLConnection) userUrl.openConnection();
+                    userConn.setRequestMethod("PATCH");
+                    userConn.setRequestProperty("Content-Type", "application/json");
+                    userConn.setRequestProperty("Authorization", "Bearer " + idToken);
+                    userConn.setDoOutput(true);
+                    
+                    OutputStream userOs = userConn.getOutputStream();
+                    userOs.write(userProfileJson.getBytes(StandardCharsets.UTF_8));
+                    userOs.close();
+                    
                     exchange.getResponseHeaders().set("Location", "/index.html");
                     exchange.sendResponseHeaders(302, -1);
                 } else {
@@ -435,14 +599,23 @@ public class Login {
     static class AuthFilter extends Filter {
         @Override
         public void doFilter(HttpExchange exchange, Chain chain) throws IOException {
+            String path = exchange.getRequestURI().getPath();
             String cookies = exchange.getRequestHeaders().getFirst("Cookie");
+            
+            System.out.println("AuthFilter: Checking auth for path: " + path);
+            System.out.println("AuthFilter: Cookies: " + cookies);
+            
             if (cookies == null || !cookies.contains("session=valid")) {
+                System.out.println("AuthFilter: Authentication failed - redirecting to invalidSession.html");
                 exchange.getResponseHeaders().set("Location", "/invalidSession.html");
                 exchange.sendResponseHeaders(302, -1);
                 return;
             }
+            
+            System.out.println("AuthFilter: Authentication passed for " + path);
             chain.doFilter(exchange);
         }
+        
         @Override
         public String description() {
             return "AuthFilter checks for a valid session cookie";

@@ -6,6 +6,8 @@
     <link rel="stylesheet" href="style.css">
     <!-- Add Chart.js library -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Include our API client -->
+    <script src="app.js"></script>
     <style>
         /* Dashboard specific styles */
         .dashboard {
@@ -201,6 +203,41 @@
             .dashboard {
                 grid-template-columns: 1fr;
             }
+        }
+
+        /* Loading spinner styles */
+        .loading-spinner {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+            color: #aaa;
+        }
+
+        .spinner {
+            width: 40px;
+            height: 40px;
+            margin-bottom: 10px;
+            border: 4px solid rgba(255, 140, 0, 0.2);
+            border-radius: 50%;
+            border-top-color: #FF8C00;
+            animation: spin 1s ease-in-out infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Refresh button hover effect */
+        .refresh-btn {
+            opacity: 0.7;
+            transition: all 0.2s ease;
+        }
+
+        .refresh-btn:hover {
+            opacity: 1;
+            transform: rotate(30deg);
         }
     </style>
 </head>
@@ -702,15 +739,6 @@
         });
     }
     
-    // Helper functions
-    function getInt(field) {
-        return field && field.integerValue ? parseInt(field.integerValue) : 0;
-    }
-    
-    function getArray(arrayField) {
-        return arrayField && arrayField.arrayValue && arrayField.arrayValue.values ? arrayField.arrayValue.values : [];
-    }
-    
     // Setup chart filters function
     function setupChartFilters() {
         // 1. Net Worth Period Selector
@@ -779,17 +807,24 @@
         });
     }
     
-    // Update Functions for Each Chart
+    // Helper functions for handling data
+    function getInt(field) {
+        return field && field.integerValue ? parseInt(field.integerValue) : 0;
+    }
     
+    function getArray(arrayField) {
+        return arrayField && arrayField.arrayValue && arrayField.arrayValue.values ? arrayField.arrayValue.values : [];
+    }
+    
+    // Update Functions for Each Chart
     function updateNetWorthChart(period) {
-        // Fetch the latest data
-        fetch('/api/getData')
-            .then(response => response.json())
+        // Fetch the latest data using our API client
+        fetchDashboardData()
             .then(data => {
                 const fields = data.fields || {};
                 
                 // Try to parse the netWorthBreakdown from string to object
-                let breakdown = { cash: 0, equity: 0, investments: 0 };
+                let breakdown = { cash: 0, stocks: 0, crypto: 0 };
                 
                 // Parse the netWorthBreakdown from Firebase
                 if (fields.netWorthBreakdown && fields.netWorthBreakdown.stringValue) {
@@ -800,20 +835,20 @@
                     }
                 }
                 
-                // Apply period filter (in a real app, this might be different for each period)
-                // For now we're just using the same data for all periods since this is a demo
+                // Apply period filter (in a real app, this might fetch different data for each period)
+                // For now, we're just using the same data for all periods
                 
                 // Update chart
                 if (netWorthChart) {
                     netWorthChart.data.datasets[0].data = Object.values(breakdown);
                     netWorthChart.update();
                 } else {
-                    createNetWorthChart({ netWorthBreakdown: { stringValue: JSON.stringify(breakdown) } });
+                    createNetWorthChart(fields);
                 }
                 
                 // Update total net worth display
                 const totalNetWorth = Object.values(breakdown).reduce((sum, val) => sum + val, 0);
-                document.getElementById('netWorthDisplay').textContent = '$' + totalNetWorth.toLocaleString();
+                document.getElementById('netWorthDisplay').textContent = formatCurrency(totalNetWorth);
             })
             .catch(err => {
                 console.error("Error fetching net worth data:", err);
@@ -821,9 +856,8 @@
     }
     
     function updateIncomeChart(type) {
-        // Fetch the latest data
-        fetch('/api/getData')
-            .then(response => response.json())
+        // Fetch the latest data using our API client
+        fetchDashboardData()
             .then(data => {
                 const fields = data.fields || {};
                 
@@ -855,12 +889,12 @@
                     incomeChart.data.datasets[0].data = Object.values(filteredBreakdown);
                     incomeChart.update();
                 } else {
-                    createIncomeChart({ totalIncomeBreakdown: { stringValue: JSON.stringify(filteredBreakdown) } });
+                    createIncomeChart(fields);
                 }
                 
                 // Update total income display
                 const totalIncome = Object.values(filteredBreakdown).reduce((sum, val) => sum + val, 0);
-                document.getElementById('totalIncomeDisplay').textContent = '$' + totalIncome.toLocaleString();
+                document.getElementById('totalIncomeDisplay').textContent = formatCurrency(totalIncome);
             })
             .catch(err => {
                 console.error("Error fetching income data:", err);
@@ -876,11 +910,7 @@
         }
         
         // Fetch data from API
-        fetch('/api/expenses')
-            .then(response => {
-                if (!response.ok) throw new Error("Failed to fetch expenses");
-                return response.json();
-            })
+        fetchExpensesData()
             .then(data => {
                 const docs = data.documents || [];
                 const monthNames = [
@@ -894,8 +924,8 @@
                 if (viewType === 'category') {
                     // Group by category
                     docs.forEach(doc => {
-                        const category = doc.fields.category.stringValue;
-                        const amount = parseFloat(doc.fields.total.doubleValue) || 0;
+                        const category = doc.fields.category?.stringValue;
+                        const amount = parseFloat(doc.fields.total?.doubleValue) || 0;
                         
                         if (category) {
                             chartData[category] = (chartData[category] || 0) + amount;
@@ -908,8 +938,8 @@
                     const monthlyTotals = Array(12).fill(0);
                     
                     docs.forEach(doc => {
-                        const dateStr = doc.fields.date.stringValue;
-                        const amount = parseFloat(doc.fields.total.doubleValue) || 0;
+                        const dateStr = doc.fields.date?.stringValue;
+                        const amount = parseFloat(doc.fields.total?.doubleValue) || 0;
                         
                         if (dateStr) {
                             const date = new Date(dateStr);
@@ -934,8 +964,8 @@
                     const today = new Date();
                     
                     docs.forEach(doc => {
-                        const dateStr = doc.fields.date.stringValue;
-                        const amount = parseFloat(doc.fields.total.doubleValue) || 0;
+                        const dateStr = doc.fields.date?.stringValue;
+                        const amount = parseFloat(doc.fields.total?.doubleValue) || 0;
                         
                         if (dateStr) {
                             const date = new Date(dateStr);
@@ -996,7 +1026,7 @@
                                         const value = context.raw || 0;
                                         const total = context.dataset.data.reduce((a, b) => a + b, 0);
                                         const percentage = total > 0 ? Math.round((value / total) * 100) : 0;
-                                        return label + ': $' + value.toLocaleString() + (chartType === 'pie' ? ` (${percentage}%)` : '');
+                                        return label + ': ' + formatCurrency(value) + (chartType === 'pie' ? ` (${percentage}%)` : '');
                                     }
                                 }
                             }
@@ -1006,7 +1036,7 @@
                                 beginAtZero: true,
                                 ticks: {
                                     callback: function(value) {
-                                        return '$' + value.toLocaleString();
+                                        return formatCurrency(value);
                                     }
                                 }
                             }
@@ -1016,7 +1046,7 @@
                 
                 // Update total expenses display
                 const totalExpenses = Object.values(chartData).reduce((sum, val) => sum + val, 0);
-                document.getElementById('totalExpensesDisplay').textContent = '$' + totalExpenses.toLocaleString();
+                document.getElementById('totalExpensesDisplay').textContent = formatCurrency(totalExpenses);
             })
             .catch(err => {
                 console.error("Error processing expense data:", err);
@@ -1051,8 +1081,7 @@
         }
         
         // Fetch the latest data
-        fetch('/api/getData')
-            .then(response => response.json())
+        fetchDashboardData()
             .then(data => {
                 const fields = data.fields || {};
                 const monthNames = [
@@ -1087,6 +1116,146 @@
             });
     }
     
+    // Refresh data periodically and on page load
+    function refreshDashboardData() {
+        console.log("Refreshing dashboard data...");
+        
+        // Show loading indicators with timeout tracking
+        const loadingTimeout = {};
+        document.querySelectorAll('.chart-container').forEach(container => {
+            const chartId = container.querySelector('canvas')?.id || 'unknown';
+            container.innerHTML = "<div class='loading-spinner' id='spinner-" + chartId + "'><div class='spinner'></div><p>Loading data...</p></div>";
+            
+            // Set a timeout to show "Taking longer than expected" message after 5 seconds
+            loadingTimeout[chartId] = setTimeout(() => {
+                const spinner = document.getElementById('spinner-' + chartId);
+                if (spinner) {
+                    spinner.innerHTML = "<div class='spinner'></div><p>Taking longer than expected...</p><p style='font-size:0.8em;color:#aaa;'>Data services may be unavailable</p>";
+                }
+            }, 5000);
+        });
+        
+        // Fetch dashboard data from our API client with timeout handling
+        fetchDashboardData()
+            .then(data => {
+                // Clear all timeouts
+                Object.values(loadingTimeout).forEach(timeout => clearTimeout(timeout));
+                
+                const fields = data.fields || {};
+                
+                // Update dashboard displays with the latest data
+                const netWorth = getInt(fields.netWorth);
+                document.getElementById("netWorthDisplay").textContent = formatCurrency(netWorth);
+                
+                const totalIncome = getInt(fields.totalIncome);
+                document.getElementById("totalIncomeDisplay").textContent = formatCurrency(totalIncome);
+                
+                const totalExpenses = getInt(fields.totalExpenses);
+                document.getElementById("totalExpensesDisplay").textContent = formatCurrency(totalExpenses);
+                
+                const billsDue = getInt(fields.billsDue);
+                document.getElementById("billRemindersDisplay").innerHTML = "<h1>" + billsDue + "</h1>";
+                
+                const monthlyExpensesArr = getArray(fields.monthlyExpenses).map(item => getInt(item));
+                const monthlyIncomesArr = getArray(fields.monthlyIncomes).map(item => getInt(item));
+                
+                console.log("Dashboard data refreshed:");
+                console.log("- Monthly Income:", monthlyIncomesArr);
+                console.log("- Monthly Expenses:", monthlyExpensesArr);
+                console.log("- Income Breakdown:", fields.totalIncomeBreakdown?.stringValue);
+                
+                // Create or update charts with latest data - check for empty data
+                if (hasChartData(fields)) {
+                    try {
+                        createNetWorthChart(fields);
+                        createIncomeChart(fields);
+                        createExpensePieChart(fields);
+                        createMonthlyExpensesChart(monthlyExpensesArr);
+                    } catch (e) {
+                        console.error("Error creating charts:", e);
+                        showNoDataMessage("netWorthChart", "Error creating chart. Please try refreshing.");
+                        showNoDataMessage("incomeChart", "Error creating chart. Please try refreshing.");
+                        showNoDataMessage("expensesPieChart", "Error creating chart. Please try refreshing.");
+                        showNoDataMessage("monthlyExpensesChart", "Error creating chart. Please try refreshing.");
+                    }
+                } else {
+                    showNoDataMessage("netWorthChart", "No net worth data available yet. Add assets and income sources to see data.");
+                    showNoDataMessage("incomeChart", "No income data available yet. Add income sources on the income page.");
+                    showNoDataMessage("expensesPieChart", "No expense data available. Add expenses on the expenses page.");
+                    showNoDataMessage("monthlyExpensesChart", "No monthly expense data available yet.");
+                }
+            })
+            .catch(err => {
+                // Clear all timeouts
+                Object.values(loadingTimeout).forEach(timeout => clearTimeout(timeout));
+                
+                console.error("Error fetching dashboard data:", err);
+                
+                // Show user-friendly error message on dashboard
+                document.querySelectorAll('.chart-container').forEach(container => {
+                    container.innerHTML = `
+                        <div class="no-data-message">
+                            <p style="color:#ff6b6b;"><strong>Unable to load chart data</strong></p>
+                            <p style="font-size:0.9em;color:#ddd;">The data service is currently unavailable.</p>
+                            <button class="retry-btn" onclick="refreshDashboardData()">Try Again</button>
+                        </div>
+                    `;
+                });
+                
+                // Reset display values to zero
+                document.getElementById("netWorthDisplay").textContent = "$0.00";
+                document.getElementById("totalIncomeDisplay").textContent = "$0.00";
+                document.getElementById("totalExpensesDisplay").textContent = "$0.00";
+                document.getElementById("billRemindersDisplay").innerHTML = "<h1>0</h1>";
+            });
+    }
+    
+    // Check if there's any actual data to display in charts
+    function hasChartData(fields) {
+        // Check if any of the key data points have real values
+        const netWorth = getInt(fields.netWorth);
+        const totalIncome = getInt(fields.totalIncome);
+        const totalExpenses = getInt(fields.totalExpenses);
+        
+        // Check breakdown objects
+        let hasBreakdownData = false;
+        try {
+            const netWorthBreakdown = JSON.parse(fields.netWorthBreakdown?.stringValue || "{}");
+            const incomeBreakdown = JSON.parse(fields.totalIncomeBreakdown?.stringValue || "{}");
+            
+            // Check if any breakdown has non-zero values
+            hasBreakdownData = Object.values(netWorthBreakdown).some(val => val > 0) || 
+                               Object.values(incomeBreakdown).some(val => val > 0);
+        } catch (e) {
+            console.error("Error parsing breakdown data:", e);
+        }
+        
+        // Check monthly arrays
+        const monthlyExpenses = getArray(fields.monthlyExpenses).map(item => getInt(item));
+        const monthlyIncomes = getArray(fields.monthlyIncomes).map(item => getInt(item));
+        
+        const hasMonthlyData = monthlyExpenses.some(val => val > 0) || 
+                              monthlyIncomes.some(val => val > 0);
+        
+        // Return true if we have any meaningful data to display
+        return netWorth > 0 || totalIncome > 0 || totalExpenses > 0 || 
+               hasBreakdownData || hasMonthlyData;
+    }
+    
+    // Show a "no data" message where a chart would be
+    function showNoDataMessage(chartId, message) {
+        const canvas = document.getElementById(chartId);
+        if (!canvas) return;
+        
+        const container = canvas.parentElement;
+        if (container) {
+            container.innerHTML = `<div class="no-data-message">
+                <p>${message}</p>
+                <p class="empty-tip">Enter data on other pages to see changes here.</p>
+            </div>`;
+        }
+    }
+    
     // Main initialization on page load
     document.addEventListener("DOMContentLoaded", function() {
         // Set up chart filter event listeners
@@ -1113,47 +1282,44 @@
             });
         }
         
-        // Fetch dashboard data
-        fetch('/api/getData')
-            .then(response => response.json())
-            .then(data => {
-                const fields = data.fields || {};
-                
-                const netWorth = getInt(fields.netWorth);
-                document.getElementById("netWorthDisplay").textContent = "$" + netWorth.toLocaleString();
-                
-                const totalIncome = getInt(fields.totalIncome);
-                document.getElementById("totalIncomeDisplay").textContent = "$" + totalIncome.toLocaleString();
-                
-                const totalExpenses = getInt(fields.totalExpenses);
-                document.getElementById("totalExpensesDisplay").textContent = "$" + totalExpenses.toLocaleString();
-                
-                const billsDue = getInt(fields.billsDue);
-                document.getElementById("billRemindersDisplay").innerHTML = "<h1>" + billsDue + "</h1>";
-                
-                const monthlyExpensesArr = getArray(fields.monthlyExpenses).map(item => getInt(item));
-                const monthlyIncomesArr = getArray(fields.monthlyIncomes).map(item => getInt(item));
-                
-                // Create modern charts with Chart.js
-                createNetWorthChart(fields);
-                createIncomeChart(fields);
-                createExpensePieChart(fields);
-                createMonthlyExpensesChart(monthlyExpensesArr);
-            })
-            .catch(err => {
-                console.error("Error fetching dashboard data:", err);
-                // Show error message on dashboard
-                document.querySelectorAll('.chart-container').forEach(container => {
-                    container.innerHTML = "<p style='text-align:center;color:#ff6b6b;'>Unable to load chart data</p>";
-                });
-            });
+        // Add refresh button to each chart card
+        document.querySelectorAll('.card h2').forEach(heading => {
+            const refreshBtn = document.createElement('button');
+            refreshBtn.innerHTML = '🔄';
+            refreshBtn.className = 'refresh-btn';
+            refreshBtn.style.marginLeft = 'auto';
+            refreshBtn.style.background = 'none';
+            refreshBtn.style.border = 'none';
+            refreshBtn.style.color = 'white';
+            refreshBtn.style.fontSize = '1em';
+            refreshBtn.style.cursor = 'pointer';
+            refreshBtn.title = 'Refresh data';
+            refreshBtn.addEventListener('click', refreshDashboardData);
+            heading.appendChild(refreshBtn);
+        });
+        
+        // Initial data load
+        refreshDashboardData();
+        
+        // Add an event listener for when the page becomes visible again
+        document.addEventListener('visibilitychange', function() {
+            if (document.visibilityState === 'visible') {
+                // Refresh data when the user returns to this tab
+                refreshDashboardData();
+            }
+        });
+        
+        // Set up auto-refresh timer (refresh every 60 seconds)
+        setInterval(refreshDashboardData, 60000);
     });
+    
+    // Chart creation functions
     function createNetWorthChart(fields) {
         const ctx = document.getElementById('netWorthChart').getContext('2d');
         
         try {
             // Try to parse the netWorthBreakdown from string to object
-            let breakdown = { cash: 0, equity: 0, investments: 0 };
+            let breakdown = { cash: 0, stocks: 0, crypto: 0 };
             
             // Parse the netWorthBreakdown from Firebase
             if (fields.netWorthBreakdown && fields.netWorthBreakdown.stringValue) {
@@ -1179,8 +1345,8 @@
                         data: Object.values(breakdown),
                         backgroundColor: [
                             'rgba(50, 205, 50, 0.7)',  // cash - green
-                            'rgba(30, 144, 255, 0.7)', // equity - blue
-                            'rgba(255, 140, 0, 0.7)'   // investments - orange
+                            'rgba(30, 144, 255, 0.7)', // stocks - blue
+                            'rgba(255, 140, 0, 0.7)'   // crypto - orange
                         ],
                         borderColor: [
                             'rgb(50, 205, 50)',
@@ -1200,7 +1366,7 @@
                         tooltip: {
                             callbacks: {
                                 label: function(context) {
-                                    return '$' + context.raw.toLocaleString();
+                                    return formatCurrency(context.raw);
                                 }
                             }
                         }
@@ -1210,7 +1376,7 @@
                             beginAtZero: true,
                             ticks: {
                                 callback: function(value) {
-                                    return '$' + value.toLocaleString();
+                                    return formatCurrency(value);
                                 }
                             }
                         }
@@ -1275,7 +1441,7 @@
                                     const value = context.raw || 0;
                                     const total = context.dataset.data.reduce((a, b) => a + b, 0);
                                     const percentage = total > 0 ? Math.round((value / total) * 100) : 0;
-                                    return label + ': $' + value.toLocaleString() + ' (' + percentage + '%)';
+                                    return label + ': ' + formatCurrency(value) + ' (' + percentage + '%)';
                                 }
                             }
                         }
@@ -1289,101 +1455,8 @@
     
     // Create Expense Pie Chart
     function createExpensePieChart(fields) {
-        const ctx = document.getElementById('expensesPieChart').getContext('2d');
-        
-        try {
-            // Fetch expense data from API
-            fetch('/api/expenses')
-                .then(response => {
-                    if (!response.ok) throw new Error("Failed to fetch expenses");
-                    return response.json();
-                })
-                .then(data => {
-                    const docs = data.documents || [];
-                    
-                    // Group expenses by category
-                    const expenseCategories = {};
-                    docs.forEach(doc => {
-                        const category = doc.fields.category.stringValue;
-                        const amount = parseFloat(doc.fields.total.doubleValue) || 0;
-                        
-                        if (category) {
-                            expenseCategories[category] = (expenseCategories[category] || 0) + amount;
-                        }
-                    });
-                    
-                    // If no categories found, show empty state
-                    if (Object.keys(expenseCategories).length === 0) {
-                        expenseCategories['No Data'] = 0;
-                    }
-                    
-                    // Destroy previous chart if it exists
-                    if (expensesPieChart) {
-                        expensesPieChart.destroy();
-                    }
-                    
-                    // Create new pie chart
-                    createExpensePieChartWithData(expenseCategories);
-                })
-                .catch(err => {
-                    console.error("Error fetching expense categories:", err);
-                    // On error, create empty chart
-                    createExpensePieChartWithData({'No Data': 0});
-                });
-        } catch (err) {
-            console.error("Error in createExpensePieChart:", err);
-            createExpensePieChartWithData({'Error': 0});
-        }
-    }
-    
-    function createExpensePieChartWithData(expenseCategories) {
-        const ctx = document.getElementById('expensesPieChart').getContext('2d');
-        
-        try {
-            // Generate colors based on number of data points
-            const numItems = Object.keys(expenseCategories).length;
-            const backgroundColors = [];
-            const borderColors = [];
-            
-            for(let i = 0; i < numItems; i++) {
-                const hue = (i * 360 / numItems) % 360;
-                backgroundColors.push(`hsla(${hue}, 70%, 60%, 0.7)`);
-                borderColors.push(`hsl(${hue}, 70%, 60%)`);
-            }
-            
-            // Create new pie chart
-            expensesPieChart = new Chart(ctx, {
-                type: 'pie',
-                data: {
-                    labels: Object.keys(expenseCategories),
-                    datasets: [{
-                        data: Object.values(expenseCategories),
-                        backgroundColor: backgroundColors,
-                        borderColor: borderColors,
-                        borderWidth: 1
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        tooltip: {
-                            callbacks: {
-                                label: function(context) {
-                                    const label = context.label || '';
-                                    const value = context.raw || 0;
-                                    const total = context.dataset.data.reduce((a, b) => a + b, 0);
-                                    const percentage = total > 0 ? Math.round((value / total) * 100) : 0;
-                                    return label + ': $' + value.toLocaleString() + ' (' + percentage + '%)';
-                                }
-                            }
-                        }
-                    }
-                }
-            });
-        } catch (err) {
-            console.error("Error creating expense pie chart:", err);
-        }
+        // We'll use the updateExpenseChart function since it already handles the API call
+        updateExpenseChart('category');
     }
     
     // Create Monthly Expenses Chart
@@ -1435,7 +1508,7 @@
                         tooltip: {
                             callbacks: {
                                 label: function(context) {
-                                    return '$' + context.raw.toLocaleString();
+                                    return formatCurrency(context.raw);
                                 }
                             }
                         }
@@ -1445,7 +1518,7 @@
                             beginAtZero: true,
                             ticks: {
                                 callback: function(value) {
-                                    return '$' + value.toLocaleString();
+                                    return formatCurrency(value);
                                 }
                             }
                         }
@@ -1457,5 +1530,3 @@
         }
     }
 </script>
-</body>
-</html>

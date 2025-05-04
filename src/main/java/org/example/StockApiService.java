@@ -102,8 +102,8 @@ public class StockApiService {
      * Get stock quote from either cache or API
      * 
      * @param symbol The stock symbol
-     * @return Stock object with current data
-     * @throws IOException If an I/O error occurs
+     * @return Stock object with current data (or mock data if API is unavailable)
+     * @throws IOException If an I/O error occurs and no mock data can be provided
      */
     public Stock getStockQuote(String symbol) throws IOException {
         // Check cache first

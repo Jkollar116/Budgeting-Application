@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Stock Trading - Simple Version</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header>
+    <div class="logo">CashClimb</div>
+    <nav>
+        <ul>
+            <li><a href="profile.html">Profile</a></li>
+        </ul>
+    </nav>
+</header>
+<button class="drawer-toggle" onclick="toggleDrawer()">☰</button>
+<nav class="drawer" id="sideDrawer">
+    <ul>
+        <li><a href="home.html">Dashboard</a></li>
+        <li><a href="expenses.html">Expenses</a></li>
+        <li><a href="income.html">Income</a></li>
+        <li><a href="stocks-simple.html">Stocks (Simple Version)</a></li>
+    </ul>
+</nav>
+
+<main>
+    <section class="hero">
+        <div class="hero-content">
+            <h1>Stock Trading - Simple Version</h1>
+            <p>This is a simplified version of the stock page</p>
+        </div>
+    </section>
+
+    <div style="padding: 20px;">
+        <h2>Simple Stock Page</h2>
+        <p>This is a simple stock page without API calls to test if the page loads properly without redirection.</p>
+        
+        <div style="margin-top: 20px; padding: 20px; background-color: #f0f0f0; border-radius: 5px;">
+            <p>If you can see this page, then there's an issue with the API calls or resources in the main stocks.html page.</p>
+            <p>Try <a href="home.html">going back to home</a> and then coming back to this page.</p>
+        </div>
+    </div>
+</main>
+
+<script>
+    function toggleDrawer() {
+        const drawer = document.getElementById('sideDrawer');
+        drawer.classList.toggle('collapsed');
+    }
+    
+    function getThemePreference(name) {
+        const match = document.cookie.match(new RegExp('(^| )' + name + '=([^;]+)'));
+        if (!match) return null;
+        return match[2];
+    }
+    
+    window.addEventListener('DOMContentLoaded', () => {
+        const savedTheme = getThemePreference('theme');
+        const body = document.body;
+        if (savedTheme === 'light') {
+            body.classList.add('light-mode');
+        } else if (savedTheme === 'dark') {
+            body.classList.add('dark-mode');
+        }
+    });
+</script>
+</body>
+</html>
