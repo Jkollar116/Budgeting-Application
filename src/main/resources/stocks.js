@@ -412,7 +412,7 @@ document.addEventListener('DOMContentLoaded', function() {
             });
     }
 
-    // Place an order (mock implementation without backend)
+    // Place an order using the backend API
     function placeOrder(orderType, side, formId) {
         const form = document.getElementById(formId);
         const symbol = currentSymbol;
@@ -431,38 +431,36 @@ document.addEventListener('DOMContentLoaded', function() {
             return;
         }
 
-        // Get price information for the order
-        let orderPrice = 0;
-        let priceDescription = "";
+        // Build order data based on order type
+        const orderData = {
+            symbol: symbol,
+            quantity: side === 'buy' ? quantity : -quantity, // Negative for sell
+            orderType: orderType,
+            timeInForce: timeInForce
+        };
         
+        // Add specific order parameters based on type
         switch (orderType) {
             case 'market':
-                // For market orders, use current price from the stock details
-                if (currentStockDetails && currentStockDetails.quote) {
-                    orderPrice = parseFloat(currentStockDetails.quote.price);
-                    priceDescription = "MARKET";
-                } else {
-                    showError('order-error', 'Cannot place market order - current price not available.');
-                    return;
-                }
+                // Market orders don't need additional parameters
                 break;
                 
             case 'limit':
-                orderPrice = parseFloat(form.querySelector('#limit-price').value);
-                if (!orderPrice || orderPrice <= 0) {
+                const limitPrice = parseFloat(form.querySelector('#limit-price').value);
+                if (!limitPrice || limitPrice <= 0) {
                     showError('order-error', 'Please enter a valid limit price.');
                     return;
                 }
-                priceDescription = `LIMIT @ ${formatCurrency(orderPrice)}`;
+                orderData.limitPrice = limitPrice;
                 break;
                 
             case 'stop':
-                orderPrice = parseFloat(form.querySelector('#stop-price').value);
-                if (!orderPrice || orderPrice <= 0) {
+                const stopPrice = parseFloat(form.querySelector('#stop-price').value);
+                if (!stopPrice || stopPrice <= 0) {
                     showError('order-error', 'Please enter a valid stop price.');
                     return;
                 }
-                priceDescription = `STOP @ ${formatCurrency(orderPrice)}`;
+                orderData.stopPrice = stopPrice;
                 break;
                 
             case 'stop-limit':
@@ -472,8 +470,8 @@ document.addEventListener('DOMContentLoaded', function() {
                     showError('order-error', 'Please enter valid stop and limit prices.');
                     return;
                 }
-                orderPrice = slLimitPrice; // Use limit price for cost calculation
-                priceDescription = `STOP-LIMIT @ ${formatCurrency(slStopPrice)}/${formatCurrency(slLimitPrice)}`;
+                orderData.stopPrice = slStopPrice;
+                orderData.limitPrice = slLimitPrice;
                 break;
                 
             case 'trailing-stop':
@@ -482,17 +480,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     showError('order-error', 'Please enter a valid trail percent.');
                     return;
                 }
-                
-                // Calculate trail amount based on current price
-                if (currentStockDetails && currentStockDetails.quote) {
-                    const currentPrice = parseFloat(currentStockDetails.quote.price);
-                    const trailAmount = currentPrice * (trailPercent / 100);
-                    orderPrice = side === 'buy' ? currentPrice + trailAmount : currentPrice - trailAmount;
-                    priceDescription = `TRAILING-STOP ${trailPercent}%`;
-                } else {
-                    showError('order-error', 'Cannot place trailing stop order - current price not available.');
-                    return;
-                }
+                orderData.trailPercent = trailPercent;
                 break;
         }
 
@@ -500,218 +488,40 @@ document.addEventListener('DOMContentLoaded', function() {
         hideError('order-error');
         hideSuccess('order-success');
         
-        // Create mock order ID
-        const orderId = 'ord_' + Math.random().toString(36).substring(2, 15);
-        
-        // Create and add order to the list
-        const order = {
-            id: orderId,
-            symbol: symbol,
-            type: orderType,
-            side: side,
-            qty: quantity,
-            price: orderPrice,
-            status: 'filled', // Simulate immediate fill
-            created_at: new Date().toISOString()
-        };
-        
-        // Add to mock order history
-        if (!window.mockOrderHistory) {
-            window.mockOrderHistory = [];
-        }
-        window.mockOrderHistory.push(order);
-        
-        // Calculate cost
-        const cost = quantity * orderPrice;
-        const costFormatted = formatCurrency(cost);
-        
-        // Show success message with details
-        showSuccess('order-success', `Order placed successfully: ${side.toUpperCase()} ${quantity} ${symbol} @ ${priceDescription} for ${costFormatted}`);
-        
-        // Since we're using a mock backend, manually update the portfolio
-        updateMockPortfolio(symbol, side, quantity, orderPrice);
-        
-        // Reset form
-        form.reset();
-        
-        // Call these to refresh the UI with our mock data
-        updateOrdersDisplay();
-    }
-    
-    // Helper function to update mock portfolio
-    function updateMockPortfolio(symbol, side, quantity, price) {
-        // Initialize mock portfolio if it doesn't exist
-        if (!window.mockPortfolio) {
-            window.mockPortfolio = {};
-        }
-        
-        // Get or create position
-        if (!window.mockPortfolio[symbol]) {
-            window.mockPortfolio[symbol] = {
-                symbol: symbol,
-                qty: 0,
-                avg_entry_price: 0,
-                total_cost: 0
-            };
-        }
-        
-        const position = window.mockPortfolio[symbol];
-        
-        if (side === 'buy') {
-            // Calculate new average price
-            const oldValue = position.qty * position.avg_entry_price;
-            const newValue = quantity * price;
-            const newQuantity = position.qty + quantity;
-            
-            position.qty = newQuantity;
-            position.total_cost = oldValue + newValue;
-            position.avg_entry_price = position.total_cost / newQuantity;
-        } else { // sell
-            // Just reduce quantity for sell
-            position.qty -= quantity;
-            
-            // Remove position if quantity is 0 or negative
-            if (position.qty <= 0) {
-                delete window.mockPortfolio[symbol];
+        // Submit the order to the backend
+        fetch(`${API_BASE}/orders`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(orderData)
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`Order failed: ${response.status} ${response.statusText}`);
             }
-        }
-        
-        // Update portfolio display
-        updatePortfolioDisplay();
-    }
-    
-    // Function to update the orders display with mock data
-    function updateOrdersDisplay() {
-        // Only proceed if we have mock order history
-        if (!window.mockOrderHistory) return;
-        
-        const ordersBody = document.getElementById('open-orders-body');
-        if (!ordersBody) return;
-        
-        // Clear current display
-        ordersBody.innerHTML = '';
-        
-        // Get orders table and message elements
-        const ordersTable = document.getElementById('open-orders-table');
-        const noOrdersMessage = document.getElementById('no-open-orders-message');
-        
-        // Filter to most recent 5 orders
-        const recentOrders = window.mockOrderHistory.slice(-5).reverse();
-        
-        if (recentOrders.length === 0) {
-            ordersTable.style.display = 'none';
-            noOrdersMessage.style.display = 'block';
-        } else {
-            ordersTable.style.display = 'table';
-            noOrdersMessage.style.display = 'none';
+            return response.json();
+        })
+        .then(data => {
+            // Show success message with order details
+            showSuccess('order-success', `Order ${data.id} placed successfully: ${data.status}`);
             
-            recentOrders.forEach(order => {
-                const row = document.createElement('tr');
-                
-                const priceDisplay = order.type === 'market' ? 'Market' : formatCurrency(order.price);
-                
-                row.innerHTML = `
-                    <td>${order.symbol}</td>
-                    <td>${order.type.toUpperCase()}</td>
-                    <td>${order.side.toUpperCase()}</td>
-                    <td>${order.qty}</td>
-                    <td>${priceDisplay}</td>
-                    <td>${order.status}</td>
-                    <td>${new Date(order.created_at).toLocaleString()}</td>
-                `;
-                
-                ordersBody.appendChild(row);
-            });
-        }
-    }
-    
-    // Function to update portfolio display with mock data
-    function updatePortfolioDisplay() {
-        // Only proceed if we have mock portfolio
-        if (!window.mockPortfolio) return;
-        
-        const positionsBody = document.getElementById('positions-body');
-        if (!positionsBody) return;
-        
-        // Clear current display
-        positionsBody.innerHTML = '';
-        
-        // Get positions table and message elements
-        const positionsTable = document.getElementById('positions-table');
-        const noPositionsMessage = document.getElementById('no-positions-message');
-        
-        const positions = Object.values(window.mockPortfolio);
-        
-        if (positions.length === 0) {
-            positionsTable.style.display = 'none';
-            noPositionsMessage.style.display = 'block';
-        } else {
-            positionsTable.style.display = 'table';
-            noPositionsMessage.style.display = 'none';
+            // Reset form
+            form.reset();
             
-            positions.forEach(position => {
-                const symbol = position.symbol;
-                const quantity = position.qty;
-                const avgPrice = position.avg_entry_price;
-                
-                // Get current price from stored stock details or use average price as fallback
-                let currentPrice = avgPrice;
-                if (currentStockDetails && symbol === currentSymbol && 
-                    currentStockDetails.quote) {
-                    currentPrice = parseFloat(currentStockDetails.quote.price);
-                }
-                
-                const marketValue = quantity * currentPrice;
-                const unrealizedPL = marketValue - (quantity * avgPrice);
-                const unrealizedPLPC = (unrealizedPL / (quantity * avgPrice)) * 100;
-                
-                const row = document.createElement('tr');
-                
-                // Format P&L with color
-                const plClass = unrealizedPL >= 0 ? 'profit' : 'loss';
-                const plSign = unrealizedPL >= 0 ? '+' : '';
-                
-                row.innerHTML = `
-                    <td>${symbol}</td>
-                    <td>${quantity}</td>
-                    <td>${formatCurrency(avgPrice)}</td>
-                    <td>${formatCurrency(currentPrice)}</td>
-                    <td>${formatCurrency(marketValue)}</td>
-                    <td class="${plClass}">${plSign}${formatCurrency(unrealizedPL)} (${plSign}${unrealizedPLPC.toFixed(2)}%)</td>
-                    <td class="position-actions">
-                        <button class="buy-more" data-symbol="${symbol}">Buy More</button>
-                        <button class="sell" data-symbol="${symbol}" data-qty="${quantity}">Sell</button>
-                    </td>
-                `;
-                
-                positionsBody.appendChild(row);
-            });
+            // Refresh data
+            fetchPortfolio();
+            fetchOrders('open');
             
-            // Add event listeners to the action buttons
-            const buyMoreButtons = document.querySelectorAll('.position-actions .buy-more');
-            const sellButtons = document.querySelectorAll('.position-actions .sell');
-            
-            buyMoreButtons.forEach(button => {
-                button.addEventListener('click', function() {
-                    const symbol = this.getAttribute('data-symbol');
-                    searchStock(symbol);
-                    // Focus on market order tab
-                    document.querySelector('.tabs [data-tab="market-order"]').click();
-                });
-            });
-            
-            sellButtons.forEach(button => {
-                button.addEventListener('click', function() {
-                    const symbol = this.getAttribute('data-symbol');
-                    const quantity = this.getAttribute('data-qty');
-                    searchStock(symbol);
-                    // Focus on market order tab
-                    document.querySelector('.tabs [data-tab="market-order"]').click();
-                    // Set quantity for selling
-                    document.getElementById('market-quantity').value = quantity;
-                });
-            });
-        }
+            // If the order was for the currently displayed stock, refresh that too
+            if (data.symbol === currentSymbol) {
+                searchStock(currentSymbol);
+            }
+        })
+        .catch(error => {
+            console.error("Order placement error:", error);
+            showError('order-error', `Failed to place order: ${error.message}`);
+        });
     }
 
     // Helper functions
@@ -867,8 +677,59 @@ document.addEventListener('DOMContentLoaded', function() {
         placeOrder('trailing-stop', 'sell', 'trailing-stop-order-form');
     });
     
-    // Initialize with sample data
-    fetchAccountInfo();
-    fetchPortfolio();
-    fetchOrders('open');
+    // Listen for authentication changes
+    window.addEventListener('DOMContentLoaded', function() {
+        // Check if the user is logged in
+        const idToken = getCookie('idToken');
+        const localId = getCookie('localId');
+        const sessionCookie = getCookie('session');
+        
+        console.log("Authentication status check:");
+        console.log("- session cookie:", sessionCookie);
+        console.log("- idToken cookie:", idToken ? "exists" : "missing");
+        console.log("- localId cookie:", localId ? "exists" : "missing");
+        
+        // Initialize with real data from Firebase if tokens are available
+        if (idToken && localId) {
+            // Initialize with real data from Firebase
+            fetchAccountInfo();
+            fetchPortfolio();
+            fetchOrders('open');
+        } else {
+            console.log("Firebase tokens not available, initializing with empty state");
+            
+            // Clear any existing mock data
+            window.mockPortfolio = {};
+            window.mockOrderHistory = [];
+            
+            // Show empty tables where needed
+            const positionsTable = document.getElementById('positions-table');
+            const noPositionsMessage = document.getElementById('no-positions-message');
+            if (positionsTable && noPositionsMessage) {
+                positionsTable.style.display = 'none';
+                noPositionsMessage.style.display = 'block';
+            }
+            
+            const ordersTable = document.getElementById('open-orders-table');
+            const noOrdersMessage = document.getElementById('no-open-orders-message');
+            if (ordersTable && noOrdersMessage) {
+                ordersTable.style.display = 'none';
+                noOrdersMessage.style.display = 'block';
+            }
+            
+            // Set default account values to zero
+            document.getElementById('account-value').textContent = '$0.00';
+            document.getElementById('buying-power').textContent = '$0.00';
+            document.getElementById('cash-balance').textContent = '$0.00';
+            document.getElementById('unrealized-pl').textContent = '$0.00 (0.00%)';
+        }
+    });
+    
+    // Helper function to get cookies
+    function getCookie(name) {
+        const value = `; ${document.cookie}`;
+        const parts = value.split(`; ${name}=`);
+        if (parts.length === 2) return parts.pop().split(';').shift();
+        return null;
+    }
 });

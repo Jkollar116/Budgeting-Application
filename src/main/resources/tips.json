@@ -1,67 +1,177 @@
 [
   {
-    "id": "tip-student-001",
-    "category": "Students",
-    "text": "Track your expenses throughout the semester with a spreadsheet or budgeting app like this one!"
+    "id": 1,
+    "category": "Budgeting",
+    "title": "50/30/20 Budgeting Rule",
+    "content": "Allocate 50% of your income to needs, 30% to wants, and 20% to savings and debt repayment. This simple rule helps maintain financial balance.",
+    "difficulty": "Beginner"
   },
   {
-    "id": "tip-workers-001",
-    "category": "Workers",
-    "text": "Set aside a fixed percentage of every paycheck for emergencies."
+    "id": 2,
+    "category": "Saving",
+    "title": "Automate Your Savings",
+    "content": "Set up automatic transfers to your savings account on payday. What you don't see, you won't miss. Even small amounts add up over time.",
+    "difficulty": "Beginner"
   },
   {
-    "id": "tip-seniors-001",
-    "category": "Seniors",
-    "text": "Review your healthcare and insurance plans annually to ensure you're not overpaying or under-covered."
+    "id": 3,
+    "category": "Debt",
+    "title": "Snowball Method",
+    "content": "Pay minimum payments on all debts, then put extra money toward your smallest debt. Once it's paid off, apply that payment to the next smallest debt. This creates momentum and motivation.",
+    "difficulty": "Intermediate"
   },
   {
-    "id": "tip-low-income-001",
-    "category": "Low Income",
-    "text": "Prioritize necessities using a needs vs wants list."
+    "id": 4,
+    "category": "Debt",
+    "title": "Avalanche Method",
+    "content": "Focus on paying off debts with the highest interest rates first. This minimizes the amount of interest you pay over time, saving you money in the long run.",
+    "difficulty": "Intermediate"
   },
   {
-    "id": "tip-low-income-002",
-    "category": "Low Income",
-    "text": "Look into local community programs for financial support."
+    "id": 5,
+    "category": "Emergency Fund",
+    "title": "Build an Emergency Fund",
+    "content": "Aim to save 3-6 months of essential expenses in an easily accessible account. This provides a financial buffer for unexpected events like medical emergencies or job loss.",
+    "difficulty": "Intermediate"
   },
   {
-    "id": "tip-high-income-001",
-    "category": "High Income",
-    "text": "Avoid lifestyle inflation, do not spend more as your income rises"
+    "id": 6,
+    "category": "Spending",
+    "title": "24-Hour Rule",
+    "content": "Wait 24 hours before making non-essential purchases over a certain amount. This helps prevent impulse buying and gives you time to consider if you really need the item.",
+    "difficulty": "Beginner"
   },
   {
-    "id": "tip-high-income-002",
-    "category": "High Income",
-    "text": "Ensure that your investments and your savings rise as your income does"
+    "id": 7,
+    "category": "Saving",
+    "title": "Pay Yourself First",
+    "content": "Treat savings as a non-negotiable expense. Set aside money for your financial goals before spending on discretionary items.",
+    "difficulty": "Beginner"
   },
   {
-    "id": "tip-new-earners-001",
-    "category": "New Earners",
-    "text": "Start building credit early with a credit card and pay off the full balance monthly on time."
+    "id": 8,
+    "category": "Investing",
+    "title": "Start Investing Early",
+    "content": "Take advantage of compound interest by starting to invest as early as possible. Even small amounts can grow significantly over time.",
+    "difficulty": "Advanced"
   },
   {
-    "id": "tip-families-001",
-    "category": "Families",
-    "text": "Meal planning can save hundreds per month, shop with a list and limit takeout to special occasions if possible."
+    "id": 9,
+    "category": "Insurance",
+    "title": "Review Insurance Coverage",
+    "content": "Regularly review your insurance policies to ensure adequate coverage and look for opportunities to save. Consider bundling policies for discounts.",
+    "difficulty": "Intermediate"
   },
   {
-    "id": "tip-debt-001",
-    "category": "Debt Management",
-    "text": "Tackle debt using the snowball or avalanche method — choose the one that keeps you motivated to stick with it."
+    "id": 10,
+    "category": "Spending",
+    "title": "Track Your Expenses",
+    "content": "Keep a record of all your expenses for at least one month. Identifying spending patterns helps you find areas where you can cut back.",
+    "difficulty": "Beginner"
   },
   {
-    "id": "tip-smallbiz-001",
-    "category": "Small Business",
-    "text": "Open a dedicated business account to simplify taxes and budgeting."
+    "id": 11,
+    "category": "Credit",
+    "title": "Monitor Your Credit Score",
+    "content": "Regularly check your credit report for errors and monitor your credit score. A good credit score can save you thousands in interest over your lifetime.",
+    "difficulty": "Intermediate"
   },
   {
-    "id": "tip-smallbiz-002",
-    "category": "Small Business",
-    "text": "Keep your personal and business finances separate"
+    "id": 12,
+    "category": "Shopping",
+    "title": "Use Cash for Discretionary Spending",
+    "content": "Using cash instead of cards for non-essential purchases can help you spend less. The physical act of handing over money makes the spending more tangible.",
+    "difficulty": "Beginner"
   },
   {
-    "id": "tip-investment-001",
-    "category": "Investment",
-    "text": "Diversify your portfolio to manage risk"
+    "id": 13,
+    "category": "Bills",
+    "title": "Negotiate Bills and Subscriptions",
+    "content": "Regularly review and negotiate recurring bills such as cable, internet, and phone. Also audit your subscriptions and cancel those you don't use regularly.",
+    "difficulty": "Intermediate"
+  },
+  {
+    "id": 14,
+    "category": "Taxes",
+    "title": "Maximize Tax Deductions",
+    "content": "Take advantage of all eligible tax deductions and credits. Consider consulting with a tax professional to ensure you're not overpaying.",
+    "difficulty": "Advanced"
+  },
+  {
+    "id": 15,
+    "category": "Retirement",
+    "title": "Maximize Employer Match",
+    "content": "If your employer offers a retirement plan match, contribute at least enough to get the full match. This is essentially free money for your future.",
+    "difficulty": "Intermediate"
+  },
+  {
+    "id": 16,
+    "category": "Housing",
+    "title": "The 28/36 Rule",
+    "content": "Aim to keep housing costs below 28% of your gross monthly income, and total debt payments below 36%. This helps maintain financial flexibility.",
+    "difficulty": "Intermediate"
+  },
+  {
+    "id": 17,
+    "category": "Education",
+    "title": "Continuously Improve Financial Literacy",
+    "content": "Invest time in learning about personal finance. Books, podcasts, and online courses can help you make better financial decisions.",
+    "difficulty": "Beginner"
+  },
+  {
+    "id": 18,
+    "category": "Food",
+    "title": "Meal Planning",
+    "content": "Plan your meals ahead of time and create a shopping list based on your plan. This reduces food waste and prevents impulse purchases at the grocery store.",
+    "difficulty": "Beginner"
+  },
+  {
+    "id": 19,
+    "category": "Transportation",
+    "title": "Consider Total Cost of Car Ownership",
+    "content": "When budgeting for a car, remember to include insurance, maintenance, fuel, and depreciation. These costs often exceed the monthly payment.",
+    "difficulty": "Intermediate"
+  },
+  {
+    "id": 20,
+    "category": "Shopping",
+    "title": "Use Price Comparison Tools",
+    "content": "Before making a purchase, use price comparison websites or apps to ensure you're getting the best deal. Also look for coupon codes for online purchases.",
+    "difficulty": "Beginner"
+  },
+  {
+    "id": 21,
+    "category": "Career",
+    "title": "Invest in Your Career",
+    "content": "Continually developing your skills and knowledge can lead to higher income potential. Consider courses, certifications, or networking that could advance your career.",
+    "difficulty": "Advanced"
+  },
+  {
+    "id": 22,
+    "category": "Investing",
+    "title": "Diversify Your Investments",
+    "content": "Spread your investments across different asset classes to reduce risk. Don't put all your eggs in one basket.",
+    "difficulty": "Advanced"
+  },
+  {
+    "id": 23,
+    "category": "Retirement",
+    "title": "Catch-Up Contributions",
+    "content": "If you're 50 or older, take advantage of catch-up contributions to retirement accounts. These allow you to save more in tax-advantaged accounts.",
+    "difficulty": "Advanced"
+  },
+  {
+    "id": 24,
+    "category": "Healthcare",
+    "title": "Use HSA or FSA Accounts",
+    "content": "If eligible, contribute to Health Savings Accounts (HSAs) or Flexible Spending Accounts (FSAs) to pay for medical expenses with pre-tax dollars.",
+    "difficulty": "Intermediate"
+  },
+  {
+    "id": 25,
+    "category": "Windfall",
+    "title": "Plan for Windfalls",
+    "content": "Have a plan for unexpected money, such as tax refunds or bonuses. Allocate a portion to savings, debt repayment, and a small amount for something enjoyable.",
+    "difficulty": "Intermediate"
   }
 ]

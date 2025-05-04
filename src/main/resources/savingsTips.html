@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Savings Tips - CashClimb</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        .tips-container {
+            max-width: 800px;
+            margin: 20px auto;
+            padding: 20px;
+        }
+        
+        .tip-category {
+            margin-bottom: 30px;
+            background-color: var(--card-bg);
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .tip-category h2 {
+            color: var(--primary-color);
+            margin-top: 0;
+            padding-bottom: 10px;
+            border-bottom: 1px solid var(--border-color);
+        }
+        
+        .tip {
+            margin-bottom: 15px;
+            padding: 15px;
+            background-color: var(--bg-color);
+            border-radius: 5px;
+            border-left: 4px solid var(--accent-color);
+        }
+        
+        .tip h3 {
+            margin-top: 0;
+            color: var(--text-color);
+        }
+        
+        .tip p {
+            margin-bottom: 0;
+        }
+        
+        .tip-icon {
+            font-size: 24px;
+            margin-right: 10px;
+            color: var(--accent-color);
+        }
+        
+        .search-box {
+            margin-bottom: 20px;
+            width: 100%;
+            padding: 10px;
+            border-radius: 5px;
+            border: 1px solid var(--border-color);
+            background-color: var(--input-bg);
+            color: var(--text-color);
+        }
+        
+        .no-results {
+            text-align: center;
+            padding: 20px;
+            background-color: var(--card-bg);
+            border-radius: 5px;
+            color: var(--text-muted);
+        }
+    </style>
+</head>
+<body>
+    <nav>
+        <div class="logo">CashClimb</div>
+        <div class="menu-toggle">☰</div>
+        <ul class="nav-links">
+            <li><a href="home.html">Home</a></li>
+            <li><a href="expenses.html">Expenses</a></li>
+            <li><a href="income.html">Income</a></li>
+            <li><a href="bills.html">Bills</a></li>
+            <li><a href="budget.html">Budget</a></li>
+            <li><a href="stocks.html">Stocks</a></li>
+            <li><a href="crypto.html">Crypto</a></li>
+            <li><a href="alerts.html">Alerts</a></li>
+            <li><a href="savingsTips.html" class="active">Savings Tips</a></li>
+            <li><a href="profile.html">Profile</a></li>
+            <li><a href="settings.html">Settings</a></li>
+            <li><a href="chat.html">Chat</a></li>
+            <li><a href="/logout">Logout</a></li>
+        </ul>
+    </nav>
+    
+    <div class="container">
+        <div class="tips-container">
+            <h1>Savings Tips</h1>
+            <p>Discover practical strategies to save money and improve your financial health.</p>
+            
+            <input type="text" id="searchTips" class="search-box" placeholder="Search for tips...">
+            
+            <div id="tipsContent">
+                <div class="tip-category">
+                    <h2>📊 Budgeting</h2>
+                    <div class="tip">
+                        <h3>50/30/20 Rule</h3>
+                        <p>Allocate 50% of your income to needs, 30% to wants, and 20% to savings and debt repayment.</p>
+                    </div>
+                    <div class="tip">
+                        <h3>Zero-Based Budgeting</h3>
+                        <p>Assign every dollar of income to a specific expense, savings, or debt payment so your income minus expenses equals zero.</p>
+                    </div>
+                    <div class="tip">
+                        <h3>Cash Envelope System</h3>
+                        <p>Use envelopes with cash for different spending categories to help stick to your budget and avoid overspending.</p>
+                    </div>
+                </div>
+                
+                <div class="tip-category">
+                    <h2>💰 Daily Savings</h2>
+                    <div class="tip">
+                        <h3>Cook at Home</h3>
+                        <p>Preparing meals at home instead of eating out can save you $2,000-$3,000 annually.</p>
+                    </div>
+                    <div class="tip">
+                        <h3>Coffee Calculations</h3>
+                        <p>Making coffee at home instead of buying it daily can save you $800-$1,200 per year.</p>
+                    </div>
+                    <div class="tip">
+                        <h3>Use Cashback Apps</h3>
+                        <p>Apps like Rakuten, Ibotta, and Honey can help you earn cashback on everyday purchases.</p>
+                    </div>
+                    <div class="tip">
+                        <h3>Unsubscribe and Cancel</h3>
+                        <p>Review and cancel subscriptions you rarely use. The average person wastes $348 annually on unused subscriptions.</p>
+                    </div>
+                </div>
+                
+                <div class="tip-category">
+                    <h2>🏦 Banking and Credit</h2>
+                    <div class="tip">
+                        <h3>High-Yield Savings</h3>
+                        <p>Switch to a high-yield savings account that offers better interest rates than traditional banks.</p>
+                    </div>
+                    <div class="tip">
+                        <h3>Automate Savings</h3>
+                        <p>Set up automatic transfers to your savings account on payday to build savings without thinking about it.</p>
+                    </div>
+                    <div class="tip">
+                        <h3>Credit Card Strategy</h3>
+                        <p>Pay off credit cards in full each month to avoid interest, and choose cards with rewards that match your spending habits.</p>
+                    </div>
+                    <div class="tip">
+                        <h3>Debt Avalanche Method</h3>
+                        <p>Focus on paying off debts with the highest interest rates first to minimize the total interest paid.</p>
+                    </div>
+                </div>
+                
+                <div class="tip-category">
+                    <h2>🏠 Housing</h2>
+                    <div class="tip">
+                        <h3>30% Rule</h3>
+                        <p>Keep housing costs below 30% of your gross monthly income for better financial stability.</p>
+                    </div>
+                    <div class="tip">
+                        <h3>Refinance Your Mortgage</h3>
+                        <p>Consider refinancing your mortgage when interest rates drop to lower your monthly payments.</p>
+                    </div>
+                    <div class="tip">
+                        <h3>Energy Efficiency</h3>
+                        <p>Invest in energy-efficient appliances and smart home devices to reduce utility bills over time.</p>
+                    </div>
+                </div>
+                
+                <div class="tip-category">
+                    <h2>🚗 Transportation</h2>
+                    <div class="tip">
+                        <h3>Compare Insurance Rates</h3>
+                        <p>Shop around for car insurance annually. You could save hundreds by switching providers.</p>
+                    </div>
+                    <div class="tip">
+                        <h3>Public Transportation</h3>
+                        <p>Using public transportation instead of owning a car can save you up to $10,000 per year in some cities.</p>
+                    </div>
+                    <div class="tip">
+                        <h3>Fuel Efficiency</h3>
+                        <p>Maintain proper tire pressure and remove excess weight from your car to improve fuel efficiency.</p>
+                    </div>
+                </div>
+                
+                <div class="tip-category">
+                    <h2>📱 Technology</h2>
+                    <div class="tip">
+                        <h3>Buy Refurbished</h3>
+                        <p>Purchase certified refurbished electronics which can be 15-30% cheaper than new ones.</p>
+                    </div>
+                    <div class="tip">
+                        <h3>Family Phone Plans</h3>
+                        <p>Join or create a family mobile plan to save on monthly service costs.</p>
+                    </div>
+                    <div class="tip">
+                        <h3>Streaming Services</h3>
+                        <p>Rotate streaming subscriptions instead of having them all active at once.</p>
+                    </div>
+                </div>
+                
+                <div class="tip-category">
+                    <h2>🛒 Shopping</h2>
+                    <div class="tip">
+                        <h3>24-Hour Rule</h3>
+                        <p>Wait 24 hours before making non-essential purchases to avoid impulse buying.</p>
+                    </div>
+                    <div class="tip">
+                        <h3>Seasonal Shopping</h3>
+                        <p>Buy seasonal items when they're off-season (winter clothes in summer, etc.) for significant discounts.</p>
+                    </div>
+                    <div class="tip">
+                        <h3>Price Tracking</h3>
+                        <p>Use price tracking tools like CamelCamelCamel for Amazon to buy when prices drop.</p>
+                    </div>
+                    <div class="tip">
+                        <h3>Buy Generic</h3>
+                        <p>Choose generic or store-brand products which often cost 20-30% less than name brands.</p>
+                    </div>
+                </div>
+                
+                <div class="tip-category">
+                    <h2>🎓 Education</h2>
+                    <div class="tip">
+                        <h3>Student Loan Refinancing</h3>
+                        <p>Consider refinancing student loans if you can qualify for a lower interest rate.</p>
+                    </div>
+                    <div class="tip">
+                        <h3>Income-Driven Repayment</h3>
+                        <p>Explore income-driven repayment plans for federal student loans if you're struggling with monthly payments.</p>
+                    </div>
+                    <div class="tip">
+                        <h3>Employer Tuition Benefits</h3>
+                        <p>Check if your employer offers tuition reimbursement for continuing education.</p>
+                    </div>
+                </div>
+                
+                <div class="tip-category">
+                    <h2>💼 Career and Income</h2>
+                    <div class="tip">
+                        <h3>Salary Negotiation</h3>
+                        <p>Negotiate your salary when starting a new job or during performance reviews. Even a 5% increase can significantly impact lifetime earnings.</p>
+                    </div>
+                    <div class="tip">
+                        <h3>Side Hustle</h3>
+                        <p>Consider starting a side hustle based on your skills to increase your income and accelerate savings goals.</p>
+                    </div>
+                    <div class="tip">
+                        <h3>Tax-Advantaged Accounts</h3>
+                        <p>Maximize contributions to 401(k), IRA, or HSA accounts to reduce taxable income and build wealth.</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div id="noResults" class="no-results" style="display: none;">
+                <p>No tips found matching your search. Try a different term.</p>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const searchInput = document.getElementById('searchTips');
+            const tipsContent = document.getElementById('tipsContent');
+            const noResults = document.getElementById('noResults');
+            const allTips = document.querySelectorAll('.tip');
+            const categories = document.querySelectorAll('.tip-category');
+            
+            // Search functionality
+            searchInput.addEventListener('input', function() {
+                const query = this.value.toLowerCase().trim();
+                let foundResults = false;
+                
+                // Reset display
+                categories.forEach(category => {
+                    category.style.display = 'block';
+                    let visibleTips = 0;
+                    
+                    // Check each tip in this category
+                    const tips = category.querySelectorAll('.tip');
+                    tips.forEach(tip => {
+                        const tipTitle = tip.querySelector('h3').textContent.toLowerCase();
+                        const tipContent = tip.querySelector('p').textContent.toLowerCase();
+                        
+                        if (query === '' || tipTitle.includes(query) || tipContent.includes(query)) {
+                            tip.style.display = 'block';
+                            visibleTips++;
+                            foundResults = true;
+                        } else {
+                            tip.style.display = 'none';
+                        }
+                    });
+                    
+                    // Hide category if no tips match
+                    if (visibleTips === 0) {
+                        category.style.display = 'none';
+                    }
+                });
+                
+                // Show/hide no results message
+                if (!foundResults && query !== '') {
+                    tipsContent.style.display = 'none';
+                    noResults.style.display = 'block';
+                } else {
+                    tipsContent.style.display = 'block';
+                    noResults.style.display = 'none';
+                }
+            });
+            
+            // Set up navigation menu toggle for mobile
+            const menuToggle = document.querySelector('.menu-toggle');
+            const navLinks = document.querySelector('.nav-links');
+            
+            menuToggle.addEventListener('click', () => {
+                navLinks.classList.toggle('active');
+            });
+        });
+        
+        // Theme handling
+        function getThemePreference(name) {
+            const match = document.cookie.match(new RegExp('(^| )' + name + '=([^;]+)'));
+            if (!match) return null;
+            return match[2];
+        }
+        
+        window.addEventListener('DOMContentLoaded', () => {
+            const savedTheme = getThemePreference('theme');
+            const body = document.body;
+            
+            if (savedTheme === 'light') {
+                body.classList.add('light-mode');
+            } else if (savedTheme === 'dark') {
+                body.classList.add('dark-mode');
+            }
+        });
+    </script>
+</body>
+</html>

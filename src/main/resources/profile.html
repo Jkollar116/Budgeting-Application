@@ -26,13 +26,15 @@
         <li><a href="chat.html">Chat</a></li>
         <li><a href="tips.html">Tips</a></li>
         <li><a href="savedTips.html">Saved Tips</a></li>
-        <li><a href="assetsLiabilities.html" class="active">Assets &amp; Liabilities</a></li>
+        <li><a href="savingsTips.html">Savings Tips</a></li>
+        <li><a href="assetsLiabilities.html">Assets &amp; Liabilities</a></li>
         <li><a href="budget.html">Budget</a></li>
-        <li><a href="profile.html">Profile</a></li>
+        <li><a href="bills.html">Bills</a></li>
+        <li><a href="alerts.html">Alerts</a></li>
+        <li><a href="profile.html" class="active">Profile</a></li>
         <li><a href="settings.html">Settings</a></li>
-        <li><a href="/logout">Logout</a></li>
-        <li><a href="bills.html">Bills Page (Not Done)</a></li>
         <li><a href="leaderboard.html">Leaderboard</a></li>
+        <li><a href="/logout">Logout</a></li>
     </ul>
 </nav>
 <main>
@@ -55,12 +57,25 @@
                 </div>
             </div>
             <div class="form-group">
-                <label for="fullName">Full Name</label>
-                <input type="text" id="fullName" name="fullName" placeholder="Enter your full name" required>
+                <label for="username">Username <span class="required">*</span></label>
+                <input type="text" id="username" name="username" placeholder="Enter your username" required>
+                <small class="form-text text-muted">Usernames must be unique.</small>
             </div>
             <div class="form-group">
-                <label for="careerDescription">Career Description</label>
-                <textarea id="careerDescription" name="careerDescription" placeholder="Tell us about your career (e.g., job title, industry, goals)" rows="4"></textarea>
+                <label for="fullName">Full Name</label>
+                <input type="text" id="fullName" name="fullName" placeholder="Enter your full name">
+            </div>
+            <div class="form-group">
+                <label for="age">Age <span class="optional">(Optional)</span></label>
+                <input type="number" id="age" name="age" placeholder="Enter your age" min="18" max="120">
+            </div>
+            <div class="form-group">
+                <label for="career">Career/Job Title <span class="optional">(Optional)</span></label>
+                <input type="text" id="career" name="career" placeholder="Enter your job title or profession">
+            </div>
+            <div class="form-group">
+                <label for="careerDescription">Career Description <span class="optional">(Optional)</span></label>
+                <textarea id="careerDescription" name="careerDescription" placeholder="Tell us about your career (e.g., industry experience, goals)" rows="4"></textarea>
             </div>
             <button type="submit" class="submit-btn">Save Profile</button>
         </form>
@@ -81,6 +96,7 @@
         if (event.persisted) window.location.reload();
     });
     window.addEventListener('DOMContentLoaded', () => {
+        // Set theme
         const savedTheme = getThemePreference('theme');
         const body = document.body;
         if (savedTheme === 'light') {
@@ -92,7 +108,52 @@
             const input = document.querySelector(`input[name="theme"][value="${savedTheme}"]`);
             if (input) input.checked = true;
         }
+        
+        // Load user profile data
+        loadProfileData();
     });
+    
+    function loadProfileData() {
+        fetch('/api/profile')
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Failed to fetch profile data');
+                }
+                return response.json();
+            })
+            .then(data => {
+                // Check if the response has the expected structure with fields
+                if (data && data.fields) {
+                    // Populate username field
+                    if (data.fields.username && data.fields.username.stringValue) {
+                        document.getElementById('username').value = data.fields.username.stringValue;
+                    }
+                    
+                    // Populate name field
+                    if (data.fields.name && data.fields.name.stringValue) {
+                        document.getElementById('fullName').value = data.fields.name.stringValue;
+                    }
+                    
+                    // Populate age field
+                    if (data.fields.age && data.fields.age.integerValue) {
+                        document.getElementById('age').value = data.fields.age.integerValue;
+                    }
+                    
+                    // Populate career field
+                    if (data.fields.career && data.fields.career.stringValue) {
+                        document.getElementById('career').value = data.fields.career.stringValue;
+                    }
+                    
+                    // Populate career description field
+                    if (data.fields.careerDescription && data.fields.careerDescription.stringValue) {
+                        document.getElementById('careerDescription').value = data.fields.careerDescription.stringValue;
+                    }
+                }
+            })
+            .catch(error => {
+                console.error('Error loading profile data:', error);
+            });
+    }
     document.getElementById('profileImage').addEventListener('change', function(event) {
         const file = event.target.files[0];
         const preview = document.getElementById('imagePreview');
@@ -112,7 +173,56 @@
 
     document.getElementById('profileForm').addEventListener('submit', function(event) {
         event.preventDefault();
-        alert('Profile saved successfully!');
+        
+        // Get form data
+        const username = document.getElementById('username').value;
+        const fullName = document.getElementById('fullName').value;
+        const age = document.getElementById('age').value;
+        const career = document.getElementById('career').value;
+        const careerDescription = document.getElementById('careerDescription').value;
+        
+        // Validate username
+        if (!username) {
+            alert('Username is required.');
+            return;
+        }
+        
+        // Save profile data to Firebase
+        fetch('/api/profile', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                username: username,
+                name: fullName,
+                age: age || null,
+                career: career || '',
+                careerDescription: careerDescription || ''
+            })
+        })
+        .then(response => {
+            if (response.ok) {
+                return response.json().then(data => {
+                    alert('Profile saved successfully!');
+                });
+            } else if (response.status === 400) {
+                // Handle username already taken error
+                return response.json().then(data => {
+                    if (data && data.message) {
+                        alert(data.message);
+                    } else {
+                        alert('Failed to save profile. Please try again.');
+                    }
+                });
+            } else {
+                alert('Failed to save profile. Please try again.');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('An error occurred. Please try again.');
+        });
     });
 </script>
 </html>

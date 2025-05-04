@@ -2436,6 +2436,112 @@ body.light-mode .crypto-page .wallets-empty-message {
     color: #444;
 }
 
+/* Enhanced loading spinner and error handling for crypto page */
+.crypto-page .loading-spinner {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    width: 100%;
+    padding: 20px;
+}
+
+.crypto-page .spinner {
+    width: 40px;
+    height: 40px;
+    border: 4px solid rgba(255, 140, 0, 0.2);
+    border-radius: 50%;
+    border-top-color: #FF8C00;
+    animation: spin 1s ease-in-out infinite;
+    margin-bottom: 10px;
+}
+
+.crypto-page .loading-spinner p {
+    margin-top: 10px;
+    color: #ddd;
+    text-align: center;
+}
+
+.crypto-page .loading-error {
+    text-align: center;
+    padding: 20px;
+    color: #ff6b6b;
+    background: rgba(255, 107, 107, 0.1);
+    border-radius: 8px;
+    margin: 10px 0;
+}
+
+.crypto-page .chart-container {
+    position: relative;
+    min-height: 200px;
+}
+
+.crypto-page .retry-btn {
+    background-color: #3E1F5B;
+    border: 1px solid #FF8C00;
+    color: #FF8C00;
+    padding: 6px 12px;
+    border-radius: 4px;
+    margin-top: 10px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: all 0.3s ease;
+}
+
+.crypto-page .retry-btn:hover {
+    background-color: #FF8C00;
+    color: #fff;
+}
+
+.crypto-page .empty-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    padding: 30px;
+    text-align: center;
+    color: rgba(255, 255, 255, 0.7);
+}
+
+.crypto-page .empty-state .icon {
+    font-size: 40px;
+    margin-bottom: 15px;
+    color: #FF8C00;
+    opacity: 0.7;
+}
+
+/* Light mode styles */
+body.light-mode .crypto-page .loading-spinner {
+    color: #666;
+}
+
+body.light-mode .crypto-page .spinner {
+    border: 4px solid rgba(255, 140, 0, 0.1);
+    border-top-color: #FF8C00;
+}
+
+body.light-mode .crypto-page .loading-error {
+    color: #d32f2f;
+    background: rgba(211, 47, 47, 0.1);
+}
+
+body.light-mode .crypto-page .retry-btn {
+    background-color: #f5f5f5;
+    border: 1px solid #FF8C00;
+    color: #FF8C00;
+}
+
+body.light-mode .crypto-page .retry-btn:hover {
+    background-color: #FF8C00;
+    color: #fff;
+}
+
+body.light-mode .crypto-page .empty-state {
+    color: #666;
+}
+
 /* PROFILE PAGE STYLES */
 .profile-header {
     text-align: center;
@@ -3323,4 +3429,3 @@ body.dark-mode .save-tip-btn:hover {
     border-radius: 6px;
     transition: width 0.5s;
 }
-

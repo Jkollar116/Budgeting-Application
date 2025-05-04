@@ -9,6 +9,10 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.nio.charset.StandardCharsets;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.net.URI;
 import java.net.http.HttpClient;
@@ -20,44 +24,19 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
+import org.json.JSONArray;
+import org.json.JSONObject;
+
 /**
  * Handler for stock-related API endpoints
  */
 public class StockHandler implements HttpHandler {
     private static final Logger LOGGER = Logger.getLogger(StockHandler.class.getName());
     private static final Gson gson = new Gson();
-    private static final StockApiService apiService = new StockApiService();
     
-    // Mock data for user accounts and positions
-    // In a real application, this would be stored in a database
-    private static final Map<String, StockPosition> USER_POSITIONS = new ConcurrentHashMap<>();
-    private static final List<StockOrder> OPEN_ORDERS = Collections.synchronizedList(new ArrayList<>());
-    private static final List<StockTransaction> ORDER_HISTORY = Collections.synchronizedList(new ArrayList<>());
-    
-    // Initialize some demo user data
-    static {
-        // Sample positions for demo
-        USER_POSITIONS.put("AAPL", new StockPosition("AAPL", 10, 170.25));
-        USER_POSITIONS.put("MSFT", new StockPosition("MSFT", 5, 410.50));
-        USER_POSITIONS.put("NVDA", new StockPosition("NVDA", 8, 880.75));
-        
-        // Sample order history
-        Calendar cal = Calendar.getInstance();
-        cal.add(Calendar.HOUR, -2);
-        ORDER_HISTORY.add(new StockTransaction("AAPL", "buy", 5, 175.50, cal.getTime()));
-        
-        cal.add(Calendar.DAY_OF_MONTH, -1);
-        ORDER_HISTORY.add(new StockTransaction("MSFT", "buy", 5, 415.20, cal.getTime()));
-        
-        cal.add(Calendar.DAY_OF_MONTH, -3);
-        ORDER_HISTORY.add(new StockTransaction("NVDA", "buy", 3, 875.25, cal.getTime()));
-        
-        cal.add(Calendar.DAY_OF_MONTH, -5);
-        ORDER_HISTORY.add(new StockTransaction("TSLA", "buy", 10, 165.75, cal.getTime()));
-        
-        cal.add(Calendar.DAY_OF_MONTH, -2);
-        ORDER_HISTORY.add(new StockTransaction("TSLA", "sell", 10, 172.30, cal.getTime()));
-    }
+    // Services
+    private final StockApiService apiService = new StockApiService();
+    private final FirestoreService firestoreService = FirestoreService.getInstance();
 
     @Override
     public void handle(HttpExchange exchange) throws IOException {
@@ -73,9 +52,9 @@ public class StockHandler implements HttpHandler {
             
             // Check if the path starts with our API prefix
             if (!path.startsWith("/api/stocks")) {
-                // Not a path we should handle
-                exchange.getResponseHeaders().set("Location", "/");
-                exchange.sendResponseHeaders(302, -1);
+                // This is a request for the stocks.html page or another resource, not an API call
+                // We should let the server's default file handler process it
+                exchange.sendResponseHeaders(404, -1); // Send 404 to let default handler take over
                 return;
             }
             
@@ -119,80 +98,156 @@ public class StockHandler implements HttpHandler {
     }
     
     private void handleAccountRequest(HttpExchange exchange, String userId) throws IOException {
-        // Calculate account value from positions and current stock prices
-        double portfolioValue = 0.0;
-        
-        try {
-            for (StockPosition position : USER_POSITIONS.values()) {
-                try {
-                    // Get current price from the API
-                    Stock stock = apiService.getStockQuote(position.getSymbol());
-                    double currentPrice = stock.getPrice();
-                    portfolioValue += position.getQuantity() * currentPrice;
-                } catch (Exception e) {
-                    LOGGER.warning("Failed to get price for " + position.getSymbol() + ": " + e.getMessage());
-                    // Use average price as fallback
-                    portfolioValue += position.getQuantity() * position.getAveragePrice();
-                }
-            }
-        } catch (Exception e) {
-            LOGGER.severe("Error calculating portfolio value: " + e.getMessage());
-            // Fallback to a simpler calculation if API calls fail
-            portfolioValue = USER_POSITIONS.values().stream()
-                    .mapToDouble(pos -> pos.getQuantity() * pos.getAveragePrice())
-                    .sum();
+        // Extract idToken from cookies for Firebase API calls
+        String idToken = extractAuthTokenFromCookies(exchange);
+        if (idToken == null) {
+            sendResponse(exchange, 401, "{ \"error\": \"No authentication token found\" }");
+            return;
         }
         
-        // Mock data for demonstration
-        double cash = 10000.00;
-        double buyingPower = cash;
-        double equity = portfolioValue + cash;
-        double lastEquity = equity - 500; // Simulate some previous value
+        // Calculate account value from positions and current stock prices from Firebase
+        double portfolioValue = 0.0;
+        double cash = 10000.00; // Default cash value - can be fetched from Firebase profile
         
-        JsonObject response = new JsonObject();
-        response.addProperty("portfolio_value", portfolioValue);
-        response.addProperty("cash", cash);
-        response.addProperty("buying_power", buyingPower);
-        response.addProperty("equity", equity);
-        response.addProperty("last_equity", lastEquity);
-        
-        sendResponse(exchange, 200, gson.toJson(response));
+        try {
+            // Get user's stock positions from Firebase
+            portfolioValue = getStockPortfolioValue(userId, idToken);
+            
+            // Get user's cash balance from Firebase (or use default)
+            cash = getCashBalance(userId, idToken);
+            
+            double buyingPower = cash;
+            double equity = portfolioValue + cash;
+            
+            // Get historical equity value for comparison
+            double lastEquity = getLastEquityValue(userId, idToken);
+            if (lastEquity <= 0) {
+                lastEquity = equity - 500; // Fallback if no historical data
+            }
+            
+            JsonObject response = new JsonObject();
+            response.addProperty("portfolio_value", portfolioValue);
+            response.addProperty("cash", cash);
+            response.addProperty("buying_power", buyingPower);
+            response.addProperty("equity", equity);
+            response.addProperty("last_equity", lastEquity);
+            
+            // Store current equity value for future reference
+            storeEquitySnapshot(userId, idToken, equity);
+            
+            sendResponse(exchange, 200, gson.toJson(response));
+            
+        } catch (Exception e) {
+            LOGGER.severe("Error calculating account value: " + e.getMessage());
+            e.printStackTrace();
+            
+            // Return a fallback response with basic data
+            JsonObject response = new JsonObject();
+            response.addProperty("portfolio_value", portfolioValue);
+            response.addProperty("cash", cash);
+            response.addProperty("buying_power", cash);
+            response.addProperty("equity", portfolioValue + cash);
+            response.addProperty("last_equity", portfolioValue + cash - 500);
+            
+            sendResponse(exchange, 200, gson.toJson(response));
+        }
     }
     
     private void handlePortfolioRequest(HttpExchange exchange, String userId) throws IOException {
+        String idToken = extractAuthTokenFromCookies(exchange);
+        if (idToken == null) {
+            sendResponse(exchange, 401, "{ \"error\": \"No authentication token found\" }");
+            return;
+        }
+        
         JsonObject response = new JsonObject();
         List<Map<String, Object>> positions = new ArrayList<>();
         
-        for (StockPosition pos : USER_POSITIONS.values()) {
-            String symbol = pos.getSymbol();
-            int qty = pos.getQuantity();
-            double avgPrice = pos.getAveragePrice();
-            double currentPrice = 0.0;
+        try {
+            // Fetch user's stock positions from Firebase
+            String firestoreUrl = "https://firestore.googleapis.com/v1/projects/cashclimb-d162c/databases/(default)/documents/Users/"
+                    + userId + "/StockPositions";
             
-            try {
-                // Get current price from the API
-                Stock stock = apiService.getStockQuote(symbol);
-                currentPrice = stock.getPrice();
-            } catch (Exception e) {
-                LOGGER.warning("Failed to get price for " + symbol + ": " + e.getMessage());
-                // Use average price as fallback
-                currentPrice = avgPrice;
+            URL url = new URL(firestoreUrl);
+            HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+            conn.setRequestMethod("GET");
+            conn.setRequestProperty("Authorization", "Bearer " + idToken);
+            
+            int responseCode = conn.getResponseCode();
+            if (responseCode == 200) {
+                BufferedReader reader = new BufferedReader(new InputStreamReader(conn.getInputStream()));
+                StringBuilder responseBuilder = new StringBuilder();
+                String line;
+                while ((line = reader.readLine()) != null) {
+                    responseBuilder.append(line);
+                }
+                reader.close();
+                
+                // Parse the positions data
+                JSONObject root = new JSONObject(responseBuilder.toString());
+                if (root.has("documents")) {
+                    JSONArray documents = root.getJSONArray("documents");
+                    
+                    for (int i = 0; i < documents.length(); i++) {
+                        JSONObject doc = documents.getJSONObject(i);
+                        if (doc.has("fields")) {
+                            JSONObject fields = doc.getJSONObject("fields");
+                            
+                            // Extract position data
+                            String symbol = "";
+                            int quantity = 0;
+                            double avgPrice = 0.0;
+                            double currentPrice = 0.0;
+                            
+                            if (fields.has("symbol") && fields.getJSONObject("symbol").has("stringValue")) {
+                                symbol = fields.getJSONObject("symbol").getString("stringValue");
+                            }
+                            
+                            if (fields.has("quantity") && fields.getJSONObject("quantity").has("integerValue")) {
+                                quantity = Integer.parseInt(fields.getJSONObject("quantity").getString("integerValue"));
+                            }
+                            
+                            if (fields.has("averagePrice") && fields.getJSONObject("averagePrice").has("doubleValue")) {
+                                avgPrice = fields.getJSONObject("averagePrice").getDouble("doubleValue");
+                            }
+                            
+                            if (quantity > 0 && !symbol.isEmpty()) {
+                                try {
+                                    // Get current price from Alpha Vantage API
+                                    Stock stock = apiService.getStockQuote(symbol);
+                                    currentPrice = stock.getPrice();
+                                } catch (Exception e) {
+                                    LOGGER.warning("Failed to get price for " + symbol + ": " + e.getMessage());
+                                    currentPrice = avgPrice; // Use average price as fallback
+                                }
+                                
+                                double marketValue = quantity * currentPrice;
+                                double unrealizedPL = marketValue - (quantity * avgPrice);
+                                double unrealizedPLPC = (unrealizedPL / (quantity * avgPrice)) * 100;
+                                
+                                Map<String, Object> posMap = new HashMap<>();
+                                posMap.put("symbol", symbol);
+                                posMap.put("qty", quantity);
+                                posMap.put("avg_entry_price", avgPrice);
+                                posMap.put("current_price", currentPrice);
+                                posMap.put("market_value", marketValue);
+                                posMap.put("unrealized_pl", unrealizedPL);
+                                posMap.put("unrealized_plpc", unrealizedPLPC);
+                                
+                                positions.add(posMap);
+                                
+                                // Update last price in Firebase for future reference
+                                updateLastPrice(userId, idToken, symbol, currentPrice);
+                            }
+                        }
+                    }
+                }
+            } else {
+                LOGGER.warning("Failed to fetch stock positions: HTTP " + responseCode);
             }
-            
-            double marketValue = qty * currentPrice;
-            double unrealizedPL = marketValue - (qty * avgPrice);
-            double unrealizedPLPC = (unrealizedPL / (qty * avgPrice)) * 100;
-            
-            Map<String, Object> posMap = new HashMap<>();
-            posMap.put("symbol", symbol);
-            posMap.put("qty", qty);
-            posMap.put("avg_entry_price", avgPrice);
-            posMap.put("current_price", currentPrice);
-            posMap.put("market_value", marketValue);
-            posMap.put("unrealized_pl", unrealizedPL);
-            posMap.put("unrealized_plpc", unrealizedPLPC);
-            
-            positions.add(posMap);
+        } catch (Exception e) {
+            LOGGER.severe("Error fetching portfolio: " + e.getMessage());
+            e.printStackTrace();
         }
         
         response.add("positions", gson.toJsonTree(positions));
@@ -200,26 +255,112 @@ public class StockHandler implements HttpHandler {
     }
     
     private void handleGetOrdersRequest(HttpExchange exchange, String userId) throws IOException {
+        String idToken = extractAuthTokenFromCookies(exchange);
+        if (idToken == null) {
+            sendResponse(exchange, 401, "{ \"error\": \"No authentication token found\" }");
+            return;
+        }
+        
         String status = exchange.getRequestURI().getQuery();
         boolean isOpen = status == null || status.contains("status=open");
         
-        List<Map<String, Object>> orders;
-        if (isOpen) {
-            orders = OPEN_ORDERS.stream()
-                    .map(this::orderToMap)
-                    .collect(Collectors.toList());
-        } else {
-            orders = ORDER_HISTORY.stream()
-                    .map(this::transactionToMap)
-                    .collect(Collectors.toList());
+        JsonObject response = new JsonObject();
+        List<Map<String, Object>> orders = new ArrayList<>();
+        
+        try {
+            // Fetch orders from Firebase
+            String collectionName = isOpen ? "OpenOrders" : "OrderHistory";
+            String firestoreUrl = "https://firestore.googleapis.com/v1/projects/cashclimb-d162c/databases/(default)/documents/Users/"
+                    + userId + "/" + collectionName;
+            
+            URL url = new URL(firestoreUrl);
+            HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+            conn.setRequestMethod("GET");
+            conn.setRequestProperty("Authorization", "Bearer " + idToken);
+            
+            int responseCode = conn.getResponseCode();
+            if (responseCode == 200) {
+                BufferedReader reader = new BufferedReader(new InputStreamReader(conn.getInputStream()));
+                StringBuilder responseBuilder = new StringBuilder();
+                String line;
+                while ((line = reader.readLine()) != null) {
+                    responseBuilder.append(line);
+                }
+                reader.close();
+                
+                // Parse the orders data
+                JSONObject root = new JSONObject(responseBuilder.toString());
+                if (root.has("documents")) {
+                    JSONArray documents = root.getJSONArray("documents");
+                    
+                    for (int i = 0; i < documents.length(); i++) {
+                        JSONObject doc = documents.getJSONObject(i);
+                        if (doc.has("fields")) {
+                            JSONObject fields = doc.getJSONObject("fields");
+                            
+                            // Extract order data
+                            Map<String, Object> orderMap = new HashMap<>();
+                            
+                            // Get the document ID from its name
+                            String name = doc.getString("name");
+                            String orderId = name.substring(name.lastIndexOf('/') + 1);
+                            orderMap.put("id", orderId);
+                            
+                            if (fields.has("symbol") && fields.getJSONObject("symbol").has("stringValue")) {
+                                orderMap.put("symbol", fields.getJSONObject("symbol").getString("stringValue"));
+                            }
+                            
+                            if (fields.has("type") && fields.getJSONObject("type").has("stringValue")) {
+                                orderMap.put("type", fields.getJSONObject("type").getString("stringValue"));
+                            }
+                            
+                            if (fields.has("side") && fields.getJSONObject("side").has("stringValue")) {
+                                orderMap.put("side", fields.getJSONObject("side").getString("stringValue"));
+                            }
+                            
+                            if (fields.has("quantity") && fields.getJSONObject("quantity").has("integerValue")) {
+                                orderMap.put("qty", Integer.parseInt(fields.getJSONObject("quantity").getString("integerValue")));
+                            }
+                            
+                            if (fields.has("price") && fields.getJSONObject("price").has("doubleValue")) {
+                                orderMap.put("price", fields.getJSONObject("price").getDouble("doubleValue"));
+                            }
+                            
+                            if (fields.has("status") && fields.getJSONObject("status").has("stringValue")) {
+                                orderMap.put("status", fields.getJSONObject("status").getString("stringValue"));
+                            }
+                            
+                            if (fields.has("createdAt") && fields.getJSONObject("createdAt").has("timestampValue")) {
+                                String timestampStr = fields.getJSONObject("createdAt").getString("timestampValue");
+                                SimpleDateFormat isoFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
+                                isoFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
+                                Date date = isoFormat.parse(timestampStr);
+                                orderMap.put("created_at", date.getTime());
+                            }
+                            
+                            orders.add(orderMap);
+                        }
+                    }
+                }
+            } else {
+                LOGGER.warning("Failed to fetch orders: HTTP " + responseCode);
+            }
+        } catch (Exception e) {
+            LOGGER.severe("Error fetching orders: " + e.getMessage());
+            e.printStackTrace();
         }
         
-        JsonObject response = new JsonObject();
         response.add("orders", gson.toJsonTree(orders));
         sendResponse(exchange, 200, gson.toJson(response));
     }
     
     private void handlePlaceOrderRequest(HttpExchange exchange, String userId) throws IOException {
+        String idToken = extractAuthTokenFromCookies(exchange);
+        if (idToken == null) {
+            sendResponse(exchange, 401, "{ \"error\": \"No authentication token found\" }");
+            return;
+        }
+        
         String requestBody = new BufferedReader(new InputStreamReader(exchange.getRequestBody()))
                 .lines().collect(Collectors.joining("\n"));
         
@@ -249,24 +390,79 @@ public class StockHandler implements HttpHandler {
             return;
         }
         
-        // Create transaction record
-        StockTransaction transaction = new StockTransaction(symbol, side, quantity, price, new Date());
-        ORDER_HISTORY.add(transaction);
-        
-        // Update user's position
-        updatePosition(userId, symbol, side, quantity, price);
-        
-        // Return success response
-        JsonObject response = new JsonObject();
-        response.addProperty("id", UUID.randomUUID().toString());
-        response.addProperty("status", "filled");
-        response.addProperty("symbol", symbol);
-        response.addProperty("side", side);
-        response.addProperty("qty", quantity);
-        response.addProperty("type", orderType);
-        response.addProperty("price", price);
-        
-        sendResponse(exchange, 200, gson.toJson(response));
+        try {
+            // Generate a unique order ID
+            String orderId = UUID.randomUUID().toString();
+            
+            // Store order in Firebase - fix path format to include proper separators
+            String firestoreUrl = "https://firestore.googleapis.com/v1/projects/cashclimb-d162c/databases/(default)/documents/Users/"
+                    + userId + "/OrderHistory";
+            
+            URL url = new URL(firestoreUrl);
+            HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+            conn.setRequestMethod("POST");
+            conn.setRequestProperty("Content-Type", "application/json");
+            conn.setRequestProperty("Authorization", "Bearer " + idToken);
+            conn.setDoOutput(true);
+            
+            // Create Firestore document
+            JSONObject requestJson = new JSONObject();
+            JSONObject fields = new JSONObject();
+            
+            fields.put("symbol", new JSONObject().put("stringValue", symbol));
+            fields.put("type", new JSONObject().put("stringValue", orderType));
+            fields.put("side", new JSONObject().put("stringValue", side));
+            fields.put("quantity", new JSONObject().put("integerValue", String.valueOf(quantity)));
+            fields.put("price", new JSONObject().put("doubleValue", price));
+            fields.put("status", new JSONObject().put("stringValue", "filled"));
+            fields.put("createdAt", new JSONObject().put("timestampValue", new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'").format(new Date())));
+            
+            requestJson.put("fields", fields);
+            
+            // Write to Firestore
+            try (OutputStream os = conn.getOutputStream()) {
+                byte[] input = requestJson.toString().getBytes(StandardCharsets.UTF_8);
+                os.write(input, 0, input.length);
+            }
+            
+            // Check response
+            int responseCode = conn.getResponseCode();
+            if (responseCode >= 400) {
+                BufferedReader errorReader = new BufferedReader(new InputStreamReader(conn.getErrorStream()));
+                StringBuilder errorResponse = new StringBuilder();
+                String line;
+                while ((line = errorReader.readLine()) != null) {
+                    errorResponse.append(line);
+                }
+                errorReader.close();
+                
+                LOGGER.severe("Error creating order in Firebase: " + errorResponse.toString());
+                sendResponse(exchange, responseCode, "{ \"error\": \"Failed to store order\" }");
+                return;
+            }
+            
+            // Update position in Firebase
+            updateStockPosition(userId, idToken, symbol, side, quantity, price);
+            
+            // Update portfolio summary for home page
+            updatePortfolioSummary(userId, idToken);
+            
+            // Return success response with order details
+            JsonObject response = new JsonObject();
+            response.addProperty("id", orderId);
+            response.addProperty("status", "filled");
+            response.addProperty("symbol", symbol);
+            response.addProperty("side", side);
+            response.addProperty("qty", quantity);
+            response.addProperty("type", orderType);
+            response.addProperty("price", price);
+            
+            sendResponse(exchange, 200, gson.toJson(response));
+        } catch (Exception e) {
+            LOGGER.severe("Error processing order: " + e.getMessage());
+            e.printStackTrace();
+            sendResponse(exchange, 500, "{ \"error\": \"Failed to process order: " + e.getMessage() + "\" }");
+        }
     }
     
     private void handleCancelOrderRequest(HttpExchange exchange, String userId) throws IOException {
@@ -407,55 +603,478 @@ public class StockHandler implements HttpHandler {
         }
     }
     
-    private void updatePosition(String userId, String symbol, String side, int quantity, double price) {
-        StockPosition position = USER_POSITIONS.getOrDefault(symbol, new StockPosition(symbol, 0, 0.0));
+    /**
+     * Extract the Firebase ID token from request cookies
+     */
+    private String extractAuthTokenFromCookies(HttpExchange exchange) {
+        // Get the Cookie header
+        String cookieHeader = exchange.getRequestHeaders().getFirst("Cookie");
+        if (cookieHeader == null) {
+            return null;
+        }
         
-        if ("buy".equals(side)) {
-            int newQuantity = position.getQuantity() + quantity;
-            double newAvgPrice = ((position.getQuantity() * position.getAveragePrice()) + (quantity * price)) / newQuantity;
-            position.setQuantity(newQuantity);
-            position.setAveragePrice(newAvgPrice);
-        } else { // sell
-            int newQuantity = position.getQuantity() - quantity;
-            if (newQuantity <= 0) {
-                USER_POSITIONS.remove(symbol);
-            } else {
-                position.setQuantity(newQuantity);
-                // Average price doesn't change when selling
-                USER_POSITIONS.put(symbol, position);
+        // Parse cookies
+        Map<String, String> cookies = new HashMap<>();
+        for (String cookie : cookieHeader.split(";")) {
+            String[] parts = cookie.trim().split("=", 2);
+            if (parts.length == 2) {
+                cookies.put(parts[0], parts[1]);
             }
         }
         
-        if (position.getQuantity() > 0) {
-            USER_POSITIONS.put(symbol, position);
+        // Extract ID token
+        return cookies.get("idToken");
+    }
+    
+    /**
+     * Calculate the total value of all stock positions
+     */
+    private double getStockPortfolioValue(String userId, String idToken) {
+        double portfolioValue = 0.0;
+        
+        try {
+            // Fetch user's stock positions from Firebase
+            String firestoreUrl = "https://firestore.googleapis.com/v1/projects/cashclimb-d162c/databases/(default)/documents/Users/"
+                    + userId + "/StockPositions";
+            
+            URL url = new URL(firestoreUrl);
+            HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+            conn.setRequestMethod("GET");
+            conn.setRequestProperty("Authorization", "Bearer " + idToken);
+            
+            int responseCode = conn.getResponseCode();
+            if (responseCode == 200) {
+                BufferedReader reader = new BufferedReader(new InputStreamReader(conn.getInputStream()));
+                StringBuilder responseBuilder = new StringBuilder();
+                String line;
+                while ((line = reader.readLine()) != null) {
+                    responseBuilder.append(line);
+                }
+                reader.close();
+                
+                // Parse the positions data
+                JSONObject root = new JSONObject(responseBuilder.toString());
+                if (root.has("documents")) {
+                    JSONArray documents = root.getJSONArray("documents");
+                    
+                    for (int i = 0; i < documents.length(); i++) {
+                        JSONObject doc = documents.getJSONObject(i);
+                        if (doc.has("fields")) {
+                            JSONObject fields = doc.getJSONObject("fields");
+                            
+                            // Extract position data
+                            String symbol = "";
+                            int quantity = 0;
+                            double currentPrice = 0.0;
+                            
+                            if (fields.has("symbol") && fields.getJSONObject("symbol").has("stringValue")) {
+                                symbol = fields.getJSONObject("symbol").getString("stringValue");
+                            }
+                            
+                            if (fields.has("quantity") && fields.getJSONObject("quantity").has("integerValue")) {
+                                quantity = Integer.parseInt(fields.getJSONObject("quantity").getString("integerValue"));
+                            }
+                            
+                            if (fields.has("lastPrice") && fields.getJSONObject("lastPrice").has("doubleValue")) {
+                                // Use stored last price as a starting point
+                                currentPrice = fields.getJSONObject("lastPrice").getDouble("doubleValue");
+                            }
+                            
+                            if (quantity > 0 && !symbol.isEmpty()) {
+                                try {
+                                    // Try to get current price from API
+                                    Stock stock = apiService.getStockQuote(symbol);
+                                    currentPrice = stock.getPrice();
+                                } catch (Exception e) {
+                                    // If API call fails, use the stored price (or default to 0)
+                                    LOGGER.warning("Failed to get price for " + symbol + ", using stored price: " + e.getMessage());
+                                }
+                                
+                                // Add to portfolio value
+                                portfolioValue += quantity * currentPrice;
+                            }
+                        }
+                    }
+                }
+            }
+        } catch (Exception e) {
+            LOGGER.severe("Error calculating portfolio value: " + e.getMessage());
+            e.printStackTrace();
+        }
+        
+        return portfolioValue;
+    }
+    
+    /**
+     * Get user's cash balance from Firebase
+     */
+    private double getCashBalance(String userId, String idToken) {
+        double cashBalance = 10000.0; // Default starting cash
+        
+        try {
+            // Check if the user has a cash balance document
+            String firestoreUrl = "https://firestore.googleapis.com/v1/projects/cashclimb-d162c/databases/(default)/documents/Users/"
+                    + userId + "/AccountInfo/cash";
+            
+            URL url = new URL(firestoreUrl);
+            HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+            conn.setRequestMethod("GET");
+            conn.setRequestProperty("Authorization", "Bearer " + idToken);
+            
+            int responseCode = conn.getResponseCode();
+            if (responseCode == 200) {
+                BufferedReader reader = new BufferedReader(new InputStreamReader(conn.getInputStream()));
+                StringBuilder responseBuilder = new StringBuilder();
+                String line;
+                while ((line = reader.readLine()) != null) {
+                    responseBuilder.append(line);
+                }
+                reader.close();
+                
+                JSONObject doc = new JSONObject(responseBuilder.toString());
+                if (doc.has("fields") && doc.getJSONObject("fields").has("balance")) {
+                    JSONObject balanceField = doc.getJSONObject("fields").getJSONObject("balance");
+                    if (balanceField.has("doubleValue")) {
+                        cashBalance = balanceField.getDouble("doubleValue");
+                    }
+                }
+            }
+        } catch (Exception e) {
+            LOGGER.warning("Error getting cash balance, using default: " + e.getMessage());
+        }
+        
+        return cashBalance;
+    }
+    
+    /**
+     * Get historical equity value for comparison
+     */
+    private double getLastEquityValue(String userId, String idToken) {
+        double lastEquity = 0.0;
+        
+        try {
+            // Get the most recent equity snapshot
+            String firestoreUrl = "https://firestore.googleapis.com/v1/projects/cashclimb-d162c/databases/(default)/documents/Users/"
+                    + userId + "/AccountInfo/equitySnapshots?orderBy=timestamp&limitToLast=1";
+            
+            URL url = new URL(firestoreUrl);
+            HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+            conn.setRequestMethod("GET");
+            conn.setRequestProperty("Authorization", "Bearer " + idToken);
+            
+            int responseCode = conn.getResponseCode();
+            if (responseCode == 200) {
+                BufferedReader reader = new BufferedReader(new InputStreamReader(conn.getInputStream()));
+                StringBuilder responseBuilder = new StringBuilder();
+                String line;
+                while ((line = reader.readLine()) != null) {
+                    responseBuilder.append(line);
+                }
+                reader.close();
+                
+                JSONObject root = new JSONObject(responseBuilder.toString());
+                if (root.has("documents") && root.getJSONArray("documents").length() > 0) {
+                    JSONObject doc = root.getJSONArray("documents").getJSONObject(0);
+                    if (doc.has("fields") && doc.getJSONObject("fields").has("value")) {
+                        JSONObject valueField = doc.getJSONObject("fields").getJSONObject("value");
+                        if (valueField.has("doubleValue")) {
+                            lastEquity = valueField.getDouble("doubleValue");
+                        }
+                    }
+                }
+            }
+        } catch (Exception e) {
+            LOGGER.warning("Error getting historical equity, using 0: " + e.getMessage());
+        }
+        
+        return lastEquity;
+    }
+    
+    /**
+     * Store current equity value for future reference
+     */
+    private void storeEquitySnapshot(String userId, String idToken, double equity) {
+        try {
+            String snapshotId = UUID.randomUUID().toString();
+            String firestoreUrl = "https://firestore.googleapis.com/v1/projects/cashclimb-d162c/databases/(default)/documents/Users/"
+                    + userId + "/AccountInfo/equitySnapshots/" + snapshotId;
+            
+            URL url = new URL(firestoreUrl);
+            HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+            conn.setRequestMethod("POST");
+            conn.setRequestProperty("Content-Type", "application/json");
+            conn.setRequestProperty("Authorization", "Bearer " + idToken);
+            conn.setDoOutput(true);
+            
+            JSONObject requestJson = new JSONObject();
+            JSONObject fields = new JSONObject();
+            
+            fields.put("value", new JSONObject().put("doubleValue", equity));
+            fields.put("timestamp", new JSONObject().put("timestampValue", new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'").format(new Date())));
+            
+            requestJson.put("fields", fields);
+            
+            try (OutputStream os = conn.getOutputStream()) {
+                byte[] input = requestJson.toString().getBytes(StandardCharsets.UTF_8);
+                os.write(input, 0, input.length);
+            }
+            
+            int responseCode = conn.getResponseCode();
+            if (responseCode >= 400) {
+                LOGGER.warning("Failed to store equity snapshot: HTTP " + responseCode);
+            }
+        } catch (Exception e) {
+            LOGGER.warning("Error storing equity snapshot: " + e.getMessage());
         }
     }
     
-    private Map<String, Object> orderToMap(StockOrder order) {
-        Map<String, Object> map = new HashMap<>();
-        map.put("id", order.getId());
-        map.put("symbol", order.getSymbol());
-        map.put("type", order.getType());
-        map.put("side", order.getSide());
-        map.put("qty", order.getQuantity());
-        map.put("limit_price", order.getLimitPrice());
-        map.put("stop_price", order.getStopPrice());
-        map.put("status", order.getStatus());
-        map.put("created_at", order.getCreatedAt().getTime());
-        return map;
+    /**
+     * Update the last known price for a stock in Firebase
+     */
+    private void updateLastPrice(String userId, String idToken, String symbol, double price) {
+        try {
+            String firestoreUrl = "https://firestore.googleapis.com/v1/projects/cashclimb-d162c/databases/(default)/documents/Users/"
+                    + userId + "/StockPositions/" + symbol;
+            
+            URL url = new URL(firestoreUrl);
+            HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+            conn.setRequestMethod("PATCH");
+            conn.setRequestProperty("Content-Type", "application/json");
+            conn.setRequestProperty("Authorization", "Bearer " + idToken);
+            conn.setDoOutput(true);
+            
+            JSONObject requestJson = new JSONObject();
+            JSONObject fields = new JSONObject();
+            
+            fields.put("lastPrice", new JSONObject().put("doubleValue", price));
+            fields.put("lastUpdated", new JSONObject().put("timestampValue", new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'").format(new Date())));
+            
+            requestJson.put("fields", fields);
+            
+            try (OutputStream os = conn.getOutputStream()) {
+                byte[] input = requestJson.toString().getBytes(StandardCharsets.UTF_8);
+                os.write(input, 0, input.length);
+            }
+            
+            int responseCode = conn.getResponseCode();
+            if (responseCode >= 400) {
+                LOGGER.warning("Failed to update last price: HTTP " + responseCode);
+            }
+        } catch (Exception e) {
+            LOGGER.warning("Error updating last price: " + e.getMessage());
+        }
     }
     
-    private Map<String, Object> transactionToMap(StockTransaction transaction) {
-        Map<String, Object> map = new HashMap<>();
-        map.put("id", UUID.randomUUID().toString());
-        map.put("symbol", transaction.getSymbol());
-        map.put("type", "market");
-        map.put("side", transaction.getType());
-        map.put("qty", transaction.getQuantity());
-        map.put("price", transaction.getPrice());
-        map.put("status", "filled");
-        map.put("created_at", transaction.getTimestamp().getTime());
-        return map;
+    /**
+     * Update or create a stock position in Firebase
+     */
+    private void updateStockPosition(String userId, String idToken, String symbol, String side, int quantity, double price) {
+        try {
+            // First, check if the position already exists
+            String firestoreUrl = "https://firestore.googleapis.com/v1/projects/cashclimb-d162c/databases/(default)/documents/Users/"
+                    + userId + "/StockPositions/" + symbol;
+            
+            URL getUrl = new URL(firestoreUrl);
+            HttpURLConnection getConn = (HttpURLConnection) getUrl.openConnection();
+            getConn.setRequestMethod("GET");
+            getConn.setRequestProperty("Authorization", "Bearer " + idToken);
+            
+            int getResponseCode = getConn.getResponseCode();
+            boolean positionExists = (getResponseCode == 200);
+            
+            int existingQuantity = 0;
+            double existingAvgPrice = 0.0;
+            
+            if (positionExists) {
+                // Read existing position data
+                BufferedReader reader = new BufferedReader(new InputStreamReader(getConn.getInputStream()));
+                StringBuilder responseBuilder = new StringBuilder();
+                String line;
+                while ((line = reader.readLine()) != null) {
+                    responseBuilder.append(line);
+                }
+                reader.close();
+                
+                JSONObject doc = new JSONObject(responseBuilder.toString());
+                if (doc.has("fields")) {
+                    JSONObject fields = doc.getJSONObject("fields");
+                    
+                    if (fields.has("quantity") && fields.getJSONObject("quantity").has("integerValue")) {
+                        existingQuantity = Integer.parseInt(fields.getJSONObject("quantity").getString("integerValue"));
+                    }
+                    
+                    if (fields.has("averagePrice") && fields.getJSONObject("averagePrice").has("doubleValue")) {
+                        existingAvgPrice = fields.getJSONObject("averagePrice").getDouble("doubleValue");
+                    }
+                }
+            }
+            
+            // Calculate new position data
+            int newQuantity;
+            double newAvgPrice;
+            
+            if ("buy".equals(side)) {
+                newQuantity = existingQuantity + quantity;
+                if (existingQuantity > 0) {
+                    newAvgPrice = ((existingQuantity * existingAvgPrice) + (quantity * price)) / newQuantity;
+                } else {
+                    newAvgPrice = price;
+                }
+            } else { // sell
+                newQuantity = existingQuantity - quantity;
+                newAvgPrice = existingAvgPrice; // Average price doesn't change when selling
+            }
+            
+            // Update or delete the position
+            if (newQuantity <= 0) {
+                // Delete position if quantity is zero or negative
+                if (positionExists) {
+                    URL deleteUrl = new URL(firestoreUrl);
+                    HttpURLConnection deleteConn = (HttpURLConnection) deleteUrl.openConnection();
+                    deleteConn.setRequestMethod("DELETE");
+                    deleteConn.setRequestProperty("Authorization", "Bearer " + idToken);
+                    
+                    int deleteResponseCode = deleteConn.getResponseCode();
+                    if (deleteResponseCode >= 400) {
+                        LOGGER.warning("Failed to delete stock position: HTTP " + deleteResponseCode);
+                    }
+                }
+            } else {
+                // Create or update position
+                URL updateUrl = new URL(firestoreUrl);
+                HttpURLConnection updateConn = (HttpURLConnection) updateUrl.openConnection();
+                updateConn.setRequestMethod(positionExists ? "PATCH" : "POST");
+                updateConn.setRequestProperty("Content-Type", "application/json");
+                updateConn.setRequestProperty("Authorization", "Bearer " + idToken);
+                updateConn.setDoOutput(true);
+                
+                JSONObject requestJson = new JSONObject();
+                JSONObject fields = new JSONObject();
+                
+                fields.put("symbol", new JSONObject().put("stringValue", symbol));
+                fields.put("quantity", new JSONObject().put("integerValue", String.valueOf(newQuantity)));
+                fields.put("averagePrice", new JSONObject().put("doubleValue", newAvgPrice));
+                fields.put("lastPrice", new JSONObject().put("doubleValue", price));
+                fields.put("lastUpdated", new JSONObject().put("timestampValue", new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'").format(new Date())));
+                
+                requestJson.put("fields", fields);
+                
+                try (OutputStream os = updateConn.getOutputStream()) {
+                    byte[] input = requestJson.toString().getBytes(StandardCharsets.UTF_8);
+                    os.write(input, 0, input.length);
+                }
+                
+                int updateResponseCode = updateConn.getResponseCode();
+                if (updateResponseCode >= 400) {
+                    LOGGER.warning("Failed to update stock position: HTTP " + updateResponseCode);
+                }
+            }
+            
+            // Update cash balance
+            updateCashBalance(userId, idToken, side, quantity, price);
+            
+        } catch (Exception e) {
+            LOGGER.severe("Error updating stock position: " + e.getMessage());
+            e.printStackTrace();
+        }
+    }
+    
+    /**
+     * Update user's cash balance after a trade
+     */
+    private void updateCashBalance(String userId, String idToken, String side, int quantity, double price) {
+        try {
+            double tradeValue = quantity * price;
+            double cashChange = "buy".equals(side) ? -tradeValue : tradeValue;
+            
+            // Get current cash balance
+            double currentCash = getCashBalance(userId, idToken);
+            double newCash = currentCash + cashChange;
+            
+            // Update cash balance in Firebase
+            String firestoreUrl = "https://firestore.googleapis.com/v1/projects/cashclimb-d162c/databases/(default)/documents/Users/"
+                    + userId + "/AccountInfo/cash";
+            
+            URL url = new URL(firestoreUrl);
+            HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+            conn.setRequestMethod("POST"); // Use POST with merge option
+            conn.setRequestProperty("Content-Type", "application/json");
+            conn.setRequestProperty("Authorization", "Bearer " + idToken);
+            conn.setDoOutput(true);
+            
+            JSONObject requestJson = new JSONObject();
+            JSONObject fields = new JSONObject();
+            
+            fields.put("balance", new JSONObject().put("doubleValue", newCash));
+            fields.put("lastUpdated", new JSONObject().put("timestampValue", new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'").format(new Date())));
+            
+            requestJson.put("fields", fields);
+            
+            try (OutputStream os = conn.getOutputStream()) {
+                byte[] input = requestJson.toString().getBytes(StandardCharsets.UTF_8);
+                os.write(input, 0, input.length);
+            }
+            
+            int responseCode = conn.getResponseCode();
+            if (responseCode >= 400) {
+                LOGGER.warning("Failed to update cash balance: HTTP " + responseCode);
+            }
+        } catch (Exception e) {
+            LOGGER.warning("Error updating cash balance: " + e.getMessage());
+        }
+    }
+    
+    /**
+     * Update portfolio summary data for the home page
+     */
+    private void updatePortfolioSummary(String userId, String idToken) {
+        try {
+            // Get current date for summary ID
+            SimpleDateFormat monthFormat = new SimpleDateFormat("yyyy-MM");
+            String monthId = monthFormat.format(new Date());
+            
+            // Calculate total portfolio value
+            double portfolioValue = getStockPortfolioValue(userId, idToken);
+            double cashBalance = getCashBalance(userId, idToken);
+            double totalValue = portfolioValue + cashBalance;
+            
+            // Create or update monthly summary
+            String firestoreUrl = "https://firestore.googleapis.com/v1/projects/cashclimb-d162c/databases/(default)/documents/Users/"
+                    + userId + "/Summaries/portfolio_" + monthId;
+            
+            URL url = new URL(firestoreUrl);
+            HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+            conn.setRequestMethod("POST"); // Use POST with merge option
+            conn.setRequestProperty("Content-Type", "application/json");
+            conn.setRequestProperty("Authorization", "Bearer " + idToken);
+            conn.setDoOutput(true);
+            
+            JSONObject requestJson = new JSONObject();
+            JSONObject fields = new JSONObject();
+            
+            fields.put("portfolioValue", new JSONObject().put("doubleValue", portfolioValue));
+            fields.put("cashBalance", new JSONObject().put("doubleValue", cashBalance));
+            fields.put("totalValue", new JSONObject().put("doubleValue", totalValue));
+            fields.put("lastUpdated", new JSONObject().put("timestampValue", new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'").format(new Date())));
+            
+            // Add date information for easier querying
+            fields.put("year", new JSONObject().put("integerValue", String.valueOf(Calendar.getInstance().get(Calendar.YEAR))));
+            fields.put("month", new JSONObject().put("integerValue", String.valueOf(Calendar.getInstance().get(Calendar.MONTH) + 1)));
+            
+            requestJson.put("fields", fields);
+            
+            try (OutputStream os = conn.getOutputStream()) {
+                byte[] input = requestJson.toString().getBytes(StandardCharsets.UTF_8);
+                os.write(input, 0, input.length);
+            }
+            
+            int responseCode = conn.getResponseCode();
+            if (responseCode >= 400) {
+                LOGGER.warning("Failed to update portfolio summary: HTTP " + responseCode);
+            }
+        } catch (Exception e) {
+            LOGGER.warning("Error updating portfolio summary: " + e.getMessage());
+        }
     }
     
     private void sendResponse(HttpExchange exchange, int statusCode, String response) throws IOException {

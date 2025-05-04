@@ -53,3 +53,5 @@ temp_backup/
 /logs
 /docs
 src/main/resources/serviceAccountKey.json
+/src/main/resources/crypto-fix.css
+/src/main/java/firebase-diagnostic-report.txt

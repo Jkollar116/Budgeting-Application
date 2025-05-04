@@ -1,0 +1,480 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Alerts - CashClimb</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        .alert-container {
+            margin: 20px auto;
+            max-width: 800px;
+        }
+        
+        .alert-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        
+        .alert-count {
+            background-color: #f44336;
+            color: white;
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            margin-left: 10px;
+        }
+        
+        .alert-header-left {
+            display: flex;
+            align-items: center;
+        }
+        
+        .alert {
+            background-color: var(--card-bg);
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 15px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            position: relative;
+            transition: all 0.3s ease;
+            border-left: 5px solid #ddd;
+        }
+        
+        .alert.unread {
+            border-left-color: #f44336;
+        }
+        
+        .alert.bill_due {
+            border-left-color: #f44336;
+        }
+        
+        .alert.bill_upcoming {
+            border-left-color: #ff9800;
+        }
+        
+        .alert.budget_exceeded {
+            border-left-color: #f44336;
+        }
+        
+        .alert.spending_limit {
+            border-left-color: #f44336;
+        }
+        
+        .alert.paycheck {
+            border-left-color: #4CAF50;
+        }
+        
+        .alert.goal_achieved {
+            border-left-color: #2196F3;
+        }
+        
+        .alert-title {
+            font-weight: bold;
+            margin-bottom: 5px;
+            padding-right: 30px;
+        }
+        
+        .alert-message {
+            margin-bottom: 10px;
+        }
+        
+        .alert-time {
+            font-size: 12px;
+            color: #777;
+        }
+        
+        .alert-delete {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: none;
+            border: none;
+            color: #999;
+            cursor: pointer;
+            font-size: 18px;
+        }
+        
+        .alert-delete:hover {
+            color: #f44336;
+        }
+        
+        .no-alerts {
+            text-align: center;
+            padding: 30px;
+            background-color: var(--card-bg);
+            border-radius: 8px;
+            color: #777;
+        }
+        
+        .mark-all-read {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        
+        .mark-all-read:hover {
+            background-color: var(--primary-color-dark);
+        }
+        
+        .check-alerts {
+            background-color: var(--accent-color);
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-left: 10px;
+        }
+        
+        .check-alerts:hover {
+            background-color: #0056b3;
+        }
+        
+        .alert-actions {
+            margin-top: 10px;
+        }
+        
+        .alert-action {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+            margin-right: 10px;
+        }
+        
+        .alert-action:hover {
+            background-color: var(--primary-color-dark);
+        }
+    </style>
+</head>
+<body>
+    <nav>
+        <div class="logo">CashClimb</div>
+        <div class="menu-toggle">☰</div>
+        <ul class="nav-links">
+            <li><a href="home.html">Home</a></li>
+            <li><a href="expenses.html">Expenses</a></li>
+            <li><a href="income.html">Income</a></li>
+            <li><a href="bills.html">Bills</a></li>
+            <li><a href="budget.html">Budget</a></li>
+            <li><a href="stocks.html">Stocks</a></li>
+            <li><a href="crypto.html">Crypto</a></li>
+            <li><a href="alerts.html" class="active">Alerts</a></li>
+            <li><a href="savingsTips.html">Savings Tips</a></li>
+            <li><a href="profile.html">Profile</a></li>
+            <li><a href="settings.html">Settings</a></li>
+            <li><a href="chat.html">Chat</a></li>
+            <li><a href="/logout">Logout</a></li>
+        </ul>
+    </nav>
+    
+    <div class="container">
+        <div class="alert-container">
+            <div class="alert-header">
+                <div class="alert-header-left">
+                    <h1>Alerts</h1>
+                    <span class="alert-count" id="unread-count">0</span>
+                </div>
+                <div>
+                    <button class="mark-all-read" id="mark-all-read">Mark All as Read</button>
+                    <button class="check-alerts" id="check-alerts">Check for New Alerts</button>
+                </div>
+            </div>
+            
+            <div id="alerts-list">
+                <!-- Alerts will be dynamically added here -->
+                <div class="no-alerts" id="no-alerts">
+                    <p>You have no alerts at the moment.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            loadAlerts();
+            
+            document.getElementById('mark-all-read').addEventListener('click', markAllRead);
+            document.getElementById('check-alerts').addEventListener('click', checkNewAlerts);
+            
+            // Set up navigation menu toggle for mobile
+            const menuToggle = document.querySelector('.menu-toggle');
+            const navLinks = document.querySelector('.nav-links');
+            
+            menuToggle.addEventListener('click', () => {
+                navLinks.classList.toggle('active');
+            });
+        });
+        
+        function loadAlerts() {
+            fetch('/api/alerts')
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    displayAlerts(data.alerts);
+                    updateUnreadCount(data.unreadCount);
+                })
+                .catch(error => {
+                    console.error('Error loading alerts:', error);
+                    showError('Failed to load alerts. Please try again later.');
+                });
+        }
+        
+        function displayAlerts(alerts) {
+            const alertsList = document.getElementById('alerts-list');
+            const noAlertsMessage = document.getElementById('no-alerts');
+            
+            // Clear existing alerts
+            alertsList.innerHTML = '';
+            
+            if (alerts.length === 0) {
+                alertsList.appendChild(noAlertsMessage);
+                return;
+            }
+            
+            // Sort alerts by timestamp (newest first)
+            alerts.sort((a, b) => {
+                return new Date(b.timestamp) - new Date(a.timestamp);
+            });
+            
+            alerts.forEach(alert => {
+                const alertElement = createAlertElement(alert);
+                alertsList.appendChild(alertElement);
+            });
+        }
+        
+        function createAlertElement(alert) {
+            const alertDiv = document.createElement('div');
+            alertDiv.className = `alert ${alert.type}`;
+            if (!alert.read) {
+                alertDiv.classList.add('unread');
+            }
+            alertDiv.dataset.id = alert.id;
+            
+            const timestamp = new Date(alert.timestamp);
+            const formattedTime = formatTimestamp(timestamp);
+            
+            alertDiv.innerHTML = `
+                <div class="alert-title">${escapeHtml(alert.type.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase()))}</div>
+                <div class="alert-message">${escapeHtml(alert.message)}</div>
+                <div class="alert-time">${formattedTime}</div>
+                <button class="alert-delete" data-id="${alert.id}">×</button>
+                <div class="alert-actions"></div>
+            `;
+            
+            // Add action buttons based on alert type
+            const actionsDiv = alertDiv.querySelector('.alert-actions');
+            
+            if (alert.type === 'bill_due' || alert.type === 'bill_upcoming') {
+                const viewBillBtn = document.createElement('button');
+                viewBillBtn.className = 'alert-action';
+                viewBillBtn.textContent = 'View Bill';
+                viewBillBtn.addEventListener('click', () => {
+                    window.location.href = 'bills.html';
+                });
+                actionsDiv.appendChild(viewBillBtn);
+            } else if (alert.type === 'budget_exceeded' || alert.type === 'spending_limit') {
+                const viewBudgetBtn = document.createElement('button');
+                viewBudgetBtn.className = 'alert-action';
+                viewBudgetBtn.textContent = 'View Budget';
+                viewBudgetBtn.addEventListener('click', () => {
+                    window.location.href = 'budget.html';
+                });
+                actionsDiv.appendChild(viewBudgetBtn);
+            } else if (alert.type === 'paycheck') {
+                const viewIncomeBtn = document.createElement('button');
+                viewIncomeBtn.className = 'alert-action';
+                viewIncomeBtn.textContent = 'View Income';
+                viewIncomeBtn.addEventListener('click', () => {
+                    window.location.href = 'income.html';
+                });
+                actionsDiv.appendChild(viewIncomeBtn);
+            }
+            
+            // Add delete event listener
+            const deleteBtn = alertDiv.querySelector('.alert-delete');
+            deleteBtn.addEventListener('click', (event) => {
+                event.stopPropagation();
+                deleteAlert(alert.id);
+            });
+            
+            // Mark as read when clicked
+            alertDiv.addEventListener('click', () => {
+                if (!alert.read) {
+                    markAlertAsRead(alert.id);
+                }
+            });
+            
+            return alertDiv;
+        }
+        
+        function formatTimestamp(timestamp) {
+            const now = new Date();
+            const diff = now - timestamp;
+            
+            // Less than a day ago
+            if (diff < 24 * 60 * 60 * 1000) {
+                // Less than an hour ago
+                if (diff < 60 * 60 * 1000) {
+                    const minutes = Math.floor(diff / (60 * 1000));
+                    return `${minutes} minute${minutes !== 1 ? 's' : ''} ago`;
+                } else {
+                    const hours = Math.floor(diff / (60 * 60 * 1000));
+                    return `${hours} hour${hours !== 1 ? 's' : ''} ago`;
+                }
+            } else if (diff < 2 * 24 * 60 * 60 * 1000) {
+                // Yesterday
+                return 'Yesterday';
+            } else {
+                // More than 2 days ago
+                const options = { year: 'numeric', month: 'short', day: 'numeric' };
+                return timestamp.toLocaleDateString(undefined, options);
+            }
+        }
+        
+        function deleteAlert(alertId) {
+            fetch(`/api/alerts/${alertId}`, {
+                method: 'DELETE'
+            })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    if (data.success) {
+                        // Remove alert from DOM
+                        const alertElement = document.querySelector(`.alert[data-id="${alertId}"]`);
+                        if (alertElement) {
+                            alertElement.remove();
+                        }
+                        
+                        // Check if there are no more alerts
+                        const alertsList = document.getElementById('alerts-list');
+                        if (alertsList.children.length === 0) {
+                            const noAlertsMessage = document.createElement('div');
+                            noAlertsMessage.className = 'no-alerts';
+                            noAlertsMessage.id = 'no-alerts';
+                            noAlertsMessage.innerHTML = '<p>You have no alerts at the moment.</p>';
+                            alertsList.appendChild(noAlertsMessage);
+                        }
+                        
+                        // Update unread count
+                        loadAlerts();
+                    }
+                })
+                .catch(error => {
+                    console.error('Error deleting alert:', error);
+                    showError('Failed to delete alert. Please try again later.');
+                });
+        }
+        
+        function markAlertAsRead(alertId) {
+            const alertElement = document.querySelector(`.alert[data-id="${alertId}"]`);
+            if (alertElement) {
+                alertElement.classList.remove('unread');
+            }
+            
+            // In a real app, we'd update the server here
+            // Currently the backend doesn't support marking individual alerts as read
+            // So we're just updating the UI for now
+        }
+        
+        function markAllRead() {
+            fetch('/api/alerts/read', {
+                method: 'POST'
+            })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    if (data.success) {
+                        // Update UI
+                        const unreadAlerts = document.querySelectorAll('.alert.unread');
+                        unreadAlerts.forEach(alert => {
+                            alert.classList.remove('unread');
+                        });
+                        
+                        // Reset unread count
+                        updateUnreadCount(0);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error marking alerts as read:', error);
+                    showError('Failed to mark alerts as read. Please try again later.');
+                });
+        }
+        
+        function checkNewAlerts() {
+            fetch('/api/alerts/trigger/check', {
+                method: 'POST'
+            })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    if (data.count > 0) {
+                        // Reload alerts to show new ones
+                        loadAlerts();
+                        showSuccess(`Found ${data.count} new alert${data.count !== 1 ? 's' : ''}.`);
+                    } else {
+                        showSuccess('No new alerts at this time.');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error checking for new alerts:', error);
+                    showError('Failed to check for new alerts. Please try again later.');
+                });
+        }
+        
+        function updateUnreadCount(count) {
+            const unreadCountElement = document.getElementById('unread-count');
+            unreadCountElement.textContent = count;
+            
+            if (count > 0) {
+                unreadCountElement.style.display = 'flex';
+            } else {
+                unreadCountElement.style.display = 'none';
+            }
+        }
+        
+        function showError(message) {
+            alert(message);
+        }
+        
+        function showSuccess(message) {
+            alert(message);
+        }
+        
+        function escapeHtml(html) {
+            const div = document.createElement('div');
+            div.textContent = html;
+            return div.innerHTML;
+        }
+    </script>
+</body>
+</html>
