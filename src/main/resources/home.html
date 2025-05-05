@@ -8,238 +8,6 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <!-- Include our API client -->
     <script src="app.js"></script>
-    <style>
-        /* Dashboard specific styles */
-        .dashboard {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 20px;
-            padding: 20px;
-            max-width: 1600px;
-            margin: 0 auto;
-        }
-
-        .card {
-            background: #3E1F5B;
-            border-radius: 12px;
-            padding: 20px;
-            color: white;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
-        }
-
-        .card h2 {
-            margin-top: 0;
-            color: #FF8C00;
-            font-size: 1.5em;
-            margin-bottom: 15px;
-            padding-bottom: 10px;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .card h2 i {
-            font-size: 1.2em;
-        }
-
-        /* Chart container */
-        .chart-container {
-            position: relative;
-            height: 220px;
-            width: 100%;
-        }
-
-        /* Progress bar styles */
-        .progress-bar {
-            width: 100%;
-            height: 20px;
-            background-color: #e0e0e0;
-            border-radius: 10px;
-            margin: 10px 0;
-            overflow: hidden;
-        }
-
-        .progress {
-            height: 100%;
-            background-color: #FF8C00;
-            border-radius: 10px;
-        }
-
-        /* Chart filter styles */
-        .chart-filters {
-            margin-bottom: 15px;
-        }
-
-        .chart-filter {
-            background-color: rgba(62, 31, 91, 0.7);
-            color: white;
-            border: 1px solid rgba(255, 140, 0, 0.5);
-            padding: 5px 10px;
-            border-radius: 4px;
-            width: 100%;
-            max-width: 200px;
-            font-size: 0.9em;
-        }
-
-        .filter-buttons {
-            display: flex;
-            gap: 5px;
-            flex-wrap: wrap;
-        }
-
-        .filter-btn {
-            background-color: rgba(62, 31, 91, 0.7);
-            color: white;
-            border: 1px solid rgba(255, 140, 0, 0.5);
-            padding: 5px 10px;
-            border-radius: 4px;
-            font-size: 0.8em;
-            cursor: pointer;
-            transition: all 0.2s ease;
-        }
-
-        .filter-btn:hover {
-            background-color: rgba(255, 140, 0, 0.2);
-        }
-
-        .filter-btn.active {
-            background-color: #FF8C00;
-            color: white;
-            border-color: #FF8C00;
-        }
-
-        .goal-item {
-            background: rgba(62, 31, 91, 0.5);
-            padding: 15px;
-            margin-bottom: 15px;
-            border-radius: 8px;
-            position: relative;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            transition: all 0.3s ease;
-        }
-
-        .goal-item:hover {
-            box-shadow: 0 2px 8px rgba(255, 140, 0, 0.3);
-            border-color: rgba(255, 140, 0, 0.3);
-        }
-
-        .goal-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 8px;
-        }
-
-        .goal-header h3 {
-            margin: 0;
-            color: #FF8C00;
-            font-size: 1.1em;
-        }
-
-        .goal-actions {
-            display: flex;
-            gap: 5px;
-        }
-
-        .goal-edit-btn, .goal-delete-btn {
-            background: none;
-            border: none;
-            color: white;
-            cursor: pointer;
-            font-size: 1em;
-            padding: 2px 5px;
-            opacity: 0.7;
-            transition: opacity 0.2s ease;
-        }
-
-        .goal-edit-btn:hover, .goal-delete-btn:hover {
-            opacity: 1;
-        }
-
-        .goal-info {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 5px;
-            font-size: 0.9em;
-            color: #e0e0e0;
-        }
-
-        .goal-percentage {
-            font-weight: bold;
-            color: #FF8C00;
-        }
-
-        .goal-estimate {
-            font-size: 0.8em;
-            color: #aaa;
-            margin-top: 5px;
-            text-align: right;
-        }
-
-        .btn-add-goal {
-            background: #FF8C00;
-            color: white;
-            border: none;
-            padding: 10px 15px;
-            border-radius: 6px;
-            cursor: pointer;
-            margin-top: 15px;
-            font-weight: bold;
-        }
-
-        .btn-add-goal:hover {
-            background: #ff9d2d;
-        }
-
-        /* Responsive grid */
-        @media (max-width: 1200px) {
-            .dashboard {
-                grid-template-columns: repeat(2, 1fr);
-            }
-        }
-
-        @media (max-width: 768px) {
-            .dashboard {
-                grid-template-columns: 1fr;
-            }
-        }
-
-        /* Loading spinner styles */
-        .loading-spinner {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            height: 100%;
-            color: #aaa;
-        }
-
-        .spinner {
-            width: 40px;
-            height: 40px;
-            margin-bottom: 10px;
-            border: 4px solid rgba(255, 140, 0, 0.2);
-            border-radius: 50%;
-            border-top-color: #FF8C00;
-            animation: spin 1s ease-in-out infinite;
-        }
-
-        @keyframes spin {
-            to { transform: rotate(360deg); }
-        }
-
-        /* Refresh button hover effect */
-        .refresh-btn {
-            opacity: 0.7;
-            transition: all 0.2s ease;
-        }
-
-        .refresh-btn:hover {
-            opacity: 1;
-            transform: rotate(30deg);
-        }
-    </style>
 </head>
 <body>
 <header>
@@ -761,12 +529,16 @@
         });
     }
     
-    // Helper functions for handling data
+    // Helper functions for handling data 
     function getInt(field) {
+        // Check if field is direct number (DTO format) or Firestore format (backward compatibility)
+        if (typeof field === 'number') return field;
         return field && field.integerValue ? parseInt(field.integerValue) : 0;
     }
     
     function getArray(arrayField) {
+        // Check if field is direct array (DTO format) or Firestore format (backward compatibility)
+        if (Array.isArray(arrayField)) return arrayField;
         return arrayField && arrayField.arrayValue && arrayField.arrayValue.values ? arrayField.arrayValue.values : [];
     }
     
@@ -1095,36 +867,70 @@
                 // Clear all timeouts
                 Object.values(loadingTimeout).forEach(timeout => clearTimeout(timeout));
                 
-                const fields = data.fields || {};
+                console.log("Dashboard data refreshed:", data);
+                
+                // Handle both direct DTO properties and legacy Firestore format
+                // The data is now directly available in the response without fields wrapper
                 
                 // Update dashboard displays with the latest data
-                const netWorth = getInt(fields.netWorth);
+                const netWorth = typeof data.netWorth === 'number' ? data.netWorth : getInt(data.fields?.netWorth);
                 document.getElementById("netWorthDisplay").textContent = formatCurrency(netWorth);
                 
-                const totalIncome = getInt(fields.totalIncome);
+                const totalIncome = typeof data.totalIncome === 'number' ? data.totalIncome : getInt(data.fields?.totalIncome);
                 document.getElementById("totalIncomeDisplay").textContent = formatCurrency(totalIncome);
                 
-                const totalExpenses = getInt(fields.totalExpenses);
+                const totalExpenses = typeof data.totalExpenses === 'number' ? data.totalExpenses : getInt(data.fields?.totalExpenses);
                 document.getElementById("totalExpensesDisplay").textContent = formatCurrency(totalExpenses);
                 
-                const billsDue = getInt(fields.billsDue);
+                const billsDue = typeof data.billsDue === 'number' ? data.billsDue : getInt(data.fields?.billsDue);
                 document.getElementById("billRemindersDisplay").innerHTML = "<h1>" + billsDue + "</h1>";
                 
-                const monthlyExpensesArr = getArray(fields.monthlyExpenses).map(item => getInt(item));
-                const monthlyIncomesArr = getArray(fields.monthlyIncomes).map(item => getInt(item));
+                // Get the monthly arrays, handling both formats
+                let monthlyExpensesArr, monthlyIncomesArr;
+                if (Array.isArray(data.monthlyExpenses)) {
+                    monthlyExpensesArr = data.monthlyExpenses;
+                    monthlyIncomesArr = data.monthlyIncomes;
+                } else {
+                    // Fall back to legacy format
+                    monthlyExpensesArr = getArray(data.fields?.monthlyExpenses).map(item => getInt(item));
+                    monthlyIncomesArr = getArray(data.fields?.monthlyIncomes).map(item => getInt(item));
+                }
                 
-                console.log("Dashboard data refreshed:");
                 console.log("- Monthly Income:", monthlyIncomesArr);
                 console.log("- Monthly Expenses:", monthlyExpensesArr);
-                console.log("- Income Breakdown:", fields.totalIncomeBreakdown?.stringValue);
+                
+                // Get breakdown objects
+                let netWorthBreakdown, incomeBreakdown;
+                if (data.netWorthBreakdown && typeof data.netWorthBreakdown === 'object') {
+                    netWorthBreakdown = data.netWorthBreakdown;
+                    incomeBreakdown = data.totalIncomeBreakdown;
+                } else if (data.fields) {
+                    // Parse the breakdowns from legacy format if needed
+                    try {
+                        netWorthBreakdown = data.fields.netWorthBreakdown?.stringValue ? 
+                            JSON.parse(data.fields.netWorthBreakdown.stringValue) : { cash: 0, stocks: 0, crypto: 0 };
+                        
+                        incomeBreakdown = data.fields.totalIncomeBreakdown?.stringValue ? 
+                            JSON.parse(data.fields.totalIncomeBreakdown.stringValue) : { salary: 0, bonus: 0, other: 0 };
+                    } catch (e) {
+                        console.error("Error parsing breakdown data:", e);
+                        netWorthBreakdown = { cash: 0, stocks: 0, crypto: 0 };
+                        incomeBreakdown = { salary: 0, bonus: 0, other: 0 };
+                    }
+                } else {
+                    // Default empty objects
+                    netWorthBreakdown = { cash: 0, stocks: 0, crypto: 0 };
+                    incomeBreakdown = { salary: 0, bonus: 0, other: 0 };
+                }
                 
                 // Create or update charts with latest data - check for empty data
-                if (hasChartData(fields)) {
+                if (hasData(data)) {
                     try {
-                        createNetWorthChart(fields);
-                        createIncomeChart(fields);
-                        createExpensePieChart(fields);
-                        createMonthlyExpensesChart(monthlyExpensesArr);
+                        // Draw charts using the updated data
+                        createOrUpdateNetWorthChart(netWorthBreakdown);
+                        createOrUpdateIncomeChart(incomeBreakdown);
+                        createExpensePieChart(data);
+                        createOrUpdateMonthlyExpensesChart(monthlyExpensesArr);
                     } catch (e) {
                         console.error("Error creating charts:", e);
                         showNoDataMessage("netWorthChart", "Error creating chart. Please try refreshing.");
@@ -1162,6 +968,39 @@
                 document.getElementById("totalExpensesDisplay").textContent = "$0.00";
                 document.getElementById("billRemindersDisplay").innerHTML = "<h1>0</h1>";
             });
+    }
+    
+    // Check if there's any actual data to display in charts
+    function hasData(data) {
+        // First check direct properties (DTO format)
+        if (data.netWorth > 0 || data.totalIncome > 0 || data.totalExpenses > 0) {
+            return true;
+        }
+        
+        // Check breakdown objects
+        if (data.netWorthBreakdown && Object.values(data.netWorthBreakdown).some(val => val > 0)) {
+            return true;
+        }
+        
+        if (data.totalIncomeBreakdown && Object.values(data.totalIncomeBreakdown).some(val => val > 0)) {
+            return true;
+        }
+        
+        // Check monthly arrays
+        if (Array.isArray(data.monthlyExpenses) && data.monthlyExpenses.some(val => val > 0)) {
+            return true;
+        }
+        
+        if (Array.isArray(data.monthlyIncomes) && data.monthlyIncomes.some(val => val > 0)) {
+            return true;
+        }
+        
+        // Fall back to legacy check if it's in Firestore format
+        if (data.fields) {
+            return hasChartData(data.fields);
+        }
+        
+        return false;
     }
     
     // Function to load goals from Firestore
@@ -1521,6 +1360,190 @@
     
     // Create Monthly Expenses Chart
     function createMonthlyExpensesChart(monthlyExpensesArr) {
+        const ctx = document.getElementById('monthlyExpensesChart').getContext('2d');
+        
+        try {
+            const monthNames = [
+                'January', 'February', 'March', 'April', 'May', 'June',
+                'July', 'August', 'September', 'October', 'November', 'December'
+            ];
+            
+            // Ensure we have 12 months of data
+            if (monthlyExpensesArr.length < 12) {
+                monthlyExpensesArr = Array(12).fill(0).map((v, i) => 
+                    i < monthlyExpensesArr.length ? monthlyExpensesArr[i] : 0
+                );
+            }
+            
+            // Destroy previous chart if it exists
+            if (monthlyExpensesChart) {
+                monthlyExpensesChart.destroy();
+            }
+            
+            // Create new line chart
+            monthlyExpensesChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: monthNames,
+                    datasets: [{
+                        label: 'Monthly Expenses',
+                        data: monthlyExpensesArr,
+                        backgroundColor: 'rgba(255, 140, 0, 0.2)',
+                        borderColor: 'rgb(255, 140, 0)',
+                        borderWidth: 2,
+                        tension: 0.3,
+                        fill: true,
+                        pointBackgroundColor: 'rgb(255, 140, 0)',
+                        pointRadius: 4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: false
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return formatCurrency(context.raw);
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                callback: function(value) {
+                                    return formatCurrency(value);
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        } catch (err) {
+            console.error("Error creating monthly expenses chart:", err);
+        }
+    }
+    // New chart creation/update functions optimized for DTO format
+    function createOrUpdateNetWorthChart(breakdown) {
+        const ctx = document.getElementById('netWorthChart').getContext('2d');
+        
+        try {
+            // Destroy previous chart if it exists
+            if (netWorthChart) {
+                netWorthChart.destroy();
+            }
+            
+            // Create new chart
+            netWorthChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: Object.keys(breakdown).map(k => k.charAt(0).toUpperCase() + k.slice(1)),
+                    datasets: [{
+                        label: 'Value ($)',
+                        data: Object.values(breakdown),
+                        backgroundColor: [
+                            'rgba(50, 205, 50, 0.7)',  // cash - green
+                            'rgba(30, 144, 255, 0.7)', // stocks - blue
+                            'rgba(255, 140, 0, 0.7)'   // crypto - orange
+                        ],
+                        borderColor: [
+                            'rgb(50, 205, 50)',
+                            'rgb(30, 144, 255)',
+                            'rgb(255, 140, 0)'
+                        ],
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: false
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return formatCurrency(context.raw);
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                callback: function(value) {
+                                    return formatCurrency(value);
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        } catch (err) {
+            console.error("Error creating net worth chart:", err);
+        }
+    }
+    
+    function createOrUpdateIncomeChart(incomeBreakdown) {
+        const ctx = document.getElementById('incomeChart').getContext('2d');
+        
+        try {
+            // Destroy previous chart if it exists
+            if (incomeChart) {
+                incomeChart.destroy();
+            }
+            
+            // Create new doughnut chart
+            incomeChart = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: Object.keys(incomeBreakdown).map(k => k.charAt(0).toUpperCase() + k.slice(1)),
+                    datasets: [{
+                        data: Object.values(incomeBreakdown),
+                        backgroundColor: [
+                            'rgba(255, 215, 0, 0.7)',   // salary - gold
+                            'rgba(255, 105, 180, 0.7)', // bonus - pink
+                            'rgba(138, 43, 226, 0.7)'   // other - purple
+                        ],
+                        borderColor: [
+                            'rgb(255, 215, 0)',
+                            'rgb(255, 105, 180)',
+                            'rgb(138, 43, 226)'
+                        ],
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    const label = context.label || '';
+                                    const value = context.raw || 0;
+                                    const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                                    const percentage = total > 0 ? Math.round((value / total) * 100) : 0;
+                                    return label + ': ' + formatCurrency(value) + ' (' + percentage + '%)';
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        } catch (err) {
+            console.error("Error creating income chart:", err);
+        }
+    }
+    
+    function createOrUpdateMonthlyExpensesChart(monthlyExpensesArr) {
         const ctx = document.getElementById('monthlyExpensesChart').getContext('2d');
         
         try {
