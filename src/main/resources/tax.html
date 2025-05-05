@@ -54,29 +54,118 @@
             <option value="qualifying_surviving_spouse">Qualifying Surviving Spouse</option>
             <option value="head_of_household">Head of Household</option>
         </select>
+        <label for="state">Select Your State:</label>
+        <select id="state">
+            <option value="blank"></option>
+            <option value="AL">Alabama</option>
+            <option value="AK">Alaska</option>
+            <option value="AZ">Arizona</option>
+            <option value="AR">Arkansas</option>
+            <option value="CA">California</option>
+            <option value="CO">Colorado</option>
+            <option value="CT">Connecticut</option>
+            <option value="DE">Delaware</option>
+            <option value="FL">Florida</option>
+            <option value="GA">Georgia</option>
+            <option value="HI">Hawaii</option>
+            <option value="ID">Idaho</option>
+            <option value="IL">Illinois</option>
+            <option value="IN">Indiana</option>
+            <option value="IA">Iowa</option>
+            <option value="KS">Kansas</option>
+            <option value="KY">Kentucky</option>
+            <option value="LA">Louisiana</option>
+            <option value="ME">Maine</option>
+            <option value="MD">Maryland</option>
+            <option value="MA">Massachusetts</option>
+            <option value="MI">Michigan</option>
+            <option value="MN">Minnesota</option>
+            <option value="MS">Mississippi</option>
+            <option value="MO">Missouri</option>
+            <option value="MT">Montana</option>
+            <option value="NE">Nebraska</option>
+            <option value="NV">Nevada</option>
+            <option value="NH">New Hampshire</option>
+            <option value="NJ">New Jersey</option>
+            <option value="NM">New Mexico</option>
+            <option value="NY">New York</option>
+            <option value="NC">North Carolina</option>
+            <option value="ND">North Dakota</option>
+            <option value="OH">Ohio</option>
+            <option value="OK">Oklahoma</option>
+            <option value="OR">Oregon</option>
+            <option value="PA">Pennsylvania</option>
+            <option value="RI">Rhode Island</option>
+            <option value="SC">South Carolina</option>
+            <option value="SD">South Dakota</option>
+            <option value="TN">Tennessee</option>
+            <option value="TX">Texas</option>
+            <option value="UT">Utah</option>
+            <option value="VT">Vermont</option>
+            <option value="VA">Virginia</option>
+            <option value="WA">Washington</option>
+            <option value="WV">West Virginia</option>
+            <option value="WI">Wisconsin</option>
+            <option value="WY">Wyoming</option>
+        </select>
         <label for="taxCredits">Tax Credits and Deductibles Available:</label>
         <input type="number" id="taxCredits" placeholder="Enter tax credits or deductibles">
         <label for="taxesPaid">Taxes Paid:</label>
         <input type="number" id="taxesPaid" placeholder="Enter the taxes that have been paid">
         <button onclick="calculateTax()">Calculate Tax</button>
-        <div id="result" class="result-container"></div>
         <button onclick="Save()">Save Tax Information</button>
+        <div id="result" class="result-container"></div>
+
+        <h2>Saved Tax Records</h2>
+        <table id="taxTable" class="data-table">
+            <thead>
+            <tr>
+                <th>Federal Tax</th>
+                <th>State Tax</th>
+                <th>Total Owed</th>
+            </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
     </div>
 </main>
 </body>
 <script>
+    const stateTaxRates = {
+        AL: 0.05, AK: 0.00, AZ: 0.025, AR: 0.049, CA: 0.093,
+        CO: 0.045, CT: 0.05, DE: 0.052, FL: 0.00, GA: 0.0575,
+        HI: 0.08, ID: 0.06, IL: 0.0495, IN: 0.0323, IA: 0.06,
+        KS: 0.057, KY: 0.05, LA: 0.06, ME: 0.0715, MD: 0.0475,
+        MA: 0.05, MI: 0.0425, MN: 0.0785, MS: 0.05, MO: 0.05,
+        MT: 0.065, NE: 0.06, NV: 0.00, NH: 0.00, NJ: 0.0637,
+        NM: 0.049, NY: 0.0649, NC: 0.0525, ND: 0.0227, OH: 0.03,
+        OK: 0.05, OR: 0.09, PA: 0.0307, RI: 0.0599, SC: 0.07,
+        SD: 0.00, TN: 0.00, TX: 0.00, UT: 0.0495, VT: 0.0875,
+        VA: 0.0575, WA: 0.00, WV: 0.065, WI: 0.053, WY: 0.00
+    };
+
     function toggleDrawer() {
         const drawer = document.getElementById('sideDrawer');
         drawer.classList.toggle('collapsed');
     }
+
     function getThemePreference(name) {
         const match = document.cookie.match(new RegExp('(^| )' + name + '=([^;]+)'));
         if (!match) return null;
         return match[2];
     }
+
     window.addEventListener('pageshow', function(event) {
         if (event.persisted) window.location.reload();
     });
+    window.addEventListener('DOMContentLoaded', () => {
+        const savedTheme = getThemePreference('theme');
+        const body = document.body;
+        body.classList.remove('light-mode', 'dark-mode');
+        if (savedTheme === 'light') body.classList.add('light-mode');
+        else if (savedTheme === 'dark') body.classList.add('dark-mode');
+    });
+
     window.addEventListener('DOMContentLoaded', () => {
         const savedTheme = getThemePreference('theme');
         const body = document.body;
@@ -87,19 +176,20 @@
         } else if (savedTheme === 'dark') {
             body.classList.add('dark-mode');
         }
+        loadTaxData();
     });
     function calculateTax() {
-        //Gets the values from the tax fields
         let income = parseFloat(document.getElementById("income").value) || 0;
         let taxCredits = parseFloat(document.getElementById("taxCredits").value) || 0;
         let taxesPaid = parseFloat(document.getElementById("taxesPaid").value) || 0;
         let filingStatus = document.getElementById("filingStatus").value;
-        //Check to see if there are values for the filing status and income, if not it will prompt you to enter it
+        let state = document.getElementById("state").value;
+        let stateRate = stateTaxRates[state] || 0;
+
         if (!income || filingStatus === "blank") {
             document.getElementById("result").innerHTML = "Enter your income and filing status.";
             return;
         }
-        //These deductions apply to each status, and are subtracted from the total income,
         let standardDeduction = {
             single: 14600,
             married_filing_jointly: 29200,
@@ -107,9 +197,9 @@
             head_of_household: 21900,
             qualifying_surviving_spouse: 29200
         }[filingStatus];
-        //Finds the taxable income, uses Math.max to make sure the value doesn't go into the negatives
+
         let taxableIncome = Math.max(income - standardDeduction - taxCredits, 0);
-        //These are the tax brackets, and the associated tax rate for that specific bracket for each filing type, they are based on the 2024 brackets
+
         let taxBrackets = {
             single: [
                 { bracket: 0, rate: 0.10 },
@@ -157,31 +247,76 @@
                 { bracket: 731200, rate: 0.37 }
             ]
         }[filingStatus];
-        //Sets the tax owed to 0
+
         let taxOwedBrackets = 0;
-        //Loops through each tax bracket
-        for (let i = 0; i < taxBrackets.length-1; i++) {
-            //Checks if the taxable income is higher than that current bracket
+        for (let i = 0; i < taxBrackets.length - 1; i++) {
             if (taxableIncome > taxBrackets[i].bracket) {
-                //Subtracts the value to find the taxable income in this bracket, first it gets the smaller value between
-                //The upper bracket and the income, and then the subtraction occurs
                 let incomeFromBracket = Math.min(taxableIncome, taxBrackets[i + 1].bracket) - taxBrackets[i].bracket;
-                //The owed tax is the income multiplied by the rate
                 taxOwedBrackets += incomeFromBracket * taxBrackets[i].rate;
             }
         }
-        //The last bracket is handled differently, because the loop above accounts for the bracket above it for the calculation
         let lastBracket = taxBrackets.length - 1;
         if (taxableIncome > taxBrackets[lastBracket].bracket) {
             taxOwedBrackets += (taxableIncome - taxBrackets[lastBracket].bracket) * taxBrackets[lastBracket].rate;
         }
-        //The tax owed cannot be 0, if it's not 0 is the total tax owed.
-        let taxOwed = Math.max(taxOwedBrackets - taxesPaid, 0);
-        //Updates the result field to be that of the taxOwed field, the value is formatted to 2 decimal points
-        document.getElementById("result").innerHTML = `Estimated Tax Owed: $${taxOwed.toFixed(2)}`;
+        let stateTaxOwed = taxableIncome * stateRate;
+        let totalTaxOwed = Math.max(taxOwedBrackets + stateTaxOwed - taxesPaid, 0);
+        document.getElementById("result").innerHTML =
+            `Estimated Federal Tax: $${taxOwedBrackets.toFixed(2)}<br>` +
+            `Estimated State Tax: $${stateTaxOwed.toFixed(2)}<br>` +
+            `Estimated Total Tax Owed After Payments: $${totalTaxOwed.toFixed(2)}`;
     }
-    function Save(){
+    function Save() {
+        const resultContainer = document.getElementById("result");
+        const resultText = resultContainer.innerHTML;
 
+        if (!resultText || resultText.includes("Enter your income")) {
+            alert("Please calculate your tax before saving.");
+            return;
+        }
+
+        fetch("/api/tax", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ result: resultText })
+        })
+            .then(res => {
+                if (res.ok) {
+                    alert("Tax information saved.");
+                    loadTaxData();
+                } else {
+                    alert("Failed to save tax information.");
+                }
+            })
+            .catch(() => {
+                alert("Error occurred while saving.");
+            });
     }
+    function loadTaxData() {
+        fetch("/api/tax", {
+            method: "GET",
+            headers: { "Content-Type": "application/json" }
+        })
+            .then(res => res.json())
+            .then(data => {
+                const container = document.getElementById("savedTaxRecords");
+                container.innerHTML = "";
+
+                if (!data.documents) return;
+
+                data.documents.forEach(doc => {
+                    const resultText = doc.fields?.result?.stringValue || "";
+                    const div = document.createElement("div");
+                    div.className = "saved-tax-entry";
+                    div.innerHTML = resultText;
+                    container.appendChild(div);
+                });
+            })
+            .catch(err => {
+                console.error("Failed to load tax records:", err);
+                document.getElementById("savedTaxRecords").innerHTML = "<p>Error loading tax records.</p>";
+            });
+    }
+
 </script>
 </html>
