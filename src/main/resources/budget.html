@@ -289,10 +289,13 @@
 <header>
     <div class="logo">CashClimb</div>
     <nav>
-        <ul>
-            <li><a href="home.html">Dashboard</a></li>
-            <li><a href="budget.html" class="active">Budget</a></li>
-            <li><a href="alerts.html">Alerts</a></li>
+        <ul class="nav-items">
+            <li class="profile-link-container">
+                <a href="profile.html">
+                    <img id="navProfileImage" class="nav-profile-img" alt="Profile" />
+                </a>
+                <a href="profile.html" class="active">Profile</a>
+            </li>
         </ul>
     </nav>
 </header>
@@ -1064,3 +1067,20 @@
         loadPaychecksData();
         loadGoalsData();
     });
+    window.addEventListener("DOMContentLoaded", function () {
+        fetch("/api/profile", {
+            method: "GET",
+            headers: { "Content-Type": "application/json" }
+        })
+            .then(res => res.json())
+            .then(data => {
+                const fields = data.fields || {};
+                if (fields.profileImage) {
+                    const base64Image = fields.profileImage.stringValue;
+                    const navImg = document.getElementById("navProfileImage");
+                    if (navImg) navImg.src = base64Image;
+                }
+            });
+    });
+    </script>
+</body>

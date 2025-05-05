@@ -4,11 +4,16 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="e72c0420-fe48-4af3-a363-18d6d8618447" name="Changes" comment="Weird update branch stuff">
-      <change afterPath="$PROJECT_DIR$/src/main/java/org/example/TaxHandler.java" afterDir="false" />
+    <list default="true" id="e72c0420-fe48-4af3-a363-18d6d8618447" name="Changes" comment="Updated the tax code to save the data, new ui for the tax. Added state taxes to the calculation.">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/example/Login.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/example/Login.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/style.css" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/style.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/assetsLiabilities.html" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/assetsLiabilities.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/budget.html" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/budget.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/chat.html" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/chat.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/expenses.html" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/expenses.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/home.html" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/home.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/income.html" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/income.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/savedTips.html" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/savedTips.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/settings.html" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/settings.html" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/resources/tax.html" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/tax.html" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -165,7 +170,7 @@
       <workItem from="1744382133023" duration="3395000" />
       <workItem from="1744583582140" duration="394000" />
       <workItem from="1745612065335" duration="19232000" />
-      <workItem from="1746386996798" duration="8995000" />
+      <workItem from="1746386996798" duration="11034000" />
     </task>
     <task id="LOCAL-00001" summary="First Commit of login">
       <option name="closed" value="true" />
@@ -399,7 +404,15 @@
       <option name="project" value="LOCAL" />
       <updated>1746214024168</updated>
     </task>
-    <option name="localTasksCounter" value="30" />
+    <task id="LOCAL-00030" summary="Updated the tax code to save the data, new ui for the tax. Added state taxes to the calculation.">
+      <option name="closed" value="true" />
+      <created>1746481573106</created>
+      <option name="number" value="00030" />
+      <option name="presentableId" value="LOCAL-00030" />
+      <option name="project" value="LOCAL" />
+      <updated>1746481573106</updated>
+    </task>
+    <option name="localTasksCounter" value="31" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -417,7 +430,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="First Commit of login" />
     <MESSAGE value="Home page as well as updated colores" />
     <MESSAGE value="workspace.xml" />
     <MESSAGE value="chatbot feature" />
@@ -442,7 +454,8 @@
     <MESSAGE value="Added the theme change for the forgot password and register." />
     <MESSAGE value="The most updated branch. &#10;style.css: Added css for the new graphs and the new pages, the tips, savedtips, and the budget page&#10;budget handler and html for the ability to add a budget, not fully done, does not load the saved data correctly. &#10;Tips page loads in the tips from a json file, each tip has a save button. The save button will save the tip and load it in the saved tips html page. &#10;Updated the html pages to have the most up to date drawer and header." />
     <MESSAGE value="Weird update branch stuff" />
-    <option name="LAST_COMMIT_MESSAGE" value="Weird update branch stuff" />
+    <MESSAGE value="Updated the tax code to save the data, new ui for the tax. Added state taxes to the calculation." />
+    <option name="LAST_COMMIT_MESSAGE" value="Updated the tax code to save the data, new ui for the tax. Added state taxes to the calculation." />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
