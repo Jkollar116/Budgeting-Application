@@ -92,9 +92,19 @@ public class StockHandler implements HttpHandler {
     }
     
     private String getUserId(HttpExchange exchange) {
-        // In a real application, this would validate the user's session/token
-        // For demo purposes, we'll return a mock user ID
-        return "user123";
+        // Extract the user ID from the cookies
+        String cookies = exchange.getRequestHeaders().getFirst("Cookie");
+        if (cookies != null) {
+            for (String cookie : cookies.split(";")) {
+                String trimmedCookie = cookie.trim();
+                if (trimmedCookie.startsWith("localId=")) {
+                    return trimmedCookie.substring("localId=".length());
+                }
+            }
+        }
+        
+        // If no user ID cookie found, return null to trigger authentication error
+        return null;
     }
     
     private void handleAccountRequest(HttpExchange exchange, String userId) throws IOException {

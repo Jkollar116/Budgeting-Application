@@ -1,5 +1,7 @@
 package org.example;
 
+import com.google.cloud.firestore.DocumentReference;
+import com.google.cloud.firestore.DocumentSnapshot;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonArray;
@@ -353,28 +355,46 @@ public class StockApiService {
     
     /**
      * Helper method to get company name for a symbol.
-     * In a real implementation, you would call a separate API endpoint
-     * to get full company details.
+     * Attempts to fetch from Firestore first, then falls back to API lookup.
+     * If both fail, uses symbol + "Inc." as fallback.
      */
     private String getCompanyName(String symbol) {
-        Map<String, String> companyNames = new HashMap<>();
-        companyNames.put("AAPL", "Apple Inc.");
-        companyNames.put("MSFT", "Microsoft Corporation");
-        companyNames.put("AMZN", "Amazon.com Inc.");
-        companyNames.put("GOOGL", "Alphabet Inc.");
-        companyNames.put("META", "Meta Platforms Inc.");
-        companyNames.put("TSLA", "Tesla Inc.");
-        companyNames.put("NVDA", "NVIDIA Corporation");
-        companyNames.put("JPM", "JPMorgan Chase & Co.");
-        companyNames.put("V", "Visa Inc.");
-        companyNames.put("JNJ", "Johnson & Johnson");
-        companyNames.put("WMT", "Walmart Inc.");
-        companyNames.put("PG", "Procter & Gamble Co.");
-        companyNames.put("MA", "Mastercard Inc.");
-        companyNames.put("UNH", "UnitedHealth Group Inc.");
-        companyNames.put("HD", "Home Depot Inc.");
+        // Try to get from Firestore
+        FirestoreService firestoreService = FirestoreService.getInstance();
+        if (firestoreService.isAvailable()) {
+            try {
+                // Path to companies collection
+                DocumentReference companyRef = firestoreService.getDb().collection("Companies").document(symbol);
+                DocumentSnapshot snapshot = companyRef.get().get();
+                
+                if (snapshot.exists() && snapshot.contains("name")) {
+                    String name = snapshot.getString("name");
+                    if (name != null && !name.isEmpty()) {
+                        LOGGER.info("Found company name in Firestore for " + symbol + ": " + name);
+                        return name;
+                    }
+                }
+            } catch (Exception e) {
+                LOGGER.warning("Error getting company name from Firestore: " + e.getMessage());
+                // Continue to fallback
+            }
+        }
         
-        return companyNames.getOrDefault(symbol, symbol + " Inc.");
+        // Fallback to commonly used symbols if Firestore lookup failed
+        String name = symbol + " Inc.";
+        if ("AAPL".equals(symbol)) {
+            name = "Apple Inc.";
+        } else if ("MSFT".equals(symbol)) {
+            name = "Microsoft Corporation";
+        } else if ("AMZN".equals(symbol)) {
+            name = "Amazon.com Inc.";
+        } else if ("GOOGL".equals(symbol)) {
+            name = "Alphabet Inc.";
+        } else if ("META".equals(symbol)) {
+            name = "Meta Platforms Inc.";
+        }
+        
+        return name;
     }
     
     /**

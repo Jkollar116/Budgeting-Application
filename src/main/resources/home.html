@@ -361,56 +361,10 @@
                 </select>
             </div>
             <div id="goals-container">
-                <div class="goal-item" data-id="goal-1" data-progress="2500" data-target="5000">
-                    <div class="goal-header">
-                        <h3 class="goal-name">Emergency Fund</h3>
-                        <div class="goal-actions">
-                            <button class="goal-edit-btn" title="Update Progress"><i>✏️</i></button>
-                            <button class="goal-delete-btn" title="Delete Goal"><i>🗑️</i></button>
-                        </div>
-                    </div>
-                    <p class="goal-info">
-                        <span class="goal-amount">$2,500 / $5,000</span>
-                        <span class="goal-percentage">50%</span>
-                    </p>
-                    <div class="progress-bar">
-                        <div class="progress" style="width: 50%"></div>
-                    </div>
-                    <p class="goal-estimate">Est. completion: <span>Dec 2025</span></p>
-                </div>
-                <div class="goal-item" data-id="goal-2" data-progress="800" data-target="2000">
-                    <div class="goal-header">
-                        <h3 class="goal-name">Vacation Savings</h3>
-                        <div class="goal-actions">
-                            <button class="goal-edit-btn" title="Update Progress"><i>✏️</i></button>
-                            <button class="goal-delete-btn" title="Delete Goal"><i>🗑️</i></button>
-                        </div>
-                    </div>
-                    <p class="goal-info">
-                        <span class="goal-amount">$800 / $2,000</span>
-                        <span class="goal-percentage">40%</span>
-                    </p>
-                    <div class="progress-bar">
-                        <div class="progress" style="width: 40%"></div>
-                    </div>
-                    <p class="goal-estimate">Est. completion: <span>Oct 2025</span></p>
-                </div>
-                <div class="goal-item" data-id="goal-3" data-progress="3500" data-target="10000">
-                    <div class="goal-header">
-                        <h3 class="goal-name">New Car Down Payment</h3>
-                        <div class="goal-actions">
-                            <button class="goal-edit-btn" title="Update Progress"><i>✏️</i></button>
-                            <button class="goal-delete-btn" title="Delete Goal"><i>🗑️</i></button>
-                        </div>
-                    </div>
-                    <p class="goal-info">
-                        <span class="goal-amount">$3,500 / $10,000</span>
-                        <span class="goal-percentage">35%</span>
-                    </p>
-                    <div class="progress-bar">
-                        <div class="progress" style="width: 35%"></div>
-                    </div>
-                    <p class="goal-estimate">Est. completion: <span>Mar 2026</span></p>
+                <!-- Goals will be loaded dynamically from Firestore -->
+                <div class="loading-spinner">
+                    <div class="spinner"></div>
+                    <p>Loading goals...</p>
                 </div>
                 <button class="btn-add-goal" id="add-goal-btn">Add New Goal</button>
             </div>
@@ -1210,6 +1164,111 @@
             });
     }
     
+    // Function to load goals from Firestore
+    function loadGoalsFromFirestore() {
+        const goalsContainer = document.getElementById('goals-container');
+        
+        // Get the add goal button so we can re-add it after loading goals
+        const addButton = document.getElementById('add-goal-btn');
+        
+        // Show loading spinner
+        const loadingSpinner = goalsContainer.querySelector('.loading-spinner');
+        if (!loadingSpinner) {
+            goalsContainer.innerHTML = `
+                <div class="loading-spinner">
+                    <div class="spinner"></div>
+                    <p>Loading goals...</p>
+                </div>
+            `;
+        }
+        
+        // Get cookies for authentication
+        const cookies = document.cookie;
+        const cookieMap = {};
+        cookies.split(';').forEach(cookie => {
+            const parts = cookie.trim().split('=');
+            if (parts.length === 2) {
+                cookieMap[parts[0]] = parts[1];
+            }
+        });
+        
+        // Check if we have the localId cookie (user id)
+        if (!cookieMap.localId) {
+            goalsContainer.innerHTML = `
+                <div class="no-data-message">
+                    <p>User not authenticated</p>
+                    <p class="empty-tip">Please log in to view your goals.</p>
+                </div>
+            `;
+            // Re-add the add goal button
+            if (addButton) goalsContainer.appendChild(addButton);
+            return;
+        }
+        
+        const userId = cookieMap.localId;
+        
+        // Use our API to fetch goals from Firebase
+        fetch(`/api/goals?userId=${userId}`)
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`Error ${response.status}: ${response.statusText}`);
+                }
+                return response.json();
+            })
+            .then(data => {
+                // Remove loading spinner
+                const spinner = goalsContainer.querySelector('.loading-spinner');
+                if (spinner) spinner.remove();
+                
+                // Clear any previous goals but keep the add button
+                const existingGoals = goalsContainer.querySelectorAll('.goal-item');
+                existingGoals.forEach(goal => goal.remove());
+                
+                // Check if we have any goals
+                if (data && data.goals && data.goals.length > 0) {
+                    // Display each goal
+                    data.goals.forEach(goal => {
+                        addGoalToList(
+                            goal.name, 
+                            parseFloat(goal.progress), 
+                            parseFloat(goal.target),
+                            goal.id
+                        );
+                    });
+                } else {
+                    // Show empty state
+                    const emptyMessage = document.createElement('div');
+                    emptyMessage.className = 'no-data-message';
+                    emptyMessage.innerHTML = `
+                        <p>No financial goals found</p>
+                        <p class="empty-tip">Click 'Add New Goal' to create your first goal.</p>
+                    `;
+                    goalsContainer.insertBefore(emptyMessage, addButton);
+                }
+                
+                // Make sure the add button is the last element
+                if (addButton && addButton.parentNode === goalsContainer) {
+                    goalsContainer.appendChild(addButton);
+                } else if (addButton) {
+                    goalsContainer.appendChild(addButton);
+                }
+                
+                // Sort goals according to current sort setting
+                sortGoals();
+            })
+            .catch(error => {
+                console.error('Error loading goals:', error);
+                goalsContainer.innerHTML = `
+                    <div class="no-data-message">
+                        <p style="color:#ff6b6b;"><strong>Unable to load goals</strong></p>
+                        <p style="font-size:0.9em;color:#ddd;">Please try again later.</p>
+                    </div>
+                `;
+                // Re-add the add button
+                if (addButton) goalsContainer.appendChild(addButton);
+            });
+    }
+    
     // Check if there's any actual data to display in charts
     function hasChartData(fields) {
         // Check if any of the key data points have real values
@@ -1298,8 +1357,9 @@
             heading.appendChild(refreshBtn);
         });
         
-        // Initial data load
+        // Initial data loads
         refreshDashboardData();
+        loadGoalsFromFirestore();
         
         // Add an event listener for when the page becomes visible again
         document.addEventListener('visibilitychange', function() {

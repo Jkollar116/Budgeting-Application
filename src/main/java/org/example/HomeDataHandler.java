@@ -968,67 +968,13 @@ public class HomeDataHandler implements HttpHandler {
     }
     
     /**
-     * Creates a response with realistic-looking mock data
-     * Used when Firestore is not available for development/testing
+     * Creates a response with empty data when Firestore is not available
+     * This provides a valid structure but with no hardcoded data
      * 
-     * @return JSON string with mock data structure
+     * @return JSON string with empty data structure
      */
     private String createMockResponse() {
-        try {
-            JSONObject doc = new JSONObject();
-            JSONObject fieldsObj = new JSONObject();
-            doc.put("fields", fieldsObj);
-            
-            // Add realistic mock values for dashboard
-            fieldsObj.put("netWorth", new JSONObject().put("integerValue", "24500"));
-            fieldsObj.put("totalIncome", new JSONObject().put("integerValue", "5200"));
-            fieldsObj.put("totalExpenses", new JSONObject().put("integerValue", "2850"));
-            fieldsObj.put("billsDue", new JSONObject().put("integerValue", "3"));
-            fieldsObj.put("totalInvestments", new JSONObject().put("integerValue", "14750"));
-            
-            // Add breakdown objects with realistic values
-            JSONObject worthBreakdown = new JSONObject();
-            worthBreakdown.put("cash", 9750);
-            worthBreakdown.put("stocks", 8500);
-            worthBreakdown.put("crypto", 6250);
-            fieldsObj.put("netWorthBreakdown", new JSONObject().put("stringValue", worthBreakdown.toString()));
-            
-            // Income breakdown for pie chart
-            JSONObject incomeBreakdown = new JSONObject();
-            incomeBreakdown.put("salary", 4200);
-            incomeBreakdown.put("bonus", 500);
-            incomeBreakdown.put("other", 500);
-            fieldsObj.put("totalIncomeBreakdown", new JSONObject().put("stringValue", incomeBreakdown.toString()));
-            
-            // Generate realistic monthly expenses data (decreasing then increasing pattern)
-            JSONArray monthlyExpArray = new JSONArray();
-            int[] expenseData = {2980, 2840, 2750, 2650, 2500, 2450, 2550, 2750, 2850, 2950, 3050, 3150};
-            for (int i = 0; i < 12; i++) {
-                monthlyExpArray.put(new JSONObject().put("integerValue", String.valueOf(expenseData[i])));
-            }
-            fieldsObj.put("monthlyExpenses", new JSONObject().put("arrayValue", new JSONObject().put("values", monthlyExpArray)));
-            
-            // Generate realistic monthly income data (slight upward trend)
-            JSONArray monthlyIncArray = new JSONArray();
-            int[] incomeData = {4800, 4850, 4850, 4900, 4900, 4950, 5000, 5000, 5050, 5100, 5150, 5200};
-            for (int i = 0; i < 12; i++) {
-                monthlyIncArray.put(new JSONObject().put("integerValue", String.valueOf(incomeData[i])));
-            }
-            fieldsObj.put("monthlyIncomes", new JSONObject().put("arrayValue", new JSONObject().put("values", monthlyIncArray)));
-            
-            // Generate realistic stock performance data (volatile with upward trend)
-            JSONArray stockValueArr = new JSONArray();
-            int[] stockData = {6800, 6500, 7200, 7400, 7100, 7600, 7400, 7800, 8100, 7900, 8200, 8500};
-            for (int i = 0; i < 12; i++) {
-                stockValueArr.put(new JSONObject().put("integerValue", String.valueOf(stockData[i])));
-            }
-            fieldsObj.put("monthlyStockValues", new JSONObject().put("arrayValue", new JSONObject().put("values", stockValueArr)));
-            
-            LOGGER.info("Created mock data response for dashboard development");
-            return doc.toString();
-        } catch (Exception e) {
-            LOGGER.log(Level.SEVERE, "Error creating mock response", e);
-            return createEmptyResponse(); // Fall back to empty response if there's an error
-        }
+        LOGGER.info("Firestore not initialized - returning empty response structure");
+        return createEmptyResponse();
     }
 }
