@@ -4,29 +4,6 @@
     <meta charset="UTF-8">
     <title>Assets &amp; Liabilities</title>
     <link rel="stylesheet" href="style.css">
-    <style>
-        .container { max-width: 1200px; margin: 1rem auto; padding: 1rem; }
-        .grid { display: flex; gap: 1rem; flex-wrap: wrap; }
-        .grid-2 > * { flex: 1; min-width: 300px; }
-        .card { background: #fff; border: 1px solid #ddd; border-radius: 8px; padding: 1rem; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
-        .form-group { margin-bottom: 1rem; }
-        .form-group label { display: block; margin-bottom: 0.5rem; font-weight: bold; }
-        .btn { padding: 0.5rem 1rem; border: none; border-radius: 4px; cursor: pointer; }
-        .btn-primary { background-color: #007bff; color: #fff; }
-        .summary-grid { display: flex; justify-content: space-between; gap: 1rem; }
-        table { width: 100%; border-collapse: collapse; }
-        table th, table td { padding: 0.75rem; border-bottom: 1px solid #eee; text-align: left; }
-        body.assets-liabilities-page,
-        #assetsList, #liabilitiesList,
-        table, table th, table td {
-            color: #333 !important;
-        }
-        header, nav { background-color: #f8f9fa; padding: 0.75rem 1rem; }
-        header .logo { font-size: 1.5rem; font-weight: bold; }
-        nav ul { list-style: none; display: flex; gap: 1rem; margin: 0; padding: 0; }
-        nav a { text-decoration: none; color: #333; }
-        nav a.active { font-weight: bold; }
-    </style>
 </head>
 <body class="assets-liabilities-page">
 <header>
@@ -42,9 +19,34 @@
         </ul>
     </nav>
 </header>
-
+<button class="drawer-toggle" onclick="toggleDrawer()">☰</button>
+<nav class="drawer" id="sideDrawer">
+    <ul>
+        <li><a href="home.html">Dashboard</a></li>
+        <li><a href="expenses.html">Expenses</a></li>
+        <li><a href="income.html">Income</a></li>
+        <li><a href="tax.html">Tax</a></li>
+        <li><a href="crypto.html">Crypto</a></li>
+        <li><a href="stocks.html">Stocks</a></li>
+        <li><a href="chat.html">Chat</a></li>
+        <li><a href="tips.html">Tips</a></li>
+        <li><a href="savedTips.html">Saved Tips</a></li>
+        <li><a href="assetsLiabilities.html" class="active">Assets &amp; Liabilities</a></li>
+        <li><a href="budget.html">Budget</a></li>
+        <li><a href="profile.html">Profile</a></li>
+        <li><a href="settings.html">Settings</a></li>
+        <li><a href="/logout">Logout</a></li>
+        <li><a href="bills.html">Bills Page (Not Done)</a></li>
+        <li><a href="leaderboard.html">Leaderboard</a></li>
+    </ul>
+</nav>
 <main class="container">
-    <h2>Manage Your Assets &amp; Liabilities</h2>
+    <div class="hero">
+        <div class="header-content">
+            <h1>Assets & Liabilities</h1>
+            <p>Add and track your assets and liabilities below</p>
+        </div>
+    </div>
 
     <div class="grid grid-2">
         <div class="card">
@@ -99,6 +101,24 @@
 </main>
 
 <script>
+    function toggleDrawer() {
+        document.getElementById('sideDrawer').classList.toggle('collapsed');
+    }
+    function getThemePreference(name) {
+        var match = document.cookie.match(new RegExp('(^| )' + name + '=([^;]+)'));
+        return match ? match[2] : null;
+    }
+    window.addEventListener('pageshow', function(event) {
+        if (event.persisted) window.location.reload();
+    });
+    window.addEventListener('DOMContentLoaded', () => {
+        var body = document.body;
+        body.classList.remove('light-mode', 'dark-mode');
+        var theme = getThemePreference('theme');
+        if (theme === 'light') body.classList.add('light-mode');
+        else if (theme === 'dark') body.classList.add('dark-mode');
+        loadExpenses();
+    });
     console.log(" AssetsLiabilities.js loaded");
 
     function fmt(v) { return '$' + v.toFixed(2); }

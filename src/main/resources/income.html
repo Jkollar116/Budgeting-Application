@@ -101,6 +101,21 @@
             body.classList.add('dark-mode');
         }
     });
+    window.addEventListener("DOMContentLoaded", function () {
+        fetch("/api/profile", {
+            method: "GET",
+            headers: { "Content-Type": "application/json" }
+        })
+            .then(res => res.json())
+            .then(data => {
+                const fields = data.fields || {};
+                if (fields.profileImage) {
+                    const base64Image = fields.profileImage.stringValue;
+                    const navImg = document.getElementById("navProfileImage");
+                    if (navImg) navImg.src = base64Image;
+                }
+            });
+    });
     console.log("income.html loaded");
     const incomeForm = document.getElementById("incomeForm");
     const incomeListEl = document.getElementById("incomeList");
@@ -195,12 +210,12 @@
             const div = document.createElement("div");
             div.className = "income-item";
             div.innerHTML = `
-                <div class="info">
-                    <div class="label">${nameVal}</div>
-                    <div>Date: ${dateVal} | Recurring: ${recVal} | Freq: ${freqVal}</div>
-                </div>
-                <div class="amount">$${totalVal.toFixed(2)}</div>
-            `;
+                 <div class="info">
+                     <div class="label">${nameVal}</div>
+                     <div>Date: ${dateVal} | Recurring: ${recVal} | Freq: ${freqVal}</div>
+                 </div>
+                 <div class="amount">$${totalVal.toFixed(2)}</div>
+             `;
             incomeListEl.appendChild(div);
         });
     }
@@ -208,8 +223,8 @@
         const monthlyArr = incomeData.monthlyIncomes || [];
         const yearlyVal = incomeData.yearlyIncome || 0;
         resultsSummary.innerHTML = `
-            <p>Total Yearly Income: <span class="positive">$${yearlyVal.toFixed(2)}</span></p>
-        `;
+             <p>Total Yearly Income: <span class="positive">$${yearlyVal.toFixed(2)}</span></p>
+         `;
         buildBarChart(monthlyArr, barChartEl);
         buildPieChart(monthlyArr, pieChartEl);
     }
@@ -307,21 +322,6 @@
         });
         container.appendChild(svg);
     }
-    window.addEventListener("DOMContentLoaded", function () {
-        fetch("/api/profile", {
-            method: "GET",
-            headers: { "Content-Type": "application/json" }
-        })
-            .then(res => res.json())
-            .then(data => {
-                const fields = data.fields || {};
-                if (fields.profileImage) {
-                    const base64Image = fields.profileImage.stringValue;
-                    const navImg = document.getElementById("navProfileImage");
-                    if (navImg) navImg.src = base64Image;
-                }
-            });
-    });
 </script>
 </body>
 </html>

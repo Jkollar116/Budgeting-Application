@@ -2,246 +2,175 @@ package org.example;
 
 import com.sun.net.httpserver.HttpHandler;
 import com.sun.net.httpserver.HttpExchange;
-import com.google.cloud.firestore.*;
-import com.google.gson.*;
 import java.io.*;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
-import java.util.*;
-import java.util.concurrent.ExecutionException;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+
+import com.google.gson.*;
 
 /**
- * Enhanced handler for income-related API endpoints
- * Uses FirestoreService for more reliable Firebase operations
+ * IncomeHandler
  *
  * GET: Fetches Firestore income documents, computes monthly totals, and returns a JSON that contains:
  *      - "incomes": an array of the original Firestore document objects,
- *      - "monthlyIncomes": an array (12 doubles) with each month's income total,
+ *      - "monthlyIncomes": an array (12 doubles) with each month’s income total,
  *      - "yearlyIncome": the sum of the monthly incomes.
  *
  * POST: Adds a new income document to Firestore.
  */
 public class IncomeHandler implements HttpHandler {
-    private static final Logger LOGGER = Logger.getLogger(IncomeHandler.class.getName());
-    private final FirestoreService firestoreService;
-    private static final String INCOME_COLLECTION = "Income";
-    private static final String SUMMARIES_COLLECTION = "Summaries";
-
-    public IncomeHandler() {
-        this.firestoreService = FirestoreService.getInstance();
-    }
 
     @Override
     public void handle(HttpExchange exchange) throws IOException {
-        LOGGER.info("IncomeHandler invoked: " + exchange.getRequestMethod());
+        System.out.println("IncomeHandler invoked: " + exchange.getRequestMethod());
+
+        // Grab cookies to see if we have idToken + localId
         String cookies = exchange.getRequestHeaders().getFirst("Cookie");
-        
+        System.out.println("IncomeHandler cookies: " + cookies);
         if (cookies == null || !cookies.contains("idToken=") || !cookies.contains("localId=")) {
-            LOGGER.warning("401 - Missing idToken/localId in cookies");
+            System.out.println("401 - Missing idToken/localId in cookies");
             exchange.sendResponseHeaders(401, -1);
             return;
         }
-        
         String idToken = extractCookieValue(cookies, "idToken");
         String localId = extractCookieValue(cookies, "localId");
-        
+        System.out.println("Extracted idToken: " + idToken);
+        System.out.println("Extracted localId: " + localId);
         if (idToken == null || localId == null) {
-            LOGGER.warning("401 - null tokens");
+            System.out.println("401 - null tokens");
             exchange.sendResponseHeaders(401, -1);
-            return;
-        }
-
-        if (!firestoreService.isInitialized()) {
-            LOGGER.severe("Firestore service not initialized");
-            exchange.sendResponseHeaders(500, -1);
             return;
         }
 
         if ("GET".equalsIgnoreCase(exchange.getRequestMethod())) {
-            handleGetIncomes(exchange, localId);
+            handleGetIncomes(exchange, idToken, localId);
         } else if ("POST".equalsIgnoreCase(exchange.getRequestMethod())) {
-            handleAddIncome(exchange, localId);
+            handleAddIncome(exchange, idToken, localId);
         } else {
             exchange.sendResponseHeaders(405, -1);
         }
     }
 
-    /** 
-     * GET: fetch docs from Firestore, parse them into monthly totals, and return incomes as well
-     */
-    private void handleGetIncomes(HttpExchange exchange, String localId) throws IOException {
-        try {
-            LOGGER.info("Fetching incomes for user: " + localId);
-            
-            // Get collection from Firestore
-            CollectionReference incomesRef = firestoreService.getSubcollection(localId, INCOME_COLLECTION);
-            
-            if (incomesRef == null) {
-                LOGGER.severe("Failed to get income collection reference");
-                exchange.sendResponseHeaders(500, -1);
-                return;
-            }
-            
-            // Query all income documents
-            QuerySnapshot querySnapshot = incomesRef.get().get();
-            
-            // Convert the QuerySnapshot to a format compatible with the computeMonthlyYearly method
-            JsonObject firestoreResponse = new JsonObject();
-            JsonArray documents = new JsonArray();
-            
-            for (DocumentSnapshot doc : querySnapshot.getDocuments()) {
-                Map<String, Object> data = doc.getData();
-                
-                if (data != null) {
-                    // Convert to Firestore API format
-                    JsonObject docObject = new JsonObject();
-                    String docPath = doc.getReference().getPath();
-                    docObject.addProperty("name", docPath);
-                    
-                    JsonObject fields = new JsonObject();
-                    
-                    // Convert each field to Firestore API format
-                    for (Map.Entry<String, Object> entry : data.entrySet()) {
-                        String key = entry.getKey();
-                        Object value = entry.getValue();
-                        
-                        JsonObject fieldValue = new JsonObject();
-                        if (value instanceof String) {
-                            fieldValue.addProperty("stringValue", (String)value);
-                            fields.add(key, fieldValue);
-                        } else if (value instanceof Double || value instanceof Float) {
-                            fieldValue.addProperty("doubleValue", ((Number)value).doubleValue());
-                            fields.add(key, fieldValue);
-                        } else if (value instanceof Integer || value instanceof Long) {
-                            fieldValue.addProperty("integerValue", ((Number)value).longValue());
-                            fields.add(key, fieldValue);
-                        } else if (value instanceof Boolean) {
-                            fieldValue.addProperty("booleanValue", (Boolean)value);
-                            fields.add(key, fieldValue);
-                        } else if (value instanceof Date) {
-                            String dateStr = new java.text.SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'")
-                                    .format((Date)value);
-                            fieldValue.addProperty("timestampValue", dateStr);
-                            fields.add(key, fieldValue);
-                        }
-                    }
-                    
-                    docObject.add("fields", fields);
-                    documents.add(docObject);
-                }
-            }
-            
-            firestoreResponse.add("documents", documents);
-            
-            // Compute monthly and yearly totals and format response
-            String calculationJson = computeMonthlyYearly(firestoreResponse.toString());
-            
-            // Send response
-            byte[] respBytes = calculationJson.getBytes(StandardCharsets.UTF_8);
-            exchange.getResponseHeaders().set("Content-Type", "application/json; charset=UTF-8");
-            exchange.sendResponseHeaders(200, respBytes.length);
-            exchange.getResponseBody().write(respBytes);
-            exchange.getResponseBody().close();
-            
-        } catch (InterruptedException | ExecutionException e) {
-            LOGGER.log(Level.SEVERE, "Error fetching incomes", e);
-            exchange.sendResponseHeaders(500, -1);
+    /** GET: fetch docs from Firestore, parse them into monthly totals, and return incomes as well */
+    private void handleGetIncomes(HttpExchange exchange, String idToken, String localId) throws IOException {
+        String firestoreUrl = "https://firestore.googleapis.com/v1/projects/cashclimb-d162c/databases/(default)/documents/Users/"
+                + localId + "/Income";
+        System.out.println("IncomeHandler GET URL: " + firestoreUrl);
+
+        URL url = new URL(firestoreUrl);
+        HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+        conn.setRequestMethod("GET");
+        conn.setRequestProperty("Authorization", "Bearer " + idToken);
+
+        int responseCode = conn.getResponseCode();
+        System.out.println("IncomeHandler GET response code: " + responseCode);
+        if (responseCode != 200) {
+            exchange.sendResponseHeaders(responseCode, -1);
+            return;
+        }
+
+        // Read raw JSON from Firestore
+        BufferedReader in = new BufferedReader(new InputStreamReader(conn.getInputStream(), StandardCharsets.UTF_8));
+        StringBuilder sb = new StringBuilder();
+        String line;
+        while ((line = in.readLine()) != null) {
+            sb.append(line);
+        }
+        in.close();
+        String responseBody = sb.toString();
+        System.out.println("IncomeHandler raw GET response:\n" + responseBody);
+
+        // Build JSON response that includes both the incomes and calculated values
+        String calculationJson = computeMonthlyYearly(responseBody);
+
+        byte[] respBytes = calculationJson.getBytes(StandardCharsets.UTF_8);
+        exchange.getResponseHeaders().set("Content-Type", "application/json; charset=UTF-8");
+        exchange.sendResponseHeaders(200, respBytes.length);
+        try (OutputStream os = exchange.getResponseBody()) {
+            os.write(respBytes);
         }
     }
 
     /**
      * POST: Add one income document to Firestore with the fields date, name, frequency, recurring, total.
      */
-    private void handleAddIncome(HttpExchange exchange, String localId) throws IOException {
+    private void handleAddIncome(HttpExchange exchange, String idToken, String localId) throws IOException {
+        StringBuilder body = new StringBuilder();
+        try (BufferedReader br = new BufferedReader(new InputStreamReader(exchange.getRequestBody(), StandardCharsets.UTF_8))) {
+            String line;
+            while ((line = br.readLine()) != null) {
+                body.append(line);
+            }
+        }
+        String requestBody = body.toString();
+        System.out.println("IncomeHandler requestBody: " + requestBody);
+
+        // extract JSON fields from the request (using a simple regex helper)
+        String dateVal       = getJsonValue(requestBody, "date");
+        String nameVal       = getJsonValue(requestBody, "name");
+        String freqVal       = getJsonValue(requestBody, "frequency");
+        String recurringVal  = getJsonValue(requestBody, "recurring");
+        String totalValStr   = getJsonValue(requestBody, "total");
+
+        double totalVal;
         try {
-            // Read request body
-            String requestBody = readAll(exchange.getRequestBody());
-            LOGGER.info("Received income POST payload: " + requestBody);
-            
-            // Parse JSON data
-            String dateVal = getJsonValue(requestBody, "date");
-            String nameVal = getJsonValue(requestBody, "name");
-            String freqVal = getJsonValue(requestBody, "frequency");
-            String recurringVal = getJsonValue(requestBody, "recurring");
-            String totalValStr = getJsonValue(requestBody, "total");
-            
-            double totalVal;
-            try {
-                totalVal = Double.parseDouble(totalValStr);
-            } catch (Exception e) {
-                LOGGER.warning("400 - invalid totalValue format");
-                exchange.sendResponseHeaders(400, -1);
-                return;
-            }
-            
-            boolean isRecurring = "true".equalsIgnoreCase(recurringVal);
-            
-            // Parse date to extract year and month for easier querying
-            LocalDate parsedDate = tryParseDate(dateVal);
-            String yearMonthField = "";
-            String yearField = "";
-            
-            if (parsedDate != null) {
-                int year = parsedDate.getYear();
-                int month = parsedDate.getMonthValue();
-                yearMonthField = year + "_" + (month < 10 ? "0" : "") + month;
-                yearField = String.valueOf(year);
-            } else {
-                LOGGER.warning("Could not parse date: " + dateVal);
-                exchange.sendResponseHeaders(400, -1);
-                return;
-            }
-            
-            // Generate a unique transaction ID for better tracking
-            String transactionId = "inc_" + System.currentTimeMillis() + "_" + Math.round(Math.random() * 1000);
-            
-            // Current timestamp for created/updated metadata
-            long currentTimestamp = System.currentTimeMillis();
-            
-            // Prepare data for Firestore
-            Map<String, Object> incomeData = new HashMap<>();
-            incomeData.put("date", dateVal);
-            incomeData.put("name", nameVal);
-            incomeData.put("frequency", freqVal);
-            incomeData.put("recurring", String.valueOf(isRecurring));
-            incomeData.put("total", totalVal);
-            incomeData.put("yearMonth", yearMonthField);
-            incomeData.put("year", yearField);
-            incomeData.put("transactionId", transactionId);
-            incomeData.put("createdAt", currentTimestamp);
-            incomeData.put("updatedAt", currentTimestamp);
-            
-            // Save to Firestore using our service
-            String docId = UUID.randomUUID().toString();
-            DocumentReference docRef = firestoreService.getSubcollectionDocument(localId, INCOME_COLLECTION, docId);
-            
-            if (docRef == null) {
-                LOGGER.severe("Failed to get income document reference");
-                exchange.sendResponseHeaders(500, -1);
-                return;
-            }
-            
-            // Save the income document
-            docRef.set(incomeData).get();
-            LOGGER.info("Income saved successfully with ID: " + docId);
-            
-            // Update the monthly summary
-            updateMonthlySummary(localId, parsedDate, totalVal, isRecurring, freqVal);
-            
-            // Prepare success response
+            totalVal = Double.parseDouble(totalValStr);
+        } catch(Exception e) {
+            System.out.println("400 - invalid totalValue format");
+            exchange.sendResponseHeaders(400, -1);
+            return;
+        }
+        boolean isRecurring = "true".equalsIgnoreCase(recurringVal);
+
+        String firestoreUrl = "https://firestore.googleapis.com/v1/projects/cashclimb-d162c/databases/(default)/documents/Users/"
+                + localId + "/Income";
+        System.out.println("Firestore URL (POST): " + firestoreUrl);
+
+        HttpURLConnection conn = (HttpURLConnection) new URL(firestoreUrl).openConnection();
+        conn.setRequestMethod("POST");
+        conn.setRequestProperty("Content-Type", "application/json");
+        conn.setRequestProperty("Authorization", "Bearer " + idToken);
+        conn.setDoOutput(true);
+
+        // Construct JSON to store as doubleValue for total
+        String jsonToFirestore = "{\"fields\":{"
+                + "\"date\":{\"stringValue\":\"" + dateVal + "\"},"
+                + "\"name\":{\"stringValue\":\"" + nameVal + "\"},"
+                + "\"frequency\":{\"stringValue\":\"" + freqVal + "\"},"
+                + "\"recurring\":{\"stringValue\":\"" + isRecurring + "\"},"
+                + "\"total\":{\"doubleValue\":" + totalVal + "}"
+                + "}}";
+        System.out.println("jsonToFirestore: " + jsonToFirestore);
+
+        try (OutputStream os = conn.getOutputStream()) {
+            os.write(jsonToFirestore.getBytes(StandardCharsets.UTF_8));
+        }
+        int responseCodePost = conn.getResponseCode();
+        System.out.println("Firestore POST response code: " + responseCodePost);
+
+        if (responseCodePost == 200 || responseCodePost == 201) {
             String success = "Income added successfully.";
-            byte[] successBytes = success.getBytes(StandardCharsets.UTF_8);
-            exchange.getResponseHeaders().set("Content-Type", "text/plain; charset=UTF-8");
-            exchange.sendResponseHeaders(200, successBytes.length);
-            exchange.getResponseBody().write(successBytes);
-            exchange.getResponseBody().close();
-            
-        } catch (Exception e) {
-            LOGGER.log(Level.SEVERE, "Error saving income", e);
-            exchange.sendResponseHeaders(500, -1);
+            exchange.sendResponseHeaders(200, success.length());
+            try (OutputStream respOs = exchange.getResponseBody()) {
+                respOs.write(success.getBytes(StandardCharsets.UTF_8));
+            }
+        } else {
+            // Log error body if available
+            InputStream errorStream = conn.getErrorStream();
+            if (errorStream != null) {
+                BufferedReader errBr = new BufferedReader(new InputStreamReader(errorStream, StandardCharsets.UTF_8));
+                StringBuilder errBody = new StringBuilder();
+                String ln;
+                while ((ln = errBr.readLine()) != null) {
+                    errBody.append(ln);
+                }
+                errBr.close();
+                System.out.println("Firestore Income error body: " + errBody);
+            }
+            exchange.sendResponseHeaders(responseCodePost, -1);
         }
     }
 
@@ -260,7 +189,7 @@ public class IncomeHandler implements HttpHandler {
         try {
             root = JsonParser.parseString(firestoreResponseBody).getAsJsonObject();
         } catch (Exception e) {
-            LOGGER.warning("Invalid JSON from Firestore in computeMonthlyYearly");
+            System.out.println("Invalid JSON from Firestore in computeMonthlyYearly");
             return "{\"incomes\":[],\"monthlyIncomes\":[0,0,0,0,0,0,0,0,0,0,0,0],\"yearlyIncome\":0}";
         }
 
@@ -287,7 +216,7 @@ public class IncomeHandler implements HttpHandler {
                 String recurringStr = getStringField(fieldsObj, "recurring");
                 boolean isRecurring = "true".equalsIgnoreCase(recurringStr);
 
-                LOGGER.fine("Doc parse => date=" + dateStr + ", total=" + total
+                System.out.println("Doc parse => date=" + dateStr + ", total=" + total
                         + ", freq=" + freqStr + ", recurring=" + isRecurring);
 
                 double[] docMonthly = new double[12];
@@ -372,80 +301,6 @@ public class IncomeHandler implements HttpHandler {
     }
 
     /**
-     * Updates the monthly summary document in Firestore for faster dashboard reads.
-     * Creates or updates a document in the Summaries collection with pre-aggregated income data.
-     */
-    private void updateMonthlySummary(String localId, LocalDate date, double amount,
-                                     boolean isRecurring, String frequency) {
-        if (date == null) {
-            LOGGER.warning("Cannot update monthly summary: Invalid date");
-            return;
-        }
-        
-        try {
-            int year = date.getYear();
-            int month = date.getMonthValue();
-            String yearMonth = year + "_" + (month < 10 ? "0" : "") + month;
-            String summaryId = "income_" + yearMonth;
-            
-            // Get the summary document reference
-            DocumentReference summaryRef = firestoreService.getSubcollectionDocument(
-                localId, SUMMARIES_COLLECTION, summaryId);
-            
-            if (summaryRef == null) {
-                LOGGER.severe("Failed to get summary document reference");
-                return;
-            }
-            
-            // Check if the document exists
-            DocumentSnapshot summarySnapshot = summaryRef.get().get();
-            boolean documentExists = summarySnapshot.exists();
-            
-            double existingTotal = 0.0;
-            int existingCount = 0;
-            
-            if (documentExists) {
-                Map<String, Object> data = summarySnapshot.getData();
-                
-                if (data != null) {
-                    // Extract existing data
-                    if (data.get("totalIncome") instanceof Number) {
-                        existingTotal = ((Number) data.get("totalIncome")).doubleValue();
-                    }
-                    
-                    if (data.get("incomeCount") instanceof Number) {
-                        existingCount = ((Number) data.get("incomeCount")).intValue();
-                    }
-                }
-            }
-            
-            // Calculate new values
-            double newTotal = existingTotal + amount;
-            int newCount = existingCount + 1;
-            
-            // Create new summary data
-            Map<String, Object> summaryData = new HashMap<>();
-            summaryData.put("totalIncome", newTotal);
-            summaryData.put("incomeCount", newCount);
-            summaryData.put("yearMonth", yearMonth);
-            summaryData.put("year", String.valueOf(year));
-            summaryData.put("month", month);
-            summaryData.put("lastUpdated", System.currentTimeMillis());
-            
-            if (!documentExists) {
-                summaryData.put("createdAt", System.currentTimeMillis());
-            }
-            
-            // Save or update the summary document
-            summaryRef.set(summaryData).get();
-            LOGGER.info("Monthly income summary updated successfully for " + yearMonth);
-            
-        } catch (Exception e) {
-            LOGGER.log(Level.SEVERE, "Error updating monthly income summary", e);
-        }
-    }
-    
-    /**
      * Utility: Safely parse a date from a string with either "yyyy-MM-dd" or "MM/dd/yyyy" format.
      */
     private LocalDate tryParseDate(String ds) {
@@ -458,7 +313,7 @@ public class IncomeHandler implements HttpHandler {
             try {
                 return LocalDate.parse(ds, DateTimeFormatter.ofPattern("MM/dd/yyyy"));
             } catch (Exception ex2) {
-                LOGGER.warning("tryParseDate failed for: " + ds);
+                System.out.println("tryParseDate failed for: " + ds);
                 return null;
             }
         }
@@ -506,24 +361,11 @@ public class IncomeHandler implements HttpHandler {
     }
 
     /**
-     * Utility: Read all content from an input stream
-     */
-    private String readAll(InputStream in) throws IOException {
-        try (BufferedReader br = new BufferedReader(new InputStreamReader(in, StandardCharsets.UTF_8))) {
-            StringBuilder sb = new StringBuilder();
-            String line;
-            while ((line = br.readLine()) != null) {
-                sb.append(line);
-            }
-            return sb.toString();
-        }
-    }
-
-    /**
      * Utility: Extract a cookie value from the cookies string.
      */
     private static String extractCookieValue(String cookies, String name) {
-        for (String part : cookies.split(";")) {
+        String[] parts = cookies.split(";");
+        for (String part : parts) {
             String trimmed = part.trim();
             if (trimmed.startsWith(name + "=")) {
                 return trimmed.substring((name + "=").length());
@@ -531,7 +373,7 @@ public class IncomeHandler implements HttpHandler {
         }
         return null;
     }
-    
+
     /**
      * Utility: Simple extraction of a JSON key's value from a JSON string using regex.
      * This supports both quoted strings and numeric/boolean values.
