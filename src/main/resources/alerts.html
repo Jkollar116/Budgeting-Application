@@ -6,8 +6,16 @@
     <title>Alerts - CashClimb</title>
     <link rel="stylesheet" href="style.css">
     <style>
+        :root {
+            --card-bg: #fff;
+            --primary-color: #3E1F5B;
+            --primary-color-dark: #2a0e42;
+            --accent-color: #FF8C00;
+        }
+
         .alert-container {
-            margin: 20px auto;
+            margin-top: 60px;
+            margin-left: 300px;
             max-width: 800px;
         }
         
@@ -161,25 +169,43 @@
     </style>
 </head>
 <body>
+<header>
+    <div class="logo">CashClimb</div>
     <nav>
-        <div class="logo">CashClimb</div>
-        <div class="menu-toggle">☰</div>
-        <ul class="nav-links">
-            <li><a href="home.html">Home</a></li>
-            <li><a href="expenses.html">Expenses</a></li>
-            <li><a href="income.html">Income</a></li>
-            <li><a href="bills.html">Bills</a></li>
-            <li><a href="budget.html">Budget</a></li>
-            <li><a href="stocks.html">Stocks</a></li>
-            <li><a href="crypto.html">Crypto</a></li>
-            <li><a href="alerts.html" class="active">Alerts</a></li>
-            <li><a href="savingsTips.html">Savings Tips</a></li>
-            <li><a href="profile.html">Profile</a></li>
-            <li><a href="settings.html">Settings</a></li>
-            <li><a href="chat.html">Chat</a></li>
-            <li><a href="/logout">Logout</a></li>
+        <ul class="nav-items">
+            <li class="profile-link-container">
+                <a href="profile.html">
+                    <img id="navProfileImage" class="nav-profile-img" alt="Profile" />
+                </a>
+                <a href="profile.html" class="active">Profile</a>
+            </li>
         </ul>
     </nav>
+</header>
+<button class="drawer-toggle" onclick="toggleDrawer()">☰</button>
+<nav class="drawer" id="sideDrawer">
+    <ul>
+        <li><a href="home.html">Dashboard</a></li>
+        <li><a href="alerts.html">Alerts Page (Not Done)</a></li>
+        <li><a href="assetsLiabilities.html" class="active">Assets &amp; Liabilities</a></li>
+        <li><a href="bills.html">Bills Page</a></li>
+        <li><a href="budget.html">Budget</a></li>
+        <li><a href="chat.html">Chat</a></li>
+        <li><a href="crypto.html">Crypto</a></li>
+        <li><a href="expenses.html">Expenses</a></li>
+        <li><a href="income.html">Income</a></li>
+        <li><a href="leaderboard.html">Leaderboard</a></li>
+        <li><a href="profile.html">Profile</a></li>
+        <li><a href="savedTips.html">Saved Tips</a></li>
+        <li><a href="savingsTips.html">Savings Tips</a></li>
+        <li><a href="settings.html">Settings</a></li>
+        <li><a href="stocks.html">Stocks</a></li>
+        <li><a href="stocks-simple.html">Stocks Simple</a></li>
+        <li><a href="tax.html">Tax</a></li>
+        <li><a href="tips.html">Tips</a></li>
+        <li><a href="/logout">Logout</a></li>
+    </ul>
+</nav>
     
     <div class="container">
         <div class="alert-container">
@@ -204,6 +230,49 @@
     </div>
     
     <script>
+        function toggleDrawer() {
+            const drawer = document.getElementById('sideDrawer');
+            drawer.classList.toggle('collapsed');
+        }
+        window.addEventListener("DOMContentLoaded", function () {
+            fetch("/api/profile", {
+                method: "GET",
+                headers: { "Content-Type": "application/json" }
+            })
+                .then(res => res.json())
+                .then(data => {
+                    const fields = data.fields || {};
+                    if (fields.profileImage) {
+                        const base64Image = fields.profileImage.stringValue;
+                        const navImg = document.getElementById("navProfileImage");
+                        if (navImg) navImg.src = base64Image;
+                    }
+                });
+        });
+        function getThemePreference(name) {
+            const match = document.cookie.match(new RegExp('(^| )' + name + '=([^;]+)'));
+            if (!match) return null;
+            return match[2];
+        }
+
+        window.addEventListener('pageshow', function(event) {
+            if (event.persisted) window.location.reload();
+        });
+
+        window.addEventListener('DOMContentLoaded', () => {
+            // Apply theme
+            const savedTheme = getThemePreference('theme');
+            const body = document.body;
+            if (savedTheme === 'light') {
+                body.classList.add('light-mode');
+            } else if (savedTheme === 'dark') {
+                body.classList.add('dark-mode');
+            }
+            if (savedTheme) {
+                const input = document.querySelector(`input[name="theme"][value="${savedTheme}"]`);
+                if (input) input.checked = true;
+            }
+        });
         document.addEventListener('DOMContentLoaded', function() {
             loadAlerts();
             

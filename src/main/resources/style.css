@@ -573,14 +573,14 @@ From the chat css, I moved it over here in preparation of having everything in s
 This is the container
  */
 .chat-container {
-    max-width: 600px;
+    max-width: 100%;
     margin: 40px auto;
     border: 1px solid #ccc;
     border-radius: 8px;
     background-color: #fff;
     display: flex;
     flex-direction: column;
-    height: 80vh;
+    height: 90vh;
 }
 /*
 Header for the chat

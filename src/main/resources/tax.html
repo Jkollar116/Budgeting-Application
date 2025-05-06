@@ -125,6 +125,11 @@
         <table id="taxTable" class="data-table">
             <thead>
             <tr>
+                <th>Income</th>
+                <th>Filing Status</th>
+                <th>State</th>
+                <th>Credits</th>
+                <th>Taxes Paid</th>
                 <th>Federal Tax</th>
                 <th>State Tax</th>
                 <th>Total Owed</th>
@@ -132,6 +137,7 @@
             </thead>
             <tbody></tbody>
         </table>
+
     </div>
 </main>
 </body>
@@ -162,13 +168,6 @@
 
     window.addEventListener('pageshow', function(event) {
         if (event.persisted) window.location.reload();
-    });
-    window.addEventListener('DOMContentLoaded', () => {
-        const savedTheme = getThemePreference('theme');
-        const body = document.body;
-        body.classList.remove('light-mode', 'dark-mode');
-        if (savedTheme === 'light') body.classList.add('light-mode');
-        else if (savedTheme === 'dark') body.classList.add('dark-mode');
     });
 
     window.addEventListener('DOMContentLoaded', () => {
@@ -283,7 +282,14 @@
         fetch("/api/tax", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ result: resultText })
+            body: JSON.stringify({
+                result: resultText,
+                income: document.getElementById("income").value,
+                filingStatus: document.getElementById("filingStatus").value,
+                state: document.getElementById("state").value,
+                taxCredits: document.getElementById("taxCredits").value,
+                taxesPaid: document.getElementById("taxesPaid").value
+            })
         })
             .then(res => {
                 if (res.ok) {
@@ -296,30 +302,78 @@
             .catch(() => {
                 alert("Error occurred while saving.");
             });
+        loadTaxData();
     }
     function loadTaxData() {
+        console.log("Fetching tax data...");
         fetch("/api/tax", {
             method: "GET",
             headers: { "Content-Type": "application/json" }
         })
-            .then(res => res.json())
-            .then(data => {
-                const container = document.getElementById("savedTaxRecords");
-                container.innerHTML = "";
+            .then(res => {
+                console.log("GET /api/tax response status:", res.status);
+                return res.text(); // Changed from .json() to .text() to debug
+            })
+            .then(text => {
+                console.log("Raw response text:", text);
 
-                if (!data.documents) return;
+                let data;
+                try {
+                    data = JSON.parse(text);
+                } catch (err) {
+                    console.error("JSON parse error:", err.message);
+                    document.querySelector("#taxTable tbody").innerHTML =
+                        "<tr><td colspan='8'>Error: Invalid JSON returned from server.</td></tr>";
+                    return;
+                }
 
-                data.documents.forEach(doc => {
-                    const resultText = doc.fields?.result?.stringValue || "";
-                    const div = document.createElement("div");
-                    div.className = "saved-tax-entry";
-                    div.innerHTML = resultText;
-                    container.appendChild(div);
+                const tbody = document.querySelector("#taxTable tbody");
+                tbody.innerHTML = "";
+
+                if (!data.documents) {
+                    console.warn("No documents found in response.");
+                    return;
+                }
+
+                data.documents.forEach((doc, index) => {
+                    const f = doc.fields || {};
+                    const income = f.income?.stringValue || "";
+                    const filingStatus = f.filingStatus?.stringValue || "";
+                    const state = f.state?.stringValue || "";
+                    const credits = f.taxCredits?.stringValue || "";
+                    const taxesPaid = f.taxesPaid?.stringValue || "";
+                    const resultHtml = f.result?.stringValue || "";
+
+                    console.log(`Doc[${index}] resultHtml:`, resultHtml);
+
+                    const fedMatch = resultHtml.match(/Estimated Federal Tax: \$([0-9.]+)/);
+                    const stateMatch = resultHtml.match(/Estimated State Tax: \$([0-9.]+)/);
+                    const totalMatch = resultHtml.match(/Estimated Total Tax Owed After Payments: \$([0-9.]+)/);
+
+                    const fedTax = fedMatch ? fedMatch[1] : "N/A";
+                    const stateTax = stateMatch ? stateMatch[1] : "N/A";
+                    const totalOwed = totalMatch ? totalMatch[1] : "N/A";
+
+                    console.log(`Parsed tax values: fedTax=${fedTax}, stateTax=${stateTax}, totalOwed=${totalOwed}`);
+
+                    const row = document.createElement("tr");
+                    row.innerHTML = `
+                <td>$${income}</td>
+                <td>${filingStatus}</td>
+                <td>${state}</td>
+                <td>$${credits}</td>
+                <td>$${taxesPaid}</td>
+                <td>$${fedTax}</td>
+                <td>$${stateTax}</td>
+                <td>$${totalOwed}</td>
+            `;
+                    tbody.appendChild(row);
                 });
             })
             .catch(err => {
                 console.error("Failed to load tax records:", err);
-                document.getElementById("savedTaxRecords").innerHTML = "<p>Error loading tax records.</p>";
+                const tbody = document.querySelector("#taxTable tbody");
+                tbody.innerHTML = "<tr><td colspan='8'>Error loading tax records.</td></tr>";
             });
     }
     window.addEventListener("DOMContentLoaded", function () {

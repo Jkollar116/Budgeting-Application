@@ -2,238 +2,15 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Savings Tips</title>
+  <title>Tips</title>
   <link rel="stylesheet" href="style.css">
-  <style>
-    .tips-container {
-      max-width: 1200px;
-      margin: 0 auto;
-      padding: 20px;
-    }
-
-    .tips-filter {
-      margin-bottom: 20px;
-      display: flex;
-      flex-wrap: wrap;
-      gap: 15px;
-      align-items: center;
-    }
-
-    .filter-label {
-      font-weight: bold;
-      color: #FF8C00;
-    }
-
-    .filter-select {
-      padding: 8px;
-      border: 1px solid #FF8C00;
-      background-color: #3E1F5B;
-      color: white;
-      border-radius: 4px;
-    }
-
-    .difficulty-badges {
-      display: flex;
-      gap: 10px;
-      margin-bottom: 20px;
-    }
-
-    .difficulty-badge {
-      padding: 5px 10px;
-      border-radius: 15px;
-      font-size: 0.8em;
-      cursor: pointer;
-      border: 1px solid #FF8C00;
-    }
-
-    .difficulty-badge.active {
-      background-color: #FF8C00;
-      color: #3E1F5B;
-    }
-
-    .difficulty-badge:not(.active) {
-      background-color: transparent;
-      color: #FF8C00;
-    }
-
-    .tips-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-      gap: 20px;
-    }
-
-    .tip-card {
-      background-color: #3E1F5B;
-      border: 1px solid #FF8C00;
-      border-radius: 8px;
-      padding: 20px;
-      transition: transform 0.3s ease;
-      position: relative;
-      height: 100%;
-      display: flex;
-      flex-direction: column;
-    }
-
-    .tip-card:hover {
-      transform: translateY(-5px);
-      box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
-    }
-
-    .tip-header {
-      margin-bottom: 15px;
-      display: flex;
-      justify-content: space-between;
-      align-items: flex-start;
-    }
-
-    .tip-title {
-      font-size: 1.25rem;
-      font-weight: bold;
-      color: #FF8C00;
-      margin: 0;
-      flex-grow: 1;
-    }
-
-    .tip-difficulty {
-      font-size: 0.75rem;
-      padding: 3px 8px;
-      border-radius: 10px;
-      margin-left: 10px;
-      flex-shrink: 0;
-    }
-
-    .tip-difficulty.Beginner {
-      background-color: #4CAF50;
-      color: white;
-    }
-
-    .tip-difficulty.Intermediate {
-      background-color: #FFC107;
-      color: black;
-    }
-
-    .tip-difficulty.Advanced {
-      background-color: #F44336;
-      color: white;
-    }
-
-    .tip-category {
-      color: #ccc;
-      font-size: 0.9rem;
-      margin-bottom: 10px;
-    }
-
-    .tip-content {
-      color: white;
-      line-height: 1.6;
-      flex-grow: 1;
-    }
-
-    .tip-actions {
-      margin-top: 20px;
-      display: flex;
-      justify-content: flex-end;
-    }
-
-    .save-btn {
-      background-color: transparent;
-      color: #FF8C00;
-      border: 1px solid #FF8C00;
-      padding: 5px 15px;
-      border-radius: 5px;
-      cursor: pointer;
-      transition: all 0.3s ease;
-    }
-
-    .save-btn:hover {
-      background-color: #FF8C00;
-      color: #3E1F5B;
-    }
-
-    .save-btn.saved {
-      background-color: #FF8C00;
-      color: #3E1F5B;
-    }
-
-    .no-tips {
-      grid-column: 1 / -1;
-      text-align: center;
-      padding: 50px;
-      color: #ccc;
-    }
-
-    .random-tip-container {
-      background-color: #3E1F5B;
-      border: 2px solid #FF8C00;
-      border-radius: 8px;
-      padding: 20px;
-      margin-bottom: 30px;
-    }
-
-    .random-tip-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 15px;
-    }
-
-    .random-tip-title {
-      font-size: 1.5rem;
-      color: #FF8C00;
-      margin: 0;
-    }
-
-    .random-btn {
-      background-color: #FF8C00;
-      color: #3E1F5B;
-      border: none;
-      padding: 8px 15px;
-      border-radius: 5px;
-      cursor: pointer;
-      font-weight: bold;
-    }
-
-    .tip-of-day {
-      display: flex;
-      align-items: flex-start;
-      gap: 15px;
-    }
-
-    .tip-of-day-icon {
-      font-size: 2rem;
-      color: #FF8C00;
-    }
-
-    .tip-of-day-content h3 {
-      color: #FF8C00;
-      margin-top: 0;
-      margin-bottom: 10px;
-    }
-
-    .tip-of-day-content p {
-      color: white;
-      line-height: 1.6;
-      margin: 0;
-    }
-
-    @media (max-width: 768px) {
-      .tips-grid {
-        grid-template-columns: 1fr;
-      }
-    }
-  </style>
 </head>
 <body>
 <header>
   <div class="logo">CashClimb</div>
   <nav>
-    <ul class="nav-items">
-      <li class="profile-link-container">
-        <a href="profile.html">
-          <img id="navProfileImage" class="nav-profile-img" alt="Profile" />
-        </a>
-        <a href="profile.html" class="active">Profile</a>
-      </li>
+    <ul>
+      <li><a href="profile.html">Profile</a></li>
     </ul>
   </nav>
 </header>
@@ -247,63 +24,44 @@
     <li><a href="crypto.html">Crypto</a></li>
     <li><a href="stocks.html">Stocks</a></li>
     <li><a href="chat.html">Chat</a></li>
-    <li><a href="tips.html" class="active">Savings Tips</a></li>
+    <li><a href="tips.html">Tips</a></li>
     <li><a href="savedTips.html">Saved Tips</a></li>
-    <li><a href="assetsLiabilities.html">Assets &amp; Liabilities</a></li>
+    <li><a href="assetsLiabilities.html" class="active">Assets &amp; Liabilities</a></li>
     <li><a href="budget.html">Budget</a></li>
-    <li><a href="alerts.html">Alerts</a></li>
-    <li><a href="bills.html">Bills</a></li>
-    <li><a href="leaderboard.html">Leaderboard</a></li>
     <li><a href="profile.html">Profile</a></li>
     <li><a href="settings.html">Settings</a></li>
     <li><a href="/logout">Logout</a></li>
+    <li><a href="bills.html">Bills Page (Not Done)</a></li>
+    <li><a href="leaderboard.html">Leaderboard</a></li>
   </ul>
 </nav>
 
-<main>
-  <div class="hero">
-    <div class="header-content">
-      <h1>Savings Tips</h1>
-      <p>Discover strategies to save money and improve your financial health</p>
-    </div>
+<main class="tips-page">
+  <div class="tips-header">
+    <h1>Financial Tips</h1>
+    <p>Get personalized tips to improve your finances.</p>
+    <button onclick="showRandomTip()" class="cta-button">Random Tip</button>
+    <div id="randomTip" class="random-tip"></div>
   </div>
 
-  <div class="tips-container">
-    <div class="random-tip-container">
-      <div class="random-tip-header">
-        <h2 class="random-tip-title">Tip of the Day</h2>
-        <button id="randomTipBtn" class="random-btn">New Random Tip</button>
-      </div>
-      <div class="tip-of-day" id="tipOfDay">
-        <div class="tip-of-day-icon">💡</div>
-        <div class="tip-of-day-content">
-          <h3 id="randomTipTitle">Loading...</h3>
-          <p id="randomTipContent">Loading a tip for you...</p>
-        </div>
-      </div>
-    </div>
-
-    <div class="tips-filter">
-      <span class="filter-label">Filter by Category:</span>
-      <select id="categoryFilter" class="filter-select">
-        <option value="all">All Categories</option>
-        <!-- Categories will be dynamically added -->
-      </select>
-      
-      <span class="filter-label" style="margin-left: 20px;">Difficulty Level:</span>
-      <div class="difficulty-badges">
-        <span class="difficulty-badge active" data-difficulty="all">All</span>
-        <span class="difficulty-badge" data-difficulty="Beginner">Beginner</span>
-        <span class="difficulty-badge" data-difficulty="Intermediate">Intermediate</span>
-        <span class="difficulty-badge" data-difficulty="Advanced">Advanced</span>
-      </div>
-    </div>
-
-    <div id="tipsGrid" class="tips-grid">
-      <!-- Tips will be dynamically added here -->
-      <div class="no-tips">Loading tips...</div>
-    </div>
+  <div class="filter-container">
+    <label for="categoryFilter">Filter by Category:</label>
+    <select id="categoryFilter" onchange="filterTips()">
+      <option value="All">All</option>
+      <option value="Students">Students</option>
+      <option value="Workers">Workers</option>
+      <option value="Seniors">Seniors</option>
+      <option value="Low Income">Low Income</option>
+      <option value="High Income">High Income</option>
+      <option value="New Earners">New Earners</option>
+      <option value="Families">Families</option>
+      <option value="Debt Management">Debt Management</option>
+      <option value="Investment">Investment</option>
+      <option value="Small Business">Small Business</option>
+    </select>
   </div>
+
+  <div id="tipsList" class="tip-section-list"></div>
 </main>
 
 <script>
@@ -317,6 +75,10 @@
     return match ? match[2] : null;
   }
 
+  window.addEventListener('pageshow', function(event) {
+    if (event.persisted) window.location.reload();
+  });
+
   window.addEventListener('DOMContentLoaded', () => {
     const body = document.body;
     const theme = getThemePreference('theme');
@@ -326,209 +88,99 @@
     loadTips();
   });
 
-  let allTips = [];
-  let savedTips = new Set();
-
+  let tipsData = [];
   async function loadTips() {
     try {
-      const response = await fetch('tips.json');
-      allTips = await response.json();
-      
-      // Load user's saved tips
-      fetchSavedTips().then(() => {
-        displayRandomTip();
-        populateCategoryFilter();
-        displayTips();
-      });
+      const res = await fetch('tips.json');
+      tipsData = await res.json();
+      displayTips(tipsData);
+      filterTips();
     } catch (e) {
       console.error("Failed to load tips.json", e);
-      document.querySelector('.no-tips').textContent = "Failed to load tips. Please try again later.";
     }
   }
-
-  async function fetchSavedTips() {
-    try {
-      const response = await fetch('/api/tips');
-      if (!response.ok) throw new Error("Failed to fetch saved tips");
-      
-      const data = await response.json();
-      
-      if (data.documents && data.documents.length > 0) {
-        data.documents.forEach(doc => {
-          const tipId = doc.fields.tipId?.integerValue || doc.fields.id?.integerValue;
-          if (tipId) savedTips.add(parseInt(tipId));
-        });
-      }
-    } catch (error) {
-      console.error("Error fetching saved tips:", error);
-    }
-  }
-
-  function populateCategoryFilter() {
-    const categoryFilter = document.getElementById('categoryFilter');
-    const categories = new Set();
-    
-    allTips.forEach(tip => {
-      categories.add(tip.category);
-    });
-    
-    categories.forEach(category => {
-      const option = document.createElement('option');
-      option.value = category;
-      option.textContent = category;
-      categoryFilter.appendChild(option);
+  function displayTips(tips) {
+    const list = document.getElementById('tipsList');
+    list.innerHTML = '';
+    tips.forEach(tip => {
+      const li = document.createElement('li');
+      li.textContent = `${tip.text} [${tip.category}]`;
+      list.appendChild(li);
     });
   }
-
-  function displayRandomTip() {
-    if (allTips.length === 0) return;
-    
-    const randomIndex = Math.floor(Math.random() * allTips.length);
-    const tip = allTips[randomIndex];
-    
-    document.getElementById('randomTipTitle').textContent = tip.title;
-    document.getElementById('randomTipContent').textContent = tip.content;
-  }
-
-  function displayTips() {
-    const tipsGrid = document.getElementById('tipsGrid');
-    const categoryFilter = document.getElementById('categoryFilter').value;
-    const difficultyFilter = document.querySelector('.difficulty-badge.active').dataset.difficulty;
-    
-    // Clear the grid
-    tipsGrid.innerHTML = '';
-    
-    // Filter tips based on selected category and difficulty
-    let filteredTips = allTips;
-    
-    if (categoryFilter !== 'all') {
-      filteredTips = filteredTips.filter(tip => tip.category === categoryFilter);
-    }
-    
-    if (difficultyFilter !== 'all') {
-      filteredTips = filteredTips.filter(tip => tip.difficulty === difficultyFilter);
-    }
-    
-    if (filteredTips.length === 0) {
-      tipsGrid.innerHTML = '<div class="no-tips">No tips found matching your filters.</div>';
-      return;
-    }
-    
-    // Create a card for each tip
-    filteredTips.forEach(tip => {
-      const isSaved = savedTips.has(tip.id);
-      
-      const tipCard = document.createElement('div');
-      tipCard.className = 'tip-card';
-      
-      tipCard.innerHTML = `
-        <div class="tip-header">
-          <h3 class="tip-title">${tip.title}</h3>
-          <span class="tip-difficulty ${tip.difficulty}">${tip.difficulty}</span>
-        </div>
-        <div class="tip-category">${tip.category}</div>
-        <div class="tip-content">${tip.content}</div>
-        <div class="tip-actions">
-          <button class="save-btn ${isSaved ? 'saved' : ''}" data-id="${tip.id}">
-            ${isSaved ? 'Saved' : 'Save Tip'}
-          </button>
-        </div>
-      `;
-      
-      tipsGrid.appendChild(tipCard);
+  function filterTips() {
+    const selectedCategory = document.getElementById('categoryFilter').value;
+    const tipsList = document.getElementById('tipsList');
+    tipsList.innerHTML = '';
+    const filtered = selectedCategory === "All"
+            ? tipsData
+            : tipsData.filter(t => t.category.toLowerCase() === selectedCategory.toLowerCase());
+    const grouped = {};
+    filtered.forEach(tip => {
+      const cat = tip.category;
+      if (!grouped[cat]) grouped[cat] = [];
+      grouped[cat].push(tip);
     });
-    
-    // Add event listeners to save buttons
-    document.querySelectorAll('.save-btn').forEach(button => {
-      button.addEventListener('click', function() {
-        const tipId = parseInt(this.dataset.id);
-        const isSaved = this.classList.contains('saved');
-        
-        if (isSaved) {
-          unsaveTip(tipId, this);
-        } else {
-          saveTip(tipId, this);
-        }
+    for (const [category, tips] of Object.entries(grouped)) {
+      const section = document.createElement('div');
+      section.className = 'tip-category-block';
+
+      const header = document.createElement('h3');
+      header.className = 'tip-category-title';
+      header.textContent = category;
+      section.appendChild(header);
+
+      const ul = document.createElement('ul');
+      ul.className = 'tip-category-list';
+
+      tips.forEach(tip => {
+        const li = document.createElement('li');
+        li.className = 'tip-item';
+
+        const text = document.createElement('p');
+        text.textContent = `- ${tip.text}`;
+        li.appendChild(text);
+
+        const saveBtn = document.createElement('button');
+        saveBtn.textContent = 'Save Tip';
+        saveBtn.className = 'save-tip-btn';
+        saveBtn.onclick = () => saveTipToFirebase(tip);
+        li.appendChild(saveBtn);
+        ul.appendChild(li);
       });
-    });
+      section.appendChild(ul);
+      tipsList.appendChild(section);
+    }
   }
-
-  function saveTip(tipId, buttonElement) {
-    const tip = allTips.find(t => t.id === tipId);
-    if (!tip) return;
-    
+  function showRandomTip() {
+    if (tipsData.length === 0) return;
+    const tip = tipsData[Math.floor(Math.random() * tipsData.length)];
+    document.getElementById('randomTip').textContent = tip.text;
+  }
+  function saveTipToFirebase(tip) {
     fetch('/api/tips', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        tipId: tip.id,
+        id: tip.id,
         category: tip.category,
-        title: tip.title,
-        content: tip.content,
-        difficulty: tip.difficulty
+        text: tip.text
       })
     })
-    .then(response => {
-      if (response.ok) {
-        savedTips.add(tipId);
-        buttonElement.classList.add('saved');
-        buttonElement.textContent = 'Saved';
-      } else {
-        throw new Error('Failed to save tip');
-      }
-    })
-    .catch(error => {
-      console.error('Error saving tip:', error);
-      alert('Failed to save tip. Please try again.');
-    });
-  }
-
-  function unsaveTip(tipId, buttonElement) {
-    fetch(`/api/tips/${tipId}`, {
-      method: 'DELETE'
-    })
-    .then(response => {
-      if (response.ok) {
-        savedTips.delete(tipId);
-        buttonElement.classList.remove('saved');
-        buttonElement.textContent = 'Save Tip';
-      } else {
-        throw new Error('Failed to remove saved tip');
-      }
-    })
-    .catch(error => {
-      console.error('Error removing saved tip:', error);
-      alert('Failed to remove saved tip. Please try again.');
-    });
-  }
-
-  // Event listeners for filters
-  document.getElementById('categoryFilter').addEventListener('change', displayTips);
-  
-  document.querySelectorAll('.difficulty-badge').forEach(badge => {
-    badge.addEventListener('click', function() {
-      document.querySelector('.difficulty-badge.active').classList.remove('active');
-      this.classList.add('active');
-      displayTips();
-    });
-  });
-  
-  document.getElementById('randomTipBtn').addEventListener('click', displayRandomTip);
-  window.addEventListener("DOMContentLoaded", function () {
-    fetch("/api/profile", {
-      method: "GET",
-      headers: { "Content-Type": "application/json" }
-    })
-            .then(res => res.json())
-            .then(data => {
-              const fields = data.fields || {};
-              if (fields.profileImage) {
-                const base64Image = fields.profileImage.stringValue;
-                const navImg = document.getElementById("navProfileImage");
-                if (navImg) navImg.src = base64Image;
+            .then(res => {
+              if (res.ok) {
+                alert("Tip saved successfully.");
+              } else {
+                alert("Failed to save tip.");
+                return res.text().then(console.error);
               }
+            })
+            .catch(err => {
+              console.error("Error saving tip:", err);
+              alert("Failed to save tip.");
             });
-  });
+  }
 </script>
 </body>
 </html>
+

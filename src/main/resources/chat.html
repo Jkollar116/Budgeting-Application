@@ -40,9 +40,11 @@
     <li><a href="leaderboard.html">Leaderboard</a></li>
   </ul>
 </nav>
+<main>
 <div class="chat-container">
   <div class="chat-header">
     <h1>Chatbot</h1>
+    <p>Ask Financial Questions!</p>
   </div>
   <div class="chat-window" id="chat-window"></div>
   <div class="chat-input">
@@ -50,9 +52,14 @@
     <button id="send-btn">Send</button>
   </div>
 </div>
+</main>
 <script src="chat.js">
 </script>
 <script>
+  function toggleDrawer() {
+    const drawer = document.getElementById('sideDrawer');
+    drawer.classList.toggle('collapsed');
+  }
   function getThemePreference(name) {
     const match = document.cookie.match(new RegExp('(^| )' + name + '=([^;]+)'));
     if (!match) return null;
@@ -72,10 +79,6 @@
       body.classList.add('dark-mode');
     }
   });
-  function toggleDrawer() {
-    const drawer = document.getElementById('sideDrawer');
-    drawer.classList.toggle('collapsed');
-  }
   window.addEventListener("DOMContentLoaded", function () {
     fetch("/api/profile", {
       method: "GET",

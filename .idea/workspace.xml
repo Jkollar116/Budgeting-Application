@@ -4,13 +4,18 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="e72c0420-fe48-4af3-a363-18d6d8618447" name="Changes" comment="Added profile picture to all pages">
+    <list default="true" id="e72c0420-fe48-4af3-a363-18d6d8618447" name="Changes" comment="Slightly improved the ui for login, register, forgot password">
+      <change afterPath="$PROJECT_DIR$/src/main/resources/netWorth.html" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/forgot.html" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/forgot.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/example/TaxHandler.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/example/TaxHandler.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/alerts.html" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/alerts.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/bills.html" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/bills.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/chat.html" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/chat.html" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/resources/home.html" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/home.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/login.html" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/login.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/register.html" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/register.html" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/resources/style.css" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/style.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/tax.html" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/tax.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/tips.html" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/tips.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/tips.json" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/tips.json" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -21,8 +26,8 @@
     <option name="RECENT_TEMPLATES">
       <list>
         <option value="JavaScript File" />
-        <option value="HTML File" />
         <option value="Class" />
+        <option value="HTML File" />
       </list>
     </option>
   </component>
@@ -166,7 +171,7 @@
       <workItem from="1744382133023" duration="3395000" />
       <workItem from="1744583582140" duration="394000" />
       <workItem from="1745612065335" duration="19232000" />
-      <workItem from="1746386996798" duration="15362000" />
+      <workItem from="1746386996798" duration="22371000" />
     </task>
     <task id="LOCAL-00001" summary="First Commit of login">
       <option name="closed" value="true" />
@@ -416,7 +421,15 @@
       <option name="project" value="LOCAL" />
       <updated>1746483660078</updated>
     </task>
-    <option name="localTasksCounter" value="32" />
+    <task id="LOCAL-00032" summary="Slightly improved the ui for login, register, forgot password">
+      <option name="closed" value="true" />
+      <created>1746492545201</created>
+      <option name="number" value="00032" />
+      <option name="presentableId" value="LOCAL-00032" />
+      <option name="project" value="LOCAL" />
+      <updated>1746492545201</updated>
+    </task>
+    <option name="localTasksCounter" value="33" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -434,7 +447,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="workspace.xml" />
     <MESSAGE value="chatbot feature" />
     <MESSAGE value="commit for aws" />
     <MESSAGE value="Fixed an issue where the login button on the forgot password page and register page did not correctly take you back to the login screen." />
@@ -459,7 +471,8 @@
     <MESSAGE value="Weird update branch stuff" />
     <MESSAGE value="Updated the tax code to save the data, new ui for the tax. Added state taxes to the calculation." />
     <MESSAGE value="Added profile picture to all pages" />
-    <option name="LAST_COMMIT_MESSAGE" value="Added profile picture to all pages" />
+    <MESSAGE value="Slightly improved the ui for login, register, forgot password" />
+    <option name="LAST_COMMIT_MESSAGE" value="Slightly improved the ui for login, register, forgot password" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
