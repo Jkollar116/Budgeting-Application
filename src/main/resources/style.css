@@ -334,7 +334,10 @@ Used for the login, it is hte container
     max-width: 400px;
     margin: 80px auto;
     background-color: #3E1F5B;
-    padding: 30px;
+    padding-top: 50px;
+    padding-right: 500px;
+    padding-bottom: 475px;
+    padding-left: 500px;
     border-radius: 8px;
     box-shadow: 0 4px 6px rgba(0,0,0,0.4);
     text-align: center;
