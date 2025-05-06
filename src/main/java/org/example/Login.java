@@ -9,6 +9,28 @@ import java.nio.file.*;
 import java.awt.Desktop;
 import java.util.List;
 
+// CSP Filter implementation
+class CspFilter extends Filter {
+  @Override
+  public void doFilter(HttpExchange exchange, Chain chain) throws IOException {
+    exchange.getResponseHeaders().set(
+      "Content-Security-Policy",
+      // allow everything from self, and make sure XHR/fetch is allowed back to you
+      "default-src 'self'; " +
+      "script-src  'self'; " +
+      "style-src   'self'; " +
+      "img-src     'self' data:; " +
+      "connect-src 'self';"
+    );
+    chain.doFilter(exchange);
+  }
+
+  @Override
+  public String description() {
+    return "Adds a Content-Security-Policy header allowing same-origin XHR";
+  }
+}
+
 public class Login {
     private static final String FIREBASE_API_KEY = "AIzaSyCMA1F8Xd4rCxGXssXIs8Da80qqP6jien8";
     public static void main(String[] args) throws Exception {
@@ -20,140 +42,201 @@ public class Login {
             try { port = Integer.parseInt(args[0]); } catch (NumberFormatException e) { System.err.println("Invalid port. Using default " + port); }
         }
         HttpServer server = HttpServer.create(new InetSocketAddress("0.0.0.0", port), 0);
-        server.createContext("/", new StaticFileHandler());
-        server.createContext("/dologin", new LoginHandler());
-        server.createContext("/deleteAccount", new DeleteAccountHandler());
-        server.createContext("/register", new RegisterHandler());
-        server.createContext("/forgot", new ForgotPasswordHandler());
+        
+        // Create contexts for public endpoints and add CSP filter
+        HttpContext rootContext = server.createContext("/", new StaticFileHandler());
+        rootContext.getFilters().add(new CspFilter());
+        
+        HttpContext loginContext = server.createContext("/dologin", new LoginHandler());
+        loginContext.getFilters().add(new CspFilter());
+        
+        HttpContext deleteAccountContext = server.createContext("/deleteAccount", new DeleteAccountHandler());
+        deleteAccountContext.getFilters().add(new CspFilter());
+        
+        HttpContext registerContext = server.createContext("/register", new RegisterHandler());
+        registerContext.getFilters().add(new CspFilter());
+        
+        HttpContext forgotContext = server.createContext("/forgot", new ForgotPasswordHandler());
+        forgotContext.getFilters().add(new CspFilter());
         HttpContext homeContext = server.createContext("/home.html", new StaticFileHandler());
+        homeContext.getFilters().add(new CspFilter());
         homeContext.getFilters().add(new AuthFilter());
         HttpContext apiDataContext = server.createContext("/api/getData", new HomeDataHandler());
+        apiDataContext.getFilters().add(new CspFilter());
         apiDataContext.getFilters().add(new AuthFilter());
         HttpContext apiChatContext = server.createContext("/api/chat", new ChatHandler());
+        apiChatContext.getFilters().add(new CspFilter());
         apiChatContext.getFilters().add(new AuthFilter());
         HttpContext apiWalletsContext = server.createContext("/api/wallets", new CryptoApiHandler());
+        apiWalletsContext.getFilters().add(new CspFilter());
         apiWalletsContext.getFilters().add(new AuthFilter());
         HttpContext apiWalletContext = server.createContext("/api/wallet", new CryptoApiHandler());
+        apiWalletContext.getFilters().add(new CspFilter());
         apiWalletContext.getFilters().add(new AuthFilter());
         HttpContext apiExpensesContext = server.createContext("/api/expenses", new ExpensesHandler());
+        apiExpensesContext.getFilters().add(new CspFilter());
         apiExpensesContext.getFilters().add(new AuthFilter());
         // Register stock API endpoints with more specific paths first
         HttpContext apiStockOrderWithIdContext = server.createContext("/api/stocks/orders/", new StockHandler());
+        apiStockOrderWithIdContext.getFilters().add(new CspFilter());
         apiStockOrderWithIdContext.getFilters().add(new AuthFilter());
         
         HttpContext apiStockHistoryContext = server.createContext("/api/stocks/history", new StockHandler());
+        apiStockHistoryContext.getFilters().add(new CspFilter());
         apiStockHistoryContext.getFilters().add(new AuthFilter());
         
         HttpContext apiStockAccountContext = server.createContext("/api/stocks/account", new StockHandler());
+        apiStockAccountContext.getFilters().add(new CspFilter());
         apiStockAccountContext.getFilters().add(new AuthFilter());
         
         HttpContext apiStockPortfolioContext = server.createContext("/api/stocks/portfolio", new StockHandler());
+        apiStockPortfolioContext.getFilters().add(new CspFilter());
         apiStockPortfolioContext.getFilters().add(new AuthFilter());
         
         HttpContext apiStockOrdersContext = server.createContext("/api/stocks/orders", new StockHandler());
+        apiStockOrdersContext.getFilters().add(new CspFilter());
         apiStockOrdersContext.getFilters().add(new AuthFilter());
         
         // Register specific stock symbol route for getting individual stocks
         // Using /api/stocks with explicit symbols rather than the overly broad /api/stocks/
         HttpContext apiStockSymbolContext = server.createContext("/api/stocks", new StockHandler());
+        apiStockSymbolContext.getFilters().add(new CspFilter());
         apiStockSymbolContext.getFilters().add(new AuthFilter());
-        server.createContext("/logout", new LogoutHandler());
+        
+        HttpContext logoutContext = server.createContext("/logout", new LogoutHandler());
+        logoutContext.getFilters().add(new CspFilter());
         HttpContext apiBudgetsContext = server.createContext("/api/budgets", new BudgetHandler());
+        apiBudgetsContext.getFilters().add(new CspFilter());
         apiBudgetsContext.getFilters().add(new AuthFilter());
         HttpContext apiIncomeContext = server.createContext("/api/income", new IncomeHandler());
+        apiIncomeContext.getFilters().add(new CspFilter());
         apiIncomeContext.getFilters().add(new AuthFilter());
         HttpContext assetsLiabilitiesPage = server.createContext("/assetsLiabilities.html", new StaticFileHandler());
+        assetsLiabilitiesPage.getFilters().add(new CspFilter());
         assetsLiabilitiesPage.getFilters().add(new AuthFilter());
         HttpContext apiTipsContext = server.createContext("/api/tips", new TipsHandler());
+        apiTipsContext.getFilters().add(new CspFilter());
         apiTipsContext.getFilters().add(new AuthFilter());
         HttpContext apiTaxContext = server.createContext("/api/tax", new TaxHandler());
+        apiTaxContext.getFilters().add(new CspFilter());
         apiTaxContext.getFilters().add(new AuthFilter());
         /*
         There were two contexts for profile, I got rid of one.
          */
         HttpContext apiProfileContext = server.createContext("/api/profile", new ProfileHandler());
+        apiProfileContext.getFilters().add(new CspFilter());
         apiProfileContext.getFilters().add(new AuthFilter());
 
         // Register AlertsHandler for all alert-related endpoints
         HttpContext apiAlertsContext = server.createContext("/api/alerts", new AlertsHandler());
+        apiAlertsContext.getFilters().add(new CspFilter());
         apiAlertsContext.getFilters().add(new AuthFilter());
         
         HttpContext apiAlertsReadContext = server.createContext("/api/alerts/read", new AlertsHandler());
+        apiAlertsReadContext.getFilters().add(new CspFilter());
         apiAlertsReadContext.getFilters().add(new AuthFilter());
         
         HttpContext apiAlertsTriggerContext = server.createContext("/api/alerts/trigger/check", new AlertsHandler());
+        apiAlertsTriggerContext.getFilters().add(new CspFilter());
         apiAlertsTriggerContext.getFilters().add(new AuthFilter());
         
         // This is for handling delete operations on specific alerts
         HttpContext apiAlertsWithIdContext = server.createContext("/api/alerts/", new AlertsHandler());
+        apiAlertsWithIdContext.getFilters().add(new CspFilter());
         apiAlertsWithIdContext.getFilters().add(new AuthFilter());
         
         HttpContext apiAssets = server.createContext("/api/assets", new AssetsLiabilitiesHandler("Assets"));
+        apiAssets.getFilters().add(new CspFilter());
         apiAssets.getFilters().add(new AuthFilter());
 
         HttpContext apiLiabilities = server.createContext("/api/liabilities", new AssetsLiabilitiesHandler("Liabilities"));
+        apiLiabilities.getFilters().add(new CspFilter());
         apiLiabilities.getFilters().add(new AuthFilter());
 
         HttpContext cryptoContext = server.createContext("/crypto.html", new StaticFileHandler());
+        cryptoContext.getFilters().add(new CspFilter());
         cryptoContext.getFilters().add(new AuthFilter());
         // Return to using StaticFileHandler for stocks.html with proper auth filter
         HttpContext stocksContext = server.createContext("/stocks.html", new StaticFileHandler());
+        stocksContext.getFilters().add(new CspFilter());
         stocksContext.getFilters().add(new AuthFilter());
         
         // Add our simplified stocks page for testing
         HttpContext stocksSimpleContext = server.createContext("/stocks-simple.html", new StaticFileHandler());
+        stocksSimpleContext.getFilters().add(new CspFilter());
         stocksSimpleContext.getFilters().add(new AuthFilter());
         HttpContext expensesContext = server.createContext("/expenses.html", new StaticFileHandler());
+        expensesContext.getFilters().add(new CspFilter());
         expensesContext.getFilters().add(new AuthFilter());
         HttpContext incomeContext = server.createContext("/income.html", new StaticFileHandler());
+        incomeContext.getFilters().add(new CspFilter());
         incomeContext.getFilters().add(new AuthFilter());
         HttpContext profileContext = server.createContext("/profile.html", new StaticFileHandler());
+        profileContext.getFilters().add(new CspFilter());
         profileContext.getFilters().add(new AuthFilter());
         HttpContext taxContext = server.createContext("/tax.html", new StaticFileHandler());
+        taxContext.getFilters().add(new CspFilter());
         taxContext.getFilters().add(new AuthFilter());
         HttpContext settingsContext = server.createContext("/settings.html", new StaticFileHandler());
+        settingsContext.getFilters().add(new CspFilter());
         settingsContext.getFilters().add(new AuthFilter());
         HttpContext chatContext = server.createContext("/chat.html", new StaticFileHandler());
+        chatContext.getFilters().add(new CspFilter());
         chatContext.getFilters().add(new AuthFilter());
         HttpContext leaderboardContext = server.createContext("/leaderboard.html", new StaticFileHandler());
+        leaderboardContext.getFilters().add(new CspFilter());
         leaderboardContext.getFilters().add(new AuthFilter());
         HttpContext apiLeaderboardContext = server.createContext("/api/leaderboard", new LeaderboardHandler());
+        apiLeaderboardContext.getFilters().add(new CspFilter());
         apiLeaderboardContext.getFilters().add(new AuthFilter());
         
         HttpContext apiNetworthContext = server.createContext("/api/networth", new NetWorthHandler());
+        apiNetworthContext.getFilters().add(new CspFilter());
         apiNetworthContext.getFilters().add(new AuthFilter());
         HttpContext apiNetworthCalculateContext = server.createContext("/api/networth/calculate", new NetWorthHandler());
+        apiNetworthCalculateContext.getFilters().add(new CspFilter());
         apiNetworthCalculateContext.getFilters().add(new AuthFilter());
         
         HttpContext apiBillsContext = server.createContext("/api/bills", new BillsHandler());
+        apiBillsContext.getFilters().add(new CspFilter());
         apiBillsContext.getFilters().add(new AuthFilter());
 
         HttpContext billsContext = server.createContext("/bills.html", new StaticFileHandler());
+        billsContext.getFilters().add(new CspFilter());
         billsContext.getFilters().add(new AuthFilter());
         
         // Handle bills with IDs for update/delete operations
         HttpContext apiBillsWithIdContext = server.createContext("/api/bills/", new BillsHandler());
+        apiBillsWithIdContext.getFilters().add(new CspFilter());
         apiBillsWithIdContext.getFilters().add(new AuthFilter());
         
         HttpContext alertsContext = server.createContext("/alerts.html", new StaticFileHandler());
+        alertsContext.getFilters().add(new CspFilter());
         alertsContext.getFilters().add(new AuthFilter());
         HttpContext apiPaychecksContext = server.createContext("/api/paychecks", new BudgetHandler());
+        apiPaychecksContext.getFilters().add(new CspFilter());
         apiPaychecksContext.getFilters().add(new AuthFilter());
 
         HttpContext apiPaycheckById = server.createContext("/api/paychecks/", new BudgetHandler());
+        apiPaycheckById.getFilters().add(new CspFilter());
         apiPaycheckById.getFilters().add(new AuthFilter());
 
         HttpContext apiGoalsContext = server.createContext("/api/goals", new GoalsHandler());
+        apiGoalsContext.getFilters().add(new CspFilter());
         apiGoalsContext.getFilters().add(new AuthFilter());
 
         HttpContext apiGoalById = server.createContext("/api/goals/", new GoalsHandler());
+        apiGoalById.getFilters().add(new CspFilter());
         apiGoalById.getFilters().add(new AuthFilter());
 
         HttpContext savingsTipsContext = server.createContext("/savingsTips.html", new StaticFileHandler());
+        savingsTipsContext.getFilters().add(new CspFilter());
         savingsTipsContext.getFilters().add(new AuthFilter());
         HttpContext tipsContext = server.createContext("/tips.html", new StaticFileHandler());
+        tipsContext.getFilters().add(new CspFilter());
         tipsContext.getFilters().add(new AuthFilter());
         HttpContext budgetContext = server.createContext("/budget.html", new StaticFileHandler());
+        budgetContext.getFilters().add(new CspFilter());
         budgetContext.getFilters().add(new AuthFilter());
         server.setExecutor(null);
         server.start();
