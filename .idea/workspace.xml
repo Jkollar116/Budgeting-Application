@@ -4,13 +4,28 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="e72c0420-fe48-4af3-a363-18d6d8618447" name="Changes" comment="Updated the ui in some pages, fixed issues that caused issues.">
+    <list default="true" id="e72c0420-fe48-4af3-a363-18d6d8618447" name="Changes" comment="Reset some pages back to older working versions, the assets and liabilities UI is fixed now.">
+      <change afterPath="$PROJECT_DIR$/src/main/resources/financialGoals.html" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/example/AssetsLiabilitiesHandler.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/example/AssetsLiabilitiesHandler.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/example/ExpensesHandler.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/example/ExpensesHandler.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/example/IncomeHandler.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/example/IncomeHandler.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/example/BudgetHandler.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/example/BudgetHandler.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/example/Login.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/example/Login.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/alerts.html" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/alerts.html" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/resources/assetsLiabilities.html" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/assetsLiabilities.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/bills.html" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/bills.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/budget.html" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/budget.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/chat.html" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/chat.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/crypto.html" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/crypto.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/expenses.html" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/expenses.html" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/resources/income.html" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/income.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/leaderboard.html" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/leaderboard.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/netWorth.html" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/netWorth.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/profile.html" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/profile.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/savedTips.html" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/savedTips.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/savingsTips.html" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/savingsTips.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/settings.html" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/settings.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/stocks.html" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/stocks.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/tax.html" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/tax.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/tips.html" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/tips.html" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -166,7 +181,7 @@
       <workItem from="1744382133023" duration="3395000" />
       <workItem from="1744583582140" duration="394000" />
       <workItem from="1745612065335" duration="19232000" />
-      <workItem from="1746386996798" duration="24834000" />
+      <workItem from="1746386996798" duration="28341000" />
     </task>
     <task id="LOCAL-00001" summary="First Commit of login">
       <option name="closed" value="true" />
@@ -432,7 +447,15 @@
       <option name="project" value="LOCAL" />
       <updated>1746502830619</updated>
     </task>
-    <option name="localTasksCounter" value="34" />
+    <task id="LOCAL-00034" summary="Reset some pages back to older working versions, the assets and liabilities UI is fixed now.">
+      <option name="closed" value="true" />
+      <created>1746561890687</created>
+      <option name="number" value="00034" />
+      <option name="presentableId" value="LOCAL-00034" />
+      <option name="project" value="LOCAL" />
+      <updated>1746561890687</updated>
+    </task>
+    <option name="localTasksCounter" value="35" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -450,7 +473,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="commit for aws" />
     <MESSAGE value="Fixed an issue where the login button on the forgot password page and register page did not correctly take you back to the login screen." />
     <MESSAGE value="Attempting to fix the API key issue by storing it in aws instead" />
     <MESSAGE value="updated js for aws" />
@@ -475,7 +497,8 @@
     <MESSAGE value="Added profile picture to all pages" />
     <MESSAGE value="Slightly improved the ui for login, register, forgot password" />
     <MESSAGE value="Updated the ui in some pages, fixed issues that caused issues." />
-    <option name="LAST_COMMIT_MESSAGE" value="Updated the ui in some pages, fixed issues that caused issues." />
+    <MESSAGE value="Reset some pages back to older working versions, the assets and liabilities UI is fixed now." />
+    <option name="LAST_COMMIT_MESSAGE" value="Reset some pages back to older working versions, the assets and liabilities UI is fixed now." />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>

@@ -1,9 +1,9 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>Chatbot</title>
-  <link rel="stylesheet" href="style.css">
+    <meta charset="UTF-8">
+    <title>Financial Goals</title>
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
 <header>
@@ -40,36 +40,28 @@
     <li><a href="profile.html">Profile</a></li>
     <li><a href="settings.html">Settings</a></li>
     <li><a href="/logout">Logout</a></li>
-  </ul>
+    </ul>
 </nav>
 <main>
-<div class="chat-container">
-  <div class="chat-header">
-    <h1>Chatbot</h1>
-    <p>Ask Financial Questions!</p>
-  </div>
-  <div class="chat-window" id="chat-window"></div>
-  <div class="chat-input">
-    <input type="text" id="user-input" placeholder="Type your message...">
-    <button id="send-btn">Send</button>
-  </div>
-</div>
+
 </main>
-<script src="chat.js">
-</script>
+</body>
 <script>
   function toggleDrawer() {
     const drawer = document.getElementById('sideDrawer');
     drawer.classList.toggle('collapsed');
   }
+
   function getThemePreference(name) {
     const match = document.cookie.match(new RegExp('(^| )' + name + '=([^;]+)'));
     if (!match) return null;
     return match[2];
   }
+
   window.addEventListener('pageshow', function(event) {
     if (event.persisted) window.location.reload();
   });
+
   window.addEventListener('DOMContentLoaded', () => {
     const savedTheme = getThemePreference('theme');
     const body = document.body;
@@ -80,6 +72,7 @@
     } else if (savedTheme === 'dark') {
       body.classList.add('dark-mode');
     }
+    loadTaxData();
   });
   window.addEventListener("DOMContentLoaded", function () {
     fetch("/api/profile", {
@@ -97,5 +90,4 @@
             });
   });
 </script>
-</body>
 </html>

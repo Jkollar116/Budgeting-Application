@@ -137,7 +137,18 @@ public class Login {
         
         HttpContext alertsContext = server.createContext("/alerts.html", new StaticFileHandler());
         alertsContext.getFilters().add(new AuthFilter());
-        
+        HttpContext apiPaychecksContext = server.createContext("/api/paychecks", new BudgetHandler());
+        apiPaychecksContext.getFilters().add(new AuthFilter());
+
+        HttpContext apiPaycheckById = server.createContext("/api/paychecks/", new BudgetHandler());
+        apiPaycheckById.getFilters().add(new AuthFilter());
+
+        HttpContext apiGoalsContext = server.createContext("/api/goals", new GoalsHandler());
+        apiGoalsContext.getFilters().add(new AuthFilter());
+
+        HttpContext apiGoalById = server.createContext("/api/goals/", new GoalsHandler());
+        apiGoalById.getFilters().add(new AuthFilter());
+
         HttpContext savingsTipsContext = server.createContext("/savingsTips.html", new StaticFileHandler());
         savingsTipsContext.getFilters().add(new AuthFilter());
         HttpContext tipsContext = server.createContext("/tips.html", new StaticFileHandler());

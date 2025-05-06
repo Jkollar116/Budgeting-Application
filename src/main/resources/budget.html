@@ -303,19 +303,20 @@
 <nav class="drawer" id="sideDrawer">
     <ul>
         <li><a href="home.html">Dashboard</a></li>
+        <li><a href="alerts.html">Alerts Page (Not Done)</a></li>
+        <li><a href="assetsLiabilities.html" class="active">Assets &amp; Liabilities</a></li>
+        <li><a href="bills.html">Bills Page</a></li>
+        <li><a href="budget.html">Budget</a></li>
+        <li><a href="chat.html">Chat</a></li>
+        <li><a href="crypto.html">Crypto</a></li>
         <li><a href="expenses.html">Expenses</a></li>
         <li><a href="income.html">Income</a></li>
-        <li><a href="tax.html">Tax</a></li>
-        <li><a href="crypto.html">Crypto</a></li>
-        <li><a href="stocks.html">Stocks</a></li>
-        <li><a href="chat.html">Chat</a></li>
+        <li><a href="leaderboard.html">Leaderboard</a></li>
+        <li><a href="netWorth.html">Net Worth</a></li>
         <li><a href="tips.html">Tips</a></li>
         <li><a href="savedTips.html">Saved Tips</a></li>
-        <li><a href="assetsLiabilities.html">Assets &amp; Liabilities</a></li>
-        <li><a href="budget.html" class="active">Budget</a></li>
-        <li><a href="alerts.html">Alerts</a></li>
-        <li><a href="bills.html">Bills</a></li>
-        <li><a href="leaderboard.html">Leaderboard</a></li>
+        <li><a href="stocks.html">Stocks</a></li>
+        <li><a href="tax.html">Tax</a></li>
         <li><a href="profile.html">Profile</a></li>
         <li><a href="settings.html">Settings</a></li>
         <li><a href="/logout">Logout</a></li>
@@ -587,12 +588,12 @@
         if (!match) return null;
         return match[2];
     }
-    
+
     function formatDate(dateString) {
         const date = new Date(dateString);
         return date.toLocaleDateString();
     }
-    
+
     function formatCurrency(amount) {
         return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(amount);
     }
@@ -875,29 +876,48 @@
     function loadPaychecksData() {
         fetch('/api/paychecks')
             .then(response => {
-                if (!response.ok) {
-                    throw new Error('Failed to fetch paycheck alerts');
-                }
+                if (!response.ok) throw new Error('Failed to fetch paycheck alerts');
                 return response.json();
             })
             .then(data => {
                 const paychecksOverview = document.getElementById('paychecks-overview');
                 const upcomingPaychecks = document.getElementById('upcoming-paychecks');
-                
+
                 if (!data.documents || data.documents.length === 0) {
-                    paychecksOverview.innerHTML = '<div class="no-data">No paycheck alerts configured. Set up paycheck alerts to receive notifications.</div>';
-                    upcomingPaychecks.innerHTML = '<div class="no-data">No paycheck alerts available.</div>';
+                    const msg = '<div class="no-data">No paycheck alerts available.</div>';
+                    paychecksOverview.innerHTML = msg;
+                    upcomingPaychecks.innerHTML = msg;
                     return;
                 }
-                
-                // TODO: Implement paycheck rendering
+
+                const paychecks = data.documents.map(doc => {
+                    const f = doc.fields;
+                    return {
+                        source: f.source?.stringValue || '',
+                        amount: parseFloat(f.amount?.doubleValue || 0),
+                        frequency: f.frequency?.stringValue || '',
+                        nextDate: f.nextDate?.timestampValue || '',
+                        alertDays: parseInt(f.alertDays?.integerValue || 0)
+                    };
+                });
+
+                const html = paychecks.map(p => `
+                    <div class="paycheck-card">
+                        <h4>${p.source}</h4>
+                        <p>Next: ${formatDate(p.nextDate)} | ${p.frequency}</p>
+                        <p>Amount: ${formatCurrency(p.amount)}</p>
+                        <p>Alert ${p.alertDays} day(s) before</p>
+                    </div>
+                `).join('');
+
+                paychecksOverview.innerHTML = html;
+                upcomingPaychecks.innerHTML = html;
             })
             .catch(error => {
                 console.error('Error loading paycheck data:', error);
-                document.getElementById('paychecks-overview').innerHTML = 
-                    '<div class="no-data">Error loading paycheck alerts. Please try again later.</div>';
-                document.getElementById('upcoming-paychecks').innerHTML = 
-                    '<div class="no-data">Error loading paycheck alerts. Please try again later.</div>';
+                const err = '<div class="no-data">Error loading paycheck alerts. Please try again later.</div>';
+                document.getElementById('paychecks-overview').innerHTML = err;
+                document.getElementById('upcoming-paychecks').innerHTML = err;
             });
     }
     
@@ -1013,55 +1033,37 @@
     
     // Set up UI event listeners
     window.addEventListener('DOMContentLoaded', () => {
-        // Apply theme
         const savedTheme = getThemePreference('theme');
         const body = document.body;
-        if (savedTheme === 'light') {
-            body.classList.add('light-mode');
-        } else if (savedTheme === 'dark') {
-            body.classList.add('dark-mode');
-        }
-        
-        // Set up tab switching
-        const tabs = document.querySelectorAll('.tab');
-        const tabContents = document.querySelectorAll('.tab-content');
-        
-        tabs.forEach(tab => {
-            tab.addEventListener('click', function() {
+        if (savedTheme === 'light') body.classList.add('light-mode');
+        else if (savedTheme === 'dark') body.classList.add('dark-mode');
+
+        document.querySelectorAll('.tab').forEach(tab => {
+            tab.addEventListener('click', function () {
                 const tabName = this.dataset.tab;
-                
-                // Update active tab
-                tabs.forEach(t => t.classList.remove('active'));
+                document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
                 this.classList.add('active');
-                
-                // Show active tab content
-                tabContents.forEach(content => {
+                document.querySelectorAll('.tab-content').forEach(content => {
                     content.classList.remove('active');
-                    if (content.id === tabName + '-tab') {
-                        content.classList.add('active');
-                    }
+                    if (content.id === tabName + '-tab') content.classList.add('active');
                 });
             });
         });
-        
-        // Set up form submissions
+
         document.getElementById('budget-form').addEventListener('submit', submitBudget);
         document.getElementById('limit-form').addEventListener('submit', submitLimit);
         document.getElementById('paycheck-form').addEventListener('submit', submitPaycheck);
         document.getElementById('goal-form').addEventListener('submit', submitGoal);
-        
-        // Set today's date as default for date inputs
+
         const today = new Date().toISOString().split('T')[0];
         document.getElementById('budgetStartDate').value = today;
         document.getElementById('limitStartDate').value = today;
         document.getElementById('paycheckNextDate').value = today;
-        
-        // Set future date (1 year from now) for goal target date
+
         const oneYearFromNow = new Date();
         oneYearFromNow.setFullYear(oneYearFromNow.getFullYear() + 1);
         document.getElementById('goalTargetDate').value = oneYearFromNow.toISOString().split('T')[0];
-        
-        // Load initial data
+
         loadBudgetData();
         loadLimitsData();
         loadPaychecksData();

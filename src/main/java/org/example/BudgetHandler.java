@@ -484,62 +484,368 @@ public class BudgetHandler implements HttpHandler {
             exchange.sendResponseHeaders(responseCode, -1);
         }
     }
-    
+
     private void createLimit(HttpExchange exchange, String idToken, String localId) throws IOException {
-        // Placeholder method
-        exchange.sendResponseHeaders(501, -1); // Not implemented
+        BufferedReader br = new BufferedReader(new InputStreamReader(exchange.getRequestBody(), StandardCharsets.UTF_8));
+        StringBuilder sb = new StringBuilder();
+        String line;
+        while ((line = br.readLine()) != null) sb.append(line);
+        JSONObject limitData = new JSONObject(sb.toString());
+
+        if (!limitData.has("category") || !limitData.has("amount") || !limitData.has("alertThreshold")) {
+            exchange.sendResponseHeaders(400, -1);
+            return;
+        }
+
+        String limitId = UUID.randomUUID().toString();
+        JSONObject firestoreData = new JSONObject();
+        JSONObject fields = new JSONObject();
+
+        JSONObject catField = new JSONObject();
+        catField.put("stringValue", limitData.getString("category"));
+        fields.put("category", catField);
+
+        JSONObject amountField = new JSONObject();
+        amountField.put("doubleValue", limitData.getDouble("amount"));
+        fields.put("amount", amountField);
+
+        JSONObject alertField = new JSONObject();
+        alertField.put("integerValue", limitData.getInt("alertThreshold"));
+        fields.put("alertThreshold", alertField);
+
+        fields.put("created", new JSONObject().put("timestampValue", Instant.now().toString()));
+        firestoreData.put("fields", fields);
+
+        String urlStr = "https://firestore.googleapis.com/v1/projects/cashclimb-d162c/databases/(default)/documents/Users/"
+                + localId + "/SpendingLimits/" + limitId;
+        HttpURLConnection conn = (HttpURLConnection) new URL(urlStr).openConnection();
+        conn.setRequestMethod("PUT");
+        conn.setRequestProperty("Authorization", "Bearer " + idToken);
+        conn.setRequestProperty("Content-Type", "application/json");
+        conn.setDoOutput(true);
+        conn.getOutputStream().write(firestoreData.toString().getBytes(StandardCharsets.UTF_8));
+
+        int code = conn.getResponseCode();
+        if (code == 200) {
+            createLimitAlert(idToken, localId, limitId,
+                    limitData.getString("category"),
+                    limitData.getDouble("amount"),
+                    limitData.getInt("alertThreshold"));
+
+            String response = "{\"status\":\"success\",\"id\":\"" + limitId + "\"}";
+            exchange.getResponseHeaders().set("Content-Type", "application/json");
+            exchange.sendResponseHeaders(200, response.length());
+            exchange.getResponseBody().write(response.getBytes(StandardCharsets.UTF_8));
+        } else {
+            exchange.sendResponseHeaders(code, -1);
+        }
     }
-    
+
     private void updateLimit(HttpExchange exchange, String idToken, String localId, String limitId) throws IOException {
-        // Placeholder method
-        exchange.sendResponseHeaders(501, -1); // Not implemented
+        BufferedReader br = new BufferedReader(new InputStreamReader(exchange.getRequestBody(), StandardCharsets.UTF_8));
+        StringBuilder sb = new StringBuilder();
+        String line;
+        while ((line = br.readLine()) != null) sb.append(line);
+        JSONObject limitData = new JSONObject(sb.toString());
+
+        JSONObject fields = new JSONObject();
+
+        if (limitData.has("category")) {
+            fields.put("category", new JSONObject().put("stringValue", limitData.getString("category")));
+        }
+        if (limitData.has("amount")) {
+            fields.put("amount", new JSONObject().put("doubleValue", limitData.getDouble("amount")));
+        }
+        if (limitData.has("alertThreshold")) {
+            fields.put("alertThreshold", new JSONObject().put("integerValue", limitData.getInt("alertThreshold")));
+        }
+        fields.put("updated", new JSONObject().put("timestampValue", Instant.now().toString()));
+
+        JSONObject firestoreData = new JSONObject().put("fields", fields);
+
+        String urlStr = "https://firestore.googleapis.com/v1/projects/cashclimb-d162c/databases/(default)/documents/Users/"
+                + localId + "/SpendingLimits/" + limitId;
+        HttpURLConnection conn = (HttpURLConnection) new URL(urlStr).openConnection();
+        conn.setRequestMethod("PATCH");
+        conn.setRequestProperty("Authorization", "Bearer " + idToken);
+        conn.setRequestProperty("Content-Type", "application/json");
+        conn.setDoOutput(true);
+        conn.getOutputStream().write(firestoreData.toString().getBytes(StandardCharsets.UTF_8));
+
+        int code = conn.getResponseCode();
+        if (code == 200) {
+            String response = "{\"status\":\"success\",\"id\":\"" + limitId + "\"}";
+            exchange.getResponseHeaders().set("Content-Type", "application/json");
+            exchange.sendResponseHeaders(200, response.length());
+            exchange.getResponseBody().write(response.getBytes(StandardCharsets.UTF_8));
+        } else {
+            exchange.sendResponseHeaders(code, -1);
+        }
     }
-    
     private void deleteLimit(HttpExchange exchange, String idToken, String localId, String limitId) throws IOException {
-        // Placeholder method
-        exchange.sendResponseHeaders(501, -1); // Not implemented
+        String urlStr = "https://firestore.googleapis.com/v1/projects/cashclimb-d162c/databases/(default)/documents/Users/"
+                + localId + "/SpendingLimits/" + limitId;
+        HttpURLConnection conn = (HttpURLConnection) new URL(urlStr).openConnection();
+        conn.setRequestMethod("DELETE");
+        conn.setRequestProperty("Authorization", "Bearer " + idToken);
+
+        int code = conn.getResponseCode();
+        if (code == 200 || code == 204) {
+            String success = "{\"status\":\"success\",\"message\":\"Limit deleted successfully\"}";
+            exchange.getResponseHeaders().set("Content-Type", "application/json");
+            exchange.sendResponseHeaders(200, success.length());
+            exchange.getResponseBody().write(success.getBytes(StandardCharsets.UTF_8));
+        } else {
+            exchange.sendResponseHeaders(code, -1);
+        }
     }
-    
+
     // Paycheck Handlers
     private void getPaychecks(HttpExchange exchange, String idToken, String localId) throws IOException {
-        // Placeholder method
-        exchange.sendResponseHeaders(501, -1); // Not implemented
+        String urlStr = "https://firestore.googleapis.com/v1/projects/cashclimb-d162c/databases/(default)/documents/Users/"
+                + localId + "/Paychecks";
+        HttpURLConnection conn = (HttpURLConnection) new URL(urlStr).openConnection();
+        conn.setRequestMethod("GET");
+        conn.setRequestProperty("Authorization", "Bearer " + idToken);
+
+        int code = conn.getResponseCode();
+        if (code == 200) {
+            BufferedReader in = new BufferedReader(new InputStreamReader(conn.getInputStream(), StandardCharsets.UTF_8));
+            StringBuilder response = new StringBuilder();
+            String line;
+            while ((line = in.readLine()) != null) response.append(line);
+            in.close();
+
+            exchange.getResponseHeaders().set("Content-Type", "application/json; charset=UTF-8");
+            byte[] data = response.toString().getBytes(StandardCharsets.UTF_8);
+            exchange.sendResponseHeaders(200, data.length);
+            exchange.getResponseBody().write(data);
+        } else if (code == 404) {
+            String empty = "{\"documents\":[]}";
+            exchange.getResponseHeaders().set("Content-Type", "application/json; charset=UTF-8");
+            exchange.sendResponseHeaders(200, empty.length());
+            exchange.getResponseBody().write(empty.getBytes(StandardCharsets.UTF_8));
+        } else {
+            exchange.sendResponseHeaders(code, -1);
+        }
     }
-    
+
+
     private void getPaycheck(HttpExchange exchange, String idToken, String localId, String paycheckId) throws IOException {
-        // Placeholder method
-        exchange.sendResponseHeaders(501, -1); // Not implemented
+        String urlStr = "https://firestore.googleapis.com/v1/projects/cashclimb-d162c/databases/(default)/documents/Users/"
+                + localId + "/Paychecks/" + paycheckId;
+        HttpURLConnection conn = (HttpURLConnection) new URL(urlStr).openConnection();
+        conn.setRequestMethod("GET");
+        conn.setRequestProperty("Authorization", "Bearer " + idToken);
+
+        int code = conn.getResponseCode();
+        if (code == 200) {
+            BufferedReader in = new BufferedReader(new InputStreamReader(conn.getInputStream(), StandardCharsets.UTF_8));
+            StringBuilder response = new StringBuilder();
+            String line;
+            while ((line = in.readLine()) != null) response.append(line);
+            in.close();
+
+            exchange.getResponseHeaders().set("Content-Type", "application/json; charset=UTF-8");
+            byte[] data = response.toString().getBytes(StandardCharsets.UTF_8);
+            exchange.sendResponseHeaders(200, data.length);
+            exchange.getResponseBody().write(data);
+        } else {
+            exchange.sendResponseHeaders(code, -1);
+        }
     }
-    
+
+
     private void createPaycheck(HttpExchange exchange, String idToken, String localId) throws IOException {
-        // Placeholder method
-        exchange.sendResponseHeaders(501, -1); // Not implemented
+        BufferedReader br = new BufferedReader(new InputStreamReader(exchange.getRequestBody(), StandardCharsets.UTF_8));
+        StringBuilder sb = new StringBuilder();
+        String line;
+        while ((line = br.readLine()) != null) sb.append(line);
+        JSONObject data = new JSONObject(sb.toString());
+
+        if (!data.has("amount") || !data.has("date") || !data.has("employer")) {
+            exchange.sendResponseHeaders(400, -1);
+            return;
+        }
+
+        String paycheckId = UUID.randomUUID().toString();
+        JSONObject fields = new JSONObject();
+
+        fields.put("amount", new JSONObject().put("doubleValue", data.getDouble("amount")));
+        fields.put("employer", new JSONObject().put("stringValue", data.getString("employer")));
+
+        LocalDate parsedDate = LocalDate.parse(data.getString("date"));
+        Instant dateInstant = parsedDate.atStartOfDay(ZoneId.systemDefault()).toInstant();
+        fields.put("date", new JSONObject().put("timestampValue", dateInstant.toString()));
+
+        fields.put("created", new JSONObject().put("timestampValue", Instant.now().toString()));
+
+        JSONObject firestoreData = new JSONObject().put("fields", fields);
+
+        String url = "https://firestore.googleapis.com/v1/projects/cashclimb-d162c/databases/(default)/documents/Users/"
+                + localId + "/Paychecks/" + paycheckId;
+        HttpURLConnection conn = (HttpURLConnection) new URL(url).openConnection();
+        conn.setRequestMethod("PUT");
+        conn.setRequestProperty("Authorization", "Bearer " + idToken);
+        conn.setRequestProperty("Content-Type", "application/json");
+        conn.setDoOutput(true);
+        conn.getOutputStream().write(firestoreData.toString().getBytes(StandardCharsets.UTF_8));
+
+        int code = conn.getResponseCode();
+        if (code == 200) {
+            String response = "{\"status\":\"success\",\"id\":\"" + paycheckId + "\"}";
+            exchange.getResponseHeaders().set("Content-Type", "application/json");
+            exchange.sendResponseHeaders(200, response.length());
+            exchange.getResponseBody().write(response.getBytes(StandardCharsets.UTF_8));
+        } else {
+            exchange.sendResponseHeaders(code, -1);
+        }
     }
-    
+
+
     private void updatePaycheck(HttpExchange exchange, String idToken, String localId, String paycheckId) throws IOException {
-        // Placeholder method
-        exchange.sendResponseHeaders(501, -1); // Not implemented
+        BufferedReader br = new BufferedReader(new InputStreamReader(exchange.getRequestBody(), StandardCharsets.UTF_8));
+        StringBuilder sb = new StringBuilder();
+        String line;
+        while ((line = br.readLine()) != null) sb.append(line);
+        JSONObject data = new JSONObject(sb.toString());
+
+        JSONObject fields = new JSONObject();
+
+        if (data.has("amount")) {
+            fields.put("amount", new JSONObject().put("doubleValue", data.getDouble("amount")));
+        }
+        if (data.has("employer")) {
+            fields.put("employer", new JSONObject().put("stringValue", data.getString("employer")));
+        }
+        if (data.has("date")) {
+            LocalDate parsedDate = LocalDate.parse(data.getString("date"));
+            Instant dateInstant = parsedDate.atStartOfDay(ZoneId.systemDefault()).toInstant();
+            fields.put("date", new JSONObject().put("timestampValue", dateInstant.toString()));
+        }
+        fields.put("updated", new JSONObject().put("timestampValue", Instant.now().toString()));
+
+        JSONObject firestoreData = new JSONObject().put("fields", fields);
+
+        String urlStr = "https://firestore.googleapis.com/v1/projects/cashclimb-d162c/databases/(default)/documents/Users/"
+                + localId + "/Paychecks/" + paycheckId;
+        HttpURLConnection conn = (HttpURLConnection) new URL(urlStr).openConnection();
+        conn.setRequestMethod("PATCH");
+        conn.setRequestProperty("Authorization", "Bearer " + idToken);
+        conn.setRequestProperty("Content-Type", "application/json");
+        conn.setDoOutput(true);
+        conn.getOutputStream().write(firestoreData.toString().getBytes(StandardCharsets.UTF_8));
+
+        int code = conn.getResponseCode();
+        if (code == 200) {
+            String response = "{\"status\":\"success\",\"id\":\"" + paycheckId + "\"}";
+            exchange.getResponseHeaders().set("Content-Type", "application/json");
+            exchange.sendResponseHeaders(200, response.length());
+            exchange.getResponseBody().write(response.getBytes(StandardCharsets.UTF_8));
+        } else {
+            exchange.sendResponseHeaders(code, -1);
+        }
     }
-    
+
+
     private void deletePaycheck(HttpExchange exchange, String idToken, String localId, String paycheckId) throws IOException {
-        // Placeholder method
-        exchange.sendResponseHeaders(501, -1); // Not implemented
+        String urlStr = "https://firestore.googleapis.com/v1/projects/cashclimb-d162c/databases/(default)/documents/Users/"
+                + localId + "/Paychecks/" + paycheckId;
+        HttpURLConnection conn = (HttpURLConnection) new URL(urlStr).openConnection();
+        conn.setRequestMethod("DELETE");
+        conn.setRequestProperty("Authorization", "Bearer " + idToken);
+
+        int code = conn.getResponseCode();
+        if (code == 200 || code == 204) {
+            String response = "{\"status\":\"success\",\"message\":\"Paycheck deleted successfully\"}";
+            exchange.getResponseHeaders().set("Content-Type", "application/json");
+            exchange.sendResponseHeaders(200, response.length());
+            exchange.getResponseBody().write(response.getBytes(StandardCharsets.UTF_8));
+        } else {
+            exchange.sendResponseHeaders(code, -1);
+        }
     }
-    
-    // Alert Methods
+
     private void createBudgetAlert(String idToken, String localId, String budgetId, double amount, int alertThreshold) throws IOException {
-        // Placeholder method - will implement later
+        String alertId = "budget_" + budgetId;
+        JSONObject fields = new JSONObject();
+
+        fields.put("type", new JSONObject().put("stringValue", "budget"));
+        fields.put("targetId", new JSONObject().put("stringValue", budgetId));
+        fields.put("threshold", new JSONObject().put("integerValue", alertThreshold));
+        fields.put("targetAmount", new JSONObject().put("doubleValue", amount));
+        fields.put("created", new JSONObject().put("timestampValue", Instant.now().toString()));
+
+        JSONObject alertDoc = new JSONObject().put("fields", fields);
+
+        String urlStr = "https://firestore.googleapis.com/v1/projects/cashclimb-d162c/databases/(default)/documents/Users/"
+                + localId + "/Alerts/" + alertId;
+        HttpURLConnection conn = (HttpURLConnection) new URL(urlStr).openConnection();
+        conn.setRequestMethod("PUT");
+        conn.setRequestProperty("Authorization", "Bearer " + idToken);
+        conn.setRequestProperty("Content-Type", "application/json");
+        conn.setDoOutput(true);
+        conn.getOutputStream().write(alertDoc.toString().getBytes(StandardCharsets.UTF_8));
+        conn.getResponseCode(); // force execution, discard result
     }
-    
+
+
     private void updateBudgetAlert(String idToken, String localId, String budgetId, double amount, int alertThreshold) throws IOException {
-        // Placeholder method - will implement later
+        String alertId = "budget_" + budgetId;
+        JSONObject fields = new JSONObject();
+
+        fields.put("threshold", new JSONObject().put("integerValue", alertThreshold));
+        fields.put("targetAmount", new JSONObject().put("doubleValue", amount));
+        fields.put("updated", new JSONObject().put("timestampValue", Instant.now().toString()));
+
+        JSONObject alertPatch = new JSONObject().put("fields", fields);
+
+        String urlStr = "https://firestore.googleapis.com/v1/projects/cashclimb-d162c/databases/(default)/documents/Users/"
+                + localId + "/Alerts/" + alertId;
+        HttpURLConnection conn = (HttpURLConnection) new URL(urlStr).openConnection();
+        conn.setRequestMethod("PATCH");
+        conn.setRequestProperty("Authorization", "Bearer " + idToken);
+        conn.setRequestProperty("Content-Type", "application/json");
+        conn.setDoOutput(true);
+        conn.getOutputStream().write(alertPatch.toString().getBytes(StandardCharsets.UTF_8));
+        conn.getResponseCode();
     }
-    
+
+
     private void createLimitAlert(String idToken, String localId, String limitId, String category, double amount, int alertThreshold) throws IOException {
-        // Placeholder method - will implement later
+        String alertId = "limit_" + limitId;
+        JSONObject fields = new JSONObject();
+
+        fields.put("type", new JSONObject().put("stringValue", "limit"));
+        fields.put("targetId", new JSONObject().put("stringValue", limitId));
+        fields.put("category", new JSONObject().put("stringValue", category));
+        fields.put("threshold", new JSONObject().put("integerValue", alertThreshold));
+        fields.put("targetAmount", new JSONObject().put("doubleValue", amount));
+        fields.put("created", new JSONObject().put("timestampValue", Instant.now().toString()));
+
+        JSONObject alertDoc = new JSONObject().put("fields", fields);
+
+        String urlStr = "https://firestore.googleapis.com/v1/projects/cashclimb-d162c/databases/(default)/documents/Users/"
+                + localId + "/Alerts/" + alertId;
+        HttpURLConnection conn = (HttpURLConnection) new URL(urlStr).openConnection();
+        conn.setRequestMethod("PUT");
+        conn.setRequestProperty("Authorization", "Bearer " + idToken);
+        conn.setRequestProperty("Content-Type", "application/json");
+        conn.setDoOutput(true);
+        conn.getOutputStream().write(alertDoc.toString().getBytes(StandardCharsets.UTF_8));
+        conn.getResponseCode();
     }
-    
+
+
     private void deleteAlertsForBudget(String idToken, String localId, String budgetId) throws IOException {
-        // Placeholder method - will implement later
+        String alertId = "budget_" + budgetId;
+        String urlStr = "https://firestore.googleapis.com/v1/projects/cashclimb-d162c/databases/(default)/documents/Users/"
+                + localId + "/Alerts/" + alertId;
+
+        HttpURLConnection conn = (HttpURLConnection) new URL(urlStr).openConnection();
+        conn.setRequestMethod("DELETE");
+        conn.setRequestProperty("Authorization", "Bearer " + idToken);
+        conn.getResponseCode();
     }
+
 }
