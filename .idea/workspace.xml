@@ -4,9 +4,8 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="e72c0420-fe48-4af3-a363-18d6d8618447" name="Changes" comment="updated login page to remove links to old files">
+    <list default="true" id="e72c0420-fe48-4af3-a363-18d6d8618447" name="Changes" comment="updated app.js for the home page">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/home.html" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/home.html" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -254,7 +253,7 @@
       <workItem from="1744583582140" duration="394000" />
       <workItem from="1745612065335" duration="19232000" />
       <workItem from="1746386996798" duration="28341000" />
-      <workItem from="1746577687355" duration="4488000" />
+      <workItem from="1746577687355" duration="6257000" />
     </task>
     <task id="LOCAL-00001" summary="First Commit of login">
       <option name="closed" value="true" />
@@ -576,7 +575,23 @@
       <option name="project" value="LOCAL" />
       <updated>1746588746524</updated>
     </task>
-    <option name="localTasksCounter" value="41" />
+    <task id="LOCAL-00041" summary="uupdated home page to old home page and added new buttons">
+      <option name="closed" value="true" />
+      <created>1746589436326</created>
+      <option name="number" value="00041" />
+      <option name="presentableId" value="LOCAL-00041" />
+      <option name="project" value="LOCAL" />
+      <updated>1746589436326</updated>
+    </task>
+    <task id="LOCAL-00042" summary="updated app.js for the home page">
+      <option name="closed" value="true" />
+      <created>1746590269334</created>
+      <option name="number" value="00042" />
+      <option name="presentableId" value="LOCAL-00042" />
+      <option name="project" value="LOCAL" />
+      <updated>1746590269334</updated>
+    </task>
+    <option name="localTasksCounter" value="43" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -594,9 +609,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="azure commit to jack branch" />
-    <MESSAGE value="updated xml java version" />
-    <MESSAGE value="no jekyell file" />
     <MESSAGE value="pluggin for heroku" />
     <MESSAGE value="added log out feature with cookies" />
     <MESSAGE value="added firebase integration as well as home page" />
@@ -619,7 +631,10 @@
     <MESSAGE value="updated the home.html" />
     <MESSAGE value="updated home back to old page maybe" />
     <MESSAGE value="updated login page to remove links to old files" />
-    <option name="LAST_COMMIT_MESSAGE" value="updated login page to remove links to old files" />
+    <MESSAGE value="uupdated home page to old home page" />
+    <MESSAGE value="uupdated home page to old home page and added new buttons" />
+    <MESSAGE value="updated app.js for the home page" />
+    <option name="LAST_COMMIT_MESSAGE" value="updated app.js for the home page" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
