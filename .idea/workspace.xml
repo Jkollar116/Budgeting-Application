@@ -4,21 +4,8 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="e72c0420-fe48-4af3-a363-18d6d8618447" name="Changes" comment="Updated all html, tried fixing the budgets page. Will see if fixes worked on live website.">
-      <change afterPath="$PROJECT_DIR$/src/main/resources/currency.html" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/resources/rates.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/example/AlertsHandler.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/example/AlertsHandler.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/example/GoalsHandler.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/example/GoalsHandler.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/example/LeaderboardHandler.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/example/LeaderboardHandler.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/example/Login.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/example/Login.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/example/NetWorthCalculator.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/example/NetWorthCalculator.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/example/NetWorthHandler.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/example/NetWorthHandler.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/example/ProfileHandler.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/example/ProfileHandler.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/assetsLiabilities.html" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/assetsLiabilities.html" afterDir="false" />
+    <list default="true" id="e72c0420-fe48-4af3-a363-18d6d8618447" name="Changes" comment="chat css update">
       <change beforePath="$PROJECT_DIR$/src/main/resources/home.html" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/home.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/leaderboard.html" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/leaderboard.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/netWorth.html" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/netWorth.html" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -117,7 +104,97 @@
         <option name="Make" enabled="true" />
       </method>
     </configuration>
+    <configuration default="true" type="DjangoTestsConfigurationType">
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="" />
+      <option name="IS_MODULE_SDK" value="false" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <module name="" />
+      <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
+      <option name="TARGET" value="" />
+      <option name="SETTINGS_FILE" value="" />
+      <option name="CUSTOM_SETTINGS" value="false" />
+      <option name="USE_OPTIONS" value="false" />
+      <option name="OPTIONS" value="" />
+      <method v="2" />
+    </configuration>
     <configuration name="index.html" type="JavascriptDebugType" temporary="true" nameIsGenerated="true" uri="http://localhost:63342/Budgeting_Application/src/main/resources/index.html" useBuiltInWebServerPort="true">
+      <method v="2" />
+    </configuration>
+    <configuration default="true" type="JetRunConfigurationType">
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <configuration default="true" type="KotlinStandaloneScriptRunConfigurationType">
+      <option name="filePath" />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <configuration default="true" type="PyBehaveRunConfigurationType" factoryName="Behave">
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <module name="" />
+      <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
+      <option name="ADDITIONAL_ARGS" value="" />
+      <method v="2" />
+    </configuration>
+    <configuration default="true" type="PythonConfigurationType" factoryName="Python">
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="" />
+      <option name="IS_MODULE_SDK" value="false" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <module name="" />
+      <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
+      <option name="SCRIPT_NAME" value="" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
+    <configuration default="true" type="Python.FlaskServer">
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="" />
+      <option name="IS_MODULE_SDK" value="false" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <module name="" />
+      <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
+      <option name="launchJavascriptDebuger" value="false" />
+      <method v="2" />
+    </configuration>
+    <configuration default="true" type="Tox" factoryName="Tox">
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="" />
+      <option name="IS_MODULE_SDK" value="false" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
       <method v="2" />
     </configuration>
     <list>
@@ -174,8 +251,8 @@
       <workItem from="1744382133023" duration="3395000" />
       <workItem from="1744583582140" duration="394000" />
       <workItem from="1745612065335" duration="19232000" />
-      <workItem from="1746386996798" duration="39384000" />
-      <workItem from="1746582414832" duration="723000" />
+      <workItem from="1746386996798" duration="28341000" />
+      <workItem from="1746577687355" duration="2908000" />
     </task>
     <task id="LOCAL-00001" summary="First Commit of login">
       <option name="closed" value="true" />
@@ -449,15 +526,23 @@
       <option name="project" value="LOCAL" />
       <updated>1746561890687</updated>
     </task>
-    <task id="LOCAL-00035" summary="Updated all html, tried fixing the budgets page. Will see if fixes worked on live website.">
+    <task id="LOCAL-00035" summary="updated login for chat">
       <option name="closed" value="true" />
-      <created>1746568313739</created>
+      <created>1746578909400</created>
       <option name="number" value="00035" />
       <option name="presentableId" value="LOCAL-00035" />
       <option name="project" value="LOCAL" />
-      <updated>1746568313739</updated>
+      <updated>1746578909400</updated>
     </task>
-    <option name="localTasksCounter" value="36" />
+    <task id="LOCAL-00036" summary="chat css update">
+      <option name="closed" value="true" />
+      <created>1746579259161</created>
+      <option name="number" value="00036" />
+      <option name="presentableId" value="LOCAL-00036" />
+      <option name="project" value="LOCAL" />
+      <updated>1746579259161</updated>
+    </task>
+    <option name="localTasksCounter" value="37" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -475,7 +560,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="Attempting to fix the API key issue by storing it in aws instead" />
     <MESSAGE value="updated js for aws" />
     <MESSAGE value="updated tge log in port" />
     <MESSAGE value="updated the log in port" />
@@ -499,8 +583,9 @@
     <MESSAGE value="Slightly improved the ui for login, register, forgot password" />
     <MESSAGE value="Updated the ui in some pages, fixed issues that caused issues." />
     <MESSAGE value="Reset some pages back to older working versions, the assets and liabilities UI is fixed now." />
-    <MESSAGE value="Updated all html, tried fixing the budgets page. Will see if fixes worked on live website." />
-    <option name="LAST_COMMIT_MESSAGE" value="Updated all html, tried fixing the budgets page. Will see if fixes worked on live website." />
+    <MESSAGE value="updated login for chat" />
+    <MESSAGE value="chat css update" />
+    <option name="LAST_COMMIT_MESSAGE" value="chat css update" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>

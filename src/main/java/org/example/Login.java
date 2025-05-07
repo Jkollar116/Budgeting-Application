@@ -2,33 +2,90 @@ package org.example;
 
 import com.sun.net.httpserver.*;
 import org.json.JSONObject;
+
+import java.awt.Desktop;
 import java.io.*;
 import java.net.*;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.*;
-import java.awt.Desktop;
+import java.nio.file.Files;
 import java.util.List;
 
 public class Login {
     private static final String FIREBASE_API_KEY = "AIzaSyCMA1F8Xd4rCxGXssXIs8Da80qqP6jien8";
+
     public static void main(String[] args) throws Exception {
         int port = 8000;
         String portEnv = System.getenv("PORT");
         if (portEnv != null) {
-            try { port = Integer.parseInt(portEnv); } catch (NumberFormatException e) { System.err.println("Invalid PORT env. Using default " + port); }
+            try { port = Integer.parseInt(portEnv); }
+            catch (NumberFormatException e) { System.err.println("Invalid PORT env. Using default " + port); }
         } else if (args.length > 0) {
-            try { port = Integer.parseInt(args[0]); } catch (NumberFormatException e) { System.err.println("Invalid port. Using default " + port); }
+            try { port = Integer.parseInt(args[0]); }
+            catch (NumberFormatException e) { System.err.println("Invalid port. Using default " + port); }
         }
+
         HttpServer server = HttpServer.create(new InetSocketAddress("0.0.0.0", port), 0);
         server.createContext("/", new StaticFileHandler());
         server.createContext("/dologin", new LoginHandler());
         server.createContext("/deleteAccount", new DeleteAccountHandler());
         server.createContext("/register", new RegisterHandler());
         server.createContext("/forgot", new ForgotPasswordHandler());
+
         HttpContext homeContext = server.createContext("/home.html", new StaticFileHandler());
         homeContext.getFilters().add(new AuthFilter());
-        HttpContext apiDataContext = server.createContext("/api/getData", new HomeDataHandler());
+
+        // Inline REST-based handler for /api/getData to avoid Admin SDK
+        HttpContext apiDataContext = server.createContext("/api/getData", new HttpHandler() {
+            @Override
+            public void handle(HttpExchange exchange) throws IOException {
+                if (!"GET".equalsIgnoreCase(exchange.getRequestMethod())) {
+                    exchange.sendResponseHeaders(405, -1);
+                    return;
+                }
+                // Extract idToken and localId from cookies
+                String cookieHeader = exchange.getRequestHeaders().getFirst("Cookie");
+                String idToken = null, localId = null;
+                if (cookieHeader != null) {
+                    for (String c : cookieHeader.split(";")) {
+                        String[] kv = c.trim().split("=", 2);
+                        if (kv.length == 2) {
+                            if ("idToken".equals(kv[0])) idToken = kv[1];
+                            if ("localId".equals(kv[0])) localId = kv[1];
+                        }
+                    }
+                }
+                if (idToken == null || localId == null) {
+                    exchange.sendResponseHeaders(401, -1);
+                    return;
+                }
+                // Call Firestore REST
+                String project = "cashclimb-d162c";
+                String docPath = "Users/" + URLEncoder.encode(localId, "UTF-8");
+                String restUrl = String.format(
+                        "https://firestore.googleapis.com/v1/projects/%s/databases/(default)/documents/%s?key=%s",
+                        project, docPath, FIREBASE_API_KEY
+                );
+                URL url = new URL(restUrl);
+                HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+                conn.setRequestMethod("GET");
+                conn.setRequestProperty("Authorization", "Bearer " + idToken);
+
+                int code = conn.getResponseCode();
+                InputStream is = (code == 200) ? conn.getInputStream() : conn.getErrorStream();
+                String body = new String(is.readAllBytes(), StandardCharsets.UTF_8);
+                if (code != 200) {
+                    exchange.sendResponseHeaders(500, -1);
+                    return;
+                }
+                exchange.getResponseHeaders().set("Content-Type", "application/json; charset=UTF-8");
+                byte[] out = body.getBytes(StandardCharsets.UTF_8);
+                exchange.sendResponseHeaders(200, out.length);
+                exchange.getResponseBody().write(out);
+                exchange.getResponseBody().close();
+            }
+        });
         apiDataContext.getFilters().add(new AuthFilter());
+
         HttpContext apiChatContext = server.createContext("/api/chat", new ChatHandler());
         apiChatContext.getFilters().add(new AuthFilter());
         HttpContext apiWalletsContext = server.createContext("/api/wallets", new CryptoApiHandler());
@@ -37,26 +94,21 @@ public class Login {
         apiWalletContext.getFilters().add(new AuthFilter());
         HttpContext apiExpensesContext = server.createContext("/api/expenses", new ExpensesHandler());
         apiExpensesContext.getFilters().add(new AuthFilter());
+
         // Register stock API endpoints with more specific paths first
         HttpContext apiStockOrderWithIdContext = server.createContext("/api/stocks/orders/", new StockHandler());
         apiStockOrderWithIdContext.getFilters().add(new AuthFilter());
-
         HttpContext apiStockHistoryContext = server.createContext("/api/stocks/history", new StockHandler());
         apiStockHistoryContext.getFilters().add(new AuthFilter());
-
         HttpContext apiStockAccountContext = server.createContext("/api/stocks/account", new StockHandler());
         apiStockAccountContext.getFilters().add(new AuthFilter());
-
         HttpContext apiStockPortfolioContext = server.createContext("/api/stocks/portfolio", new StockHandler());
         apiStockPortfolioContext.getFilters().add(new AuthFilter());
-
         HttpContext apiStockOrdersContext = server.createContext("/api/stocks/orders", new StockHandler());
         apiStockOrdersContext.getFilters().add(new AuthFilter());
-
-        // Register specific stock symbol route for getting individual stocks
-        // Using /api/stocks with explicit symbols rather than the overly broad /api/stocks/
         HttpContext apiStockSymbolContext = server.createContext("/api/stocks", new StockHandler());
         apiStockSymbolContext.getFilters().add(new AuthFilter());
+
         server.createContext("/logout", new LogoutHandler());
         HttpContext apiBudgetsContext = server.createContext("/api/budgets", new BudgetHandler());
         apiBudgetsContext.getFilters().add(new AuthFilter());
@@ -68,95 +120,73 @@ public class Login {
         apiTipsContext.getFilters().add(new AuthFilter());
         HttpContext apiTaxContext = server.createContext("/api/tax", new TaxHandler());
         apiTaxContext.getFilters().add(new AuthFilter());
-        /*
-        There were two contexts for profile, I got rid of one.
-         */
+
+        /* There were two contexts for profile, I got rid of one. */
         HttpContext apiProfileContext = server.createContext("/api/profile", new ProfileHandler());
         apiProfileContext.getFilters().add(new AuthFilter());
 
         // Register AlertsHandler for all alert-related endpoints
         HttpContext apiAlertsContext = server.createContext("/api/alerts", new AlertsHandler());
         apiAlertsContext.getFilters().add(new AuthFilter());
-
         HttpContext apiAlertsReadContext = server.createContext("/api/alerts/read", new AlertsHandler());
         apiAlertsReadContext.getFilters().add(new AuthFilter());
-
         HttpContext apiAlertsTriggerContext = server.createContext("/api/alerts/trigger/check", new AlertsHandler());
         apiAlertsTriggerContext.getFilters().add(new AuthFilter());
-
-        // This is for handling delete operations on specific alerts
         HttpContext apiAlertsWithIdContext = server.createContext("/api/alerts/", new AlertsHandler());
         apiAlertsWithIdContext.getFilters().add(new AuthFilter());
 
         HttpContext apiAssets = server.createContext("/api/assets", new AssetsLiabilitiesHandler("Assets"));
         apiAssets.getFilters().add(new AuthFilter());
-
         HttpContext apiLiabilities = server.createContext("/api/liabilities", new AssetsLiabilitiesHandler("Liabilities"));
         apiLiabilities.getFilters().add(new AuthFilter());
 
         HttpContext cryptoContext = server.createContext("/crypto.html", new StaticFileHandler());
         cryptoContext.getFilters().add(new AuthFilter());
-        // Return to using StaticFileHandler for stocks.html with proper auth filter
         HttpContext stocksContext = server.createContext("/stocks.html", new StaticFileHandler());
         stocksContext.getFilters().add(new AuthFilter());
-
-        // Add our simplified stocks page for testing
         HttpContext stocksSimpleContext = server.createContext("/stocks-simple.html", new StaticFileHandler());
         stocksSimpleContext.getFilters().add(new AuthFilter());
-        HttpContext expensesContext = server.createContext("/expenses.html", new StaticFileHandler());
-        expensesContext.getFilters().add(new AuthFilter());
-        HttpContext incomeContext = server.createContext("/income.html", new StaticFileHandler());
-        incomeContext.getFilters().add(new AuthFilter());
-        HttpContext profileContext = server.createContext("/profile.html", new StaticFileHandler());
-        profileContext.getFilters().add(new AuthFilter());
-        HttpContext taxContext = server.createContext("/tax.html", new StaticFileHandler());
-        taxContext.getFilters().add(new AuthFilter());
-        HttpContext settingsContext = server.createContext("/settings.html", new StaticFileHandler());
-        settingsContext.getFilters().add(new AuthFilter());
-        HttpContext chatContext = server.createContext("/chat.html", new StaticFileHandler());
-        chatContext.getFilters().add(new AuthFilter());
-        HttpContext leaderboardContext = server.createContext("/leaderboard.html", new StaticFileHandler());
-        leaderboardContext.getFilters().add(new AuthFilter());
-//        HttpContext apiLeaderboardContext = server.createContext("/api/leaderboard", new LeaderboardHandler());
-//        apiLeaderboardContext.getFilters().add(new AuthFilter());
+        HttpContext expensesPage = server.createContext("/expenses.html", new StaticFileHandler());
+        expensesPage.getFilters().add(new AuthFilter());
+        HttpContext incomePage = server.createContext("/income.html", new StaticFileHandler());
+        incomePage.getFilters().add(new AuthFilter());
+        HttpContext profilePage = server.createContext("/profile.html", new StaticFileHandler());
+        profilePage.getFilters().add(new AuthFilter());
+        HttpContext taxPage = server.createContext("/tax.html", new StaticFileHandler());
+        taxPage.getFilters().add(new AuthFilter());
+        HttpContext settingsPage = server.createContext("/settings.html", new StaticFileHandler());
+        settingsPage.getFilters().add(new AuthFilter());
+        HttpContext chatPage = server.createContext("/chat.html", new StaticFileHandler());
+        chatPage.getFilters().add(new AuthFilter());
+        HttpContext leaderboardPage = server.createContext("/leaderboard.html", new StaticFileHandler());
+        leaderboardPage.getFilters().add(new AuthFilter());
+        HttpContext apiLeaderboardContext = server.createContext("/api/leaderboard", new LeaderboardHandler());
+        apiLeaderboardContext.getFilters().add(new AuthFilter());
 
-//        HttpContext apiNetworthContext = server.createContext("/api/netWorth", new NetWorthHandler());
-//        apiNetworthContext.getFilters().add(new AuthFilter());
-//        HttpContext apiNetworthCalculateContext = server.createContext("/api/netWorth/calculate", new NetWorthHandler());
-//        apiNetworthCalculateContext.getFilters().add(new AuthFilter());
+        HttpContext apiNetworthContext = server.createContext("/api/networth", new NetWorthHandler());
+        apiNetworthContext.getFilters().add(new AuthFilter());
+        HttpContext apiNetworthCalculateContext = server.createContext("/api/networth/calculate", new NetWorthHandler());
+        apiNetworthCalculateContext.getFilters().add(new AuthFilter());
 
         HttpContext apiBillsContext = server.createContext("/api/bills", new BillsHandler());
         apiBillsContext.getFilters().add(new AuthFilter());
-
-        HttpContext billsContext = server.createContext("/bills.html", new StaticFileHandler());
-        billsContext.getFilters().add(new AuthFilter());
-
-        // Handle bills with IDs for update/delete operations
-        HttpContext apiBillsWithIdContext = server.createContext("/api/bills/", new BillsHandler());
-        apiBillsWithIdContext.getFilters().add(new AuthFilter());
-
-        HttpContext alertsContext = server.createContext("/alerts.html", new StaticFileHandler());
-        alertsContext.getFilters().add(new AuthFilter());
+        HttpContext billsPageContext = server.createContext("/alerts.html", new StaticFileHandler());
+        billsPageContext.getFilters().add(new AuthFilter());
         HttpContext apiPaychecksContext = server.createContext("/api/paychecks", new BudgetHandler());
         apiPaychecksContext.getFilters().add(new AuthFilter());
-
         HttpContext apiPaycheckById = server.createContext("/api/paychecks/", new BudgetHandler());
         apiPaycheckById.getFilters().add(new AuthFilter());
-
-//        HttpContext apiGoalsContext = server.createContext("/api/goals", new GoalsHandler());
-//        apiGoalsContext.getFilters().add(new AuthFilter());
-//
-//        HttpContext apiGoalById = server.createContext("/api/goals/", new GoalsHandler());
-//        apiGoalById.getFilters().add(new AuthFilter());
-
+        HttpContext apiGoalsContext = server.createContext("/api/goals", new GoalsHandler());
+        apiGoalsContext.getFilters().add(new AuthFilter());
+        HttpContext apiGoalById = server.createContext("/api/goals/", new GoalsHandler());
+        apiGoalById.getFilters().add(new AuthFilter());
         HttpContext savingsTipsContext = server.createContext("/savingsTips.html", new StaticFileHandler());
         savingsTipsContext.getFilters().add(new AuthFilter());
         HttpContext tipsContext = server.createContext("/tips.html", new StaticFileHandler());
         tipsContext.getFilters().add(new AuthFilter());
         HttpContext budgetContext = server.createContext("/budget.html", new StaticFileHandler());
         budgetContext.getFilters().add(new AuthFilter());
-        HttpContext netWorthContext = server.createContext("/netWorth.html", new StaticFileHandler());
-        netWorthContext.getFilters().add(new AuthFilter());
+
         server.setExecutor(null);
         server.start();
         if (Desktop.isDesktopSupported()) {
@@ -164,14 +194,11 @@ public class Login {
         }
     }
 
-
     static class StaticFileHandler implements HttpHandler {
         private final String basePath = "src/main/resources";
         public void handle(HttpExchange exchange) throws IOException {
             String uriPath = exchange.getRequestURI().getPath();
-            if (uriPath.equals("/")) {
-                uriPath = "/index.html";
-            }
+            if (uriPath.equals("/")) uriPath = "/index.html";
             File file = new File(basePath + uriPath).getCanonicalFile();
             if (!file.getPath().startsWith(new File(basePath).getCanonicalPath())) {
                 exchange.sendResponseHeaders(403, 0);
@@ -187,12 +214,11 @@ public class Login {
             if (uriPath.endsWith(".html")) mime = "text/html";
             else if (uriPath.endsWith(".css")) mime = "text/css";
             else if (uriPath.endsWith(".js")) mime = "application/javascript";
-            exchange.getResponseHeaders().set("Content-Type", mime);
             byte[] bytes = Files.readAllBytes(file.toPath());
+            exchange.getResponseHeaders().set("Content-Type", mime);
             exchange.sendResponseHeaders(200, bytes.length);
-            OutputStream os = exchange.getResponseBody();
-            os.write(bytes);
-            os.close();
+            exchange.getResponseBody().write(bytes);
+            exchange.getResponseBody().close();
         }
     }
     static class LoginHandler implements HttpHandler {
@@ -373,7 +399,7 @@ public class Login {
                         else if (key.equals("confirm")) confirm = value;
                     }
                 }
-                
+
                 // Validate required fields
                 if (username.isEmpty() || name.isEmpty() || email.isEmpty() || password.isEmpty() || confirm.isEmpty()) {
                     String errorHtml = "<!DOCTYPE html><html lang=\"en\"><head><meta charset=\"UTF-8\"><title>Registration Error</title><link rel=\"stylesheet\" href=\"style.css\"></head><body><div class=\"login-container\"><h2>Registration Error</h2><p>All fields are required. Please complete the form.</p><a href='/register.html'>Try Again</a></div></body></html>";
@@ -385,7 +411,7 @@ public class Login {
                     osResp.close();
                     return;
                 }
-                
+
                 if (!password.equals(confirm)) {
                     String errorHtml = "<!DOCTYPE html><html lang=\"en\"><head><meta charset=\"UTF-8\"><title>Registration Error</title><link rel=\"stylesheet\" href=\"style.css\"></head><body><div class=\"login-container\"><h2>Registration Error</h2><p>Passwords do not match. Please try again.</p><a href='/register.html'>Try Again</a></div></body></html>";
                     exchange.getResponseHeaders().set("Content-Type", "text/html; charset=UTF-8");
@@ -396,14 +422,14 @@ public class Login {
                     osResp.close();
                     return;
                 }
-                
+
                 // Check if username is already taken
                 String checkUsernameUrl = "https://firestore.googleapis.com/v1/projects/cashclimb-d162c/databases/(default)/documents/Usernames/" + username;
                 URL usernameUrl = new URL(checkUsernameUrl);
                 HttpURLConnection usernameConn = (HttpURLConnection) usernameUrl.openConnection();
                 usernameConn.setRequestMethod("GET");
                 int usernameResponseCode = usernameConn.getResponseCode();
-                
+
                 if (usernameResponseCode == 200) {
                     // Username exists
                     String errorHtml = "<!DOCTYPE html><html lang=\"en\"><head><meta charset=\"UTF-8\"><title>Registration Error</title><link rel=\"stylesheet\" href=\"style.css\"></head><body><div class=\"login-container\"><h2>Registration Error</h2><p>Username already taken. Please choose another.</p><a href='/register.html'>Try Again</a></div></body></html>";
@@ -419,7 +445,7 @@ public class Login {
                     exchange.sendResponseHeaders(500, -1);
                     return;
                 }
-                
+
                 // Username is available, create user
                 String firebaseUrl = "https://identitytoolkit.googleapis.com/v1/accounts:signUp?key=" + FIREBASE_API_KEY;
                 URL url = new URL(firebaseUrl);
@@ -441,11 +467,11 @@ public class Login {
                         firebaseResponse.append(ln);
                     }
                     in.close();
-                    
+
                     JSONObject jsonObject = new JSONObject(firebaseResponse.toString());
                     String idToken = jsonObject.getString("idToken");
                     String localId = jsonObject.getString("localId");
-                    
+
                     // Store username in Usernames collection to ensure uniqueness
                     String usernameReserveUrl = "https://firestore.googleapis.com/v1/projects/cashclimb-d162c/databases/(default)/documents/Usernames/" + username;
                     URL reserveUrl = new URL(usernameReserveUrl);
@@ -458,7 +484,7 @@ public class Login {
                     OutputStream reserveOs = reserveConn.getOutputStream();
                     reserveOs.write(reservePayload.getBytes(StandardCharsets.UTF_8));
                     reserveOs.close();
-                    
+
                     // Create the entire user profile as a JSON string to avoid JSONObject ambiguities
                     String userProfileJson = String.format(
                         "{" +
@@ -482,13 +508,13 @@ public class Login {
                                     "}" +
                                 "}" +
                             "}" +
-                        "}", 
-                        username.replace("\"", "\\\""), 
-                        name.replace("\"", "\\\""), 
-                        email.replace("\"", "\\\""), 
+                        "}",
+                        username.replace("\"", "\\\""),
+                        name.replace("\"", "\\\""),
+                        email.replace("\"", "\\\""),
                         java.time.Instant.now().toString()
                     );
-                    
+
                     // Store user profile information
                     String profileUrl = "https://firestore.googleapis.com/v1/projects/cashclimb-d162c/databases/(default)/documents/Users/" + localId;
                     URL userUrl = new URL(profileUrl);
@@ -497,11 +523,11 @@ public class Login {
                     userConn.setRequestProperty("Content-Type", "application/json");
                     userConn.setRequestProperty("Authorization", "Bearer " + idToken);
                     userConn.setDoOutput(true);
-                    
+
                     OutputStream userOs = userConn.getOutputStream();
                     userOs.write(userProfileJson.getBytes(StandardCharsets.UTF_8));
                     userOs.close();
-                    
+
                     exchange.getResponseHeaders().set("Location", "/index.html");
                     exchange.sendResponseHeaders(302, -1);
                 } else {
@@ -616,21 +642,21 @@ public class Login {
         public void doFilter(HttpExchange exchange, Chain chain) throws IOException {
             String path = exchange.getRequestURI().getPath();
             String cookies = exchange.getRequestHeaders().getFirst("Cookie");
-            
+
             System.out.println("AuthFilter: Checking auth for path: " + path);
             System.out.println("AuthFilter: Cookies: " + cookies);
-            
+
             if (cookies == null || !cookies.contains("session=valid")) {
                 System.out.println("AuthFilter: Authentication failed - redirecting to invalidSession.html");
                 exchange.getResponseHeaders().set("Location", "/invalidSession.html");
                 exchange.sendResponseHeaders(302, -1);
                 return;
             }
-            
+
             System.out.println("AuthFilter: Authentication passed for " + path);
             chain.doFilter(exchange);
         }
-        
+
         @Override
         public String description() {
             return "AuthFilter checks for a valid session cookie";
