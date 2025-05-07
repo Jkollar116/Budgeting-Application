@@ -160,8 +160,13 @@ public class Login {
         chatPage.getFilters().add(new AuthFilter());
         HttpContext leaderboardPage = server.createContext("/leaderboard.html", new StaticFileHandler());
         leaderboardPage.getFilters().add(new AuthFilter());
-
-
+//        HttpContext apiLeaderboardContext = server.createContext("/api/leaderboard", new LeaderboardHandler());
+//        apiLeaderboardContext.getFilters().add(new AuthFilter());
+//
+//        HttpContext apiNetworthContext = server.createContext("/api/networth", new NetWorthHandler());
+//        apiNetworthContext.getFilters().add(new AuthFilter());
+//        HttpContext apiNetworthCalculateContext = server.createContext("/api/networth/calculate", new NetWorthHandler());
+//        apiNetworthCalculateContext.getFilters().add(new AuthFilter());
 
         HttpContext apiBillsContext = server.createContext("/api/bills", new BillsHandler());
         apiBillsContext.getFilters().add(new AuthFilter());
@@ -171,13 +176,20 @@ public class Login {
         apiPaychecksContext.getFilters().add(new AuthFilter());
         HttpContext apiPaycheckById = server.createContext("/api/paychecks/", new BudgetHandler());
         apiPaycheckById.getFilters().add(new AuthFilter());
-
+//        HttpContext apiGoalsContext = server.createContext("/api/goals", new GoalsHandler());
+//        apiGoalsContext.getFilters().add(new AuthFilter());
+//        HttpContext apiGoalById = server.createContext("/api/goals/", new GoalsHandler());
+//        apiGoalById.getFilters().add(new AuthFilter());
         HttpContext savingsTipsContext = server.createContext("/savingsTips.html", new StaticFileHandler());
         savingsTipsContext.getFilters().add(new AuthFilter());
         HttpContext tipsContext = server.createContext("/tips.html", new StaticFileHandler());
         tipsContext.getFilters().add(new AuthFilter());
         HttpContext budgetContext = server.createContext("/budget.html", new StaticFileHandler());
         budgetContext.getFilters().add(new AuthFilter());
+        HttpContext loanCalculatorContext = server.createContext("/loanCalculator.html", new StaticFileHandler());
+        loanCalculatorContext.getFilters().add(new AuthFilter());
+        HttpContext currencyContext = server.createContext("/currency.html", new StaticFileHandler());
+        currencyContext.getFilters().add(new AuthFilter());
 
         server.setExecutor(null);
         server.start();
