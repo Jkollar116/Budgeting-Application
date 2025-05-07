@@ -78,17 +78,18 @@
 </main>
 <script>
     function toggleDrawer() {
-        const drawer = document.getElementById('sideDrawer');
-        drawer.classList.toggle('collapsed');
+        document.getElementById('sideDrawer').classList.toggle('collapsed');
     }
+
     function getThemePreference(name) {
         const match = document.cookie.match(new RegExp('(^| )' + name + '=([^;]+)'));
-        if (!match) return null;
-        return match[2];
+        return match ? match[2] : null;
     }
+
     window.addEventListener('pageshow', function(event) {
         if (event.persisted) window.location.reload();
     });
+
     window.addEventListener('DOMContentLoaded', () => {
         const savedTheme = getThemePreference('theme');
         const body = document.body;
@@ -102,267 +103,225 @@
             if (input) input.checked = true;
         }
     });
-    window.addEventListener("DOMContentLoaded", function () {
-        fetch("/api/profile", {
-            method: "GET",
-            headers: { "Content-Type": "application/json" }
-        })
-            .then(res => res.json())
+
+    window.addEventListener('DOMContentLoaded', () => {
+        const navImg = document.getElementById('navProfileImage');
+        fetch('/api/profile', { method: 'GET', headers: { 'Content-Type': 'application/json' } })
+            .then(res => {
+                if (!res.ok) throw new Error('Profile fetch failed');
+                return res.json();
+            })
             .then(data => {
                 const fields = data.fields || {};
-                if (fields.profileImage) {
-                    const base64Image = fields.profileImage.stringValue;
-                    const navImg = document.getElementById("navProfileImage");
-                    if (navImg) navImg.src = base64Image;
+                if (fields.profileImage && fields.profileImage.stringValue) {
+                    navImg.src = fields.profileImage.stringValue;
+                } else {
+                    throw new Error('No image in profile data');
                 }
             })
             .catch(() => {
-                const navImg = document.getElementById("navProfileImage");
-                if (navImg) navImg.src = "default-avatar.png";
+                navImg.src = 'default-avatar.png';
             });
     });
-    document.addEventListener("DOMContentLoaded", function() {
-        console.log("home.html: DOMContentLoaded");
 
+    document.addEventListener('DOMContentLoaded', function() {
         function getInt(field) {
-            // Safely parse an integer from field's integerValue or doubleValue
-            if(!field) return 0;
-            if(field.integerValue) return parseInt(field.integerValue);
-            if(field.doubleValue) return Math.floor(parseFloat(field.doubleValue));
+            if (!field) return 0;
+            if (field.integerValue) return parseInt(field.integerValue, 10);
+            if (field.doubleValue) return Math.floor(parseFloat(field.doubleValue));
             return 0;
         }
         function getArray(arrayField) {
-            if(arrayField && arrayField.arrayValue && arrayField.arrayValue.values) {
-                return arrayField.arrayValue.values;
-            }
-            return [];
+            return (arrayField && arrayField.arrayValue && arrayField.arrayValue.values) || [];
         }
 
         fetch('/api/getData')
-            .then(r=>r.json())
-            .then(data=>{
-                console.log("home.html: data received", data);
-                let fields = data.fields || {};
-
-                let netWorth = getInt(fields.netWorth);
-                document.getElementById("netWorthDisplay").textContent = "$" + netWorth;
-
-                let totalIncome = getInt(fields.totalIncome);
-                document.getElementById("totalIncomeDisplay").textContent = "" ;
-
-                let totalExpenses = getInt(fields.totalExpenses);
-                document.getElementById("totalExpensesDisplay").textContent = "$" + totalExpenses;
-
-                let billsDue = getInt(fields.billsDue);
-                document.getElementById("billRemindersDisplay").innerHTML = "<h1>"+billsDue+"</h1>";
-
-                // monthlyExpenses
-                let monthlyExpensesArr = getArray(fields.monthlyExpenses).map(getInt);
-                if(monthlyExpensesArr.length < 12) {
-                    monthlyExpensesArr = Array(12).fill(0);
+            .then(res => {
+                if (!res.ok) {
+                    console.error(`getData failed with status ${res.status}`);
+                    return {};
                 }
-                console.log("home.html: building expense bar chart", monthlyExpensesArr);
-                buildBarChart(monthlyExpensesArr);
+                return res.json();
+            })
+            .then(data => {
+                const fields = data.fields || {};
 
-                // build expenses pie
+                const netWorth = getInt(fields.netWorth);
+                document.getElementById('netWorthDisplay').textContent = '$' + netWorth;
+
+                const totalIncome = getInt(fields.totalIncome);
+                document.getElementById('totalIncomeDisplay').textContent = '$' + totalIncome;
+
+                const totalExpenses = getInt(fields.totalExpenses);
+                document.getElementById('totalExpensesDisplay').textContent = '$' + totalExpenses;
+
+                const billsDue = getInt(fields.billsDue);
+                document.getElementById('billRemindersDisplay').innerHTML = '<h1>' + billsDue + '</h1>';
+
+                let monthlyExpensesArr = getArray(fields.monthlyExpenses).map(getInt);
+                if (monthlyExpensesArr.length < 12) monthlyExpensesArr = Array(12).fill(0);
+                buildBarChart(monthlyExpensesArr);
                 buildPieChartExpenses(monthlyExpensesArr);
 
-                // monthlyIncomes
                 let monthlyIncomesArr = getArray(fields.monthlyIncomes).map(getInt);
-                if(monthlyIncomesArr.length < 12) {
-                    monthlyIncomesArr = Array(12).fill(0);
-                }
-                console.log("home.html: building income pie chart", monthlyIncomesArr);
+                if (monthlyIncomesArr.length < 12) monthlyIncomesArr = Array(12).fill(0);
                 buildPieChartIncome(monthlyIncomesArr);
             })
-            .catch(e=>{
-                console.error("Error fetching dashboard data:", e);
+            .catch(e => {
+                console.error('Error fetching dashboard data:', e);
             });
     });
 
     function buildBarChart(monthlyExpensesArr) {
-        let barContainer = document.getElementById("chartContainer");
-        let svgNS = "http://www.w3.org/2000/svg";
-
-        let containerWidth = barContainer.clientWidth;
-        let chartWidth = containerWidth < 500 ? 500 : containerWidth;
-        let chartHeight = 300;
-        let barWidth = chartWidth / monthlyExpensesArr.length;
-
+        const svgNS = 'http://www.w3.org/2000/svg';
+        const barContainer = document.getElementById('chartContainer');
+        const containerWidth = barContainer.clientWidth;
+        const chartWidth = containerWidth < 500 ? 500 : containerWidth;
+        const chartHeight = 300;
+        const barWidth = chartWidth / monthlyExpensesArr.length;
         let maxExpense = Math.max(...monthlyExpensesArr);
-        if(maxExpense === 0) maxExpense=1;
+        if (maxExpense === 0) maxExpense = 1;
 
-        let barSvg = document.createElementNS(svgNS, "svg");
-        barSvg.setAttribute("width", "100%");
-        barSvg.setAttribute("viewBox", `0 0 ${chartWidth} ${chartHeight}`);
+        const barSvg = document.createElementNS(svgNS, 'svg');
+        barSvg.setAttribute('width', '100%');
+        barSvg.setAttribute('viewBox', `0 0 ${chartWidth} ${chartHeight}`);
 
-        monthlyExpensesArr.forEach((expense, i)=>{
-            // scale bar height
+        monthlyExpensesArr.forEach((expense, i) => {
             let barHeight = (expense / maxExpense) * (chartHeight - 40);
-
-            // clamp so it never goes negative or above chart
-            barHeight = Math.max(0, barHeight);
-            barHeight = Math.min(barHeight, chartHeight - 40);
-
-            let x = i * barWidth;
-            let y = chartHeight - barHeight;
-
-            let rect = document.createElementNS(svgNS, "rect");
-            rect.setAttribute("x", x);
-            rect.setAttribute("y", y);
-            rect.setAttribute("width", barWidth - 4);
-            rect.setAttribute("height", barHeight);
-            rect.setAttribute("fill", "#FF8C00");
+            barHeight = Math.max(0, Math.min(barHeight, chartHeight - 40));
+            const x = i * barWidth;
+            const y = chartHeight - barHeight;
+            const rect = document.createElementNS(svgNS, 'rect');
+            rect.setAttribute('x', x);
+            rect.setAttribute('y', y);
+            rect.setAttribute('width', barWidth - 4);
+            rect.setAttribute('height', barHeight);
+            rect.setAttribute('fill', '#FF8C00');
             barSvg.appendChild(rect);
 
-            // label
-            let label = document.createElementNS(svgNS, "text");
-            label.setAttribute("x", x + (barWidth - 4)/2);
-            label.setAttribute("y", chartHeight - 5);
-            label.setAttribute("fill", "#000");
-            label.setAttribute("font-size","10");
-            label.setAttribute("text-anchor","middle");
-            label.textContent = (i+1);
+            const label = document.createElementNS(svgNS, 'text');
+            label.setAttribute('x', x + (barWidth - 4) / 2);
+            label.setAttribute('y', chartHeight - 5);
+            label.setAttribute('fill', '#000');
+            label.setAttribute('font-size', '10');
+            label.setAttribute('text-anchor', 'middle');
+            label.textContent = (i + 1);
             barSvg.appendChild(label);
         });
 
-        barContainer.innerHTML="";
+        barContainer.innerHTML = '';
         barContainer.appendChild(barSvg);
     }
 
-    function buildPieChartExpenses(monthlyExpensesArr){
-        let expensesPieContainer = document.getElementById("expensesPieChart");
-        expensesPieContainer.innerHTML="";
-
-        if(!monthlyExpensesArr || monthlyExpensesArr.length===0){
-            expensesPieContainer.innerHTML="<p style='padding:10px;text-align:center;'>No monthly expense data</p>";
-            return;
-        }
-        let totalExpense = monthlyExpensesArr.reduce((a,b)=>a+b,0);
-        if(totalExpense<=0){
-            expensesPieContainer.innerHTML="<p style='padding:10px;text-align:center;'>No expense data</p>";
+    function buildPieChartExpenses(monthlyExpensesArr) {
+        const svgNS = 'http://www.w3.org/2000/svg';
+        const container = document.getElementById('expensesPieChart');
+        container.innerHTML = '';
+        const total = monthlyExpensesArr.reduce((a, b) => a + b, 0);
+        if (total <= 0) {
+            container.innerHTML = "<p style='padding:10px;text-align:center;'>No expense data</p>";
             return;
         }
 
-        let svgNS="http://www.w3.org/2000/svg";
-        let size=200;
-        let cx=size/2, cy=size/2;
-        let r=(size/2)-10;
-        let svg=document.createElementNS(svgNS,"svg");
-        svg.setAttribute("width", size);
-        svg.setAttribute("height",size);
+        const size = 200;
+        const cx = size / 2, cy = size / 2, r = cx - 10;
+        const svg = document.createElementNS(svgNS, 'svg');
+        svg.setAttribute('width', size);
+        svg.setAttribute('height', size);
 
-        let startAngle=0;
-        // we'll group months in quarters, for example
-        let quarters=[0,0,0,0];
-        monthlyExpensesArr.forEach((val,i)=>{
-            quarters[Math.floor(i/3)] += val;
-        });
-        let quarterLabels=["Q1","Q2","Q3","Q4"];
-        let colors=["#FF8C00","#FF4500","#1E90FF","#32CD32"];
-        let totalAll=quarters.reduce((a,b)=>a+b,0);
+        const quarters = [0, 0, 0, 0];
+        monthlyExpensesArr.forEach((v, i) => quarters[Math.floor(i / 3)] += v);
+        const labels = ['Q1', 'Q2', 'Q3', 'Q4'];
+        const colors = ['#FF8C00', '#FF4500', '#1E90FF', '#32CD32'];
 
-        quarters.forEach((val,i)=>{
-            if(val<=0) return;
-            let sliceAngle=(val/totalAll)*2*Math.PI;
-            let endAngle=startAngle+sliceAngle;
+        let startAngle = 0;
+        const totalAll = quarters.reduce((a, b) => a + b, 0);
 
-            let x1=cx + r*Math.cos(startAngle);
-            let y1=cy + r*Math.sin(startAngle);
-            let x2=cx + r*Math.cos(endAngle);
-            let y2=cy + r*Math.sin(endAngle);
+        quarters.forEach((v, i) => {
+            if (v <= 0) return;
+            const sliceAngle = (v / totalAll) * 2 * Math.PI;
+            const endAngle = startAngle + sliceAngle;
+            const x1 = cx + r * Math.cos(startAngle);
+            const y1 = cy + r * Math.sin(startAngle);
+            const x2 = cx + r * Math.cos(endAngle);
+            const y2 = cy + r * Math.sin(endAngle);
+            const largeArc = sliceAngle > Math.PI ? 1 : 0;
+            const d = `M ${cx} ${cy} L ${x1} ${y1} A ${r} ${r} 0 ${largeArc} 1 ${x2} ${y2} Z`;
 
-            let largeArc= sliceAngle>Math.PI ? 1 : 0;
-            let d=`M ${cx} ${cy} L ${x1} ${y1} A ${r} ${r} 0 ${largeArc} 1 ${x2} ${y2} Z`;
-
-            let path=document.createElementNS(svgNS,"path");
-            path.setAttribute("d", d);
-            path.setAttribute("fill", colors[i%colors.length]);
+            const path = document.createElementNS(svgNS, 'path');
+            path.setAttribute('d', d);
+            path.setAttribute('fill', colors[i % colors.length]);
             svg.appendChild(path);
 
-            // label
-            let midAngle=startAngle + sliceAngle/2;
-            let labelX=cx + (r/2)*Math.cos(midAngle);
-            let labelY=cy + (r/2)*Math.sin(midAngle);
-
-            let text=document.createElementNS(svgNS,"text");
-            text.setAttribute("x",labelX);
-            text.setAttribute("y",labelY);
-            text.setAttribute("text-anchor","middle");
-            text.setAttribute("fill","#fff");
-            text.setAttribute("font-size","10");
-            text.textContent= quarterLabels[i]+"("+val+")";
-
+            const midAngle = startAngle + sliceAngle / 2;
+            const labelX = cx + (r / 2) * Math.cos(midAngle);
+            const labelY = cy + (r / 2) * Math.sin(midAngle);
+            const text = document.createElementNS(svgNS, 'text');
+            text.setAttribute('x', labelX);
+            text.setAttribute('y', labelY);
+            text.setAttribute('text-anchor', 'middle');
+            text.setAttribute('fill', '#fff');
+            text.setAttribute('font-size', '10');
+            text.textContent = `${labels[i]}(${v})`;
             svg.appendChild(text);
 
-            startAngle=endAngle;
+            startAngle = endAngle;
         });
 
-        expensesPieContainer.appendChild(svg);
+        container.appendChild(svg);
     }
 
-    function buildPieChartIncome(monthlyIncomesArr){
-        let incomeChart=document.getElementById("incomeChart");
-        incomeChart.innerHTML="";
-
-        if(!monthlyIncomesArr || monthlyIncomesArr.length===0){
-            incomeChart.innerHTML="<p style='padding:10px;text-align:center;'>No monthly income data</p>";
-            return;
-        }
-        let sum=monthlyIncomesArr.reduce((a,b)=>a+b,0);
-        if(sum<=0){
-            incomeChart.innerHTML="<p style='padding:10px;text-align:center;'>No income data</p>";
+    function buildPieChartIncome(monthlyIncomesArr) {
+        const svgNS = 'http://www.w3.org/2000/svg';
+        const container = document.getElementById('incomeChart');
+        container.innerHTML = '';
+        const sum = monthlyIncomesArr.reduce((a, b) => a + b, 0);
+        if (sum <= 0) {
+            container.innerHTML = "<p style='padding:10px;text-align:center;'>No income data</p>";
             return;
         }
 
-        let svgNS="http://www.w3.org/2000/svg";
-        let size=200;
-        let cx=size/2, cy=size/2;
-        let r=(size/2)-10;
-        let svg=document.createElementNS(svgNS,"svg");
-        svg.setAttribute("width", size);
-        svg.setAttribute("height", size);
+        const size = 200;
+        const cx = size / 2, cy = size / 2, r = cx - 10;
+        const svg = document.createElementNS(svgNS, 'svg');
+        svg.setAttribute('width', size);
+        svg.setAttribute('height', size);
 
-        let startAngle=0;
-        let colors=["#FFD700","#FF69B4","#8A2BE2","#20B2AA","#F08080","#DEB887","#87CEEB","#FFA500","#C71585","#ADFF2F","#00FA9A","#FF6347"];
+        const colors = ['#FFD700','#FF69B4','#8A2BE2','#20B2AA','#F08080','#DEB887','#87CEEB','#FFA500','#C71585','#ADFF2F','#00FA9A','#FF6347'];
+        let startAngle = 0;
 
-        monthlyIncomesArr.forEach((val,i)=>{
-            if(val<=0) return;
-            let sliceAngle=(val/sum)*2*Math.PI;
-            let endAngle=startAngle+sliceAngle;
+        monthlyIncomesArr.forEach((v, i) => {
+            if (v <= 0) return;
+            const sliceAngle = (v / sum) * 2 * Math.PI;
+            const endAngle = startAngle + sliceAngle;
+            const x1 = cx + r * Math.cos(startAngle);
+            const y1 = cy + r * Math.sin(startAngle);
+            const x2 = cx + r * Math.cos(endAngle);
+            const y2 = cy + r * Math.sin(endAngle);
+            const largeArc = sliceAngle > Math.PI ? 1 : 0;
+            const d = `M ${cx} ${cy} L ${x1} ${y1} A ${r} ${r} 0 ${largeArc} 1 ${x2} ${y2} Z`;
 
-            let x1=cx + r*Math.cos(startAngle);
-            let y1=cy + r*Math.sin(startAngle);
-            let x2=cx + r*Math.cos(endAngle);
-            let y2=cy + r*Math.sin(endAngle);
-
-            let largeArc= sliceAngle>Math.PI ? 1 : 0;
-            let d=`M ${cx} ${cy} L ${x1} ${y1} A ${r} ${r} 0 ${largeArc} 1 ${x2} ${y2} Z`;
-
-            let path=document.createElementNS(svgNS,"path");
-            path.setAttribute("d", d);
-            path.setAttribute("fill", colors[i%colors.length]);
+            const path = document.createElementNS(svgNS, 'path');
+            path.setAttribute('d', d);
+            path.setAttribute('fill', colors[i % colors.length]);
             svg.appendChild(path);
 
-            // label
-            let midAngle=startAngle + sliceAngle/2;
-            let labelX=cx + (r/2)*Math.cos(midAngle);
-            let labelY=cy + (r/2)*Math.sin(midAngle);
-
-            let text=document.createElementNS(svgNS,"text");
-            text.setAttribute("x",labelX);
-            text.setAttribute("y",labelY);
-            text.setAttribute("text-anchor","middle");
-            text.setAttribute("fill","#fff");
-            text.setAttribute("font-size","10");
-            text.textContent= (i+1);
-
+            const midAngle = startAngle + sliceAngle / 2;
+            const labelX = cx + (r / 2) * Math.cos(midAngle);
+            const labelY = cy + (r / 2) * Math.sin(midAngle);
+            const text = document.createElementNS(svgNS, 'text');
+            text.setAttribute('x', labelX);
+            text.setAttribute('y', labelY);
+            text.setAttribute('text-anchor', 'middle');
+            text.setAttribute('fill', '#fff');
+            text.setAttribute('font-size', '10');
+            text.textContent = (i + 1);
             svg.appendChild(text);
 
-            startAngle=endAngle;
+            startAngle = endAngle;
         });
 
-        incomeChart.appendChild(svg);
+        container.appendChild(svg);
     }
 </script>
 </body>
