@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Saved Tips</title>
+  <title>Loan Calculator</title>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -43,25 +43,36 @@
     <li><a href="/logout">Logout</a></li>
   </ul>
 </nav>
-
-<main class="tips-page">
-  <div class="tips-header">
-    <h1>Your Saved Tips</h1>
-    <p>These are the financial tips you saved.</p>
+<main>
+  <div class="container">
+    <h2>Loan Calculator</h2>
+    <form id="loanForm">
+      <div class="form-group">
+        <label for="amount">Loan Amount ($)</label>
+        <input type="number" id="amount" required>
+      </div>
+      <div class="form-group">
+        <label for="rate">Annual Interest Rate (%)</label>
+        <input type="number" id="rate" step="0.01" required>
+      </div>
+      <div class="form-group">
+        <label for="years">Loan Term (Years)</label>
+        <input type="number" id="years" required>
+      </div>
+      <button type="submit" class="submit-btn">Calculate</button>
+    </form>
+    <div class="result" id="result"></div>
   </div>
-
-  <div id="savedTipsList" class="tip-section-list"></div>
 </main>
 
 <script>
   function toggleDrawer() {
-    const drawer = document.getElementById('sideDrawer');
-    drawer.classList.toggle('collapsed');
+    document.getElementById("sideDrawer").classList.toggle("collapsed");
   }
-
   function getThemePreference(name) {
     const match = document.cookie.match(new RegExp('(^| )' + name + '=([^;]+)'));
-    return match ? match[2] : null;
+    if (!match) return null;
+    return match[2];
   }
 
   window.addEventListener('pageshow', function(event) {
@@ -69,66 +80,42 @@
   });
 
   window.addEventListener('DOMContentLoaded', () => {
+    const savedTheme = getThemePreference('theme');
     const body = document.body;
-    const theme = getThemePreference('theme');
-    if (theme === 'light') body.classList.add('light-mode');
-    else if (theme === 'dark') body.classList.add('dark-mode');
 
-    loadSavedTips();
+    body.classList.remove('light-mode', 'dark-mode');
+    if (savedTheme === 'light') {
+      body.classList.add('light-mode');
+    } else if (savedTheme === 'dark') {
+      body.classList.add('dark-mode');
+    }
+    loadTaxData();
   });
+  document.getElementById("loanForm").addEventListener("submit", function (e) {
+    e.preventDefault();
 
-  function loadSavedTips() {
-    fetch('/api/tips')
-            .then(res => {
-              if (!res.ok) throw new Error('Failed to load saved tips');
-              return res.json();
-            })
-            .then(data => {
-              const docs = data.documents || [];
-              const tipsByCategory = {};
+    const amount = parseFloat(document.getElementById("amount").value);
+    const annualRate = parseFloat(document.getElementById("rate").value);
+    const years = parseInt(document.getElementById("years").value);
 
-              docs.forEach(doc => {
-                const f = doc.fields;
-                const cat = f.category.stringValue;
-                const txt = f.text.stringValue;
-                if (!tipsByCategory[cat]) tipsByCategory[cat] = [];
-                tipsByCategory[cat].push(txt);
-              });
+    if (!amount || !annualRate || !years) {
+      document.getElementById("result").textContent = "Please fill in all fields.";
+      return;
+    }
 
-              const container = document.getElementById('savedTipsList');
-              container.innerHTML = '';
+    const monthlyRate = (annualRate / 100) / 12;
+    const payments = years * 12;
+    const x = Math.pow(1 + monthlyRate, payments);
+    const monthlyPayment = (amount * x * monthlyRate) / (x - 1);
+    const totalPayment = monthlyPayment * payments;
+    const totalInterest = totalPayment - amount;
 
-              for (const [category, tips] of Object.entries(tipsByCategory)) {
-                const section = document.createElement('div');
-                section.className = 'tip-category-block';
-
-                const header = document.createElement('h3');
-                header.className = 'tip-category-title';
-                header.textContent = category;
-                section.appendChild(header);
-
-                const ul = document.createElement('ul');
-                ul.className = 'tip-category-list';
-
-                tips.forEach(text => {
-                  const li = document.createElement('li');
-                  li.className = 'tip-item';
-
-                  const p = document.createElement('p');
-                  p.textContent = `- ${text}`;
-                  li.appendChild(p);
-                  ul.appendChild(li);
-                });
-
-                section.appendChild(ul);
-                container.appendChild(section);
-              }
-            })
-            .catch(err => {
-              document.getElementById('savedTipsList').innerHTML = '<p>Error loading saved tips.</p>';
-              console.error(err);
-            });
-  }
+    document.getElementById("result").innerHTML = `
+      <strong>Monthly Payment:</strong> $${monthlyPayment.toFixed(2)}<br>
+      <strong>Total Interest:</strong> $${totalInterest.toFixed(2)}<br>
+      <strong>Total Payment:</strong> $${totalPayment.toFixed(2)}
+    `;
+  });
   window.addEventListener("DOMContentLoaded", function () {
     fetch("/api/profile", {
       method: "GET",

@@ -160,8 +160,13 @@ public class Login {
         chatPage.getFilters().add(new AuthFilter());
         HttpContext leaderboardPage = server.createContext("/leaderboard.html", new StaticFileHandler());
         leaderboardPage.getFilters().add(new AuthFilter());
-
-
+//        HttpContext apiLeaderboardContext = server.createContext("/api/leaderboard", new LeaderboardHandler());
+//        apiLeaderboardContext.getFilters().add(new AuthFilter());
+//
+//        HttpContext apiNetworthContext = server.createContext("/api/networth", new NetWorthHandler());
+//        apiNetworthContext.getFilters().add(new AuthFilter());
+//        HttpContext apiNetworthCalculateContext = server.createContext("/api/networth/calculate", new NetWorthHandler());
+//        apiNetworthCalculateContext.getFilters().add(new AuthFilter());
 
         HttpContext apiBillsContext = server.createContext("/api/bills", new BillsHandler());
         apiBillsContext.getFilters().add(new AuthFilter());
@@ -171,13 +176,20 @@ public class Login {
         apiPaychecksContext.getFilters().add(new AuthFilter());
         HttpContext apiPaycheckById = server.createContext("/api/paychecks/", new BudgetHandler());
         apiPaycheckById.getFilters().add(new AuthFilter());
-
+//        HttpContext apiGoalsContext = server.createContext("/api/goals", new GoalsHandler());
+//        apiGoalsContext.getFilters().add(new AuthFilter());
+//        HttpContext apiGoalById = server.createContext("/api/goals/", new GoalsHandler());
+//        apiGoalById.getFilters().add(new AuthFilter());
         HttpContext savingsTipsContext = server.createContext("/savingsTips.html", new StaticFileHandler());
         savingsTipsContext.getFilters().add(new AuthFilter());
         HttpContext tipsContext = server.createContext("/tips.html", new StaticFileHandler());
         tipsContext.getFilters().add(new AuthFilter());
         HttpContext budgetContext = server.createContext("/budget.html", new StaticFileHandler());
         budgetContext.getFilters().add(new AuthFilter());
+        HttpContext loanCalculatorContext = server.createContext("/loanCalculator.html", new StaticFileHandler());
+        loanCalculatorContext.getFilters().add(new AuthFilter());
+        HttpContext currencyContext = server.createContext("/currency.html", new StaticFileHandler());
+        currencyContext.getFilters().add(new AuthFilter());
 
         server.setExecutor(null);
         server.start();
@@ -356,11 +368,7 @@ public class Login {
             if ("GET".equalsIgnoreCase(exchange.getRequestMethod())) {
                 String fileName = "/register.html";
                 File file = new File(basePath + fileName).getCanonicalFile();
-                if (!file.isFile()) {
-                    exchange.sendResponseHeaders(404, 0);
-                    exchange.getResponseBody().close();
-                    return;
-                }
+                if (!file.isFile()) { exchange.sendResponseHeaders(404, 0); exchange.getResponseBody().close(); return; }
                 String mime = "text/html";
                 exchange.getResponseHeaders().set("Content-Type", mime);
                 byte[] bytes = Files.readAllBytes(file.toPath());
@@ -368,42 +376,26 @@ public class Login {
                 OutputStream os = exchange.getResponseBody();
                 os.write(bytes);
                 os.close();
+                return;
             } else if ("POST".equalsIgnoreCase(exchange.getRequestMethod())) {
                 InputStreamReader isr = new InputStreamReader(exchange.getRequestBody(), StandardCharsets.UTF_8);
                 BufferedReader br = new BufferedReader(isr);
                 StringBuilder buf = new StringBuilder();
                 String line;
-                while ((line = br.readLine()) != null) {
-                    buf.append(line);
-                }
+                while ((line = br.readLine()) != null) { buf.append(line); }
                 String formData = buf.toString();
-                String username = "", name = "", email = "", password = "", confirm = "";
+                String email = "", password = "", confirm = "";
                 String[] pairs = formData.split("&");
                 for (String pair : pairs) {
                     String[] parts = pair.split("=");
                     if (parts.length == 2) {
                         String key = URLDecoder.decode(parts[0], "UTF-8");
                         String value = URLDecoder.decode(parts[1], "UTF-8");
-                        if (key.equals("username")) username = value;
-                        else if (key.equals("name")) name = value;
-                        else if (key.equals("email")) email = value;
-                        else if (key.equals("password")) password = value;
-                        else if (key.equals("confirm")) confirm = value;
+                        if (key.equals("email")) { email = value; }
+                        else if (key.equals("password")) { password = value; }
+                        else if (key.equals("confirm")) { confirm = value; }
                     }
                 }
-
-                // Validate required fields
-                if (username.isEmpty() || name.isEmpty() || email.isEmpty() || password.isEmpty() || confirm.isEmpty()) {
-                    String errorHtml = "<!DOCTYPE html><html lang=\"en\"><head><meta charset=\"UTF-8\"><title>Registration Error</title><link rel=\"stylesheet\" href=\"style.css\"></head><body><div class=\"login-container\"><h2>Registration Error</h2><p>All fields are required. Please complete the form.</p><a href='/register.html'>Try Again</a></div></body></html>";
-                    exchange.getResponseHeaders().set("Content-Type", "text/html; charset=UTF-8");
-                    byte[] errorBytes = errorHtml.getBytes(StandardCharsets.UTF_8);
-                    exchange.sendResponseHeaders(200, errorBytes.length);
-                    OutputStream osResp = exchange.getResponseBody();
-                    osResp.write(errorBytes);
-                    osResp.close();
-                    return;
-                }
-
                 if (!password.equals(confirm)) {
                     String errorHtml = "<!DOCTYPE html><html lang=\"en\"><head><meta charset=\"UTF-8\"><title>Registration Error</title><link rel=\"stylesheet\" href=\"style.css\"></head><body><div class=\"login-container\"><h2>Registration Error</h2><p>Passwords do not match. Please try again.</p><a href='/register.html'>Try Again</a></div></body></html>";
                     exchange.getResponseHeaders().set("Content-Type", "text/html; charset=UTF-8");
@@ -414,31 +406,6 @@ public class Login {
                     osResp.close();
                     return;
                 }
-
-                // Check if username is already taken
-                String checkUsernameUrl = "https://firestore.googleapis.com/v1/projects/cashclimb-d162c/databases/(default)/documents/Usernames/" + username;
-                URL usernameUrl = new URL(checkUsernameUrl);
-                HttpURLConnection usernameConn = (HttpURLConnection) usernameUrl.openConnection();
-                usernameConn.setRequestMethod("GET");
-                int usernameResponseCode = usernameConn.getResponseCode();
-
-                if (usernameResponseCode == 200) {
-                    // Username exists
-                    String errorHtml = "<!DOCTYPE html><html lang=\"en\"><head><meta charset=\"UTF-8\"><title>Registration Error</title><link rel=\"stylesheet\" href=\"style.css\"></head><body><div class=\"login-container\"><h2>Registration Error</h2><p>Username already taken. Please choose another.</p><a href='/register.html'>Try Again</a></div></body></html>";
-                    exchange.getResponseHeaders().set("Content-Type", "text/html; charset=UTF-8");
-                    byte[] errorBytes = errorHtml.getBytes(StandardCharsets.UTF_8);
-                    exchange.sendResponseHeaders(200, errorBytes.length);
-                    OutputStream osResp = exchange.getResponseBody();
-                    osResp.write(errorBytes);
-                    osResp.close();
-                    return;
-                } else if (usernameResponseCode != 404) {
-                    // Unexpected error
-                    exchange.sendResponseHeaders(500, -1);
-                    return;
-                }
-
-                // Username is available, create user
                 String firebaseUrl = "https://identitytoolkit.googleapis.com/v1/accounts:signUp?key=" + FIREBASE_API_KEY;
                 URL url = new URL(firebaseUrl);
                 HttpURLConnection conn = (HttpURLConnection) url.openConnection();
@@ -451,89 +418,19 @@ public class Login {
                 os.close();
                 int responseCode = conn.getResponseCode();
                 if (responseCode == 200) {
-                    // Read the response from Firebase
-                    BufferedReader in = new BufferedReader(new InputStreamReader(conn.getInputStream(), StandardCharsets.UTF_8));
-                    StringBuilder firebaseResponse = new StringBuilder();
-                    String ln;
-                    while ((ln = in.readLine()) != null) {
-                        firebaseResponse.append(ln);
-                    }
-                    in.close();
-
-                    JSONObject jsonObject = new JSONObject(firebaseResponse.toString());
-                    String idToken = jsonObject.getString("idToken");
-                    String localId = jsonObject.getString("localId");
-
-                    // Store username in Usernames collection to ensure uniqueness
-                    String usernameReserveUrl = "https://firestore.googleapis.com/v1/projects/cashclimb-d162c/databases/(default)/documents/Usernames/" + username;
-                    URL reserveUrl = new URL(usernameReserveUrl);
-                    HttpURLConnection reserveConn = (HttpURLConnection) reserveUrl.openConnection();
-                    reserveConn.setRequestMethod("PUT");
-                    reserveConn.setRequestProperty("Content-Type", "application/json");
-                    reserveConn.setRequestProperty("Authorization", "Bearer " + idToken);
-                    reserveConn.setDoOutput(true);
-                    String reservePayload = "{\"fields\":{\"userId\":{\"stringValue\":\"" + localId + "\"}}}";
-                    OutputStream reserveOs = reserveConn.getOutputStream();
-                    reserveOs.write(reservePayload.getBytes(StandardCharsets.UTF_8));
-                    reserveOs.close();
-
-                    // Create the entire user profile as a JSON string to avoid JSONObject ambiguities
-                    String userProfileJson = String.format(
-                        "{" +
-                            "\"fields\": {" +
-                                "\"username\": {\"stringValue\": \"%s\"}," +
-                                "\"name\": {\"stringValue\": \"%s\"}," +
-                                "\"email\": {\"stringValue\": \"%s\"}," +
-                                "\"age\": {\"nullValue\": null}," +
-                                "\"career\": {\"stringValue\": \"\"}," +
-                                "\"careerDescription\": {\"stringValue\": \"\"}," +
-                                "\"theme\": {\"stringValue\": \"dark\"}," +
-                                "\"netWorth\": {\"doubleValue\": 0.0}," +
-                                "\"netWorthLastUpdated\": {\"timestampValue\": \"%s\"}," +
-                                "\"settings\": {" +
-                                    "\"mapValue\": {" +
-                                        "\"fields\": {" +
-                                            "\"showOnLeaderboard\": {\"booleanValue\": true}," +
-                                            "\"receiveAlerts\": {\"booleanValue\": true}," +
-                                            "\"billAlertDays\": {\"integerValue\": 3}" +
-                                        "}" +
-                                    "}" +
-                                "}" +
-                            "}" +
-                        "}",
-                        username.replace("\"", "\\\""),
-                        name.replace("\"", "\\\""),
-                        email.replace("\"", "\\\""),
-                        java.time.Instant.now().toString()
-                    );
-
-                    // Store user profile information
-                    String profileUrl = "https://firestore.googleapis.com/v1/projects/cashclimb-d162c/databases/(default)/documents/Users/" + localId;
-                    URL userUrl = new URL(profileUrl);
-                    HttpURLConnection userConn = (HttpURLConnection) userUrl.openConnection();
-                    userConn.setRequestMethod("PATCH");
-                    userConn.setRequestProperty("Content-Type", "application/json");
-                    userConn.setRequestProperty("Authorization", "Bearer " + idToken);
-                    userConn.setDoOutput(true);
-
-                    OutputStream userOs = userConn.getOutputStream();
-                    userOs.write(userProfileJson.getBytes(StandardCharsets.UTF_8));
-                    userOs.close();
-
                     exchange.getResponseHeaders().set("Location", "/index.html");
                     exchange.sendResponseHeaders(302, -1);
+                    return;
                 } else {
                     InputStream errorStream = conn.getErrorStream();
-                    if (errorStream != null) {
-                        InputStreamReader isrError = new InputStreamReader(errorStream, StandardCharsets.UTF_8);
-                        BufferedReader in = new BufferedReader(isrError);
-                        StringBuilder response = new StringBuilder();
-                        while ((line = in.readLine()) != null) {
-                            response.append(line);
-                        }
-                        in.close();
-                    }
+                    InputStreamReader isrError = new InputStreamReader(errorStream, StandardCharsets.UTF_8);
+                    BufferedReader in = new BufferedReader(isrError);
+                    StringBuilder response = new StringBuilder();
+                    while ((line = in.readLine()) != null) { response.append(line); }
+                    in.close();
+                    String errorResponse = response.toString();
                     String userMessage = "Registration failed. Please try again.";
+                    if (errorResponse.contains("EMAIL_EXISTS")) { userMessage = "This email is already registered. Please use a different email."; }
                     String errorHtml = "<!DOCTYPE html><html lang=\"en\"><head><meta charset=\"UTF-8\"><title>Registration Error</title><link rel=\"stylesheet\" href=\"style.css\"></head><body><div class=\"login-container\"><h2>Registration Error</h2><p>" + userMessage + "</p><a href='/register.html'>Try Again</a></div></body></html>";
                     exchange.getResponseHeaders().set("Content-Type", "text/html; charset=UTF-8");
                     byte[] errorBytes = errorHtml.getBytes(StandardCharsets.UTF_8);
@@ -542,9 +439,7 @@ public class Login {
                     osResp.write(errorBytes);
                     osResp.close();
                 }
-            } else {
-                exchange.sendResponseHeaders(405, -1);
-            }
+            } else { exchange.sendResponseHeaders(405, -1); }
         }
     }
     static class ForgotPasswordHandler implements HttpHandler {

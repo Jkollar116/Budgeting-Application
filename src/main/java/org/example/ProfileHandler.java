@@ -7,7 +7,8 @@ import java.io.*;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
-import java.util.regex.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class ProfileHandler implements HttpHandler {
     @Override
@@ -17,7 +18,6 @@ public class ProfileHandler implements HttpHandler {
         String localId = extractCookieValue(cookies, "localId");
 
         if (idToken == null || localId == null) {
-            System.out.println("401 - Missing idToken or localId");
             exchange.sendResponseHeaders(401, -1);
             return;
         }
@@ -33,41 +33,20 @@ public class ProfileHandler implements HttpHandler {
 
     private void handlePost(HttpExchange exchange, String idToken, String localId) throws IOException {
         String body = readAll(exchange.getRequestBody());
-        System.out.println("ProfileHandler POST invoked");
-        System.out.println("Body: " + body);
-
         String fullName = getJsonValue(body, "fullName");
         String careerDescription = getJsonValue(body, "careerDescription");
         String profileImage = getJsonValue(body, "profileImage");
-        String netWorth = getJsonValue(body, "netWorth");
-        String optInLeaderboardRaw = getJsonValue(body, "optInLeaderboard");
 
-        if (fullName.isEmpty() && careerDescription.isEmpty() && profileImage.isEmpty()
-                && netWorth.isEmpty() && optInLeaderboardRaw.isEmpty()) {
-            System.out.println("400 - No valid fields provided");
+        if (fullName.isEmpty() || careerDescription.isEmpty()) {
             exchange.sendResponseHeaders(400, -1);
             return;
         }
 
-        StringBuilder json = new StringBuilder("{ \"fields\": {");
-
-        if (!fullName.isEmpty()) {
-            json.append("\"fullName\": {\"stringValue\": \"").append(escapeJson(fullName)).append("\"},");
-        }
-        if (!careerDescription.isEmpty()) {
-            json.append("\"careerDescription\": {\"stringValue\": \"").append(escapeJson(careerDescription)).append("\"},");
-        }
-        if (!profileImage.isEmpty()) {
-            json.append("\"profileImage\": {\"stringValue\": \"").append(escapeJson(profileImage)).append("\"},");
-        }
-        if (!netWorth.isEmpty()) {
-            json.append("\"netWorth\": {\"doubleValue\": ").append(netWorth).append("},");
-        }
-        if (json.charAt(json.length() - 1) == ',') {
-            json.setLength(json.length() - 1);
-        }
-
-        json.append("} }");
+        String json = "{ \"fields\": {"
+                + "\"fullName\": {\"stringValue\": \"" + escapeJson(fullName) + "\"},"
+                + "\"careerDescription\": {\"stringValue\": \"" + escapeJson(careerDescription) + "\"},"
+                + "\"profileImage\": {\"stringValue\": \"" + escapeJson(profileImage) + "\"}"
+                + "} }";
 
         String urlStr = "https://firestore.googleapis.com/v1/projects/cashclimb-d162c/databases/(default)/documents/Users/"
                 + localId + "/Profile/profile";
@@ -75,21 +54,16 @@ public class ProfileHandler implements HttpHandler {
         HttpURLConnection conn = openFirestoreConnection(urlStr, "PATCH", idToken);
         conn.setRequestProperty("Content-Type", "application/json");
         conn.setDoOutput(true);
-        conn.getOutputStream().write(json.toString().getBytes(StandardCharsets.UTF_8));
+        conn.getOutputStream().write(json.getBytes(StandardCharsets.UTF_8));
 
         int code = conn.getResponseCode();
-        System.out.println("Firestore response code: " + code);
-
         if (code == 200 || code == 201) {
             byte[] msg = "Profile saved.".getBytes(StandardCharsets.UTF_8);
             exchange.sendResponseHeaders(200, msg.length);
             exchange.getResponseBody().write(msg);
         } else {
-            String error = readAll(conn.getErrorStream());
-            System.out.println("Firestore error body: " + error);
             exchange.sendResponseHeaders(code, -1);
         }
-
         exchange.getResponseBody().close();
     }
 
@@ -124,7 +98,6 @@ public class ProfileHandler implements HttpHandler {
     }
 
     private static String readAll(InputStream in) throws IOException {
-        if (in == null) return "";
         BufferedReader reader = new BufferedReader(new InputStreamReader(in, StandardCharsets.UTF_8));
         StringBuilder sb = new StringBuilder();
         String line;
@@ -144,9 +117,10 @@ public class ProfileHandler implements HttpHandler {
     }
 
     private static String getJsonValue(String json, String key) {
-        Pattern p = Pattern.compile("\"" + key + "\"\\s*:\\s*\"?([^\"]+?)\"?[,}]");
+        Pattern p = Pattern.compile("\"" + key + "\"\\s*:\\s*\"([^\"]*)\"");
         Matcher m = p.matcher(json);
-        return m.find() ? m.group(1) : "";
+        if (m.find()) return m.group(1);
+        return "";
     }
 
     private static String escapeJson(String value) {
