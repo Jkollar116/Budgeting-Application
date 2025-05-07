@@ -4,28 +4,10 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="e72c0420-fe48-4af3-a363-18d6d8618447" name="Changes" comment="updated login page to remove links to old files">
-      <change afterPath="$PROJECT_DIR$/src/main/resources/loanCalculator.html" afterDir="false" />
+    <list default="true" id="e72c0420-fe48-4af3-a363-18d6d8618447" name="Changes" comment="Added currency converter and loan calculation for mortgage, updated side drawer for all pages">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/org/example/Login.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/example/Login.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/alerts.html" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/alerts.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/assetsLiabilities.html" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/assetsLiabilities.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/bills.html" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/bills.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/budget.html" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/budget.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/chat.html" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/chat.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/crypto.html" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/crypto.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/currency.html" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/currency.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/expenses.html" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/expenses.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/home.html" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/home.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/income.html" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/income.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/leaderboard.html" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/leaderboard.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/netWorth.html" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/netWorth.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/profile.html" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/profile.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/savedTips.html" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/savedTips.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/settings.html" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/settings.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/stocks.html" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/stocks.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/tax.html" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/tax.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/tips.html" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/tips.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/register.html" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/register.html" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -595,7 +577,15 @@
       <option name="project" value="LOCAL" />
       <updated>1746588746524</updated>
     </task>
-    <option name="localTasksCounter" value="41" />
+    <task id="LOCAL-00041" summary="Added currency converter and loan calculation for mortgage, updated side drawer for all pages">
+      <option name="closed" value="true" />
+      <created>1746590481798</created>
+      <option name="number" value="00041" />
+      <option name="presentableId" value="LOCAL-00041" />
+      <option name="project" value="LOCAL" />
+      <updated>1746590481798</updated>
+    </task>
+    <option name="localTasksCounter" value="42" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -613,7 +603,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="azure commit to jack branch" />
     <MESSAGE value="updated xml java version" />
     <MESSAGE value="no jekyell file" />
     <MESSAGE value="pluggin for heroku" />
@@ -638,7 +627,8 @@
     <MESSAGE value="updated the home.html" />
     <MESSAGE value="updated home back to old page maybe" />
     <MESSAGE value="updated login page to remove links to old files" />
-    <option name="LAST_COMMIT_MESSAGE" value="updated login page to remove links to old files" />
+    <MESSAGE value="Added currency converter and loan calculation for mortgage, updated side drawer for all pages" />
+    <option name="LAST_COMMIT_MESSAGE" value="Added currency converter and loan calculation for mortgage, updated side drawer for all pages" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
