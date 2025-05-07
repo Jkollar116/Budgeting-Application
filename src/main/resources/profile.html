@@ -12,7 +12,7 @@
         <ul class="nav-items">
             <li class="profile-link-container">
                 <a href="profile.html">
-                <img id="navProfileImage" class="nav-profile-img" alt="Profile" />
+                    <img id="navProfileImage" class="nav-profile-img" alt="Profile" />
                 </a>
                 <a href="profile.html" class="active">Profile</a>
             </li>
@@ -94,7 +94,6 @@
         const theme = getThemePreference('theme');
         if (theme === 'light') body.classList.add('light-mode');
         else if (theme === 'dark') body.classList.add('dark-mode');
-        loadTips();
     });
     let base64Image = "";
 

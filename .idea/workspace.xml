@@ -4,7 +4,12 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="e72c0420-fe48-4af3-a363-18d6d8618447" name="Changes" comment="Tried to fix register" />
+    <list default="true" id="e72c0420-fe48-4af3-a363-18d6d8618447" name="Changes" comment="Trying to fix image loading issue">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/example/ProfileHandler.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/example/ProfileHandler.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/home.html" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/home.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/profile.html" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/profile.html" afterDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -589,7 +594,15 @@
       <option name="project" value="LOCAL" />
       <updated>1746592771293</updated>
     </task>
-    <option name="localTasksCounter" value="43" />
+    <task id="LOCAL-00043" summary="Trying to fix image loading issue">
+      <option name="closed" value="true" />
+      <created>1746593361238</created>
+      <option name="number" value="00043" />
+      <option name="presentableId" value="LOCAL-00043" />
+      <option name="project" value="LOCAL" />
+      <updated>1746593361238</updated>
+    </task>
+    <option name="localTasksCounter" value="44" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -607,7 +620,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="no jekyell file" />
     <MESSAGE value="pluggin for heroku" />
     <MESSAGE value="added log out feature with cookies" />
     <MESSAGE value="added firebase integration as well as home page" />
@@ -632,7 +644,8 @@
     <MESSAGE value="updated login page to remove links to old files" />
     <MESSAGE value="Added currency converter and loan calculation for mortgage, updated side drawer for all pages" />
     <MESSAGE value="Tried to fix register" />
-    <option name="LAST_COMMIT_MESSAGE" value="Tried to fix register" />
+    <MESSAGE value="Trying to fix image loading issue" />
+    <option name="LAST_COMMIT_MESSAGE" value="Trying to fix image loading issue" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>

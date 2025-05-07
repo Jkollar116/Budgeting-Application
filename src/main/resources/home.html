@@ -115,6 +115,10 @@
                     const navImg = document.getElementById("navProfileImage");
                     if (navImg) navImg.src = base64Image;
                 }
+            })
+            .catch(() => {
+                const navImg = document.getElementById("navProfileImage");
+                if (navImg) navImg.src = "default-avatar.png";
             });
     });
     document.addEventListener("DOMContentLoaded", function() {
