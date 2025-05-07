@@ -4,8 +4,8 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="e72c0420-fe48-4af3-a363-18d6d8618447" name="Changes" comment="chat css update">
-      <change beforePath="$PROJECT_DIR$/src/main/resources/home.html" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/home.html" afterDir="false" />
+    <list default="true" id="e72c0420-fe48-4af3-a363-18d6d8618447" name="Changes" comment="updated the home.html">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -252,7 +252,7 @@
       <workItem from="1744583582140" duration="394000" />
       <workItem from="1745612065335" duration="19232000" />
       <workItem from="1746386996798" duration="28341000" />
-      <workItem from="1746577687355" duration="2908000" />
+      <workItem from="1746577687355" duration="3558000" />
     </task>
     <task id="LOCAL-00001" summary="First Commit of login">
       <option name="closed" value="true" />
@@ -542,7 +542,15 @@
       <option name="project" value="LOCAL" />
       <updated>1746579259161</updated>
     </task>
-    <option name="localTasksCounter" value="37" />
+    <task id="LOCAL-00037" summary="updated the home.html">
+      <option name="closed" value="true" />
+      <created>1746580647723</created>
+      <option name="number" value="00037" />
+      <option name="presentableId" value="LOCAL-00037" />
+      <option name="project" value="LOCAL" />
+      <updated>1746580647723</updated>
+    </task>
+    <option name="localTasksCounter" value="38" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -560,7 +568,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="updated js for aws" />
     <MESSAGE value="updated tge log in port" />
     <MESSAGE value="updated the log in port" />
     <MESSAGE value="azure commit to jack branch" />
@@ -585,7 +592,8 @@
     <MESSAGE value="Reset some pages back to older working versions, the assets and liabilities UI is fixed now." />
     <MESSAGE value="updated login for chat" />
     <MESSAGE value="chat css update" />
-    <option name="LAST_COMMIT_MESSAGE" value="chat css update" />
+    <MESSAGE value="updated the home.html" />
+    <option name="LAST_COMMIT_MESSAGE" value="updated the home.html" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
