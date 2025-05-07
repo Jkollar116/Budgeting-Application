@@ -92,35 +92,35 @@
         document.getElementById("result").textContent = "Net Worth: $" + netWorth.toFixed(2);
     }
 
-    function saveNetWorthToFirebase() {
-        const netWorthText = document.getElementById("result").textContent;
+    // function saveNetWorthToFirebase() {
+    //     const netWorthText = document.getElementById("result").textContent;
+    //
+    //     if (!netWorthText || !netWorthText.includes("Net Worth: $")) {
+    //         alert("Please calculate your net worth before saving.");
+    //         return;
+    //     }
+    //
+    //     const netWorthValue = netWorthText.replace("Net Worth: $", "").trim();
 
-        if (!netWorthText || !netWorthText.includes("Net Worth: $")) {
-            alert("Please calculate your net worth before saving.");
-            return;
-        }
-
-        const netWorthValue = netWorthText.replace("Net Worth: $", "").trim();
-
-        fetch("/api/profile", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ netWorth: parseFloat(netWorthValue) })
-        })
-            .then(res => {
-                if (res.ok) {
-                    alert("Net worth saved.");
-                } else {
-                    alert("Save failed.");
-                }
-            })
-            .catch(() => alert("Save error."));
-    }
+    //     fetch("/api/profile", {
+    //         method: "POST",
+    //         headers: { "Content-Type": "application/json" },
+    //         body: JSON.stringify({ netWorth: parseFloat(netWorthValue) })
+    //     })
+    //         .then(res => {
+    //             if (res.ok) {
+    //                 alert("Net worth saved.");
+    //             } else {
+    //                 alert("Save failed.");
+    //             }
+    //         })
+    //         .catch(() => alert("Save error."));
+    // }
 
     document.getElementById("netWorthForm").addEventListener("submit", function (e) {
         e.preventDefault();
         calculateNetWorth();
-        saveNetWorthToFirebase();
+        // saveNetWorthToFirebase();
     });
 
     window.addEventListener("DOMContentLoaded", () => {
@@ -129,19 +129,34 @@
         if (theme === 'light') body.classList.add('light-mode');
         else if (theme === 'dark') body.classList.add('dark-mode');
 
-        // Load net worth and profile image
+    //     // Load net worth and profile image
+    //     fetch("/api/profile", {
+    //         method: "GET",
+    //         headers: { "Content-Type": "application/json" }
+    //     }).then(res => res.json()).then(data => {
+    //         const fields = data.fields || {};
+    //         if (fields.netWorth) {
+    //             const netWorth = parseFloat(fields.netWorth.doubleValue);
+    //             document.getElementById("result").textContent = "Net Worth: $" + netWorth.toFixed(2);
+    //         }
+    //         const img = fields.profileImage?.stringValue;
+    //         if (img) document.getElementById("navProfileImage").src = img;
+    //     });
+    });
+    window.addEventListener("DOMContentLoaded", function () {
         fetch("/api/profile", {
             method: "GET",
             headers: { "Content-Type": "application/json" }
-        }).then(res => res.json()).then(data => {
-            const fields = data.fields || {};
-            if (fields.netWorth) {
-                const netWorth = parseFloat(fields.netWorth.doubleValue);
-                document.getElementById("result").textContent = "Net Worth: $" + netWorth.toFixed(2);
-            }
-            const img = fields.profileImage?.stringValue;
-            if (img) document.getElementById("navProfileImage").src = img;
-        });
+        })
+            .then(res => res.json())
+            .then(data => {
+                const fields = data.fields || {};
+                if (fields.profileImage) {
+                    const base64Image = fields.profileImage.stringValue;
+                    const navImg = document.getElementById("navProfileImage");
+                    if (navImg) navImg.src = base64Image;
+                }
+            });
     });
 </script>
 </body>
