@@ -5,27 +5,11 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="e72c0420-fe48-4af3-a363-18d6d8618447" name="Changes" comment="Reset some pages back to older working versions, the assets and liabilities UI is fixed now.">
-      <change afterPath="$PROJECT_DIR$/src/main/resources/financialGoals.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Checkout_at_3_1_25__4_51PM__Changes_.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Checkout_at_3_1_25__4_51PM__Changes_.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Checkout_at_3_3_25__1_10PM__Changes_.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Checkout_at_3_3_25__1_10PM__Changes_.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/example/BudgetHandler.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/example/BudgetHandler.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/org/example/Login.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/example/Login.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/alerts.html" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/alerts.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/assetsLiabilities.html" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/assetsLiabilities.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/bills.html" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/bills.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/budget.html" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/budget.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/chat.html" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/chat.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/crypto.html" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/crypto.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/expenses.html" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/expenses.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/income.html" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/income.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/leaderboard.html" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/leaderboard.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/netWorth.html" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/netWorth.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/profile.html" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/profile.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/savedTips.html" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/savedTips.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/savingsTips.html" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/savingsTips.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/settings.html" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/settings.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/stocks.html" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/stocks.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/tax.html" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/tax.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/tips.html" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/tips.html" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -124,7 +108,97 @@
         <option name="Make" enabled="true" />
       </method>
     </configuration>
+    <configuration default="true" type="DjangoTestsConfigurationType">
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="" />
+      <option name="IS_MODULE_SDK" value="false" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <module name="" />
+      <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
+      <option name="TARGET" value="" />
+      <option name="SETTINGS_FILE" value="" />
+      <option name="CUSTOM_SETTINGS" value="false" />
+      <option name="USE_OPTIONS" value="false" />
+      <option name="OPTIONS" value="" />
+      <method v="2" />
+    </configuration>
     <configuration name="index.html" type="JavascriptDebugType" temporary="true" nameIsGenerated="true" uri="http://localhost:63342/Budgeting_Application/src/main/resources/index.html" useBuiltInWebServerPort="true">
+      <method v="2" />
+    </configuration>
+    <configuration default="true" type="JetRunConfigurationType">
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <configuration default="true" type="KotlinStandaloneScriptRunConfigurationType">
+      <option name="filePath" />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <configuration default="true" type="PyBehaveRunConfigurationType" factoryName="Behave">
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <module name="" />
+      <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
+      <option name="ADDITIONAL_ARGS" value="" />
+      <method v="2" />
+    </configuration>
+    <configuration default="true" type="PythonConfigurationType" factoryName="Python">
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="" />
+      <option name="IS_MODULE_SDK" value="false" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <module name="" />
+      <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
+      <option name="SCRIPT_NAME" value="" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
+    <configuration default="true" type="Python.FlaskServer">
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="" />
+      <option name="IS_MODULE_SDK" value="false" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <module name="" />
+      <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
+      <option name="launchJavascriptDebuger" value="false" />
+      <method v="2" />
+    </configuration>
+    <configuration default="true" type="Tox" factoryName="Tox">
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="" />
+      <option name="IS_MODULE_SDK" value="false" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
       <method v="2" />
     </configuration>
     <list>
@@ -182,6 +256,7 @@
       <workItem from="1744583582140" duration="394000" />
       <workItem from="1745612065335" duration="19232000" />
       <workItem from="1746386996798" duration="28341000" />
+      <workItem from="1746577687355" duration="1165000" />
     </task>
     <task id="LOCAL-00001" summary="First Commit of login">
       <option name="closed" value="true" />
