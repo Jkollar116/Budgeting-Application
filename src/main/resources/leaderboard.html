@@ -116,32 +116,32 @@
             body.classList.add('dark-mode');
         }
     });
-    async function loadLeaderboard() {
-        try {
-            const res = await fetch('/api/leaderboard'); // You'll need to implement this handler
-            const data = await res.json();
-            const table = document.getElementById('leaderboardTable').querySelector('tbody');
-            table.innerHTML = "";
-
-            data.sort((a, b) => b.netWorth - a.netWorth);
-
-            data.forEach((user, index) => {
-                const row = document.createElement('tr');
-                row.innerHTML = `
-          <td>${index + 1}</td>
-          <td><img src="${user.profileImage || 'default.png'}" alt="Profile" /></td>
-          <td>${user.fullName || 'N/A'}</td>
-          <td>${user.careerDescription || 'N/A'}</td>
-          <td>$${user.netWorth?.toFixed(2) || '0.00'}</td>
-        `;
-                table.appendChild(row);
-            });
-        } catch (err) {
-            console.error("Error loading leaderboard:", err);
-        }
-    }
-
-    window.addEventListener("DOMContentLoaded", loadLeaderboard);
+    // async function loadLeaderboard() {
+    //     try {
+    //         const res = await fetch('/api/leaderboard'); // You'll need to implement this handler
+    //         const data = await res.json();
+    //         const table = document.getElementById('leaderboardTable').querySelector('tbody');
+    //         table.innerHTML = "";
+    //
+    //         data.sort((a, b) => b.netWorth - a.netWorth);
+    //
+    //         data.forEach((user, index) => {
+    //             const row = document.createElement('tr');
+    //             row.innerHTML = `
+    //       <td>${index + 1}</td>
+    //       <td><img src="${user.profileImage || 'default.png'}" alt="Profile" /></td>
+    //       <td>${user.fullName || 'N/A'}</td>
+    //       <td>${user.careerDescription || 'N/A'}</td>
+    //       <td>$${user.netWorth?.toFixed(2) || '0.00'}</td>
+    //     `;
+    //             table.appendChild(row);
+    //         });
+    //     } catch (err) {
+    //         console.error("Error loading leaderboard:", err);
+    //     }
+    // }
+    //
+    // window.addEventListener("DOMContentLoaded", loadLeaderboard);
 </script>
 </body>
 </html>
