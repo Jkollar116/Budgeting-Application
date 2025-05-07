@@ -4,13 +4,7 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="e72c0420-fe48-4af3-a363-18d6d8618447" name="Changes" comment="Reset some pages back to older working versions, the assets and liabilities UI is fixed now.">
-      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Checkout_at_3_1_25__4_51PM__Changes_.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Checkout_at_3_1_25__4_51PM__Changes_.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Checkout_at_3_3_25__1_10PM__Changes_.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Checkout_at_3_3_25__1_10PM__Changes_.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/example/Login.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/example/Login.java" afterDir="false" />
-    </list>
+    <list default="true" id="e72c0420-fe48-4af3-a363-18d6d8618447" name="Changes" comment="updated login for chat" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -256,7 +250,7 @@
       <workItem from="1744583582140" duration="394000" />
       <workItem from="1745612065335" duration="19232000" />
       <workItem from="1746386996798" duration="28341000" />
-      <workItem from="1746577687355" duration="1165000" />
+      <workItem from="1746577687355" duration="1546000" />
     </task>
     <task id="LOCAL-00001" summary="First Commit of login">
       <option name="closed" value="true" />
@@ -530,7 +524,15 @@
       <option name="project" value="LOCAL" />
       <updated>1746561890687</updated>
     </task>
-    <option name="localTasksCounter" value="35" />
+    <task id="LOCAL-00035" summary="updated login for chat">
+      <option name="closed" value="true" />
+      <created>1746578909400</created>
+      <option name="number" value="00035" />
+      <option name="presentableId" value="LOCAL-00035" />
+      <option name="project" value="LOCAL" />
+      <updated>1746578909400</updated>
+    </task>
+    <option name="localTasksCounter" value="36" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -548,7 +550,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="Fixed an issue where the login button on the forgot password page and register page did not correctly take you back to the login screen." />
     <MESSAGE value="Attempting to fix the API key issue by storing it in aws instead" />
     <MESSAGE value="updated js for aws" />
     <MESSAGE value="updated tge log in port" />
@@ -573,7 +574,8 @@
     <MESSAGE value="Slightly improved the ui for login, register, forgot password" />
     <MESSAGE value="Updated the ui in some pages, fixed issues that caused issues." />
     <MESSAGE value="Reset some pages back to older working versions, the assets and liabilities UI is fixed now." />
-    <option name="LAST_COMMIT_MESSAGE" value="Reset some pages back to older working versions, the assets and liabilities UI is fixed now." />
+    <MESSAGE value="updated login for chat" />
+    <option name="LAST_COMMIT_MESSAGE" value="updated login for chat" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>

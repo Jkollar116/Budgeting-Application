@@ -1778,7 +1778,12 @@ body.light-mode .message.user {
     background-color: #FF8C00;
     color: #fff;
 }
-
+.chat-window,
+.chat-window .message,
+.chat-input input,
+.chat-input button {
+    color: #000 !important;
+}
 body.light-mode .message.bot {
     background-color: #ffffff;
     border: 1px solid #ccc;
