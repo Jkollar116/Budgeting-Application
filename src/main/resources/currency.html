@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Currency Converter</title>
+    <link rel="stylesheet" href="style.css">
+<!--    <style>-->
+<!--        .converter-container {-->
+<!--            max-width: 500px;-->
+<!--            margin: 40px auto;-->
+<!--            padding: 20px;-->
+<!--            background-color: #f9f9f9;-->
+<!--            border-radius: 8px;-->
+<!--            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);-->
+<!--        }-->
+
+<!--        .converter-container h2 {-->
+<!--            text-align: center;-->
+<!--            margin-bottom: 20px;-->
+<!--        }-->
+
+<!--        .form-group {-->
+<!--            margin-bottom: 15px;-->
+<!--        }-->
+
+<!--        label {-->
+<!--            display: block;-->
+<!--            margin-bottom: 5px;-->
+<!--        }-->
+
+<!--        select, input[type="number"] {-->
+<!--            width: 100%;-->
+<!--            padding: 8px;-->
+<!--            box-sizing: border-box;-->
+<!--        }-->
+
+<!--        .submit-btn {-->
+<!--            width: 100%;-->
+<!--            padding: 10px;-->
+<!--            margin-top: 10px;-->
+<!--            background-color: #0077cc;-->
+<!--            color: white;-->
+<!--            border: none;-->
+<!--            border-radius: 4px;-->
+<!--            cursor: pointer;-->
+<!--        }-->
+
+<!--        .submit-btn:hover {-->
+<!--            background-color: #005fa3;-->
+<!--        }-->
+
+<!--        .result {-->
+<!--            margin-top: 20px;-->
+<!--            font-size: 1.2em;-->
+<!--            text-align: center;-->
+<!--        }-->
+<!--    </style>-->
+</head>
+<body>
+<header>
+    <div class="logo">CashClimb</div>
+    <nav>
+        <ul class="nav-items">
+            <li class="profile-link-container">
+                <a href="profile.html">
+                    <img id="navProfileImage" class="nav-profile-img" alt="Profile" />
+                </a>
+                <a href="profile.html" class="active">Profile</a>
+            </li>
+        </ul>
+    </nav>
+</header>
+<button class="drawer-toggle" onclick="toggleDrawer()">☰</button>
+<nav class="drawer" id="sideDrawer">
+    <ul>
+        <li><a href="home.html">Dashboard</a></li>
+        <li><a href="alerts.html">Alerts Page (Not Done)</a></li>
+        <li><a href="assetsLiabilities.html" class="active">Assets &amp; Liabilities</a></li>
+        <li><a href="bills.html">Bills Page</a></li>
+        <li><a href="budget.html">Budget</a></li>
+        <li><a href="chat.html">Chat</a></li>
+        <li><a href="crypto.html">Crypto</a></li>
+        <li><a href="expenses.html">Expenses</a></li>
+        <li><a href="income.html">Income</a></li>
+        <li><a href="leaderboard.html">Leaderboard</a></li>
+        <li><a href="netWorth.html">Net Worth</a></li>
+        <li><a href="tips.html">Tips</a></li>
+        <li><a href="savedTips.html">Saved Tips</a></li>
+        <li><a href="stocks.html">Stocks</a></li>
+        <li><a href="tax.html">Tax</a></li>
+        <li><a href="profile.html">Profile</a></li>
+        <li><a href="settings.html">Settings</a></li>
+        <li><a href="/logout">Logout</a></li>
+    </ul>
+</nav>
+<main>
+    <div class="hero">
+        <div class="header-content">
+            <h1>Currency Converter</h1>
+            <p>Convert Currency Here</p>
+        </div>
+    </div>
+    <div class="container">
+        <h2>Currency Converter</h2>
+        <form id="converterForm">
+            <div class="form-group">
+                <label for="amount">Amount</label>
+                <input type="number" id="amount" name="amount" required min="0" step="any">
+            </div>
+            <div class="form-group">
+                <label for="fromCurrency">From</label>
+                <select id="fromCurrency"></select>
+            </div>
+            <div class="form-group">
+                <label for="toCurrency">To</label>
+                <select id="toCurrency"></select>
+            </div>
+            <button type="submit" class="submit-btn">Convert</button>
+        </form>
+    </div>
+    <div id="result" class="result-container"></div>
+</main>
+
+<script>
+    function toggleDrawer() {
+        const drawer = document.getElementById('sideDrawer');
+        drawer.classList.toggle('collapsed');
+    }
+
+    function getThemePreference(name) {
+        const match = document.cookie.match(new RegExp('(^| )' + name + '=([^;]+)'));
+        if (!match) return null;
+        return match[2];
+    }
+
+    window.addEventListener('pageshow', function(event) {
+        if (event.persisted) window.location.reload();
+    });
+
+    window.addEventListener('DOMContentLoaded', () => {
+        const savedTheme = getThemePreference('theme');
+        const body = document.body;
+
+        body.classList.remove('light-mode', 'dark-mode');
+        if (savedTheme === 'light') {
+            body.classList.add('light-mode');
+        } else if (savedTheme === 'dark') {
+            body.classList.add('dark-mode');
+        }
+        loadTaxData();
+    });
+    let rates = {};
+
+    async function loadRates() {
+        try {
+            const res = await fetch('rates.json');
+            rates = await res.json();
+
+            const fromSelect = document.getElementById('fromCurrency');
+            const toSelect = document.getElementById('toCurrency');
+
+            for (const currency in rates) {
+                const option1 = document.createElement("option");
+                option1.value = currency;
+                option1.textContent = currency;
+                fromSelect.appendChild(option1);
+
+                const option2 = option1.cloneNode(true);
+                toSelect.appendChild(option2);
+            }
+
+            fromSelect.value = 'USD';
+            toSelect.value = 'EUR';
+        } catch (e) {
+            document.getElementById("result").textContent = "Failed to load exchange rates.";
+            console.error("Rate loading error:", e);
+        }
+    }
+
+    document.getElementById("converterForm").addEventListener("submit", function (e) {
+        e.preventDefault();
+        const amount = parseFloat(document.getElementById("amount").value);
+        const from = document.getElementById("fromCurrency").value;
+        const to = document.getElementById("toCurrency").value;
+
+        if (!rates[from] || !rates[to]) {
+            document.getElementById("result").textContent = "Invalid currency selected.";
+            return;
+        }
+
+        const converted = amount * (rates[to] / rates[from]);
+        document.getElementById("result").textContent = `${amount} ${from} = ${converted.toFixed(2)} ${to}`;
+    });
+
+    window.addEventListener("DOMContentLoaded", loadRates);
+    window.addEventListener("DOMContentLoaded", function () {
+        fetch("/api/profile", {
+            method: "GET",
+            headers: { "Content-Type": "application/json" }
+        })
+            .then(res => res.json())
+            .then(data => {
+                const fields = data.fields || {};
+                if (fields.profileImage) {
+                    const base64Image = fields.profileImage.stringValue;
+                    const navImg = document.getElementById("navProfileImage");
+                    if (navImg) navImg.src = base64Image;
+                }
+            });
+    });
+</script>
+</body>
+</html>

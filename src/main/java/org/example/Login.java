@@ -40,19 +40,19 @@ public class Login {
         // Register stock API endpoints with more specific paths first
         HttpContext apiStockOrderWithIdContext = server.createContext("/api/stocks/orders/", new StockHandler());
         apiStockOrderWithIdContext.getFilters().add(new AuthFilter());
-        
+
         HttpContext apiStockHistoryContext = server.createContext("/api/stocks/history", new StockHandler());
         apiStockHistoryContext.getFilters().add(new AuthFilter());
-        
+
         HttpContext apiStockAccountContext = server.createContext("/api/stocks/account", new StockHandler());
         apiStockAccountContext.getFilters().add(new AuthFilter());
-        
+
         HttpContext apiStockPortfolioContext = server.createContext("/api/stocks/portfolio", new StockHandler());
         apiStockPortfolioContext.getFilters().add(new AuthFilter());
-        
+
         HttpContext apiStockOrdersContext = server.createContext("/api/stocks/orders", new StockHandler());
         apiStockOrdersContext.getFilters().add(new AuthFilter());
-        
+
         // Register specific stock symbol route for getting individual stocks
         // Using /api/stocks with explicit symbols rather than the overly broad /api/stocks/
         HttpContext apiStockSymbolContext = server.createContext("/api/stocks", new StockHandler());
@@ -77,17 +77,17 @@ public class Login {
         // Register AlertsHandler for all alert-related endpoints
         HttpContext apiAlertsContext = server.createContext("/api/alerts", new AlertsHandler());
         apiAlertsContext.getFilters().add(new AuthFilter());
-        
+
         HttpContext apiAlertsReadContext = server.createContext("/api/alerts/read", new AlertsHandler());
         apiAlertsReadContext.getFilters().add(new AuthFilter());
-        
+
         HttpContext apiAlertsTriggerContext = server.createContext("/api/alerts/trigger/check", new AlertsHandler());
         apiAlertsTriggerContext.getFilters().add(new AuthFilter());
-        
+
         // This is for handling delete operations on specific alerts
         HttpContext apiAlertsWithIdContext = server.createContext("/api/alerts/", new AlertsHandler());
         apiAlertsWithIdContext.getFilters().add(new AuthFilter());
-        
+
         HttpContext apiAssets = server.createContext("/api/assets", new AssetsLiabilitiesHandler("Assets"));
         apiAssets.getFilters().add(new AuthFilter());
 
@@ -99,7 +99,7 @@ public class Login {
         // Return to using StaticFileHandler for stocks.html with proper auth filter
         HttpContext stocksContext = server.createContext("/stocks.html", new StaticFileHandler());
         stocksContext.getFilters().add(new AuthFilter());
-        
+
         // Add our simplified stocks page for testing
         HttpContext stocksSimpleContext = server.createContext("/stocks-simple.html", new StaticFileHandler());
         stocksSimpleContext.getFilters().add(new AuthFilter());
@@ -117,24 +117,24 @@ public class Login {
         chatContext.getFilters().add(new AuthFilter());
         HttpContext leaderboardContext = server.createContext("/leaderboard.html", new StaticFileHandler());
         leaderboardContext.getFilters().add(new AuthFilter());
-        HttpContext apiLeaderboardContext = server.createContext("/api/leaderboard", new LeaderboardHandler());
-        apiLeaderboardContext.getFilters().add(new AuthFilter());
-        
-        HttpContext apiNetworthContext = server.createContext("/api/networth", new NetWorthHandler());
-        apiNetworthContext.getFilters().add(new AuthFilter());
-        HttpContext apiNetworthCalculateContext = server.createContext("/api/networth/calculate", new NetWorthHandler());
-        apiNetworthCalculateContext.getFilters().add(new AuthFilter());
-        
+//        HttpContext apiLeaderboardContext = server.createContext("/api/leaderboard", new LeaderboardHandler());
+//        apiLeaderboardContext.getFilters().add(new AuthFilter());
+
+//        HttpContext apiNetworthContext = server.createContext("/api/netWorth", new NetWorthHandler());
+//        apiNetworthContext.getFilters().add(new AuthFilter());
+//        HttpContext apiNetworthCalculateContext = server.createContext("/api/netWorth/calculate", new NetWorthHandler());
+//        apiNetworthCalculateContext.getFilters().add(new AuthFilter());
+
         HttpContext apiBillsContext = server.createContext("/api/bills", new BillsHandler());
         apiBillsContext.getFilters().add(new AuthFilter());
 
         HttpContext billsContext = server.createContext("/bills.html", new StaticFileHandler());
         billsContext.getFilters().add(new AuthFilter());
-        
+
         // Handle bills with IDs for update/delete operations
         HttpContext apiBillsWithIdContext = server.createContext("/api/bills/", new BillsHandler());
         apiBillsWithIdContext.getFilters().add(new AuthFilter());
-        
+
         HttpContext alertsContext = server.createContext("/alerts.html", new StaticFileHandler());
         alertsContext.getFilters().add(new AuthFilter());
         HttpContext apiPaychecksContext = server.createContext("/api/paychecks", new BudgetHandler());
@@ -143,11 +143,11 @@ public class Login {
         HttpContext apiPaycheckById = server.createContext("/api/paychecks/", new BudgetHandler());
         apiPaycheckById.getFilters().add(new AuthFilter());
 
-        HttpContext apiGoalsContext = server.createContext("/api/goals", new GoalsHandler());
-        apiGoalsContext.getFilters().add(new AuthFilter());
-
-        HttpContext apiGoalById = server.createContext("/api/goals/", new GoalsHandler());
-        apiGoalById.getFilters().add(new AuthFilter());
+//        HttpContext apiGoalsContext = server.createContext("/api/goals", new GoalsHandler());
+//        apiGoalsContext.getFilters().add(new AuthFilter());
+//
+//        HttpContext apiGoalById = server.createContext("/api/goals/", new GoalsHandler());
+//        apiGoalById.getFilters().add(new AuthFilter());
 
         HttpContext savingsTipsContext = server.createContext("/savingsTips.html", new StaticFileHandler());
         savingsTipsContext.getFilters().add(new AuthFilter());
@@ -155,6 +155,8 @@ public class Login {
         tipsContext.getFilters().add(new AuthFilter());
         HttpContext budgetContext = server.createContext("/budget.html", new StaticFileHandler());
         budgetContext.getFilters().add(new AuthFilter());
+        HttpContext netWorthContext = server.createContext("/netWorth.html", new StaticFileHandler());
+        netWorthContext.getFilters().add(new AuthFilter());
         server.setExecutor(null);
         server.start();
         if (Desktop.isDesktopSupported()) {
