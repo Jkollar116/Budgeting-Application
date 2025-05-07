@@ -625,16 +625,16 @@ public class AlertsHandler implements HttpHandler {
         int alertsCreated = 0;
         try {
             // Get user's financial goals
-            String goalsUrl = "https://firestore.googleapis.com/v1/projects/cashclimb-d162c/databases/(default)/documents/Users/" 
+            String goalsUrl = "https://firestore.googleapis.com/v1/projects/cashclimb-d162c/databases/(default)/documents/Users/"
                     + localId + "/Goals";
-            
+
             URL url = new URL(goalsUrl);
             HttpURLConnection conn = (HttpURLConnection) url.openConnection();
             conn.setRequestMethod("GET");
             conn.setRequestProperty("Authorization", "Bearer " + idToken);
-            
+
             int responseCode = conn.getResponseCode();
-            
+
             if (responseCode == 200) {
                 BufferedReader in = new BufferedReader(new InputStreamReader(conn.getInputStream(), StandardCharsets.UTF_8));
                 StringBuilder response = new StringBuilder();
@@ -643,20 +643,20 @@ public class AlertsHandler implements HttpHandler {
                     response.append(line);
                 }
                 in.close();
-                
+
                 JSONObject firebaseResponse = new JSONObject(response.toString());
-                
+
                 if (firebaseResponse.has("documents")) {
                     JSONArray documents = firebaseResponse.getJSONArray("documents");
-                    
+
                     // Get user's current net worth
-                    double netWorth = getUserNetWorth(idToken, localId);
-                    
+                    //double netWorth = getUserNetWorth(idToken, localId);
+
                     // Check each goal
                     for (int i = 0; i < documents.length(); i++) {
                         JSONObject document = documents.getJSONObject(i);
                         JSONObject fields = document.getJSONObject("fields");
-                        
+
                         if (fields.has("targetAmount") && fields.has("type")) {
                             double targetAmount = 0;
                             if (fields.getJSONObject("targetAmount").has("doubleValue")) {
@@ -664,52 +664,52 @@ public class AlertsHandler implements HttpHandler {
                             } else if (fields.getJSONObject("targetAmount").has("integerValue")) {
                                 targetAmount = fields.getJSONObject("targetAmount").getInt("integerValue");
                             }
-                            
+
                             String goalType = fields.getJSONObject("type").getString("stringValue");
-                            
-                            if (goalType.equals("netWorth") && netWorth >= targetAmount) {
-                                // Goal achieved
-                                boolean achieved = fields.has("achieved") && fields.getJSONObject("achieved").getBoolean("booleanValue");
-                                
-                                if (!achieved) {
-                                    // Get document ID
-                                    String name = document.getString("name");
-                                    String id = name.substring(name.lastIndexOf('/') + 1);
-                                    
-                                    // Update goal to mark as achieved
-                                    String updateUrl = "https://firestore.googleapis.com/v1/projects/cashclimb-d162c/databases/(default)/documents/Users/" 
-                                            + localId + "/Goals/" + id;
-                                    
-                                    URL updateUrlObj = new URL(updateUrl);
-                                    HttpURLConnection updateConn = (HttpURLConnection) updateUrlObj.openConnection();
-                                    updateConn.setRequestMethod("PATCH");
-                                    updateConn.setRequestProperty("Content-Type", "application/json");
-                                    updateConn.setRequestProperty("Authorization", "Bearer " + idToken);
-                                    updateConn.setDoOutput(true);
-                                    
-                                    JSONObject updateData = new JSONObject();
-                                    JSONObject updateFields = new JSONObject();
-                                    updateFields.put("achieved", new JSONObject().put("booleanValue", true));
-                                    updateFields.put("achievedDate", new JSONObject().put("timestampValue", Instant.now().toString()));
-                                    updateData.put("fields", updateFields);
-                                    
-                                    OutputStream os = updateConn.getOutputStream();
-                                    os.write(updateData.toString().getBytes(StandardCharsets.UTF_8));
-                                    os.close();
-                                    
-                                    int updateResponseCode = updateConn.getResponseCode();
-                                    
-                                    if (updateResponseCode == 200) {
-                                        // Create alert for achieved goal
-                                        String goalName = fields.has("name") ? fields.getJSONObject("name").getString("stringValue") : "Financial Goal";
-                                        String title = "Goal Achieved!";
-                                        String message = String.format("Congratulations! You've achieved your goal of reaching $%.2f net worth.", targetAmount);
-                                        
-                                        createAlert(idToken, localId, title, message, "goal_achieved", id);
-                                        alertsCreated++;
-                                    }
-                                }
-                            }
+
+//                            if (goalType.equals("netWorth") && netWorth >= targetAmount) {
+//                                // Goal achieved
+//                                boolean achieved = fields.has("achieved") && fields.getJSONObject("achieved").getBoolean("booleanValue");
+//
+//                                if (!achieved) {
+//                                    // Get document ID
+//                                    String name = document.getString("name");
+//                                    String id = name.substring(name.lastIndexOf('/') + 1);
+//
+//                                    // Update goal to mark as achieved
+//                                    String updateUrl = "https://firestore.googleapis.com/v1/projects/cashclimb-d162c/databases/(default)/documents/Users/"
+//                                            + localId + "/Goals/" + id;
+//
+//                                    URL updateUrlObj = new URL(updateUrl);
+//                                    HttpURLConnection updateConn = (HttpURLConnection) updateUrlObj.openConnection();
+//                                    updateConn.setRequestMethod("PATCH");
+//                                    updateConn.setRequestProperty("Content-Type", "application/json");
+//                                    updateConn.setRequestProperty("Authorization", "Bearer " + idToken);
+//                                    updateConn.setDoOutput(true);
+//
+//                                    JSONObject updateData = new JSONObject();
+//                                    JSONObject updateFields = new JSONObject();
+//                                    updateFields.put("achieved", new JSONObject().put("booleanValue", true));
+//                                    updateFields.put("achievedDate", new JSONObject().put("timestampValue", Instant.now().toString()));
+//                                    updateData.put("fields", updateFields);
+//
+//                                    OutputStream os = updateConn.getOutputStream();
+//                                    os.write(updateData.toString().getBytes(StandardCharsets.UTF_8));
+//                                    os.close();
+//
+//                                    int updateResponseCode = updateConn.getResponseCode();
+//
+//                                    if (updateResponseCode == 200) {
+//                                        // Create alert for achieved goal
+//                                        String goalName = fields.has("name") ? fields.getJSONObject("name").getString("stringValue") : "Financial Goal";
+//                                        String title = "Goal Achieved!";
+//                                        String message = String.format("Congratulations! You've achieved your goal of reaching $%.2f net worth.", targetAmount);
+//
+//                                        createAlert(idToken, localId, title, message, "goal_achieved", id);
+//                                        alertsCreated++;
+//                                    }
+//                                }
+//                            }
                         }
                     }
                 }
@@ -1013,47 +1013,47 @@ public class AlertsHandler implements HttpHandler {
     /**
      * Get the user's current net worth
      */
-    private double getUserNetWorth(String idToken, String localId) {
-        double netWorth = 0.0;
-        
-        try {
-            String userUrl = "https://firestore.googleapis.com/v1/projects/cashclimb-d162c/databases/(default)/documents/Users/" + localId;
-            
-            URL url = new URL(userUrl);
-            HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-            conn.setRequestMethod("GET");
-            conn.setRequestProperty("Authorization", "Bearer " + idToken);
-            
-            int responseCode = conn.getResponseCode();
-            
-            if (responseCode == 200) {
-                BufferedReader in = new BufferedReader(new InputStreamReader(conn.getInputStream(), StandardCharsets.UTF_8));
-                StringBuilder response = new StringBuilder();
-                String line;
-                while ((line = in.readLine()) != null) {
-                    response.append(line);
-                }
-                in.close();
-                
-                JSONObject userDoc = new JSONObject(response.toString());
-                
-                if (userDoc.has("fields") && userDoc.getJSONObject("fields").has("netWorth")) {
-                    JSONObject netWorthField = userDoc.getJSONObject("fields").getJSONObject("netWorth");
-                    
-                    if (netWorthField.has("doubleValue")) {
-                        netWorth = netWorthField.getDouble("doubleValue");
-                    } else if (netWorthField.has("integerValue")) {
-                        netWorth = netWorthField.getInt("integerValue");
-                    }
-                }
-            }
-        } catch (Exception e) {
-            System.out.println("Error getting user net worth: " + e.getMessage());
-            e.printStackTrace();
-        }
-        
-        return netWorth;
-    }
+//    private double getUserNetWorth(String idToken, String localId) {
+//        double netWorth = 0.0;
+//
+//        try {
+//            String userUrl = "https://firestore.googleapis.com/v1/projects/cashclimb-d162c/databases/(default)/documents/Users/" + localId;
+//
+//            URL url = new URL(userUrl);
+//            HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+//            conn.setRequestMethod("GET");
+//            conn.setRequestProperty("Authorization", "Bearer " + idToken);
+//
+//            int responseCode = conn.getResponseCode();
+//
+//            if (responseCode == 200) {
+//                BufferedReader in = new BufferedReader(new InputStreamReader(conn.getInputStream(), StandardCharsets.UTF_8));
+//                StringBuilder response = new StringBuilder();
+//                String line;
+//                while ((line = in.readLine()) != null) {
+//                    response.append(line);
+//                }
+//                in.close();
+//
+//                JSONObject userDoc = new JSONObject(response.toString());
+//
+//                if (userDoc.has("fields") && userDoc.getJSONObject("fields").has("netWorth")) {
+//                    JSONObject netWorthField = userDoc.getJSONObject("fields").getJSONObject("netWorth");
+//
+//                    if (netWorthField.has("doubleValue")) {
+//                        netWorth = netWorthField.getDouble("doubleValue");
+//                    } else if (netWorthField.has("integerValue")) {
+//                        netWorth = netWorthField.getInt("integerValue");
+//                    }
+//                }
+//            }
+//        } catch (Exception e) {
+//            System.out.println("Error getting user net worth: " + e.getMessage());
+//            e.printStackTrace();
+//        }
+//
+//        return netWorth;
+//    }
     
     /**
      * Extract a cookie value from the cookie string

@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Tax Calculator</title>
+    <title>Net Worth Calculator</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -42,52 +42,106 @@
         <li><a href="/logout">Logout</a></li>
     </ul>
 </nav>
-<main>
 
+<main>
+    <div class="hero">
+        <div class="header-content">
+            <h1>Net Worth Calculator</h1>
+            <p>Enter your financial information below.</p>
+        </div>
+    </div>
+    <div class="container">
+        <form id="netWorthForm" class="profile-form">
+            <div class="form-group">
+                <label for="assetsLiabilities">Assets - Liabilities ($)</label>
+                <input type="number" id="assetsLiabilities" name="assetsLiabilities" required>
+            </div>
+            <div class="form-group">
+                <label for="crypto">Crypto Holdings ($)</label>
+                <input type="number" id="crypto" name="crypto" required>
+            </div>
+            <div class="form-group">
+                <label for="stocks">Stock Holdings ($)</label>
+                <input type="number" id="stocks" name="stocks" required>
+            </div>
+
+            <div id="result" class="result-container"></div>
+
+            <button type="button" class="submit-btn" onclick="calculateNetWorth()">Calculate</button>
+            <button type="submit" class="submit-btn">Save Net Worth</button>
+        </form>
+    </div>
 </main>
-</body>
+
 <script>
     function toggleDrawer() {
-        const drawer = document.getElementById('sideDrawer');
-        drawer.classList.toggle('collapsed');
+        document.getElementById('sideDrawer').classList.toggle('collapsed');
     }
 
     function getThemePreference(name) {
         const match = document.cookie.match(new RegExp('(^| )' + name + '=([^;]+)'));
-        if (!match) return null;
-        return match[2];
+        return match ? match[2] : null;
     }
 
-    window.addEventListener('pageshow', function(event) {
-        if (event.persisted) window.location.reload();
-    });
+    function calculateNetWorth() {
+        const aL = parseFloat(document.getElementById("assetsLiabilities").value) || 0;
+        const crypto = parseFloat(document.getElementById("crypto").value) || 0;
+        const stocks = parseFloat(document.getElementById("stocks").value) || 0;
+        const netWorth = aL + crypto + stocks;
+        document.getElementById("result").textContent = "Net Worth: $" + netWorth.toFixed(2);
+    }
 
-    window.addEventListener('DOMContentLoaded', () => {
-        const savedTheme = getThemePreference('theme');
-        const body = document.body;
+    function saveNetWorthToFirebase() {
+        const netWorthText = document.getElementById("result").textContent;
 
-        body.classList.remove('light-mode', 'dark-mode');
-        if (savedTheme === 'light') {
-            body.classList.add('light-mode');
-        } else if (savedTheme === 'dark') {
-            body.classList.add('dark-mode');
+        if (!netWorthText || !netWorthText.includes("Net Worth: $")) {
+            alert("Please calculate your net worth before saving.");
+            return;
         }
-        loadTaxData();
+
+        const netWorthValue = netWorthText.replace("Net Worth: $", "").trim();
+
+        fetch("/api/profile", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ netWorth: parseFloat(netWorthValue) })
+        })
+            .then(res => {
+                if (res.ok) {
+                    alert("Net worth saved.");
+                } else {
+                    alert("Save failed.");
+                }
+            })
+            .catch(() => alert("Save error."));
+    }
+
+    document.getElementById("netWorthForm").addEventListener("submit", function (e) {
+        e.preventDefault();
+        calculateNetWorth();
+        saveNetWorthToFirebase();
     });
-    window.addEventListener("DOMContentLoaded", function () {
+
+    window.addEventListener("DOMContentLoaded", () => {
+        const theme = getThemePreference('theme');
+        const body = document.body;
+        if (theme === 'light') body.classList.add('light-mode');
+        else if (theme === 'dark') body.classList.add('dark-mode');
+
+        // Load net worth and profile image
         fetch("/api/profile", {
             method: "GET",
             headers: { "Content-Type": "application/json" }
-        })
-            .then(res => res.json())
-            .then(data => {
-                const fields = data.fields || {};
-                if (fields.profileImage) {
-                    const base64Image = fields.profileImage.stringValue;
-                    const navImg = document.getElementById("navProfileImage");
-                    if (navImg) navImg.src = base64Image;
-                }
-            });
+        }).then(res => res.json()).then(data => {
+            const fields = data.fields || {};
+            if (fields.netWorth) {
+                const netWorth = parseFloat(fields.netWorth.doubleValue);
+                document.getElementById("result").textContent = "Net Worth: $" + netWorth.toFixed(2);
+            }
+            const img = fields.profileImage?.stringValue;
+            if (img) document.getElementById("navProfileImage").src = img;
+        });
     });
 </script>
+</body>
 </html>
