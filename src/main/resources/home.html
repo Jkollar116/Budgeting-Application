@@ -2,207 +2,8 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>CashClimb Dashboard</title>
+    <title>BudgetApp Home</title>
     <link rel="stylesheet" href="style.css">
-    <!-- Add Chart.js library -->
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <style>
-        /* Dashboard specific styles */
-        .dashboard {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 20px;
-            padding: 20px;
-            max-width: 1600px;
-            margin: 0 auto;
-        }
-
-        .card {
-            background: #3E1F5B;
-            border-radius: 12px;
-            padding: 20px;
-            color: white;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
-        }
-
-        .card h2 {
-            margin-top: 0;
-            color: #FF8C00;
-            font-size: 1.5em;
-            margin-bottom: 15px;
-            padding-bottom: 10px;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .card h2 i {
-            font-size: 1.2em;
-        }
-
-        /* Chart container */
-        .chart-container {
-            position: relative;
-            height: 220px;
-            width: 100%;
-        }
-
-        /* Progress bar styles */
-        .progress-bar {
-            width: 100%;
-            height: 20px;
-            background-color: #e0e0e0;
-            border-radius: 10px;
-            margin: 10px 0;
-            overflow: hidden;
-        }
-
-        .progress {
-            height: 100%;
-            background-color: #FF8C00;
-            border-radius: 10px;
-        }
-
-        /* Chart filter styles */
-        .chart-filters {
-            margin-bottom: 15px;
-        }
-
-        .chart-filter {
-            background-color: rgba(62, 31, 91, 0.7);
-            color: white;
-            border: 1px solid rgba(255, 140, 0, 0.5);
-            padding: 5px 10px;
-            border-radius: 4px;
-            width: 100%;
-            max-width: 200px;
-            font-size: 0.9em;
-        }
-
-        .filter-buttons {
-            display: flex;
-            gap: 5px;
-            flex-wrap: wrap;
-        }
-
-        .filter-btn {
-            background-color: rgba(62, 31, 91, 0.7);
-            color: white;
-            border: 1px solid rgba(255, 140, 0, 0.5);
-            padding: 5px 10px;
-            border-radius: 4px;
-            font-size: 0.8em;
-            cursor: pointer;
-            transition: all 0.2s ease;
-        }
-
-        .filter-btn:hover {
-            background-color: rgba(255, 140, 0, 0.2);
-        }
-
-        .filter-btn.active {
-            background-color: #FF8C00;
-            color: white;
-            border-color: #FF8C00;
-        }
-
-        .goal-item {
-            background: rgba(62, 31, 91, 0.5);
-            padding: 15px;
-            margin-bottom: 15px;
-            border-radius: 8px;
-            position: relative;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            transition: all 0.3s ease;
-        }
-
-        .goal-item:hover {
-            box-shadow: 0 2px 8px rgba(255, 140, 0, 0.3);
-            border-color: rgba(255, 140, 0, 0.3);
-        }
-
-        .goal-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 8px;
-        }
-
-        .goal-header h3 {
-            margin: 0;
-            color: #FF8C00;
-            font-size: 1.1em;
-        }
-
-        .goal-actions {
-            display: flex;
-            gap: 5px;
-        }
-
-        .goal-edit-btn, .goal-delete-btn {
-            background: none;
-            border: none;
-            color: white;
-            cursor: pointer;
-            font-size: 1em;
-            padding: 2px 5px;
-            opacity: 0.7;
-            transition: opacity 0.2s ease;
-        }
-
-        .goal-edit-btn:hover, .goal-delete-btn:hover {
-            opacity: 1;
-        }
-
-        .goal-info {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 5px;
-            font-size: 0.9em;
-            color: #e0e0e0;
-        }
-
-        .goal-percentage {
-            font-weight: bold;
-            color: #FF8C00;
-        }
-
-        .goal-estimate {
-            font-size: 0.8em;
-            color: #aaa;
-            margin-top: 5px;
-            text-align: right;
-        }
-
-        .btn-add-goal {
-            background: #FF8C00;
-            color: white;
-            border: none;
-            padding: 10px 15px;
-            border-radius: 6px;
-            cursor: pointer;
-            margin-top: 15px;
-            font-weight: bold;
-        }
-
-        .btn-add-goal:hover {
-            background: #ff9d2d;
-        }
-
-        /* Responsive grid */
-        @media (max-width: 1200px) {
-            .dashboard {
-                grid-template-columns: repeat(2, 1fr);
-            }
-        }
-
-        @media (max-width: 768px) {
-            .dashboard {
-                grid-template-columns: 1fr;
-            }
-        }
-    </style>
 </head>
 <body>
 <header>
@@ -231,6 +32,29 @@
         <li><a href="settings.html">Settings</a></li>
         <li><a href="/logout">Logout</a></li>
         <li><a href="bills.html">Bills Page (Not Done)</a></li>
+        <!--
+        Add net worth amount to profile
+        -->
+        <li><a href="profile.html">Profile</a></li>
+        <li><a href="settings.html">Settings</a></li>
+        <!--
+        This is not working as it's supposed to
+        -->
+        <li><a href="/logout">Logout</a></li>
+        <li><a href="bills.html">Bills Page (Not Done)</a></li>
+        <!--
+        Everything Below this is incomplete, add as its completed, the page below this comment
+        section that actually works, has a template for including the side drawer, and relevant
+        javascript for the theme change. Copy and paste that to any html and you should be fine
+        <li><a href="leaderboard.html">Leaderboard</a></li>
+        <li><a href="reminders.html">Set Reminders</a></li>
+        <li><a href="alerts.html">Alerts</a></li>
+        <li><a href="assetsLiabilities.html">Assets & Liabilities</a></li>
+        <li><a href="reports.html">Reports</a></li>
+        <li><a href="netWorth.html">Net Worth</a></li>
+        <li><a href="financialTips.html">Financial Tips</a></li>
+        <li><a href="goals.html">Goals and Limits</a></li>
+        -->
         <li><a href="leaderboard.html">Leaderboard</a></li>
     </ul>
 </nav>
@@ -243,140 +67,27 @@
     </section>
     <div class="dashboard">
         <div class="card" id="netWorthCard">
-            <h2>💰 Net Worth</h2>
-            <p id="netWorthDisplay">$0</p>
-            <!-- Time period filter for net worth -->
-            <div class="chart-filters">
-                <select id="netWorthPeriod" class="chart-filter">
-                    <option value="1m">1 Month</option>
-                    <option value="3m">3 Months</option>
-                    <option value="6m">6 Months</option>
-                    <option value="1y" selected>1 Year</option>
-                    <option value="all">All Time</option>
-                </select>
-            </div>
-            <div class="chart-container">
-                <canvas id="netWorthChart"></canvas>
-            </div>
+            <h2>Net Worth</h2>
+            <p id="netWorthDisplay"></p>
+            <div id="netWorthChart"></div>
         </div>
-
         <div class="card" id="incomeCard">
-            <h2>💵 Total Income</h2>
-            <p id="totalIncomeDisplay">$0</p>
-            <!-- Income type filter -->
-            <div class="chart-filters">
-                <div class="filter-buttons" id="incomeTypeFilter">
-                    <button class="filter-btn active" data-value="all">All</button>
-                    <button class="filter-btn" data-value="salary">Salary</button>
-                    <button class="filter-btn" data-value="bonus">Bonus</button>
-                    <button class="filter-btn" data-value="other">Other</button>
-                </div>
-            </div>
-            <div class="chart-container">
-                <canvas id="incomeChart"></canvas>
-            </div>
+            <h2>Total Income</h2>
+            <p id="totalIncomeDisplay"></p>
+            <div id="incomeChart"></div>
         </div>
-
         <div class="card" id="expensesCard">
-            <h2>📊 Total Expenses</h2>
-            <p id="totalExpensesDisplay">$0</p>
-            <!-- Expense category filter -->
-            <div class="chart-filters">
-                <select id="expenseViewType" class="chart-filter">
-                    <option value="category" selected>By Category</option>
-                    <option value="monthly">By Month</option>
-                    <option value="weekly">By Week</option>
-                </select>
-            </div>
-            <div class="chart-container">
-                <canvas id="expensesPieChart"></canvas>
-            </div>
+            <h2>Total Expenses</h2>
+            <p id="totalExpensesDisplay"></p>
+            <div id="expensesPieChart"></div>
         </div>
-
         <div class="card" id="billsCard">
-            <h2>📅 Bills Due</h2>
-            <div id="billRemindersDisplay"><h1>0</h1></div>
+            <h2>Bills Due</h2>
+            <div id="billRemindersDisplay"></div>
         </div>
-
         <div class="card" id="chartCard">
-            <h2>📈 Monthly Expenses</h2>
-            <!-- Time period filter for monthly expenses -->
-            <div class="chart-filters">
-                <div class="filter-buttons" id="monthlyExpensesPeriod">
-                    <button class="filter-btn" data-value="3m">3 Months</button>
-                    <button class="filter-btn active" data-value="6m">6 Months</button>
-                    <button class="filter-btn" data-value="1y">1 Year</button>
-                </div>
-            </div>
-            <div class="chart-container">
-                <canvas id="monthlyExpensesChart"></canvas>
-            </div>
-        </div>
-
-        <div class="card" id="goalsCard">
-            <h2>🎯 Financial Goals</h2>
-            <div class="chart-filters">
-                <select id="goalsSortBy" class="chart-filter">
-                    <option value="progress">Sort by Progress</option>
-                    <option value="amount">Sort by Amount</option>
-                    <option value="alphabet">Sort by Name</option>
-                    <option value="recent" selected>Most Recent First</option>
-                </select>
-            </div>
-            <div id="goals-container">
-                <div class="goal-item" data-id="goal-1" data-progress="2500" data-target="5000">
-                    <div class="goal-header">
-                        <h3 class="goal-name">Emergency Fund</h3>
-                        <div class="goal-actions">
-                            <button class="goal-edit-btn" title="Update Progress"><i>✏️</i></button>
-                            <button class="goal-delete-btn" title="Delete Goal"><i>🗑️</i></button>
-                        </div>
-                    </div>
-                    <p class="goal-info">
-                        <span class="goal-amount">$2,500 / $5,000</span>
-                        <span class="goal-percentage">50%</span>
-                    </p>
-                    <div class="progress-bar">
-                        <div class="progress" style="width: 50%"></div>
-                    </div>
-                    <p class="goal-estimate">Est. completion: <span>Dec 2025</span></p>
-                </div>
-                <div class="goal-item" data-id="goal-2" data-progress="800" data-target="2000">
-                    <div class="goal-header">
-                        <h3 class="goal-name">Vacation Savings</h3>
-                        <div class="goal-actions">
-                            <button class="goal-edit-btn" title="Update Progress"><i>✏️</i></button>
-                            <button class="goal-delete-btn" title="Delete Goal"><i>🗑️</i></button>
-                        </div>
-                    </div>
-                    <p class="goal-info">
-                        <span class="goal-amount">$800 / $2,000</span>
-                        <span class="goal-percentage">40%</span>
-                    </p>
-                    <div class="progress-bar">
-                        <div class="progress" style="width: 40%"></div>
-                    </div>
-                    <p class="goal-estimate">Est. completion: <span>Oct 2025</span></p>
-                </div>
-                <div class="goal-item" data-id="goal-3" data-progress="3500" data-target="10000">
-                    <div class="goal-header">
-                        <h3 class="goal-name">New Car Down Payment</h3>
-                        <div class="goal-actions">
-                            <button class="goal-edit-btn" title="Update Progress"><i>✏️</i></button>
-                            <button class="goal-delete-btn" title="Delete Goal"><i>🗑️</i></button>
-                        </div>
-                    </div>
-                    <p class="goal-info">
-                        <span class="goal-amount">$3,500 / $10,000</span>
-                        <span class="goal-percentage">35%</span>
-                    </p>
-                    <div class="progress-bar">
-                        <div class="progress" style="width: 35%"></div>
-                    </div>
-                    <p class="goal-estimate">Est. completion: <span>Mar 2026</span></p>
-                </div>
-                <button class="btn-add-goal" id="add-goal-btn">Add New Goal</button>
-            </div>
+            <h2>Monthly Expenses</h2>
+            <div id="chartContainer"></div>
         </div>
     </div>
 </main>
@@ -385,22 +96,15 @@
         const drawer = document.getElementById('sideDrawer');
         drawer.classList.toggle('collapsed');
     }
-
-    // Chart objects to track and update
-    let netWorthChart, incomeChart, expensesPieChart, monthlyExpensesChart;
-
     function getThemePreference(name) {
         const match = document.cookie.match(new RegExp('(^| )' + name + '=([^;]+)'));
         if (!match) return null;
         return match[2];
     }
-
     window.addEventListener('pageshow', function(event) {
         if (event.persisted) window.location.reload();
     });
-
     window.addEventListener('DOMContentLoaded', () => {
-        // Apply theme
         const savedTheme = getThemePreference('theme');
         const body = document.body;
         if (savedTheme === 'light') {
@@ -412,903 +116,250 @@
             const input = document.querySelector(`input[name="theme"][value="${savedTheme}"]`);
             if (input) input.checked = true;
         }
-
-        // Add Goal Button Functionality
-        const addGoalBtn = document.getElementById('add-goal-btn');
-        if (addGoalBtn) {
-            addGoalBtn.addEventListener('click', function() {
-                showAddGoalForm();
-            });
-        }
     });
-
-    function showAddGoalForm() {
-        // Create modal for adding a new goal
-        const modal = document.createElement('div');
-        modal.className = 'modal';
-        modal.style.position = 'fixed';
-        modal.style.top = '0';
-        modal.style.left = '0';
-        modal.style.width = '100%';
-        modal.style.height = '100%';
-        modal.style.backgroundColor = 'rgba(0,0,0,0.7)';
-        modal.style.display = 'flex';
-        modal.style.justifyContent = 'center';
-        modal.style.alignItems = 'center';
-        modal.style.zIndex = '1000';
-
-        // Create form container
-        const formContainer = document.createElement('div');
-        formContainer.className = 'form-container';
-        formContainer.style.backgroundColor = '#3E1F5B';
-        formContainer.style.padding = '20px';
-        formContainer.style.borderRadius = '10px';
-        formContainer.style.width = '90%';
-        formContainer.style.maxWidth = '500px';
-
-        // Create form content
-        formContainer.innerHTML = `
-            <h3 style="color: #FF8C00; margin-top: 0;">Add New Financial Goal</h3>
-            <div style="margin-bottom: 15px;">
-                <label style="display: block; margin-bottom: 5px; color: white;">Goal Name</label>
-                <input type="text" id="goal-name" style="width: 100%; padding: 8px; border-radius: 5px; border: 1px solid #ddd;">
-            </div>
-            <div style="margin-bottom: 15px;">
-                <label style="display: block; margin-bottom: 5px; color: white;">Target Amount ($)</label>
-                <input type="number" id="goal-amount" style="width: 100%; padding: 8px; border-radius: 5px; border: 1px solid #ddd;" min="1">
-            </div>
-            <div style="margin-bottom: 15px;">
-                <label style="display: block; margin-bottom: 5px; color: white;">Current Progress ($)</label>
-                <input type="number" id="goal-progress" style="width: 100%; padding: 8px; border-radius: 5px; border: 1px solid #ddd;" min="0">
-            </div>
-            <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px;">
-                <button id="cancel-goal" style="padding: 8px 15px; border-radius: 5px; border: none; background-color: #6c757d; color: white; cursor: pointer;">Cancel</button>
-                <button id="save-goal" style="padding: 8px 15px; border-radius: 5px; border: none; background-color: #FF8C00; color: white; cursor: pointer;">Save Goal</button>
-            </div>
-        `;
-
-        modal.appendChild(formContainer);
-        document.body.appendChild(modal);
-
-        // Add event listeners to buttons
-        document.getElementById('cancel-goal').addEventListener('click', function() {
-            document.body.removeChild(modal);
-        });
-
-        document.getElementById('save-goal').addEventListener('click', function() {
-            const name = document.getElementById('goal-name').value;
-            const amount = document.getElementById('goal-amount').value;
-            const progress = document.getElementById('goal-progress').value;
-
-            if (!name || !amount) {
-                alert('Please fill out all required fields');
-                return;
-            }
-
-            addGoalToList(name, parseFloat(progress) || 0, parseFloat(amount));
-            document.body.removeChild(modal);
-        });
-    }
-
-    function addGoalToList(name, progress, target) {
-        const goalsContainer = document.getElementById('goals-container');
-        const percent = Math.min(100, Math.round((progress / target) * 100));
-        const goalId = 'goal-' + Date.now(); // Unique ID based on timestamp
-
-        // Calculate estimated completion date (just for demo)
-        const now = new Date();
-        const monthsToComplete = progress > 0 ? Math.ceil((target - progress) / (progress * 0.2)) : 12;
-        now.setMonth(now.getMonth() + monthsToComplete);
-        const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-        const completionDate = monthNames[now.getMonth()] + ' ' + now.getFullYear();
-
-        const goalItem = document.createElement('div');
-        goalItem.className = 'goal-item';
-        goalItem.dataset.id = goalId;
-        goalItem.dataset.progress = progress;
-        goalItem.dataset.target = target;
-        goalItem.innerHTML = `
-            <div class="goal-header">
-                <h3 class="goal-name">${name}</h3>
-                <div class="goal-actions">
-                    <button class="goal-edit-btn" title="Update Progress"><i>✏️</i></button>
-                    <button class="goal-delete-btn" title="Delete Goal"><i>🗑️</i></button>
-                </div>
-            </div>
-            <p class="goal-info">
-                <span class="goal-amount">$${progress.toLocaleString()} / $${target.toLocaleString()}</span>
-                <span class="goal-percentage">${percent}%</span>
-            </p>
-            <div class="progress-bar">
-                <div class="progress" style="width: ${percent}%"></div>
-            </div>
-            <p class="goal-estimate">Est. completion: <span>${completionDate}</span></p>
-        `;
-
-        // Insert the new goal before the add button
-        const addButton = document.getElementById('add-goal-btn');
-        goalsContainer.insertBefore(goalItem, addButton);
-
-        // Add event listeners to the new goal's buttons
-        setupGoalItemListeners(goalItem);
-
-        // Sort goals after adding
-        sortGoals();
-    }
-
-    function setupGoalItemListeners(goalItem) {
-        // Edit button functionality
-        const editBtn = goalItem.querySelector('.goal-edit-btn');
-        if (editBtn) {
-            editBtn.addEventListener('click', function() {
-                const goalId = goalItem.dataset.id;
-                const currentProgress = parseFloat(goalItem.dataset.progress);
-                const targetAmount = parseFloat(goalItem.dataset.target);
-                const goalName = goalItem.querySelector('.goal-name').textContent;
-
-                showUpdateProgressModal(goalId, goalName, currentProgress, targetAmount);
-            });
-        }
-
-        // Delete button functionality
-        const deleteBtn = goalItem.querySelector('.goal-delete-btn');
-        if (deleteBtn) {
-            deleteBtn.addEventListener('click', function() {
-                // Ask for confirmation
-                if (confirm("Are you sure you want to delete this goal?")) {
-                    goalItem.remove();
-                }
-            });
-        }
-    }
-
-    function showUpdateProgressModal(goalId, goalName, currentProgress, targetAmount) {
-        // Create modal for updating progress
-        const modal = document.createElement('div');
-        modal.className = 'modal';
-        modal.style.position = 'fixed';
-        modal.style.top = '0';
-        modal.style.left = '0';
-        modal.style.width = '100%';
-        modal.style.height = '100%';
-        modal.style.backgroundColor = 'rgba(0,0,0,0.7)';
-        modal.style.display = 'flex';
-        modal.style.justifyContent = 'center';
-        modal.style.alignItems = 'center';
-        modal.style.zIndex = '1000';
-
-        // Create form container
-        const formContainer = document.createElement('div');
-        formContainer.className = 'form-container';
-        formContainer.style.backgroundColor = '#3E1F5B';
-        formContainer.style.padding = '20px';
-        formContainer.style.borderRadius = '10px';
-        formContainer.style.width = '90%';
-        formContainer.style.maxWidth = '500px';
-
-        // Create form content
-        formContainer.innerHTML = `
-            <h3 style="color: #FF8C00; margin-top: 0;">Update Goal Progress</h3>
-            <p style="color: white; margin-bottom: 20px;">Goal: ${goalName}</p>
-            <div style="margin-bottom: 15px;">
-                <label style="display: block; margin-bottom: 5px; color: white;">Current Progress ($)</label>
-                <input type="number" id="update-progress" style="width: 100%; padding: 8px; border-radius: 5px; border: 1px solid #ddd;" min="0" max="${targetAmount}" value="${currentProgress}">
-                <p style="color: #aaa; font-size: 0.9em; margin-top: 5px;">Target: $${targetAmount.toLocaleString()}</p>
-            </div>
-            <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px;">
-                <button id="cancel-update" style="padding: 8px 15px; border-radius: 5px; border: none; background-color: #6c757d; color: white; cursor: pointer;">Cancel</button>
-                <button id="save-update" style="padding: 8px 15px; border-radius: 5px; border: none; background-color: #FF8C00; color: white; cursor: pointer;">Save</button>
-            </div>
-        `;
-
-        modal.appendChild(formContainer);
-        document.body.appendChild(modal);
-
-        // Add event listeners to buttons
-        document.getElementById('cancel-update').addEventListener('click', function() {
-            document.body.removeChild(modal);
-        });
-
-        document.getElementById('save-update').addEventListener('click', function() {
-            const newProgress = parseFloat(document.getElementById('update-progress').value);
-            if (isNaN(newProgress) || newProgress < 0 || newProgress > targetAmount) {
-                alert('Please enter a valid progress amount between 0 and ' + targetAmount);
-                return;
-            }
-
-            updateGoalProgress(goalId, newProgress, targetAmount);
-            document.body.removeChild(modal);
-        });
-    }
-
-    function updateGoalProgress(goalId, newProgress, targetAmount) {
-        const goalItem = document.querySelector(`.goal-item[data-id="${goalId}"]`);
-        if (!goalItem) return;
-
-        // Update data attributes
-        goalItem.dataset.progress = newProgress;
-
-        // Calculate percent
-        const percent = Math.min(100, Math.round((newProgress / targetAmount) * 100));
-
-        // Update visual elements
-        goalItem.querySelector('.goal-amount').textContent = `$${newProgress.toLocaleString()} / $${targetAmount.toLocaleString()}`;
-        goalItem.querySelector('.goal-percentage').textContent = `${percent}%`;
-        goalItem.querySelector('.progress').style.width = `${percent}%`;
-
-        // Update estimated completion date
-        const now = new Date();
-        const monthsToComplete = newProgress > 0 ? Math.ceil((targetAmount - newProgress) / (newProgress * 0.2)) : 12;
-        now.setMonth(now.getMonth() + monthsToComplete);
-        const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-        const completionDate = monthNames[now.getMonth()] + ' ' + now.getFullYear();
-        goalItem.querySelector('.goal-estimate span').textContent = completionDate;
-
-        // Resort goals because progress has changed
-        sortGoals();
-    }
-
-    function sortGoals() {
-        const goalsSortBy = document.getElementById('goalsSortBy');
-        if (!goalsSortBy) return;
-
-        const sortValue = goalsSortBy.value;
-        const goalsContainer = document.getElementById('goals-container');
-        const addButton = document.getElementById('add-goal-btn');
-
-        // Get all goal items except the add button
-        const goals = Array.from(goalsContainer.querySelectorAll('.goal-item'));
-
-        // Sort based on selected criteria
-        switch (sortValue) {
-            case 'progress':
-                goals.sort((a, b) => {
-                    const aProgress = parseFloat(a.dataset.progress) / parseFloat(a.dataset.target);
-                    const bProgress = parseFloat(b.dataset.progress) / parseFloat(b.dataset.target);
-                    return bProgress - aProgress; // Highest progress first
-                });
-                break;
-            case 'amount':
-                goals.sort((a, b) => {
-                    const aTarget = parseFloat(a.dataset.target);
-                    const bTarget = parseFloat(b.dataset.target);
-                    return bTarget - aTarget; // Highest amount first
-                });
-                break;
-            case 'alphabet':
-                goals.sort((a, b) => {
-                    const aName = a.querySelector('.goal-name').textContent;
-                    const bName = b.querySelector('.goal-name').textContent;
-                    return aName.localeCompare(bName);
-                });
-                break;
-            case 'recent':
-                // No need to sort by ID since we're using timestamps
-                // Newest goals already have the highest ID value
-                goals.sort((a, b) => {
-                    const aId = a.dataset.id.replace('goal-', '');
-                    const bId = b.dataset.id.replace('goal-', '');
-                    return parseInt(bId) - parseInt(aId); // Newest first
-                });
-                break;
-        }
-
-        // Remove all goals from container
-        goals.forEach(goal => goal.remove());
-
-        // Add sorted goals back before the add button
-        goals.forEach(goal => {
-            goalsContainer.insertBefore(goal, addButton);
-        });
-    }
-
-    // Helper functions
-    function getInt(field) {
-        return field && field.integerValue ? parseInt(field.integerValue) : 0;
-    }
-
-    function getArray(arrayField) {
-        return arrayField && arrayField.arrayValue && arrayField.arrayValue.values ? arrayField.arrayValue.values : [];
-    }
-
-    // Setup chart filters function
-    function setupChartFilters() {
-        // 1. Net Worth Period Selector
-        const netWorthPeriod = document.getElementById('netWorthPeriod');
-        if (netWorthPeriod) {
-            netWorthPeriod.addEventListener('change', function() {
-                const period = this.value;
-                console.log(`Net Worth period changed to: ${period}`);
-                updateNetWorthChart(period);
-            });
-        }
-
-        // 2. Income Type Filter
-        const incomeFilterButtons = document.querySelectorAll('#incomeTypeFilter .filter-btn');
-        incomeFilterButtons.forEach(button => {
-            button.addEventListener('click', function() {
-                // Remove active class from all buttons
-                incomeFilterButtons.forEach(btn => btn.classList.remove('active'));
-                // Add active class to clicked button
-                this.classList.add('active');
-
-                const type = this.getAttribute('data-value');
-                console.log(`Income type filter changed to: ${type}`);
-                updateIncomeChart(type);
-            });
-        });
-
-        // 3. Expense View Type
-        const expenseViewType = document.getElementById('expenseViewType');
-        if (expenseViewType) {
-            expenseViewType.addEventListener('change', function() {
-                const viewType = this.value;
-                console.log(`Expense view type changed to: ${viewType}`);
-                updateExpenseChart(viewType);
-            });
-        }
-
-        // 4. Monthly Expenses Period
-        const monthlyExpensesButtons = document.querySelectorAll('#monthlyExpensesPeriod .filter-btn');
-        monthlyExpensesButtons.forEach(button => {
-            button.addEventListener('click', function() {
-                // Remove active class from all buttons
-                monthlyExpensesButtons.forEach(btn => btn.classList.remove('active'));
-                // Add active class to clicked button
-                this.classList.add('active');
-
-                const period = this.getAttribute('data-value');
-                console.log(`Monthly expenses period changed to: ${period}`);
-                updateMonthlyExpensesChart(period);
-            });
-        });
-
-        // 5. Goals Sort By
-        const goalsSortBy = document.getElementById('goalsSortBy');
-        if (goalsSortBy) {
-            goalsSortBy.addEventListener('change', function() {
-                const sortValue = this.value;
-                console.log(`Goals sort changed to: ${sortValue}`);
-                sortGoals();
-            });
-        }
-
-        // 6. Setup Goal Item Listeners
-        document.querySelectorAll('.goal-item').forEach(goalItem => {
-            setupGoalItemListeners(goalItem);
-        });
-    }
-
-    // Update Functions for Each Chart
-
-    function updateNetWorthChart(period) {
-        // Sample data for different time periods
-        const data = {
-            '1m': { cash: 4500, equity: 115000, investments: 42000 },
-            '3m': { cash: 4800, equity: 118000, investments: 43500 },
-            '6m': { cash: 5000, equity: 120000, investments: 45000 },
-            '1y': { cash: 5500, equity: 125000, investments: 48000 },
-            'all': { cash: 6000, equity: 130000, investments: 50000 }
-        };
-
-        // Get data for selected period
-        const breakdownData = data[period] || data['1y'];
-
-        // Update chart
-        if (netWorthChart) {
-            netWorthChart.data.datasets[0].data = Object.values(breakdownData);
-            netWorthChart.update();
-        } else {
-            createNetWorthChart({ netWorthBreakdown: { stringValue: JSON.stringify(breakdownData) } });
-        }
-
-        // Update total net worth display
-        const totalNetWorth = Object.values(breakdownData).reduce((sum, val) => sum + val, 0);
-        document.getElementById('netWorthDisplay').textContent = '$' + totalNetWorth.toLocaleString();
-    }
-
-    function updateIncomeChart(type) {
-        // Full income breakdown
-        const fullBreakdown = { salary: 60000, bonus: 5000, other: 2000 };
-
-        // Filter based on selected type
-        let filteredBreakdown;
-        if (type === 'all') {
-            filteredBreakdown = fullBreakdown;
-        } else {
-            filteredBreakdown = {};
-            if (type in fullBreakdown) {
-                filteredBreakdown[type] = fullBreakdown[type];
-            }
-        }
-
-        // Update chart
-        if (incomeChart) {
-            incomeChart.data.labels = Object.keys(filteredBreakdown).map(k => k.charAt(0).toUpperCase() + k.slice(1));
-            incomeChart.data.datasets[0].data = Object.values(filteredBreakdown);
-            incomeChart.update();
-        } else {
-            createIncomeChart({ totalIncomeBreakdown: { stringValue: JSON.stringify(filteredBreakdown) } });
-        }
-
-        // Update total income display
-        const totalIncome = Object.values(filteredBreakdown).reduce((sum, val) => sum + val, 0);
-        document.getElementById('totalIncomeDisplay').textContent = '$' + totalIncome.toLocaleString();
-    }
-
-    function updateExpenseChart(viewType) {
-        // Get expenses container and clear it
-        const container = document.getElementById('expensesPieChart');
-
-        if (expensesPieChart) {
-            expensesPieChart.destroy();
-        }
-
-        // Sample data
-        const categoryData = {
-            'Housing': 1200,
-            'Food': 450,
-            'Transportation': 350,
-            'Entertainment': 200,
-            'Utilities': 180
-        };
-
-        const monthlyData = {
-            'January': 2100,
-            'February': 2200,
-            'March': 2300,
-            'April': 2150,
-            'May': 2050,
-            'June': 1980
-        };
-
-        const weeklyData = {
-            'Week 1': 550,
-            'Week 2': 480,
-            'Week 3': 520,
-            'Week 4': 430
-        };
-
-        // Choose data based on view type
-        let chartData, chartType;
-        switch(viewType) {
-            case 'monthly':
-                chartData = monthlyData;
-                chartType = 'bar';
-                break;
-            case 'weekly':
-                chartData = weeklyData;
-                chartType = 'bar';
-                break;
-            default: // 'category'
-                chartData = categoryData;
-                chartType = 'pie';
-        }
-
-        // Create chart with selected data
-        const ctx = container.getContext('2d');
-
-        // Generate colors based on number of data points
-        const numItems = Object.keys(chartData).length;
-        const backgroundColors = [];
-        const borderColors = [];
-
-        for(let i = 0; i < numItems; i++) {
-            const hue = (i * 360 / numItems) % 360;
-            backgroundColors.push(`hsla(${hue}, 70%, 60%, 0.7)`);
-            borderColors.push(`hsl(${hue}, 70%, 60%)`);
-        }
-
-        // Create new chart
-        expensesPieChart = new Chart(ctx, {
-            type: chartType,
-            data: {
-                labels: Object.keys(chartData),
-                datasets: [{
-                    data: Object.values(chartData),
-                    backgroundColor: backgroundColors,
-                    borderColor: borderColors,
-                    borderWidth: 1
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                    tooltip: {
-                        callbacks: {
-                            label: function(context) {
-                                const label = context.label || '';
-                                const value = context.raw || 0;
-                                const total = context.dataset.data.reduce((a, b) => a + b, 0);
-                                const percentage = total > 0 ? Math.round((value / total) * 100) : 0;
-                                return label + ': $' + value.toLocaleString() + (chartType === 'pie' ? ` (${percentage}%)` : '');
-                            }
-                        }
-                    }
-                },
-                scales: chartType !== 'pie' ? {
-                    y: {
-                        beginAtZero: true,
-                        ticks: {
-                            callback: function(value) {
-                                return '$' + value.toLocaleString();
-                            }
-                        }
-                    }
-                } : {}
-            }
-        });
-
-        // Update total expenses display
-        const totalExpenses = Object.values(chartData).reduce((sum, val) => sum + val, 0);
-        document.getElementById('totalExpensesDisplay').textContent = '$' + totalExpenses.toLocaleString();
-    }
-
-    function updateMonthlyExpensesChart(period) {
-        const monthNames = [
-            'January', 'February', 'March', 'April', 'May', 'June',
-            'July', 'August', 'September', 'October', 'November', 'December'
-        ];
-
-        // Sample data for each period (3m, 6m, 1y)
-        const data = {
-            '3m': [2200, 2100, 1950],
-            '6m': [2500, 2300, 2200, 2100, 1950, 1800],
-            '1y': [2800, 2700, 2600, 2500, 2300, 2200, 2100, 1950, 1800, 1700, 1600, 1500]
-        };
-
-        // Get data for selected period
-        const periodData = data[period] || data['6m'];
-
-        // Determine how many months to show
-        let numMonths;
-        switch(period) {
-            case '3m': numMonths = 3; break;
-            case '6m': numMonths = 6; break;
-            case '1y': numMonths = 12; break;
-            default: numMonths = 6;
-        }
-
-        // Get current month index (0-11)
-        const currentMonth = new Date().getMonth();
-
-        // Calculate month labels working backwards from current month
-        const labels = [];
-        for (let i = 0; i < numMonths; i++) {
-            const monthIndex = (currentMonth - i + 12) % 12; // Handle wrapping around to previous year
-            labels.unshift(monthNames[monthIndex]);
-        }
-
-        // Update chart
-        if (monthlyExpensesChart) {
-            monthlyExpensesChart.data.labels = labels;
-            monthlyExpensesChart.data.datasets[0].data = periodData;
-            monthlyExpensesChart.update();
-        } else {
-            createMonthlyExpensesChart(periodData);
-        }
-    }
-
-    // Main initialization on page load
     document.addEventListener("DOMContentLoaded", function() {
-        // Set up chart filter event listeners
-        setupChartFilters();
+        console.log("home.html: DOMContentLoaded");
 
-        // Apply theme from cookies
-        const savedTheme = getThemePreference('theme');
-        const body = document.body;
-        if (savedTheme === 'light') {
-            body.classList.add('light-mode');
-        } else if (savedTheme === 'dark') {
-            body.classList.add('dark-mode');
+        function getInt(field) {
+            // Safely parse an integer from field's integerValue or doubleValue
+            if(!field) return 0;
+            if(field.integerValue) return parseInt(field.integerValue);
+            if(field.doubleValue) return Math.floor(parseFloat(field.doubleValue));
+            return 0;
         }
-        if (savedTheme) {
-            const input = document.querySelector(`input[name="theme"][value="${savedTheme}"]`);
-            if (input) input.checked = true;
-        }
-
-        // Setup goal button click handler
-        const addGoalBtn = document.getElementById('add-goal-btn');
-        if (addGoalBtn) {
-            addGoalBtn.addEventListener('click', function() {
-                showAddGoalForm();
-            });
+        function getArray(arrayField) {
+            if(arrayField && arrayField.arrayValue && arrayField.arrayValue.values) {
+                return arrayField.arrayValue.values;
+            }
+            return [];
         }
 
-        // Fetch dashboard data
         fetch('/api/getData')
-            .then(response => response.json())
-            .then(data => {
-                const fields = data.fields || {};
+            .then(r=>r.json())
+            .then(data=>{
+                console.log("home.html: data received", data);
+                let fields = data.fields || {};
 
-                const netWorth = getInt(fields.netWorth);
-                document.getElementById("netWorthDisplay").textContent = "$" + netWorth.toLocaleString();
+                let netWorth = getInt(fields.netWorth);
+                document.getElementById("netWorthDisplay").textContent = "$" + netWorth;
 
-                const totalIncome = getInt(fields.totalIncome);
-                document.getElementById("totalIncomeDisplay").textContent = "$" + totalIncome.toLocaleString();
+                let totalIncome = getInt(fields.totalIncome);
+                document.getElementById("totalIncomeDisplay").textContent = "" ;
 
-                const totalExpenses = getInt(fields.totalExpenses);
-                document.getElementById("totalExpensesDisplay").textContent = "$" + totalExpenses.toLocaleString();
+                let totalExpenses = getInt(fields.totalExpenses);
+                document.getElementById("totalExpensesDisplay").textContent = "$" + totalExpenses;
 
-                const billsDue = getInt(fields.billsDue);
-                document.getElementById("billRemindersDisplay").innerHTML = "<h1>" + billsDue + "</h1>";
+                let billsDue = getInt(fields.billsDue);
+                document.getElementById("billRemindersDisplay").innerHTML = "<h1>"+billsDue+"</h1>";
 
-                const monthlyExpensesArr = getArray(fields.monthlyExpenses).map(item => getInt(item));
-                const monthlyIncomesArr = getArray(fields.monthlyIncomes).map(item => getInt(item));
+                // monthlyExpenses
+                let monthlyExpensesArr = getArray(fields.monthlyExpenses).map(getInt);
+                if(monthlyExpensesArr.length < 12) {
+                    monthlyExpensesArr = Array(12).fill(0);
+                }
+                console.log("home.html: building expense bar chart", monthlyExpensesArr);
+                buildBarChart(monthlyExpensesArr);
 
-                // Create modern charts with Chart.js
-                createNetWorthChart(fields);
-                createIncomeChart(fields);
-                createExpensePieChart(fields);
-                createMonthlyExpensesChart(monthlyExpensesArr);
+                // build expenses pie
+                buildPieChartExpenses(monthlyExpensesArr);
+
+                // monthlyIncomes
+                let monthlyIncomesArr = getArray(fields.monthlyIncomes).map(getInt);
+                if(monthlyIncomesArr.length < 12) {
+                    monthlyIncomesArr = Array(12).fill(0);
+                }
+                console.log("home.html: building income pie chart", monthlyIncomesArr);
+                buildPieChartIncome(monthlyIncomesArr);
             })
-            .catch(err => {
-                console.error("Error fetching dashboard data:", err);
-                // Show error message on dashboard
-                document.querySelectorAll('.chart-container').forEach(container => {
-                    container.innerHTML = "<p style='text-align:center;color:#ff6b6b;'>Unable to load chart data</p>";
-                });
+            .catch(e=>{
+                console.error("Error fetching dashboard data:", e);
             });
     });
-    function createNetWorthChart(fields) {
-        const ctx = document.getElementById('netWorthChart').getContext('2d');
 
-        try {
-            // Try to parse the netWorthBreakdown from string to object
-            let breakdown = { cash: 5000, equity: 120000, investments: 45000 };
+    function buildBarChart(monthlyExpensesArr) {
+        let barContainer = document.getElementById("chartContainer");
+        let svgNS = "http://www.w3.org/2000/svg";
 
-            // Destroy previous chart if it exists
-            if (netWorthChart) {
-                netWorthChart.destroy();
-            }
+        let containerWidth = barContainer.clientWidth;
+        let chartWidth = containerWidth < 500 ? 500 : containerWidth;
+        let chartHeight = 300;
+        let barWidth = chartWidth / monthlyExpensesArr.length;
 
-            // Create new chart
-            netWorthChart = new Chart(ctx, {
-                type: 'bar',
-                data: {
-                    labels: Object.keys(breakdown).map(k => k.charAt(0).toUpperCase() + k.slice(1)),
-                    datasets: [{
-                        label: 'Value ($)',
-                        data: Object.values(breakdown),
-                        backgroundColor: [
-                            'rgba(50, 205, 50, 0.7)',  // cash - green
-                            'rgba(30, 144, 255, 0.7)', // equity - blue
-                            'rgba(255, 140, 0, 0.7)'   // investments - orange
-                        ],
-                        borderColor: [
-                            'rgb(50, 205, 50)',
-                            'rgb(30, 144, 255)',
-                            'rgb(255, 140, 0)'
-                        ],
-                        borderWidth: 1
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: {
-                            display: false
-                        },
-                        tooltip: {
-                            callbacks: {
-                                label: function(context) {
-                                    return '$' + context.raw.toLocaleString();
-                                }
-                            }
-                        }
-                    },
-                    scales: {
-                        y: {
-                            beginAtZero: true,
-                            ticks: {
-                                callback: function(value) {
-                                    return '$' + value.toLocaleString();
-                                }
-                            }
-                        }
-                    }
-                }
-            });
-        } catch (err) {
-            console.error("Error creating net worth chart:", err);
-        }
+        let maxExpense = Math.max(...monthlyExpensesArr);
+        if(maxExpense === 0) maxExpense=1;
+
+        let barSvg = document.createElementNS(svgNS, "svg");
+        barSvg.setAttribute("width", "100%");
+        barSvg.setAttribute("viewBox", `0 0 ${chartWidth} ${chartHeight}`);
+
+        monthlyExpensesArr.forEach((expense, i)=>{
+            // scale bar height
+            let barHeight = (expense / maxExpense) * (chartHeight - 40);
+
+            // clamp so it never goes negative or above chart
+            barHeight = Math.max(0, barHeight);
+            barHeight = Math.min(barHeight, chartHeight - 40);
+
+            let x = i * barWidth;
+            let y = chartHeight - barHeight;
+
+            let rect = document.createElementNS(svgNS, "rect");
+            rect.setAttribute("x", x);
+            rect.setAttribute("y", y);
+            rect.setAttribute("width", barWidth - 4);
+            rect.setAttribute("height", barHeight);
+            rect.setAttribute("fill", "#FF8C00");
+            barSvg.appendChild(rect);
+
+            // label
+            let label = document.createElementNS(svgNS, "text");
+            label.setAttribute("x", x + (barWidth - 4)/2);
+            label.setAttribute("y", chartHeight - 5);
+            label.setAttribute("fill", "#000");
+            label.setAttribute("font-size","10");
+            label.setAttribute("text-anchor","middle");
+            label.textContent = (i+1);
+            barSvg.appendChild(label);
+        });
+
+        barContainer.innerHTML="";
+        barContainer.appendChild(barSvg);
     }
 
-    // Create Income Chart
-    function createIncomeChart(fields) {
-        const ctx = document.getElementById('incomeChart').getContext('2d');
+    function buildPieChartExpenses(monthlyExpensesArr){
+        let expensesPieContainer = document.getElementById("expensesPieChart");
+        expensesPieContainer.innerHTML="";
 
-        try {
-            // Sample income breakdown
-            let incomeBreakdown = { salary: 60000, bonus: 5000, other: 2000 };
-
-            // Destroy previous chart if it exists
-            if (incomeChart) {
-                incomeChart.destroy();
-            }
-
-            // Create new doughnut chart
-            incomeChart = new Chart(ctx, {
-                type: 'doughnut',
-                data: {
-                    labels: Object.keys(incomeBreakdown).map(k => k.charAt(0).toUpperCase() + k.slice(1)),
-                    datasets: [{
-                        data: Object.values(incomeBreakdown),
-                        backgroundColor: [
-                            'rgba(255, 215, 0, 0.7)',   // salary - gold
-                            'rgba(255, 105, 180, 0.7)', // bonus - pink
-                            'rgba(138, 43, 226, 0.7)'   // other - purple
-                        ],
-                        borderColor: [
-                            'rgb(255, 215, 0)',
-                            'rgb(255, 105, 180)',
-                            'rgb(138, 43, 226)'
-                        ],
-                        borderWidth: 1
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        tooltip: {
-                            callbacks: {
-                                label: function(context) {
-                                    const label = context.label || '';
-                                    const value = context.raw || 0;
-                                    const total = context.dataset.data.reduce((a, b) => a + b, 0);
-                                    const percentage = total > 0 ? Math.round((value / total) * 100) : 0;
-                                    return label + ': $' + value.toLocaleString() + ' (' + percentage + '%)';
-                                }
-                            }
-                        }
-                    }
-                }
-            });
-        } catch (err) {
-            console.error("Error creating income chart:", err);
+        if(!monthlyExpensesArr || monthlyExpensesArr.length===0){
+            expensesPieContainer.innerHTML="<p style='padding:10px;text-align:center;'>No monthly expense data</p>";
+            return;
         }
+        let totalExpense = monthlyExpensesArr.reduce((a,b)=>a+b,0);
+        if(totalExpense<=0){
+            expensesPieContainer.innerHTML="<p style='padding:10px;text-align:center;'>No expense data</p>";
+            return;
+        }
+
+        let svgNS="http://www.w3.org/2000/svg";
+        let size=200;
+        let cx=size/2, cy=size/2;
+        let r=(size/2)-10;
+        let svg=document.createElementNS(svgNS,"svg");
+        svg.setAttribute("width", size);
+        svg.setAttribute("height",size);
+
+        let startAngle=0;
+        // we'll group months in quarters, for example
+        let quarters=[0,0,0,0];
+        monthlyExpensesArr.forEach((val,i)=>{
+            quarters[Math.floor(i/3)] += val;
+        });
+        let quarterLabels=["Q1","Q2","Q3","Q4"];
+        let colors=["#FF8C00","#FF4500","#1E90FF","#32CD32"];
+        let totalAll=quarters.reduce((a,b)=>a+b,0);
+
+        quarters.forEach((val,i)=>{
+            if(val<=0) return;
+            let sliceAngle=(val/totalAll)*2*Math.PI;
+            let endAngle=startAngle+sliceAngle;
+
+            let x1=cx + r*Math.cos(startAngle);
+            let y1=cy + r*Math.sin(startAngle);
+            let x2=cx + r*Math.cos(endAngle);
+            let y2=cy + r*Math.sin(endAngle);
+
+            let largeArc= sliceAngle>Math.PI ? 1 : 0;
+            let d=`M ${cx} ${cy} L ${x1} ${y1} A ${r} ${r} 0 ${largeArc} 1 ${x2} ${y2} Z`;
+
+            let path=document.createElementNS(svgNS,"path");
+            path.setAttribute("d", d);
+            path.setAttribute("fill", colors[i%colors.length]);
+            svg.appendChild(path);
+
+            // label
+            let midAngle=startAngle + sliceAngle/2;
+            let labelX=cx + (r/2)*Math.cos(midAngle);
+            let labelY=cy + (r/2)*Math.sin(midAngle);
+
+            let text=document.createElementNS(svgNS,"text");
+            text.setAttribute("x",labelX);
+            text.setAttribute("y",labelY);
+            text.setAttribute("text-anchor","middle");
+            text.setAttribute("fill","#fff");
+            text.setAttribute("font-size","10");
+            text.textContent= quarterLabels[i]+"("+val+")";
+
+            svg.appendChild(text);
+
+            startAngle=endAngle;
+        });
+
+        expensesPieContainer.appendChild(svg);
     }
 
-    // Create Expense Pie Chart
-    function createExpensePieChart(fields) {
-        const ctx = document.getElementById('expensesPieChart').getContext('2d');
+    function buildPieChartIncome(monthlyIncomesArr){
+        let incomeChart=document.getElementById("incomeChart");
+        incomeChart.innerHTML="";
 
-        try {
-            // Sample category data
-            const expenseCategories = {
-                'Housing': 1200,
-                'Food': 450,
-                'Transportation': 350,
-                'Entertainment': 200,
-                'Utilities': 180
-            };
-
-            // Destroy previous chart if it exists
-            if (expensesPieChart) {
-                expensesPieChart.destroy();
-            }
-
-            // Create new pie chart
-            expensesPieChart = new Chart(ctx, {
-                type: 'pie',
-                data: {
-                    labels: Object.keys(expenseCategories),
-                    datasets: [{
-                        data: Object.values(expenseCategories),
-                        backgroundColor: [
-                            'rgba(255, 140, 0, 0.7)',   // housing - orange
-                            'rgba(255, 69, 0, 0.7)',    // food - red-orange
-                            'rgba(30, 144, 255, 0.7)',  // transportation - blue
-                            'rgba(138, 43, 226, 0.7)',  // entertainment - purple
-                            'rgba(50, 205, 50, 0.7)'    // utilities - green
-                        ],
-                        borderColor: [
-                            'rgb(255, 140, 0)',
-                            'rgb(255, 69, 0)',
-                            'rgb(30, 144, 255)',
-                            'rgb(138, 43, 226)',
-                            'rgb(50, 205, 50)'
-                        ],
-                        borderWidth: 1
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        tooltip: {
-                            callbacks: {
-                                label: function(context) {
-                                    const label = context.label || '';
-                                    const value = context.raw || 0;
-                                    const total = context.dataset.data.reduce((a, b) => a + b, 0);
-                                    const percentage = total > 0 ? Math.round((value / total) * 100) : 0;
-                                    return label + ': $' + value.toLocaleString() + ' (' + percentage + '%)';
-                                }
-                            }
-                        }
-                    }
-                }
-            });
-        } catch (err) {
-            console.error("Error creating expense pie chart:", err);
+        if(!monthlyIncomesArr || monthlyIncomesArr.length===0){
+            incomeChart.innerHTML="<p style='padding:10px;text-align:center;'>No monthly income data</p>";
+            return;
         }
-    }
-
-    // Create Monthly Expenses Chart
-    function createMonthlyExpensesChart(monthlyExpensesArr) {
-        const ctx = document.getElementById('monthlyExpensesChart').getContext('2d');
-
-        try {
-            const monthNames = [
-                'January', 'February', 'March', 'April', 'May', 'June',
-                'July', 'August', 'September', 'October', 'November', 'December'
-            ];
-
-            // Ensure we have 12 months of data
-            if (monthlyExpensesArr.length < 12) {
-                monthlyExpensesArr = Array(12).fill(0).map((v, i) =>
-                    i < monthlyExpensesArr.length ? monthlyExpensesArr[i] : 0
-                );
-            }
-
-            // Destroy previous chart if it exists
-            if (monthlyExpensesChart) {
-                monthlyExpensesChart.destroy();
-            }
-
-            // Create new line chart
-            monthlyExpensesChart = new Chart(ctx, {
-                type: 'line',
-                data: {
-                    labels: monthNames,
-                    datasets: [{
-                        label: 'Monthly Expenses',
-                        data: monthlyExpensesArr,
-                        backgroundColor: 'rgba(255, 140, 0, 0.2)',
-                        borderColor: 'rgb(255, 140, 0)',
-                        borderWidth: 2,
-                        tension: 0.3,
-                        fill: true,
-                        pointBackgroundColor: 'rgb(255, 140, 0)',
-                        pointRadius: 4
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: {
-                            display: false
-                        },
-                        tooltip: {
-                            callbacks: {
-                                label: function(context) {
-                                    return '$' + context.raw.toLocaleString();
-                                }
-                            }
-                        }
-                    },
-                    scales: {
-                        y: {
-                            beginAtZero: true,
-                            ticks: {
-                                callback: function(value) {
-                                    return '$' + value.toLocaleString();
-                                }
-                            }
-                        }
-                    }
-                }
-            });
-        } catch (err) {
-            console.error("Error creating monthly expenses chart:", err);
+        let sum=monthlyIncomesArr.reduce((a,b)=>a+b,0);
+        if(sum<=0){
+            incomeChart.innerHTML="<p style='padding:10px;text-align:center;'>No income data</p>";
+            return;
         }
-    }
 
+        let svgNS="http://www.w3.org/2000/svg";
+        let size=200;
+        let cx=size/2, cy=size/2;
+        let r=(size/2)-10;
+        let svg=document.createElementNS(svgNS,"svg");
+        svg.setAttribute("width", size);
+        svg.setAttribute("height", size);
+
+        let startAngle=0;
+        let colors=["#FFD700","#FF69B4","#8A2BE2","#20B2AA","#F08080","#DEB887","#87CEEB","#FFA500","#C71585","#ADFF2F","#00FA9A","#FF6347"];
+
+        monthlyIncomesArr.forEach((val,i)=>{
+            if(val<=0) return;
+            let sliceAngle=(val/sum)*2*Math.PI;
+            let endAngle=startAngle+sliceAngle;
+
+            let x1=cx + r*Math.cos(startAngle);
+            let y1=cy + r*Math.sin(startAngle);
+            let x2=cx + r*Math.cos(endAngle);
+            let y2=cy + r*Math.sin(endAngle);
+
+            let largeArc= sliceAngle>Math.PI ? 1 : 0;
+            let d=`M ${cx} ${cy} L ${x1} ${y1} A ${r} ${r} 0 ${largeArc} 1 ${x2} ${y2} Z`;
+
+            let path=document.createElementNS(svgNS,"path");
+            path.setAttribute("d", d);
+            path.setAttribute("fill", colors[i%colors.length]);
+            svg.appendChild(path);
+
+            // label
+            let midAngle=startAngle + sliceAngle/2;
+            let labelX=cx + (r/2)*Math.cos(midAngle);
+            let labelY=cy + (r/2)*Math.sin(midAngle);
+
+            let text=document.createElementNS(svgNS,"text");
+            text.setAttribute("x",labelX);
+            text.setAttribute("y",labelY);
+            text.setAttribute("text-anchor","middle");
+            text.setAttribute("fill","#fff");
+            text.setAttribute("font-size","10");
+            text.textContent= (i+1);
+
+            svg.appendChild(text);
+
+            startAngle=endAngle;
+        });
+
+        incomeChart.appendChild(svg);
+    }
 </script>
 </body>
 </html>
