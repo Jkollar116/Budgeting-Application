@@ -5,7 +5,7 @@
   <title>Loan Calculator</title>
   <link rel="stylesheet" href="style.css">
 </head>
-<body>
+<body class = "tax-page">
 <header>
   <div class="logo">CashClimb</div>
   <nav>
@@ -44,6 +44,12 @@
   </ul>
 </nav>
 <main>
+  <div class="hero">
+    <div class="header-content">
+      <h1>Loan Calculator</h1>
+      <p>Calculate the value of your loan below</p>
+    </div>
+  </div>
   <div class="container">
     <h2>Loan Calculator</h2>
     <form id="loanForm">
@@ -60,8 +66,8 @@
         <input type="number" id="years" required>
       </div>
       <button type="submit" class="submit-btn">Calculate</button>
+      <div id="result" class="result-container"></div>
     </form>
-    <div class="result" id="result"></div>
   </div>
 </main>
 

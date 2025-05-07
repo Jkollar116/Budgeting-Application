@@ -163,8 +163,8 @@ public class Login {
 //        HttpContext apiLeaderboardContext = server.createContext("/api/leaderboard", new LeaderboardHandler());
 //        apiLeaderboardContext.getFilters().add(new AuthFilter());
 //
-//        HttpContext apiNetworthContext = server.createContext("/api/networth", new NetWorthHandler());
-//        apiNetworthContext.getFilters().add(new AuthFilter());
+        HttpContext apiNetworthContext = server.createContext("/api/networth", new NetWorthHandler());
+        apiNetworthContext.getFilters().add(new AuthFilter());
 //        HttpContext apiNetworthCalculateContext = server.createContext("/api/networth/calculate", new NetWorthHandler());
 //        apiNetworthCalculateContext.getFilters().add(new AuthFilter());
 
@@ -190,6 +190,8 @@ public class Login {
         loanCalculatorContext.getFilters().add(new AuthFilter());
         HttpContext currencyContext = server.createContext("/currency.html", new StaticFileHandler());
         currencyContext.getFilters().add(new AuthFilter());
+        HttpContext netWorthContext = server.createContext("/netWorth.html", new StaticFileHandler());
+        netWorthContext.getFilters().add(new AuthFilter());
 
         server.setExecutor(null);
         server.start();
