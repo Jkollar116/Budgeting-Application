@@ -4,7 +4,7 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="e72c0420-fe48-4af3-a363-18d6d8618447" name="Changes" comment="Profile image won't load for some reason, making last ditch effort to fix now.">
+    <list default="true" id="e72c0420-fe48-4af3-a363-18d6d8618447" name="Changes" comment="updated graphs for the home page">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/resources/home.html" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/home.html" afterDir="false" />
     </list>
@@ -608,7 +608,15 @@
       <option name="project" value="LOCAL" />
       <updated>1746594694816</updated>
     </task>
-    <option name="localTasksCounter" value="45" />
+    <task id="LOCAL-00045" summary="updated graphs for the home page">
+      <option name="closed" value="true" />
+      <created>1746657154641</created>
+      <option name="number" value="00045" />
+      <option name="presentableId" value="LOCAL-00045" />
+      <option name="project" value="LOCAL" />
+      <updated>1746657154641</updated>
+    </task>
+    <option name="localTasksCounter" value="46" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -626,7 +634,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="added log out feature with cookies" />
     <MESSAGE value="added firebase integration as well as home page" />
     <MESSAGE value="do login" />
     <MESSAGE value="do login home page" />
@@ -651,7 +658,8 @@
     <MESSAGE value="Tried to fix register" />
     <MESSAGE value="Trying to fix image loading issue" />
     <MESSAGE value="Profile image won't load for some reason, making last ditch effort to fix now." />
-    <option name="LAST_COMMIT_MESSAGE" value="Profile image won't load for some reason, making last ditch effort to fix now." />
+    <MESSAGE value="updated graphs for the home page" />
+    <option name="LAST_COMMIT_MESSAGE" value="updated graphs for the home page" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>

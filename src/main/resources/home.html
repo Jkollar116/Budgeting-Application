@@ -19,6 +19,7 @@
         </ul>
     </nav>
 </header>
+
 <button class="drawer-toggle" onclick="toggleDrawer()">☰</button>
 <nav class="drawer" id="sideDrawer">
     <ul>
@@ -43,6 +44,7 @@
         <li><a href="/logout">Logout</a></li>
     </ul>
 </nav>
+
 <main>
     <section class="hero">
         <div class="hero-content">
@@ -50,6 +52,7 @@
             <p>Your financial overview</p>
         </div>
     </section>
+
     <div class="dashboard">
         <div class="card" id="netWorthCard">
             <h2>Net Worth</h2>
@@ -76,6 +79,7 @@
         </div>
     </div>
 </main>
+
 <script>
     function toggleDrawer() {
         document.getElementById('sideDrawer').classList.toggle('collapsed');
@@ -98,17 +102,17 @@
         } else if (savedTheme === 'dark') {
             body.classList.add('dark-mode');
         }
-        if (savedTheme) {
-            const input = document.querySelector(`input[name="theme"][value="${savedTheme}"]`);
-            if (input) input.checked = true;
-        }
     });
 
     window.addEventListener('DOMContentLoaded', () => {
         const navImg = document.getElementById('navProfileImage');
-        fetch('/api/profile', { method: 'GET', headers: { 'Content-Type': 'application/json' } })
+        fetch('/api/profile', {
+            method: 'GET',
+            credentials: 'include',
+            headers: { 'Content-Type': 'application/json' }
+        })
             .then(res => {
-                if (!res.ok) throw new Error('Profile fetch failed');
+                if (!res.ok) throw new Error();
                 return res.json();
             })
             .then(data => {
@@ -116,7 +120,7 @@
                 if (fields.profileImage && fields.profileImage.stringValue) {
                     navImg.src = fields.profileImage.stringValue;
                 } else {
-                    throw new Error('No image in profile data');
+                    throw new Error();
                 }
             })
             .catch(() => {
@@ -135,7 +139,9 @@
             return (arrayField && arrayField.arrayValue && arrayField.arrayValue.values) || [];
         }
 
-        fetch('/api/getData')
+        fetch('/api/getData', {
+            credentials: 'include'
+        })
             .then(res => {
                 if (!res.ok) {
                     console.error(`getData failed with status ${res.status}`);
@@ -287,7 +293,11 @@
         svg.setAttribute('width', size);
         svg.setAttribute('height', size);
 
-        const colors = ['#FFD700','#FF69B4','#8A2BE2','#20B2AA','#F08080','#DEB887','#87CEEB','#FFA500','#C71585','#ADFF2F','#00FA9A','#FF6347'];
+        const colors = [
+            '#FFD700','#FF69B4','#8A2BE2','#20B2AA',
+            '#F08080','#DEB887','#87CEEB','#FFA500',
+            '#C71585','#ADFF2F','#00FA9A','#FF6347'
+        ];
         let startAngle = 0;
 
         monthlyIncomesArr.forEach((v, i) => {
