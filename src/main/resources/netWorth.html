@@ -170,7 +170,6 @@
     window.addEventListener("DOMContentLoaded", function () {
         fetch("/api/networth", {
             method: "GET",
-            headers: { "Content-Type": "application/json" }
         })
             .then(async res => {
                 if (!res.ok) throw new Error(`HTTP ${res.status}`);
