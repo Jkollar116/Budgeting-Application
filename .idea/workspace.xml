@@ -4,8 +4,8 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="e72c0420-fe48-4af3-a363-18d6d8618447" name="Changes" comment="updated graphs for the home page">
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/example/HomeDataHandler.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/example/HomeDataHandler.java" afterDir="false" />
+    <list default="true" id="e72c0420-fe48-4af3-a363-18d6d8618447" name="Changes" comment="updated graphs for the home page via home data haldner">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -623,7 +623,15 @@
       <option name="project" value="LOCAL" />
       <updated>1746662755351</updated>
     </task>
-    <option name="localTasksCounter" value="47" />
+    <task id="LOCAL-00047" summary="updated graphs for the home page via home data haldner">
+      <option name="closed" value="true" />
+      <created>1746663264598</created>
+      <option name="number" value="00047" />
+      <option name="presentableId" value="LOCAL-00047" />
+      <option name="project" value="LOCAL" />
+      <updated>1746663264598</updated>
+    </task>
+    <option name="localTasksCounter" value="48" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -641,7 +649,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="added firebase integration as well as home page" />
     <MESSAGE value="do login" />
     <MESSAGE value="do login home page" />
     <MESSAGE value="updated it so now it shows the charts" />
@@ -666,7 +673,8 @@
     <MESSAGE value="Trying to fix image loading issue" />
     <MESSAGE value="Profile image won't load for some reason, making last ditch effort to fix now." />
     <MESSAGE value="updated graphs for the home page" />
-    <option name="LAST_COMMIT_MESSAGE" value="updated graphs for the home page" />
+    <MESSAGE value="updated graphs for the home page via home data haldner" />
+    <option name="LAST_COMMIT_MESSAGE" value="updated graphs for the home page via home data haldner" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
