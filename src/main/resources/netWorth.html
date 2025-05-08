@@ -168,21 +168,10 @@
     });
 
     window.addEventListener("DOMContentLoaded", function () {
-        fetch("/api/profile", {
+        fetch("/api/networth", {
             method: "GET",
             headers: { "Content-Type": "application/json" }
         })
-            .then(res => res.json())
-            .then(data => {
-                const fields = data.fields || {};
-                if (fields.profileImage) {
-                    const base64Image = fields.profileImage.stringValue;
-                    const navImg = document.getElementById("navProfileImage");
-                    if (navImg) navImg.src = base64Image;
-                }
-            });
-
-        fetch("/api/networth")
             .then(async res => {
                 if (!res.ok) throw new Error(`HTTP ${res.status}`);
                 const text = await res.text();
@@ -209,6 +198,21 @@
             .catch(err => {
                 console.error("Failed to load net worth:", err.message);
                 document.getElementById("result").textContent = "Net Worth: $0.00";
+            });
+    });
+    window.addEventListener("DOMContentLoaded", function () {
+        fetch("/api/profile", {
+            method: "GET",
+            headers: { "Content-Type": "application/json" }
+        })
+            .then(res => res.json())
+            .then(data => {
+                const fields = data.fields || {};
+                if (fields.profileImage) {
+                    const base64Image = fields.profileImage.stringValue;
+                    const navImg = document.getElementById("navProfileImage");
+                    if (navImg) navImg.src = base64Image;
+                }
             });
     });
 </script>
