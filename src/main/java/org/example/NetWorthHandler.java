@@ -2,6 +2,7 @@ package org.example;
 
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
+import org.json.JSONObject;
 
 import java.io.*;
 import java.net.HttpURLConnection;
@@ -25,19 +26,20 @@ public class NetWorthHandler implements HttpHandler {
             String body = readAll(exchange.getRequestBody());
             System.out.println("NetWorth POST Body: " + body);
 
-            String netWorthStr = getJsonValue(body, "netWorth");
-            String assetsStr = getJsonValue(body, "assetsLiabilities");
-            String holdingsStr = getJsonValue(body, "stocksCrypto");
+            JSONObject obj = new JSONObject(body);
+            double netWorth = obj.optDouble("netWorth", -1);
+            double assets = obj.optDouble("assetsLiabilities", -1);
+            double holdings = obj.optDouble("stocksCrypto", -1);
 
-            if (netWorthStr.isEmpty() || assetsStr.isEmpty() || holdingsStr.isEmpty()) {
+            if (netWorth < 0 || assets < 0 || holdings < 0) {
                 exchange.sendResponseHeaders(400, -1);
                 return;
             }
 
             String json = "{ \"fields\": {"
-                    + "\"netWorth\": {\"doubleValue\": " + netWorthStr + "},"
-                    + "\"assetsLiabilities\": {\"doubleValue\": " + assetsStr + "},"
-                    + "\"stocksCrypto\": {\"doubleValue\": " + holdingsStr + "}"
+                    + "\"netWorth\": {\"doubleValue\": " + netWorth + "},"
+                    + "\"assetsLiabilities\": {\"doubleValue\": " + assets + "},"
+                    + "\"stocksCrypto\": {\"doubleValue\": " + holdings + "}"
                     + "} }";
 
             String urlStr = "https://firestore.googleapis.com/v1/projects/cashclimb-d162c/databases/(default)/documents/Users/"
@@ -60,7 +62,6 @@ public class NetWorthHandler implements HttpHandler {
                 exchange.sendResponseHeaders(code, -1);
             }
             exchange.getResponseBody().close();
-
         } else if ("GET".equalsIgnoreCase(exchange.getRequestMethod())) {
             String urlStr = "https://firestore.googleapis.com/v1/projects/cashclimb-d162c/databases/(default)/documents/Users/"
                     + localId + "/NetWorth/networth";
@@ -93,13 +94,6 @@ public class NetWorthHandler implements HttpHandler {
         }
         return null;
     }
-
-    private static String getJsonValue(String json, String key) {
-        Pattern p = Pattern.compile("\"" + key + "\"\\s*:\\s*\"?([^\"]+?)\"?[,}]");
-        Matcher m = p.matcher(json);
-        return m.find() ? m.group(1) : "";
-    }
-
     private static String readAll(InputStream in) throws IOException {
         if (in == null) return "";
         BufferedReader reader = new BufferedReader(new InputStreamReader(in, StandardCharsets.UTF_8));

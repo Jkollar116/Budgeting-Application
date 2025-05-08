@@ -66,10 +66,20 @@
 
             <button type="button" class="submit-btn" onclick="calculateNetWorth()">Calculate</button>
             <button type="submit" class="submit-btn">Save Net Worth</button>
-            <canvas id="netWorthChart" width="100" height="100" style="margin-top: 30px;"></canvas>
-
         </form>
     </div>
+    <canvas id="netWorthChart" style="max-width: 300px; width: 100%;"></canvas>
+    <h2>Saved Tax Records</h2>
+    <table id="netWorthTable" class="data-table">
+        <thead>
+        <tr>
+            <th>Assets and Liabilities</th>
+            <th>Stock and Crypto Holdings</th>
+            <th>Net Worth</th>
+        </tr>
+        </thead>
+        <tbody></tbody>
+    </table>
 </main>
 
 <script>
@@ -127,17 +137,68 @@
             })
             .catch(() => alert("Save error."));
     }
+    function updateNetWorthTable(aL, holdings, netWorth) {
+        const tbody = document.querySelector("#netWorthTable tbody");
+        tbody.innerHTML = "";
+        const row = document.createElement("tr");
+        row.innerHTML = `
+            <td>$${aL.toFixed(2)}</td>
+            <td>$${holdings.toFixed(2)}</td>
+            <td>$${netWorth.toFixed(2)}</td>
+        `;
+        tbody.appendChild(row);
+    }
     document.getElementById("netWorthForm").addEventListener("submit", function (e) {
         e.preventDefault();
         const { aL, holdings, netWorth } = calculateNetWorth();
         saveNetWorthToFirebase(netWorth, aL, holdings);
         renderChart(aL, holdings);
+        updateNetWorthTable(aL, holdings, netWorth);
     });
+
+    function getNumericField(field) {
+        return parseFloat(field?.doubleValue ?? field?.integerValue ?? 0);
+    }
+
     window.addEventListener("DOMContentLoaded", () => {
         const theme = getThemePreference('theme');
         const body = document.body;
         if (theme === 'light') body.classList.add('light-mode');
         else if (theme === 'dark') body.classList.add('dark-mode');
+    });
+
+    window.addEventListener("DOMContentLoaded", function () {
+        fetch("/api/networth", {
+            method: "GET",
+            headers: { "Content-Type": "application/json" }
+        })
+            .then(async res => {
+                if (!res.ok) throw new Error(`HTTP ${res.status}`);
+                const text = await res.text();
+                if (!text.trim()) throw new Error("Empty response");
+                try {
+                    return JSON.parse(text);
+                } catch (err) {
+                    console.error("JSON parse error:", err.message);
+                    throw new Error("Invalid JSON format");
+                }
+            })
+            .then(data => {
+                const fields = data.fields || {};
+                const aL = getNumericField(fields.assetsLiabilities);
+                const holdings = getNumericField(fields.stocksCrypto);
+                const netWorth = getNumericField(fields.netWorth);
+
+                document.getElementById("assetsLiabilities").value = aL;
+                document.getElementById("stocks-crypto").value = holdings;
+                document.getElementById("result").textContent = "Net Worth: $" + netWorth.toFixed(2);
+                renderChart(aL, holdings);
+                updateNetWorthTable(aL, holdings, netWorth);
+            })
+            .catch(err => {
+                console.error("Failed to load net worth:", err.message);
+                document.getElementById("result").textContent = "Net Worth: $0.00";
+            });
     });
     window.addEventListener("DOMContentLoaded", function () {
         fetch("/api/profile", {
@@ -153,23 +214,6 @@
                     if (navImg) navImg.src = base64Image;
                 }
             });
-        fetch("/api/networth", {
-            method: "GET",
-            headers: { "Content-Type": "application/json" }
-        })
-            .then(res => res.json())
-            .then(data => {
-                const fields = data.fields || {};
-                const aL = parseFloat(fields.assetsLiabilities?.doubleValue || 0);
-                const holdings = parseFloat(fields.stocksCrypto?.doubleValue || 0);
-                const netWorth = aL + holdings;
-
-                document.getElementById("assetsLiabilities").value = aL;
-                document.getElementById("stocks-crypto").value = holdings;
-                document.getElementById("result").textContent = "Net Worth: $" + netWorth.toFixed(2);
-                renderChart(aL, holdings);
-            })
-            .catch(err => console.error("Failed to load net worth:", err));
     });
 </script>
 </body>
