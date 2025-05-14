@@ -71,6 +71,23 @@ public class HomeDataHandler implements HttpHandler {
         double[] monthlyExpenses = fetchMonthly("Expenses", localId);
         double[] monthlyIncomes  = fetchMonthly("Income", localId);
 
+        // Ensure the arrays have 12 entries (one for each month)
+        if (monthlyExpenses.length != 12) {
+            double[] newMonthlyExpenses = new double[12];
+            for (int i = 0; i < Math.min(12, monthlyExpenses.length); i++) {
+                newMonthlyExpenses[i] = monthlyExpenses[i];
+            }
+            monthlyExpenses = newMonthlyExpenses;
+        }
+        
+        if (monthlyIncomes.length != 12) {
+            double[] newMonthlyIncomes = new double[12];
+            for (int i = 0; i < Math.min(12, monthlyIncomes.length); i++) {
+                newMonthlyIncomes[i] = monthlyIncomes[i];
+            }
+            monthlyIncomes = newMonthlyIncomes;
+        }
+
         // Calculate current month totals
         LocalDate today = LocalDate.now();
         int idx = today.getMonthValue() - 1;
@@ -89,7 +106,7 @@ public class HomeDataHandler implements HttpHandler {
 
         // Totals
         fieldsObj.put("totalExpenses", new JSONObject().put("integerValue", String.valueOf((int)Math.round(currentMonthExpenses))));
-        fieldsObj.put("totalIncomes",  new JSONObject().put("integerValue", String.valueOf((int)Math.round(currentMonthIncomes))));
+        fieldsObj.put("totalIncome",  new JSONObject().put("integerValue", String.valueOf((int)Math.round(currentMonthIncomes))));
 
         // Net worth, income, bills – you can compute similarly by querying other collections or documents
         int netWorth    = computeNetWorth(localId);
@@ -126,18 +143,128 @@ public class HomeDataHandler implements HttpHandler {
         return monthly;
     }
 
-    // Placeholder implementations; replace with your actual Firestore queries if stored elsewhere
+    // Implementation of computing net worth from assets and liabilities
     private int computeNetWorth(String localId) {
-        // e.g. sum of cash + investments collections
-        return 0;
+        try {
+            // Get assets total
+            int assetsTotal = 0;
+            CollectionReference assetsRef = db
+                .collection("Users")
+                .document(localId)
+                .collection("Assets");
+            ApiFuture<QuerySnapshot> assetsFuture = assetsRef.get();
+            List<QueryDocumentSnapshot> assetsDocs = assetsFuture.get().getDocuments();
+            for (QueryDocumentSnapshot d : assetsDocs) {
+                Map<String, Object> fields = d.getData();
+                if (fields.containsKey("value") && fields.get("value") instanceof Map) {
+                    Map<?, ?> valueField = (Map<?, ?>)fields.get("value");
+                    if (valueField.containsKey("integerValue")) {
+                        assetsTotal += Integer.parseInt((String)valueField.get("integerValue"));
+                    } else if (valueField.containsKey("doubleValue")) {
+                        assetsTotal += (int)Math.round(Double.parseDouble(valueField.get("doubleValue").toString()));
+                    }
+                }
+            }
+            
+            // Get liabilities total
+            int liabilitiesTotal = 0;
+            CollectionReference liabilitiesRef = db
+                .collection("Users")
+                .document(localId)
+                .collection("Liabilities");
+            ApiFuture<QuerySnapshot> liabilitiesFuture = liabilitiesRef.get();
+            List<QueryDocumentSnapshot> liabilitiesDocs = liabilitiesFuture.get().getDocuments();
+            for (QueryDocumentSnapshot d : liabilitiesDocs) {
+                Map<String, Object> fields = d.getData();
+                if (fields.containsKey("value") && fields.get("value") instanceof Map) {
+                    Map<?, ?> valueField = (Map<?, ?>)fields.get("value");
+                    if (valueField.containsKey("integerValue")) {
+                        liabilitiesTotal += Integer.parseInt((String)valueField.get("integerValue"));
+                    } else if (valueField.containsKey("doubleValue")) {
+                        liabilitiesTotal += (int)Math.round(Double.parseDouble(valueField.get("doubleValue").toString()));
+                    }
+                }
+            }
+            
+            // Net worth is assets minus liabilities
+            return assetsTotal - liabilitiesTotal;
+        } catch (Exception e) {
+            System.out.println("Error computing net worth: " + e.getMessage());
+            // Return a default value in case of error
+            return 0;
+        }
     }
+    
+    // Implementation of computing total income across all income documents
     private int computeCumulativeIncome(String localId) {
-        // e.g. sum over all Income documents
-        return 0;
+        try {
+            int totalIncome = 0;
+            CollectionReference incomeRef = db
+                .collection("Users")
+                .document(localId)
+                .collection("Income");
+            ApiFuture<QuerySnapshot> incomeFuture = incomeRef.get();
+            List<QueryDocumentSnapshot> incomeDocs = incomeFuture.get().getDocuments();
+            
+            for (QueryDocumentSnapshot d : incomeDocs) {
+                Map<String, Object> fields = d.getData();
+                if (fields.containsKey("total") && fields.get("total") instanceof Map) {
+                    Map<?, ?> totalField = (Map<?, ?>)fields.get("total");
+                    if (totalField.containsKey("integerValue")) {
+                        totalIncome += Integer.parseInt((String)totalField.get("integerValue"));
+                    } else if (totalField.containsKey("doubleValue")) {
+                        totalIncome += (int)Math.round(Double.parseDouble(totalField.get("doubleValue").toString()));
+                    }
+                }
+            }
+            
+            return totalIncome;
+        } catch (Exception e) {
+            System.out.println("Error computing cumulative income: " + e.getMessage());
+            // Return a default value in case of error
+            return 0;
+        }
     }
+    
+    // Implementation of counting bills due soon
     private int computeBillsDue(String localId) {
-        // e.g. count of bills where dueDate <= today
-        return 0;
+        try {
+            int billsDue = 0;
+            CollectionReference billsRef = db
+                .collection("Users")
+                .document(localId)
+                .collection("Bills");
+                
+            LocalDate today = LocalDate.now();
+            LocalDate nextWeek = today.plusDays(7); // Bills due within a week
+            
+            ApiFuture<QuerySnapshot> billsFuture = billsRef.get();
+            List<QueryDocumentSnapshot> billsDocs = billsFuture.get().getDocuments();
+            
+            for (QueryDocumentSnapshot d : billsDocs) {
+                Map<String, Object> fields = d.getData();
+                if (fields.containsKey("dueDate") && fields.get("dueDate") instanceof Map) {
+                    Map<?, ?> dueDateField = (Map<?, ?>)fields.get("dueDate");
+                    if (dueDateField.containsKey("stringValue")) {
+                        String dueDateStr = (String)dueDateField.get("stringValue");
+                        LocalDate dueDate = parseAnyDate(dueDateStr);
+                        
+                        // Count if due date is between today and next week
+                        if (dueDate != null && 
+                            (dueDate.isEqual(today) || dueDate.isAfter(today)) && 
+                            dueDate.isBefore(nextWeek)) {
+                            billsDue++;
+                        }
+                    }
+                }
+            }
+            
+            return billsDue;
+        } catch (Exception e) {
+            System.out.println("Error computing bills due: " + e.getMessage());
+            // Return a default value in case of error
+            return 0;
+        }
     }
 
     private String extractCookieValue(String cookies, String name) {
