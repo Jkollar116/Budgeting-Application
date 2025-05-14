@@ -95,19 +95,7 @@ public class Login {
         HttpContext apiExpensesContext = server.createContext("/api/expenses", new ExpensesHandler());
         apiExpensesContext.getFilters().add(new AuthFilter());
 
-        // Register stock API endpoints with more specific paths first
-        HttpContext apiStockOrderWithIdContext = server.createContext("/api/stocks/orders/", new StockHandler());
-        apiStockOrderWithIdContext.getFilters().add(new AuthFilter());
-        HttpContext apiStockHistoryContext = server.createContext("/api/stocks/history", new StockHandler());
-        apiStockHistoryContext.getFilters().add(new AuthFilter());
-        HttpContext apiStockAccountContext = server.createContext("/api/stocks/account", new StockHandler());
-        apiStockAccountContext.getFilters().add(new AuthFilter());
-        HttpContext apiStockPortfolioContext = server.createContext("/api/stocks/portfolio", new StockHandler());
-        apiStockPortfolioContext.getFilters().add(new AuthFilter());
-        HttpContext apiStockOrdersContext = server.createContext("/api/stocks/orders", new StockHandler());
-        apiStockOrdersContext.getFilters().add(new AuthFilter());
-        HttpContext apiStockSymbolContext = server.createContext("/api/stocks", new StockHandler());
-        apiStockSymbolContext.getFilters().add(new AuthFilter());
+        // Stock API endpoints removed
 
         server.createContext("/logout", new LogoutHandler());
         HttpContext apiBudgetsContext = server.createContext("/api/budgets", new BudgetHandler());
@@ -142,10 +130,7 @@ public class Login {
 
         HttpContext cryptoContext = server.createContext("/crypto.html", new StaticFileHandler());
         cryptoContext.getFilters().add(new AuthFilter());
-        HttpContext stocksContext = server.createContext("/stocks.html", new StaticFileHandler());
-        stocksContext.getFilters().add(new AuthFilter());
-        HttpContext stocksSimpleContext = server.createContext("/stocks-simple.html", new StaticFileHandler());
-        stocksSimpleContext.getFilters().add(new AuthFilter());
+        // Stock HTML contexts removed
         HttpContext expensesPage = server.createContext("/expenses.html", new StaticFileHandler());
         expensesPage.getFilters().add(new AuthFilter());
         HttpContext incomePage = server.createContext("/income.html", new StaticFileHandler());
@@ -559,5 +544,4 @@ public class Login {
             exchange.sendResponseHeaders(302, -1);
         }
     }
-
 }
