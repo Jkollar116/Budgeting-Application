@@ -1,6 +1,6 @@
 # Cash Climb - Financial Management Application
 
-Cash Climb is designed to help users effectively manage their finances, track their expenses, and monitor their wealth growth over time. It integrates advanced features like a crypto wallet, personalized financial insights, and secure account management to provide a comprehensive financial tool.
+Cash Climb is designed to help users manage their finances, track their expenses, and monitor their wealth growth over time. It integrates advanced features like a crypto wallet, personalized financial insights, and secure account management to provide a comprehensive financial tool.
 
 #### Features
 
@@ -8,7 +8,7 @@ Cash Climb is designed to help users effectively manage their finances, track th
     - As a user, I would like to be able to register and create an account with CashClimb using my email address and password so that I can track my financial data. -Jack
 
 2. **Secure Login**
-    - As a user, I would like to be able to securely login to view my saved information and prevent others from being able to freely view my confidential information. -Jack
+    - As a user, I would like to be able to securely log in to view my saved information and prevent others from being able to freely view my confidential information. -Jack
 
 3. **Password Reset**
     - As a user, I would like to be able to reset my password in the case that I have forgotten it through a link in my email. -Jack
