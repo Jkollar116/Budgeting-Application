@@ -119,6 +119,9 @@ Cash Climb is designed to help users effectively manage their finances, track th
 
 <img width="1440" alt="Screen Shot 2025-05-14 at 9 14 30 PM" src="https://github.com/user-attachments/assets/bda3cbea-4ee5-41c6-8e39-97c4d271a556" />
 
+<img width="1440" alt="Screen Shot 2025-05-14 at 9 14 52 PM" src="https://github.com/user-attachments/assets/77218f84-506e-4f04-a7c0-f33863de542f" />
+
+
 
 
 
