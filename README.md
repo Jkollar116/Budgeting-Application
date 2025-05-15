@@ -4,74 +4,86 @@ Cash Climb is designed to help users effectively manage their finances, track th
 
 #### Features
 
-1. **Secure Login**
-    - Users can log in with their email and password to securely access their financial data.
+1. **Email/Password Registration**
+    - As a user, I would like to be able to register and create an account with CashClimb using my email address and password so that I can track my financial data. -Jack
 
-2. **Email/Password Registration**
-    - Users can register using their email address and password to create a CashClimb account for financial tracking.
+2. **Secure Login**
+    - As a user, I would like to be able to securely login to view my saved information and prevent others from being able to freely view my confidential information. -Jack
 
-3. **Profile Customization**
-    - Users can set and update their profile details to personalize their experience.
+3. **Password Reset**
+    - As a user, I would like to be able to reset my password in the case that I have forgotten it through a link in my email. -Jack
 
-4. **Password Reset**
-    - Users can reset their password if they forget it or wish to change it.
+4. **Profile Customization**
+    - As a user, I would like to be able to set my profile with an image, name, and career description in order to have a greater level of customization and representation. -Jay, Muhammad
 
-5. **Logout**
-    - Users can log out to ensure no one else can access their account.
+5. **Assets & Liabilities Entry**
+    - As a user, I would like to be able to track my assets and liabilities by entering them on one page so that I can accurately keep track of them and their values. -Jack
 
-6. **Account Deletion**
-    - Users can delete their account and all associated data when they no longer want to use the service.
+6. **Net Worth Display**
+    - As a user I would like to be able to see my net worth which automatically updates based on my assets and liabilities, so that I can keep track of any changes to it, and better understand my financial outlook. -Jack/Jay
 
-7. **Theme Selection**
-    - Users can change the website theme so the interface matches their color preferences.
+7. **AI Chatbot Advisor**
+    - As a user, I would like to be able to communicate with an AI chatbot in order to receive financial advice and answer any financial questions I may have. -Jack
 
-8. **Asset Aggregation**
-    - Users can track all their assets in one place and view the combined total value.
+8. **Crypto Wallet Integration**
+    - As a user, I would like to be able to enter any crypto wallets I am in possession of into one interface to be better organized and to keep track of my holdings. -Efe
 
-9. **Liability Tracking**
-    - Users can track their liabilities to understand their financial obligations.
+9. **Crypto Performance Graphs**
+    - As a user I would like to be able to see the value change in my crypto holdings through updating graphs, so I can see the value change over time. -Efe
 
-10. **AI Chatbot Advisor**
-    - Users can interact with an AI chatbot for finance-based tips and answers to their questions.
+10. **Currency Converter**
+    - As a user, I would like to be able to see the value of my money if it was in another currency, allowing me to adequately understand its value through a currency converter. -Jay
 
-11. **Crypto Wallet Tracking**
-    - Users can connect and monitor their cryptocurrency wallets to see performance over time.
+11. **Manual Expense Entry**
+    - As a user, I would like to be able to add individual expenses manually in order to keep track of them in a single space. -Jack
 
-12. **Currency Converter**
-    - Users can convert between currencies using current exchange rates for real-time value comparisons.
+12. **Bank CSV Upload**
+    - As a user, I would like to be able to upload excel sheets provided by my bank in order to keep track of any expenses I have made from my card or bank. -Jack
 
-13. **Manual Expense Entry**
-    - Users can enter individual cash expenses manually for up-to-date tracking.
+13. **Income Tracking**
+    - As a user, I would like to be able to add and track any income I might have, including one time or recurring payments, manually so that I can see how much I am earning monthly as well as my total income for the year. -Jack
 
-14. **CSV Bank Import**
-    - Users can upload bank CSV files to import large volumes of transactions automatically.
+14. **Loan Calculator**
+    - As a user, I would like to be able to calculate the value of a potential loan, so that I can understand the total interest I would need to pay and how much I would owe both monthly and in total. -Jay
 
-15. **Recurring Income Tracking**
-    - Users can record paycheck information for recurring income sources.
+15. **Tip Library**
+    - As a user, I would like to be able to view and filter a wide variety of tips that would give me financial advice. -Jay
 
-16. **One-Time Income Entry**
-    - Users can log one-off income events to keep their financial records complete.
+16. **Saved Tips**
+    - As a user, I would like to be able to save any tips that I might want to keep track of, for any future use or reference. -Jay
 
-17. **Loan Calculator**
-    - Users can calculate loan details like monthly payment, total interest, and overall payout.
+17. **Tax Calculator**
+    - As a user, I would like to be able to calculate my income and state taxes based on the financial information I enter, allowing me to see how much I need to pay in taxes in total. -Jay
 
-18. **Tax Calculator**
-    - Users can estimate their annual taxes by entering their financial information.
+18. **Theme Selection**
+    - As a user, I would like to be able to change the theme of the website in order to better fit my preferences. -Jay
 
-19. **Net Worth Calculator**
-    - Users can view their net worth by combining assets, liabilities, crypto, and stock holdings.
+19. **Secure Logout**
+    - As a user, I would like to be able to securely log out after hitting the logout button, and insure that after logging out none of my information can be accessed. -Jack/Jay
 
-20. **Subscription Tracking**
-    - Users can track their active subscriptions to avoid losing sight of recurring services.
+20. **Account Deletion**
+    - As a user, I would like to be able to delete my account in the case that I no longer want to use CashClimb for my financial data. -Ian
 
-21. **Bill Tracking**
-    - Users can track upcoming bills to ensure timely payments.
+21. **Bill Due Date Tracking**
+    - As a user, I would like to be able to enter and keep track of the due dates of my bills, so that I never miss a payment. -Ian
 
-22. **Financial Visualizations**
-    - Users can view their financial data in graphs and charts for better insights.
+22. **Subscription Tracking**
+    - As a user, I would like to be able to enter and keep track of all of my subscriptions and how much they are worth. -Ian, Jay
 
-23. **Saved Financial Tips**
-    - Users can browse pre-written finance tips and save the ones that matter most to them.
+23. **Budget Planner**
+    - As a user, I would like to be able to add and set a budget and compare it against my expenses, so that I can avoid spending over budget. -Efe, Ian
+
+24. **Net Worth Leaderboard**
+    - As a user, I would like to be able to view my net worth in relation to others through a leaderboard, which will actively update my position as well as others’ position based on their net worth. -Ian/Efe
+
+25. **Stock Portfolio Management**
+    - As a user, I would like to be able to keep track of my stock holdings by entering any stocks I hold, and be able to keep track of my order history for the stocks. -Efe
+
+26. **Stock Performance Graphs**
+    - As a user, I would like to be able to view how my stocks have changed in value over time through graphs and live updated data on my earnings. -Efe
+
+27. **Dashboard Overview**
+    - As a user I would like to be able to see a brief overview of my financial information on the dashboard based on what I have entered. -Jack/Efe
 
 
 #### Technologies Used
