@@ -4,35 +4,75 @@ Cash Climb is designed to help users effectively manage their finances, track th
 
 #### Features
 
-1. **Secure Login with OAuth**
-    - Users can securely sign up and log in using OAuth integrations with Google, ensuring all financial data and user accounts are protected.
+1. **Secure Login**
+    - Users can log in with their email and password to securely access their financial data.
 
-2. **Regex Input Validation**
-    - Validates all user inputs such as email, monetary values, and crypto transactions using regular expressions to ensure data integrity and formatting consistency.
+2. **Email/Password Registration**
+    - Users can register using their email address and password to create a CashClimb account for financial tracking.
 
-3. **Dashboard**
-    - Offers a holistic view of the user's financial health, displaying key metrics such as total net worth, expenses, savings, and investment values.
+3. **Profile Customization**
+    - Users can set and update their profile details to personalize their experience.
 
-4. **Expense Tracker**
-    - Allows users to input daily expenses categorically and see how these impact their overall financial goals and monthly budget.
+4. **Password Reset**
+    - Users can reset their password if they forget it or wish to change it.
 
-5. **Net Worth Calculator**
-    - Dynamically calculates and displays the user’s net worth by aggregating assets (including crypto investments) and subtracting liabilities.
+5. **Logout**
+    - Users can log out to ensure no one else can access their account.
 
-6. **Crypto Wallet Integration**
-    - Provides a secure interface to manage cryptocurrency transactions, view balances, and track performance directly within the app.
+6. **Account Deletion**
+    - Users can delete their account and all associated data when they no longer want to use the service.
 
-7. **Settings with Personalization Options**
-    - Enables users to customize the app interface with themes that reflect their style and preference, ensuring a personalized user experience.
+7. **Theme Selection**
+    - Users can change the website theme so the interface matches their color preferences.
 
-8. **Thread-Safe Operations**
-    - Guarantees that changes in the settings and updates to financial data are handled safely in a multi-threaded environment to avoid data inconsistency.
+8. **Asset Aggregation**
+    - Users can track all their assets in one place and view the combined total value.
 
-9. **Account Management**
-    - Offers features to update user profile details, change passwords, and securely delete accounts with all associated data.
+9. **Liability Tracking**
+    - Users can track their liabilities to understand their financial obligations.
 
-10. **Real-Time Financial Insights**
-    - Provides real-time analytics on spending habits, investment returns, and alerts for unusual activities to help users stay informed and proactive.
+10. **AI Chatbot Advisor**
+    - Users can interact with an AI chatbot for finance-based tips and answers to their questions.
+
+11. **Crypto Wallet Tracking**
+    - Users can connect and monitor their cryptocurrency wallets to see performance over time.
+
+12. **Currency Converter**
+    - Users can convert between currencies using current exchange rates for real-time value comparisons.
+
+13. **Manual Expense Entry**
+    - Users can enter individual cash expenses manually for up-to-date tracking.
+
+14. **CSV Bank Import**
+    - Users can upload bank CSV files to import large volumes of transactions automatically.
+
+15. **Recurring Income Tracking**
+    - Users can record paycheck information for recurring income sources.
+
+16. **One-Time Income Entry**
+    - Users can log one-off income events to keep their financial records complete.
+
+17. **Loan Calculator**
+    - Users can calculate loan details like monthly payment, total interest, and overall payout.
+
+18. **Tax Calculator**
+    - Users can estimate their annual taxes by entering their financial information.
+
+19. **Net Worth Calculator**
+    - Users can view their net worth by combining assets, liabilities, crypto, and stock holdings.
+
+20. **Subscription Tracking**
+    - Users can track their active subscriptions to avoid losing sight of recurring services.
+
+21. **Bill Tracking**
+    - Users can track upcoming bills to ensure timely payments.
+
+22. **Financial Visualizations**
+    - Users can view their financial data in graphs and charts for better insights.
+
+23. **Saved Financial Tips**
+    - Users can browse pre-written finance tips and save the ones that matter most to them.
+
 
 #### Technologies Used
 
