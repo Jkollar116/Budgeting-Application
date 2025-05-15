@@ -64,6 +64,11 @@
             <h3>Assets Breakdown</h3>
             <div id="assetsPieChart"></div>
         </div>
+        <div class="card" id="taxCard">
+            <h2>Taxes</h2>
+            <p id="totalTaxesDisplay" style="font-weight: bold; font-size: 1.2em;"></p>
+            <div id="taxesPieChart"></div>
+        </div>
         <div class="card chart-section">
             <h3>Liabilities Breakdown</h3>
             <div id="liabilitiesPieChart"></div>
@@ -406,6 +411,47 @@
     }
     window.addEventListener('DOMContentLoaded', () => {
         drawAssetLiabilityCharts();
+    });
+    async function loadTaxSummaryForDashboard() {
+        try {
+            const res = await fetch('/api/tax', {
+                method: 'GET',
+                headers: { 'Content-Type': 'application/json' },
+                credentials: 'include'
+            });
+            const data = await res.json();
+            const docs = data.documents || [];
+
+            if (!docs.length) {
+                document.getElementById("totalTaxesDisplay").textContent = "No tax data available.";
+                return;
+            }
+            const latest = docs[docs.length - 1];
+            const resultText = latest.fields?.result?.stringValue || '';
+
+            const fedMatch = resultText.match(/Estimated Federal Tax: \$([0-9.]+)/);
+            const stateMatch = resultText.match(/Estimated State Tax: \$([0-9.]+)/);
+            const totalMatch = resultText.match(/Estimated Total Tax Owed After Payments: \$([0-9.]+)/);
+
+            const fedTax = fedMatch ? parseFloat(fedMatch[1]) : 0;
+            const stateTax = stateMatch ? parseFloat(stateMatch[1]) : 0;
+            const totalTax = totalMatch ? parseFloat(totalMatch[1]) : (fedTax + stateTax);
+
+            document.getElementById("totalTaxesDisplay").textContent =
+                "Total Owed: $" + totalTax.toFixed(2);
+
+            const breakdown = new Map();
+            breakdown.set("Federal", fedTax);
+            breakdown.set("State", stateTax);
+
+            drawPieChart("taxesPieChart", breakdown, ['#4CAF50', '#2196F3']);
+        } catch (e) {
+            console.error("Error loading tax data:", e);
+            document.getElementById("totalTaxesDisplay").textContent = "Error loading tax info.";
+        }
+    }
+    window.addEventListener('DOMContentLoaded', () => {
+        loadTaxSummaryForDashboard();
     });
 </script>
 </body>

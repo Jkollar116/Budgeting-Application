@@ -4,14 +4,8 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="e72c0420-fe48-4af3-a363-18d6d8618447" name="Changes" comment="Actual last attempt">
-      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Checkout_at_3_1_25,_4_51 PM_[Changes]/shelved.patch" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Checkout_at_3_1_25__4_51PM__Changes_.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Checkout_at_3_3_25,_1_10 PM_[Changes]/shelved.patch" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Checkout_at_3_3_25__1_10PM__Changes_.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+    <list default="true" id="e72c0420-fe48-4af3-a363-18d6d8618447" name="Changes" comment="Added charts for the assets and liabilities">
       <change beforePath="$PROJECT_DIR$/src/main/resources/bills.html" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/bills.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/home.html" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/home.html" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -261,7 +255,7 @@
       <workItem from="1746386996798" duration="28341000" />
       <workItem from="1746577687355" duration="4488000" />
       <workItem from="1746827615308" duration="995000" />
-      <workItem from="1747261011518" duration="2653000" />
+      <workItem from="1747261011518" duration="2997000" />
     </task>
     <task id="LOCAL-00001" summary="First Commit of login">
       <option name="closed" value="true" />
@@ -639,7 +633,23 @@
       <option name="project" value="LOCAL" />
       <updated>1746663264598</updated>
     </task>
-    <option name="localTasksCounter" value="48" />
+    <task id="LOCAL-00048" summary="An attempt to fix the net worth loading on the home page.">
+      <option name="closed" value="true" />
+      <created>1747351270822</created>
+      <option name="number" value="00048" />
+      <option name="presentableId" value="LOCAL-00048" />
+      <option name="project" value="LOCAL" />
+      <updated>1747351270822</updated>
+    </task>
+    <task id="LOCAL-00049" summary="Added charts for the assets and liabilities">
+      <option name="closed" value="true" />
+      <created>1747351460738</created>
+      <option name="number" value="00049" />
+      <option name="presentableId" value="LOCAL-00049" />
+      <option name="project" value="LOCAL" />
+      <updated>1747351460738</updated>
+    </task>
+    <option name="localTasksCounter" value="50" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -657,8 +667,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="do login" />
-    <MESSAGE value="do login home page" />
     <MESSAGE value="updated it so now it shows the charts" />
     <MESSAGE value="Preliminary changes to the dashboard" />
     <MESSAGE value="More minor css and html fixes. Adjusted some of the pages to be more consistent with the others, still a work in progress." />
@@ -682,7 +690,9 @@
     <MESSAGE value="Profile image won't load for some reason, making last ditch effort to fix now." />
     <MESSAGE value="updated graphs for the home page" />
     <MESSAGE value="updated graphs for the home page via home data haldner" />
-    <option name="LAST_COMMIT_MESSAGE" value="updated graphs for the home page via home data haldner" />
+    <MESSAGE value="An attempt to fix the net worth loading on the home page." />
+    <MESSAGE value="Added charts for the assets and liabilities" />
+    <option name="LAST_COMMIT_MESSAGE" value="Added charts for the assets and liabilities" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
