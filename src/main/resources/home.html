@@ -56,8 +56,9 @@
     <div class="dashboard">
         <div class="card" id="netWorthCard">
             <h2>Net Worth</h2>
-            <p id="netWorthDisplay"></p>
-            <div id="netWorthChart"></div>
+            <p id="netWorthValue" style="font-weight: bold; font-size: 1.2em;"></p>
+            <p id="assetsValue"></p>
+            <p id="liabilitiesValue"></p>
         </div>
         <div class="card" id="incomeCard">
             <h2>Total Income</h2>
@@ -117,44 +118,44 @@
             });
     });
 
-    document.addEventListener('DOMContentLoaded', () => {
-        const getInt = f => f?.integerValue ? parseInt(f.integerValue, 10)
-            : f?.doubleValue ? Math.floor(parseFloat(f.doubleValue))
-                : 0;
-        const getArr = a => a?.arrayValue?.values || [];
-
-        fetch('/api/getData', {
-            credentials: 'include'
-        })
-            .then(res => {
-                if (!res.ok) {
-                    console.error(`getData failed with status ${res.status}`);
-                    return {};
-                }
-                return res.json();
-            })
-            .then(data => {
-                const fields = data.fields || {};
-                document.getElementById('netWorthDisplay').textContent =
-                    '$' + getInt(fields.netWorth);
-                document.getElementById('totalIncomeDisplay').textContent =
-                    '$' + getInt(fields.totalIncome);
-                document.getElementById('totalExpensesDisplay').textContent =
-                    '$' + getInt(fields.totalExpenses);
-                document.getElementById('billRemindersDisplay').innerHTML =
-                    '<h1>' + getInt(fields.billsDue) + '</h1>';
-
-                let mExp = getArr(fields.monthlyExpenses).map(getInt);
-                if (mExp.length < 12) mExp = Array(12).fill(0);
-                buildBarChart(mExp);
-                buildPieChartExpenses(mExp);
-
-                let mInc = getArr(fields.monthlyIncomes).map(getInt);
-                if (mInc.length < 12) mInc = Array(12).fill(0);
-                buildPieChartIncome(mInc);
-            })
-            .catch(e => console.error('Error fetching dashboard data:', e));
-    });
+    // document.addEventListener('DOMContentLoaded', () => {
+    //     const getInt = f => f?.integerValue ? parseInt(f.integerValue, 10)
+    //         : f?.doubleValue ? Math.floor(parseFloat(f.doubleValue))
+    //             : 0;
+    //     const getArr = a => a?.arrayValue?.values || [];
+    //
+    //     fetch('/api/getData', {
+    //         credentials: 'include'
+    //     })
+    //         .then(res => {
+    //             if (!res.ok) {
+    //                 console.error(`getData failed with status ${res.status}`);
+    //                 return {};
+    //             }
+    //             return res.json();
+    //         })
+    //         .then(data => {
+    //             const fields = data.fields || {};
+    //             document.getElementById('netWorthDisplay').textContent =
+    //                 '$' + getInt(fields.netWorth);
+    //             document.getElementById('totalIncomeDisplay').textContent =
+    //                 '$' + getInt(fields.totalIncome);
+    //             document.getElementById('totalExpensesDisplay').textContent =
+    //                 '$' + getInt(fields.totalExpenses);
+    //             document.getElementById('billRemindersDisplay').innerHTML =
+    //                 '<h1>' + getInt(fields.billsDue) + '</h1>';
+    //
+    //             let mExp = getArr(fields.monthlyExpenses).map(getInt);
+    //             if (mExp.length < 12) mExp = Array(12).fill(0);
+    //             buildBarChart(mExp);
+    //             buildPieChartExpenses(mExp);
+    //
+    //             let mInc = getArr(fields.monthlyIncomes).map(getInt);
+    //             if (mInc.length < 12) mInc = Array(12).fill(0);
+    //             buildPieChartIncome(mInc);
+    //         })
+    //         .catch(e => console.error('Error fetching dashboard data:', e));
+    // });
 
     function buildBarChart(data) {
         const svgNS = 'http://www.w3.org/2000/svg';
@@ -278,6 +279,41 @@
         });
         cont.appendChild(svg);
     }
+    async function loadAssetsAndLiabilities() {
+        try {
+            const [assetsRes, liabilitiesRes] = await Promise.all([
+                fetch('/api/assets', { credentials: 'include' }),
+                fetch('/api/liabilities', { credentials: 'include' })
+            ]);
+
+            if (!assetsRes.ok || !liabilitiesRes.ok) {
+                throw new Error('Failed to load assets or liabilities');
+            }
+
+            const assetsJson = await assetsRes.json();
+            const liabilitiesJson = await liabilitiesRes.json();
+
+            const total = arr => arr.reduce((sum, d) => {
+                const v = d.fields?.amount?.doubleValue || 0;
+                return sum + parseFloat(v);
+            }, 0);
+
+            const totalAssets = total(assetsJson.documents || []);
+            const totalLiabilities = total(liabilitiesJson.documents || []);
+            const netWorth = totalAssets - totalLiabilities;
+
+            document.getElementById('netWorthValue').textContent = 'Net Worth: $' + netWorth.toFixed(2);
+            document.getElementById('assetsValue').textContent = 'Assets: $' + totalAssets.toFixed(2);
+            document.getElementById('liabilitiesValue').textContent = 'Liabilities: $' + totalLiabilities.toFixed(2);
+        } catch (e) {
+            console.error('Error loading net worth data:', e);
+            document.getElementById('netWorthCard').innerHTML += '<p style="color:red;">Failed to load net worth info.</p>';
+        }
+    }
+
+    window.addEventListener('DOMContentLoaded', () => {
+        loadAssetsAndLiabilities();
+    });
 </script>
 </body>
 </html>
