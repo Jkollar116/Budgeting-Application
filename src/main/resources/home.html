@@ -60,6 +60,14 @@
             <p id="assetsValue"></p>
             <p id="liabilitiesValue"></p>
         </div>
+        <div class="card chart-section">
+            <h3>Assets Breakdown</h3>
+            <div id="assetsPieChart"></div>
+        </div>
+        <div class="card chart-section">
+            <h3>Liabilities Breakdown</h3>
+            <div id="liabilitiesPieChart"></div>
+        </div>
         <div class="card" id="incomeCard">
             <h2>Total Income</h2>
             <p id="totalIncomeDisplay"></p>
@@ -310,9 +318,94 @@
             document.getElementById('netWorthCard').innerHTML += '<p style="color:red;">Failed to load net worth info.</p>';
         }
     }
-
     window.addEventListener('DOMContentLoaded', () => {
         loadAssetsAndLiabilities();
+    });
+    function drawPieChart(containerId, dataMap, colors) {
+        const svgNS = 'http://www.w3.org/2000/svg';
+        const size = 200, cx = size / 2, cy = size / 2, r = cx - 10;
+        const total = Array.from(dataMap.values()).reduce((sum, val) => sum + val, 0);
+
+        const container = document.getElementById(containerId);
+        container.innerHTML = '';
+
+        if (total <= 0) {
+            container.innerHTML = "<p style='text-align:center;'>No data</p>";
+            return;
+        }
+
+        const svg = document.createElementNS(svgNS, 'svg');
+        svg.setAttribute('width', size);
+        svg.setAttribute('height', size);
+
+        let start = 0, i = 0;
+        for (const [label, value] of dataMap.entries()) {
+            if (!value) continue;
+            const angle = (value / total) * 2 * Math.PI;
+            const end = start + angle;
+
+            const x1 = cx + r * Math.cos(start),
+                y1 = cy + r * Math.sin(start),
+                x2 = cx + r * Math.cos(end),
+                y2 = cy + r * Math.sin(end),
+                largeArc = angle > Math.PI ? 1 : 0;
+
+            const pathData = `M ${cx} ${cy} L ${x1} ${y1} A ${r} ${r} 0 ${largeArc} 1 ${x2} ${y2} Z`;
+
+            const path = document.createElementNS(svgNS, 'path');
+            path.setAttribute('d', pathData);
+            path.setAttribute('fill', colors[i % colors.length]);
+            svg.appendChild(path);
+
+            const midAngle = start + angle / 2;
+            const lx = cx + (r / 2) * Math.cos(midAngle),
+                ly = cy + (r / 2) * Math.sin(midAngle);
+
+            const text = document.createElementNS(svgNS, 'text');
+            text.setAttribute('x', lx);
+            text.setAttribute('y', ly);
+            text.setAttribute('text-anchor', 'middle');
+            text.setAttribute('fill', '#fff');
+            text.setAttribute('font-size', '10');
+            text.textContent = label;
+            svg.appendChild(text);
+
+            start = end;
+            i++;
+        }
+        container.appendChild(svg);
+    }
+    async function drawAssetLiabilityCharts() {
+        try {
+            const [assetsRes, liabilitiesRes] = await Promise.all([
+                fetch('/api/assets', { credentials: 'include' }),
+                fetch('/api/liabilities', { credentials: 'include' })
+            ]);
+
+            const assets = (await assetsRes.json()).documents || [];
+            const liabilities = (await liabilitiesRes.json()).documents || [];
+
+            const extractMap = docs => {
+                const map = new Map();
+                docs.forEach(d => {
+                    const f = d.fields || {};
+                    const name = f.name?.stringValue || 'Unnamed';
+                    const amt = +f.amount?.doubleValue || 0;
+                    map.set(name, amt);
+                });
+                return map;
+            };
+            const assetMap = extractMap(assets);
+            const liabilityMap = extractMap(liabilities);
+            const pieColors = ['#FF8C00', '#1E90FF', '#32CD32', '#FF69B4', '#FFD700', '#8A2BE2', '#FF6347'];
+            drawPieChart('assetsPieChart', assetMap, pieColors);
+            drawPieChart('liabilitiesPieChart', liabilityMap, pieColors);
+        } catch (err) {
+            console.error("Error drawing pie charts:", err);
+        }
+    }
+    window.addEventListener('DOMContentLoaded', () => {
+        drawAssetLiabilityCharts();
     });
 </script>
 </body>
