@@ -1782,7 +1782,7 @@ body.light-mode .message.user {
 .chat-window .message,
 .chat-input input,
 .chat-input button {
-    color: #000 !important;
+    color: #000;
 }
 body.light-mode .message.bot {
     background-color: #ffffff;

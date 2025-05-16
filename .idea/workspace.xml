@@ -4,27 +4,11 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="e72c0420-fe48-4af3-a363-18d6d8618447" name="Changes" comment="Added a card for taxes, breaks it down by state and federal taxes. Updated bills page as well">
+    <list default="true" id="e72c0420-fe48-4af3-a363-18d6d8618447" name="Changes" comment="Changed assets and liabilities calculation back to net worth. &#10;Removed net worth page, now handled in the assets and liabilities page.&#10;Updated leaderboard to be a work in progress. &#10;Profile picture now loads in tips page. &#10;Dashboard done.">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/assetsLiabilities.html" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/assetsLiabilities.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/bills.html" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/bills.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/budget.html" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/budget.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/chat.html" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/chat.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/crypto.html" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/crypto.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/currency.html" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/currency.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/expenses.html" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/expenses.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/financialGoals.html" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/financialGoals.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/home.html" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/home.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/income.html" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/income.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/org/example/Login.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/example/Login.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/resources/leaderboard.html" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/leaderboard.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/loanCalculator.html" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/loanCalculator.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/profile.html" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/profile.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/savedTips.html" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/savedTips.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/savingsTips.html" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/savingsTips.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/settings.html" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/settings.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/stocks.html" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/stocks.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/tax.html" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/tax.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/tips.html" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/tips.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/style.css" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/style.css" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -274,15 +258,7 @@
       <workItem from="1746386996798" duration="28341000" />
       <workItem from="1746577687355" duration="4488000" />
       <workItem from="1746827615308" duration="995000" />
-      <workItem from="1747261011518" duration="9364000" />
-    </task>
-    <task id="LOCAL-00002" summary="Home page as well as updated colores">
-      <option name="closed" value="true" />
-      <created>1739947127113</created>
-      <option name="number" value="00002" />
-      <option name="presentableId" value="LOCAL-00002" />
-      <option name="project" value="LOCAL" />
-      <updated>1739947127113</updated>
+      <workItem from="1747261011518" duration="10557000" />
     </task>
     <task id="LOCAL-00003" summary="workspace.xml">
       <option name="closed" value="true" />
@@ -668,7 +644,15 @@
       <option name="project" value="LOCAL" />
       <updated>1747351682573</updated>
     </task>
-    <option name="localTasksCounter" value="51" />
+    <task id="LOCAL-00051" summary="Changed assets and liabilities calculation back to net worth. &#10;Removed net worth page, now handled in the assets and liabilities page.&#10;Updated leaderboard to be a work in progress. &#10;Profile picture now loads in tips page. &#10;Dashboard done.">
+      <option name="closed" value="true" />
+      <created>1747434997789</created>
+      <option name="number" value="00051" />
+      <option name="presentableId" value="LOCAL-00051" />
+      <option name="project" value="LOCAL" />
+      <updated>1747434997789</updated>
+    </task>
+    <option name="localTasksCounter" value="52" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -686,7 +670,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="Preliminary changes to the dashboard" />
     <MESSAGE value="More minor css and html fixes. Adjusted some of the pages to be more consistent with the others, still a work in progress." />
     <MESSAGE value="Fixed the logout button, it actually logs you out now. &#10;Made it so that if you are not logged in, you cannot go to any of the inner html pages, such as typing it in the search bar. If you hit the back button you will also not be able to go back to the page after being logged out. &#10;Added event listener to make sure that the theme is loaded in even if you hit the back button&#10;Added theme change for the splash screen and login page. &#10;Added screen for invalid session requests, such as trying to access a page while not being logged in" />
     <MESSAGE value="Added the theme change for the forgot password and register." />
@@ -711,7 +694,8 @@
     <MESSAGE value="An attempt to fix the net worth loading on the home page." />
     <MESSAGE value="Added charts for the assets and liabilities" />
     <MESSAGE value="Added a card for taxes, breaks it down by state and federal taxes. Updated bills page as well" />
-    <option name="LAST_COMMIT_MESSAGE" value="Added a card for taxes, breaks it down by state and federal taxes. Updated bills page as well" />
+    <MESSAGE value="Changed assets and liabilities calculation back to net worth. &#10;Removed net worth page, now handled in the assets and liabilities page.&#10;Updated leaderboard to be a work in progress. &#10;Profile picture now loads in tips page. &#10;Dashboard done." />
+    <option name="LAST_COMMIT_MESSAGE" value="Changed assets and liabilities calculation back to net worth. &#10;Removed net worth page, now handled in the assets and liabilities page.&#10;Updated leaderboard to be a work in progress. &#10;Profile picture now loads in tips page. &#10;Dashboard done." />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>

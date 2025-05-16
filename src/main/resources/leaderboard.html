@@ -143,6 +143,21 @@
     // }
     //
     // window.addEventListener("DOMContentLoaded", loadLeaderboard);
+    window.addEventListener("DOMContentLoaded", function () {
+        fetch("/api/profile", {
+            method: "GET",
+            headers: { "Content-Type": "application/json" }
+        })
+            .then(res => res.json())
+            .then(data => {
+                const fields = data.fields || {};
+                if (fields.profileImage) {
+                    const base64Image = fields.profileImage.stringValue;
+                    const navImg = document.getElementById("navProfileImage");
+                    if (navImg) navImg.src = base64Image;
+                }
+            });
+    });
 </script>
 </body>
 </html>

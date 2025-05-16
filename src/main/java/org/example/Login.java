@@ -180,7 +180,7 @@ public class Login {
 //        apiGoalsContext.getFilters().add(new AuthFilter());
 //        HttpContext apiGoalById = server.createContext("/api/goals/", new GoalsHandler());
 //        apiGoalById.getFilters().add(new AuthFilter());
-        HttpContext savingsTipsContext = server.createContext("/savingsTips.html", new StaticFileHandler());
+        HttpContext savingsTipsContext = server.createContext("/savedTips.html", new StaticFileHandler());
         savingsTipsContext.getFilters().add(new AuthFilter());
         HttpContext tipsContext = server.createContext("/tips.html", new StaticFileHandler());
         tipsContext.getFilters().add(new AuthFilter());
