@@ -34,7 +34,7 @@
         <li><a href="income.html">Income</a></li>
         <li><a href="leaderboard.html">Leaderboard</a></li>
         <li><a href="loanCalculator.html">Loan Calculator</a></li>
-        <li><a href="netWorth.html">Net Worth</a></li>
+<!--        <li><a href="netWorth.html">Net Worth</a></li>-->
         <li><a href="tips.html">Tips</a></li>
         <li><a href="savedTips.html">Saved Tips</a></li>
         <li><a href="stocks.html">Stocks</a></li>
@@ -60,36 +60,84 @@
             <p id="assetsValue"></p>
             <p id="liabilitiesValue"></p>
         </div>
-        <div class="card chart-section">
-            <h3>Assets Breakdown</h3>
-            <div id="assetsPieChart"></div>
-        </div>
         <div class="card" id="taxCard">
             <h2>Taxes</h2>
             <p id="totalTaxesDisplay" style="font-weight: bold; font-size: 1.2em;"></p>
             <div id="taxesPieChart"></div>
         </div>
         <div class="card chart-section">
-            <h3>Liabilities Breakdown</h3>
+            <h2>Assets Breakdown</h2>
+            <div id="assetsPieChart"></div>
+        </div>
+        <div class="card chart-section">
+            <h2>Liabilities Breakdown</h2>
             <div id="liabilitiesPieChart"></div>
         </div>
-        <div class="card" id="incomeCard">
-            <h2>Total Income</h2>
-            <p id="totalIncomeDisplay"></p>
-            <div id="incomeChart"></div>
+        <div class="card" id="incomeByTimeCard">
+            <h2>Income by Time Period</h2>
+            <label for="incomeTimeSelect">Select Period:</label>
+            <select id="incomeTimeSelect">
+                <option value="year">Entire Year</option>
+                <option value="0">January</option>
+                <option value="1">February</option>
+                <option value="2">March</option>
+                <option value="3">April</option>
+                <option value="4">May</option>
+                <option value="5">June</option>
+                <option value="6">July</option>
+                <option value="7">August</option>
+                <option value="8">September</option>
+                <option value="9">October</option>
+                <option value="10">November</option>
+                <option value="11">December</option>
+            </select>
+            <p id="incomeSummaryDisplay" style="margin-top: 10px; font-weight: bold;"></p>
+            <div id="incomeTimePieChart"></div>
         </div>
-        <div class="card" id="expensesCard">
-            <h2>Total Expenses</h2>
-            <p id="totalExpensesDisplay"></p>
-            <div id="expensesPieChart"></div>
+        <div class="card" id="incomeBarCard">
+            <h2>Income Breakdown Bar Chart</h2>
+            <div id="incomeTimeBarChart"></div>
         </div>
-        <div class="card" id="billsCard">
-            <h2>Bills Due</h2>
-            <div id="billRemindersDisplay"></div>
+        <div class="card" id="expensesSummaryCard">
+            <h2>Expenses Summary</h2>
+            <label for="expensesMonthSelect">Select Month:</label>
+            <select id="expensesMonthSelect">
+                <option value="all">All</option>
+                <option value="0">January</option>
+                <option value="1">February</option>
+                <option value="2">March</option>
+                <option value="3">April</option>
+                <option value="4">May</option>
+                <option value="5">June</option>
+                <option value="6">July</option>
+                <option value="7">August</option>
+                <option value="8">September</option>
+                <option value="9">October</option>
+                <option value="10">November</option>
+                <option value="11">December</option>
+            </select>
+            <p id="expensesSummaryDisplay" style="margin-top: 10px; font-weight: bold;"></p>
+            <div id="expensesTimePieChart"></div>
         </div>
-        <div class="card" id="chartCard">
-            <h2>Monthly Expenses</h2>
-            <div id="chartContainer"></div>
+        <div class="card" id="expensesBarCard">
+            <h2>Expenses Bar Graph</h2>
+            <label for="expensesBarMonthSelect">Select Month:</label>
+            <select id="expensesBarMonthSelect">
+                <option value="all">All</option>
+                <option value="0">January</option>
+                <option value="1">February</option>
+                <option value="2">March</option>
+                <option value="3">April</option>
+                <option value="4">May</option>
+                <option value="5">June</option>
+                <option value="6">July</option>
+                <option value="7">August</option>
+                <option value="8">September</option>
+                <option value="9">October</option>
+                <option value="10">November</option>
+                <option value="11">December</option>
+            </select>
+            <div id="expensesTimeBarChart"></div>
         </div>
     </div>
 </main>
@@ -105,31 +153,31 @@
 
     window.addEventListener('pageshow', e => { if (e.persisted) location.reload(); });
 
-    window.addEventListener('DOMContentLoaded', () => {
-        const theme = getThemePreference('theme');
-        if (theme) document.body.classList.add(theme + '-mode');
-    });
+    // window.addEventListener('DOMContentLoaded', () => {
+    //     const theme = getThemePreference('theme');
+    //     if (theme) document.body.classList.add(theme + '-mode');
+    // });
 
-    window.addEventListener('DOMContentLoaded', () => {
-        const navImg = document.getElementById('navProfileImage');
-        fetch('/api/profile', {
-            method: 'GET',
-            credentials: 'include',
-            headers: { 'Content-Type': 'application/json' }
-        })
-            .then(res => {
-                if (!res.ok) throw new Error();
-                return res.json();
-            })
-            .then(data => {
-                const img = data.fields?.profileImage?.stringValue;
-                if (img) navImg.src = img;
-                else throw new Error();
-            })
-            .catch(() => {
-                navImg.src = 'default-avatar.png';
-            });
-    });
+    // window.addEventListener('DOMContentLoaded', () => {
+    //     const navImg = document.getElementById('navProfileImage');
+    //     fetch('/api/profile', {
+    //         method: 'GET',
+    //         credentials: 'include',
+    //         headers: { 'Content-Type': 'application/json' }
+    //     })
+    //         .then(res => {
+    //             if (!res.ok) throw new Error();
+    //             return res.json();
+    //         })
+    //         .then(data => {
+    //             const img = data.fields?.profileImage?.stringValue;
+    //             if (img) navImg.src = img;
+    //             else throw new Error();
+    //         })
+    //         .catch(() => {
+    //             navImg.src = 'default-avatar.png';
+    //         });
+    // });
 
     // document.addEventListener('DOMContentLoaded', () => {
     //     const getInt = f => f?.integerValue ? parseInt(f.integerValue, 10)
@@ -323,9 +371,9 @@
             document.getElementById('netWorthCard').innerHTML += '<p style="color:red;">Failed to load net worth info.</p>';
         }
     }
-    window.addEventListener('DOMContentLoaded', () => {
-        loadAssetsAndLiabilities();
-    });
+    // window.addEventListener('DOMContentLoaded', () => {
+    //     loadAssetsAndLiabilities();
+    // });
     function drawPieChart(containerId, dataMap, colors) {
         const svgNS = 'http://www.w3.org/2000/svg';
         const size = 200, cx = size / 2, cy = size / 2, r = cx - 10;
@@ -360,6 +408,9 @@
             const path = document.createElementNS(svgNS, 'path');
             path.setAttribute('d', pathData);
             path.setAttribute('fill', colors[i % colors.length]);
+            const tooltip = document.createElementNS(svgNS, 'title');
+            tooltip.textContent = `${label}: $${value.toFixed(2)}`;
+            path.appendChild(tooltip);
             svg.appendChild(path);
 
             const midAngle = start + angle / 2;
@@ -370,8 +421,8 @@
             text.setAttribute('x', lx);
             text.setAttribute('y', ly);
             text.setAttribute('text-anchor', 'middle');
-            text.setAttribute('fill', '#fff');
-            text.setAttribute('font-size', '10');
+            text.setAttribute('fill', '#d97600');
+            text.setAttribute('font-size', '15');
             text.textContent = label;
             svg.appendChild(text);
 
@@ -402,17 +453,17 @@
             };
             const assetMap = extractMap(assets);
             const liabilityMap = extractMap(liabilities);
-            const pieColors = ['#FF8C00', '#1E90FF', '#32CD32', '#FF69B4', '#FFD700', '#8A2BE2', '#FF6347'];
+            const pieColors = ['', '#1E90FF', '#32CD32', '#FF69B4', '#FFD700', '#8A2BE2', '#FF6347','#4682B4', '#2E8B57', '#A52A2A', '#00CED1', '#DC143C', '#BDB76B', '#708090', '#6A5ACD'];
             drawPieChart('assetsPieChart', assetMap, pieColors);
             drawPieChart('liabilitiesPieChart', liabilityMap, pieColors);
         } catch (err) {
             console.error("Error drawing pie charts:", err);
         }
     }
-    window.addEventListener('DOMContentLoaded', () => {
-        drawAssetLiabilityCharts();
-    });
-    async function loadTaxSummaryForDashboard() {
+    // window.addEventListener('DOMContentLoaded', () => {
+    //     drawAssetLiabilityCharts();
+    // });
+    async function loadTax() {
         try {
             const res = await fetch('/api/tax', {
                 method: 'GET',
@@ -450,8 +501,213 @@
             document.getElementById("totalTaxesDisplay").textContent = "Error loading tax info.";
         }
     }
-    window.addEventListener('DOMContentLoaded', () => {
-        loadTaxSummaryForDashboard();
+    // window.addEventListener('DOMContentLoaded', () => {
+    //     loadTax();
+    // });
+    let fullIncomeDocs = [];
+    async function loadIncomeDataForDashboard() {
+        try {
+            const res = await fetch("/api/income", { credentials: 'include' });
+            const data = await res.json();
+            fullIncomeDocs = data.incomes || [];
+            updateIncomeChart("year");
+        } catch (err) {
+            console.error("Error loading income:", err);
+        }
+    }
+    function updateIncomeChart(selected) {
+        const pieMap = new Map();
+        let total = 0;
+
+        fullIncomeDocs.forEach(doc => {
+            const fields = doc.fields || {};
+            const amount = parseFloat(fields.total?.doubleValue || 0);
+            const name = fields.name?.stringValue || "Unnamed";
+            const dateStr = fields.date?.stringValue || "";
+            const recurring = fields.recurring?.stringValue === "true";
+            const freq = fields.frequency?.stringValue || "";
+
+            const date = new Date(dateStr);
+            const month = date.getMonth();
+
+            let count = 0;
+            if (recurring) {
+                switch (freq.toLowerCase()) {
+                    case "weekly": count = 52; break;
+                    case "biweekly": count = 26; break;
+                    case "monthly": count = 12; break;
+                    case "yearly": count = 1; break;
+                    default: count = 0;
+                }
+            } else {
+                if (!isNaN(month)) count = 1;
+            }
+            const isInSelectedMonth = !isNaN(month) && selected !== "year" && parseInt(selected) === month;
+            const shouldInclude =
+                (selected === "year" && count > 0) ||
+                (selected !== "year" && (recurring || isInSelectedMonth));
+
+            if (shouldInclude) {
+                let incomeAmount = 0;
+                if (recurring) {
+                    const perMonth = (amount * count) / 12;
+                    incomeAmount = selected === "year" ? perMonth * 12 : perMonth;
+                } else {
+                    incomeAmount = amount;
+                }
+                pieMap.set(name, (pieMap.get(name) || 0) + incomeAmount);
+                total += incomeAmount;
+            }
+        });
+        document.getElementById("incomeSummaryDisplay").textContent =
+            `Total: $${total.toFixed(2)}`;
+        drawPieChart("incomeTimePieChart", pieMap, ['#FFD700','#FF69B4','#8A2BE2','#20B2AA','#F08080','#DEB887','#87CEEB','#FFA500','#C71585','#ADFF2F','#00FA9A','#FF6347']);
+        buildBarChartFromMap("incomeTimeBarChart", pieMap);
+
+    }
+    document.addEventListener('DOMContentLoaded', () => {
+        loadIncomeDataForDashboard();
+        document.getElementById("incomeTimeSelect").addEventListener("change", function () {
+            updateIncomeChart(this.value);
+        });
+    });
+    function buildBarChartFromMap(containerId, dataMap) {
+        const svgNS = 'http://www.w3.org/2000/svg';
+        const container = document.getElementById(containerId);
+        container.innerHTML = '';
+
+        const labels = Array.from(dataMap.keys());
+        const values = Array.from(dataMap.values());
+        const maxVal = Math.max(...values, 1);
+
+        const w = container.clientWidth || 500;
+        const h = 300;
+        const bw = w / values.length;
+
+        const svg = document.createElementNS(svgNS, 'svg');
+        svg.setAttribute('width', w);
+        svg.setAttribute('height', h);
+
+        values.forEach((v, i) => {
+            const ph = v / maxVal * (h - 40);
+            const x = i * bw, y = h - ph;
+
+            const r = document.createElementNS(svgNS, 'rect');
+            r.setAttribute('x', x);
+            r.setAttribute('y', y);
+            r.setAttribute('width', bw - 4);
+            r.setAttribute('height', ph);
+            r.setAttribute('fill', '#1E90FF');
+
+            const title = document.createElementNS(svgNS, 'title');
+            title.textContent = `${labels[i]}: $${v.toFixed(2)}`;
+            r.appendChild(title);
+
+            svg.appendChild(r);
+
+            const t = document.createElementNS(svgNS, 'text');
+            t.setAttribute('x', x + (bw - 4) / 2);
+            t.setAttribute('y', h - 5);
+            t.setAttribute('fill', '#d97600');
+            t.setAttribute('font-size', '10');
+            t.setAttribute('text-anchor', 'middle');
+            t.textContent = labels[i].length > 10 ? labels[i].slice(0, 10) + '…' : labels[i];
+            svg.appendChild(t);
+        });
+        container.appendChild(svg);
+    }
+    let fullExpenseDocs = [];
+    async function loadExpensesDataForDashboard() {
+        try {
+            const res = await fetch("/api/expenses", { credentials: 'include' });
+            const data = await res.json();
+            fullExpenseDocs = data.documents || [];
+            updateExpensesPieChart("all");
+            updateExpensesBarChart("all");
+        } catch (err) {
+            console.error("Error loading expenses:", err);
+        }
+    }
+    function updateExpensesPieChart(selectedMonth) {
+        const pieMap = new Map();
+        let total = 0;
+
+        fullExpenseDocs.forEach(doc => {
+            const fields = doc.fields || {};
+            const amount = parseFloat(fields.total?.doubleValue || 0);
+            const category = fields.category?.stringValue || "Other";
+            const dateStr = fields.date?.stringValue || "";
+
+            const date = new Date(dateStr);
+            const month = date.getMonth();
+
+            const isInSelectedMonth = selectedMonth === "all" || (!isNaN(month) && parseInt(selectedMonth) === month);
+            if (isInSelectedMonth) {
+                pieMap.set(category, (pieMap.get(category) || 0) + amount);
+                total += amount;
+            }
+        });
+        document.getElementById("expensesSummaryDisplay").textContent = `Total: $${total.toFixed(2)}`;
+        drawPieChart("expensesTimePieChart", pieMap, ['#FFD700','#FF69B4','#8A2BE2','#20B2AA','#F08080','#DEB887','#87CEEB','#FFA500','#C71585','#ADFF2F','#00FA9A','#FF6347']);
+    }
+    function updateExpensesBarChart(selectedMonth) {
+        const barMap = new Map();
+        fullExpenseDocs.forEach(doc => {
+            const fields = doc.fields || {};
+            const amount = parseFloat(fields.total?.doubleValue || 0);
+            const name = fields.name?.stringValue || "Unnamed";
+            const dateStr = fields.date?.stringValue || "";
+
+            const date = new Date(dateStr);
+            const month = date.getMonth();
+
+            const isInSelectedMonth = selectedMonth === "all" || (!isNaN(month) && parseInt(selectedMonth) === month);
+            if (isInSelectedMonth) {
+                barMap.set(name, (barMap.get(name) || 0) + amount);
+            }
+        });
+
+        buildBarChartFromMap("expensesTimeBarChart", barMap);
+    }
+    // document.addEventListener('DOMContentLoaded', () => {
+    //     loadExpensesDataForDashboard();
+    //     document.getElementById("expensesMonthSelect").addEventListener("change", function () {
+    //         updateExpensesChart(this.value);
+    //     });
+    //     document.getElementById("expensesBarMonthSelect").addEventListener("change", function () {
+    //         updateExpensesChart(this.value);
+    //     });
+    // });
+    document.addEventListener('DOMContentLoaded', () => {
+        const theme = getThemePreference('theme');
+        if (theme) document.body.classList.add(theme + '-mode');
+
+        const navImg = document.getElementById('navProfileImage');
+        fetch('/api/profile', {
+            method: 'GET',
+            credentials: 'include',
+            headers: { 'Content-Type': 'application/json' }
+        })
+            .then(res => res.json())
+            .then(data => {
+                const img = data.fields?.profileImage?.stringValue;
+                if (img) navImg.src = img;
+            })
+            .catch(() => navImg.src = 'default-avatar.png');
+        loadAssetsAndLiabilities();
+        drawAssetLiabilityCharts();
+        loadTax();
+        loadIncomeDataForDashboard();
+        loadExpensesDataForDashboard();
+        document.getElementById("incomeTimeSelect").addEventListener("change", function () {
+            updateIncomeChart(this.value);
+        });
+        document.getElementById("expensesMonthSelect").addEventListener("change", function () {
+            updateExpensesPieChart(this.value);
+        });
+        document.getElementById("expensesBarMonthSelect").addEventListener("change", function () {
+            updateExpensesBarChart(this.value);
+        });
     });
 </script>
 </body>

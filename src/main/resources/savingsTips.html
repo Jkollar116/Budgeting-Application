@@ -11,7 +11,7 @@
             margin: 20px auto;
             padding: 20px;
         }
-        
+
         .tip-category {
             margin-bottom: 30px;
             background-color: var(--card-bg);
@@ -19,14 +19,14 @@
             padding: 20px;
             box-shadow: 0 2px 4px rgba(0,0,0,0.1);
         }
-        
+
         .tip-category h2 {
             color: var(--primary-color);
             margin-top: 0;
             padding-bottom: 10px;
             border-bottom: 1px solid var(--border-color);
         }
-        
+
         .tip {
             margin-bottom: 15px;
             padding: 15px;
@@ -34,38 +34,38 @@
             border-radius: 5px;
             border-left: 4px solid var(--accent-color);
         }
-        
+
         .tip h3 {
             margin-top: 0;
-            color: var(--text-color);
+            /*color: var(--text-color);*/
         }
-        
+
         .tip p {
             margin-bottom: 0;
         }
-        
+
         .tip-icon {
             font-size: 24px;
             margin-right: 10px;
             color: var(--accent-color);
         }
-        
+
         .search-box {
             margin-bottom: 20px;
             width: 100%;
             padding: 10px;
             border-radius: 5px;
             border: 1px solid var(--border-color);
-            background-color: var(--input-bg);
-            color: var(--text-color);
+            /*background-color: var(--input-bg);*/
+            /*color: var(--text-color);*/
         }
-        
+
         .no-results {
             text-align: center;
             padding: 20px;
             background-color: var(--card-bg);
             border-radius: 5px;
-            color: var(--text-muted);
+            /*color: var(--text-muted);*/
         }
     </style>
 </head>
@@ -89,14 +89,14 @@
             <li><a href="/logout">Logout</a></li>
         </ul>
     </nav>
-    
+
     <div class="container">
         <div class="tips-container">
             <h1>Savings Tips</h1>
             <p>Discover practical strategies to save money and improve your financial health.</p>
-            
+
             <input type="text" id="searchTips" class="search-box" placeholder="Search for tips...">
-            
+
             <div id="tipsContent">
                 <div class="tip-category">
                     <h2>📊 Budgeting</h2>
@@ -113,7 +113,7 @@
                         <p>Use envelopes with cash for different spending categories to help stick to your budget and avoid overspending.</p>
                     </div>
                 </div>
-                
+
                 <div class="tip-category">
                     <h2>💰 Daily Savings</h2>
                     <div class="tip">
@@ -133,7 +133,7 @@
                         <p>Review and cancel subscriptions you rarely use. The average person wastes $348 annually on unused subscriptions.</p>
                     </div>
                 </div>
-                
+
                 <div class="tip-category">
                     <h2>🏦 Banking and Credit</h2>
                     <div class="tip">
@@ -153,7 +153,7 @@
                         <p>Focus on paying off debts with the highest interest rates first to minimize the total interest paid.</p>
                     </div>
                 </div>
-                
+
                 <div class="tip-category">
                     <h2>🏠 Housing</h2>
                     <div class="tip">
@@ -169,7 +169,7 @@
                         <p>Invest in energy-efficient appliances and smart home devices to reduce utility bills over time.</p>
                     </div>
                 </div>
-                
+
                 <div class="tip-category">
                     <h2>🚗 Transportation</h2>
                     <div class="tip">
@@ -185,7 +185,7 @@
                         <p>Maintain proper tire pressure and remove excess weight from your car to improve fuel efficiency.</p>
                     </div>
                 </div>
-                
+
                 <div class="tip-category">
                     <h2>📱 Technology</h2>
                     <div class="tip">
@@ -201,7 +201,7 @@
                         <p>Rotate streaming subscriptions instead of having them all active at once.</p>
                     </div>
                 </div>
-                
+
                 <div class="tip-category">
                     <h2>🛒 Shopping</h2>
                     <div class="tip">
@@ -221,7 +221,7 @@
                         <p>Choose generic or store-brand products which often cost 20-30% less than name brands.</p>
                     </div>
                 </div>
-                
+
                 <div class="tip-category">
                     <h2>🎓 Education</h2>
                     <div class="tip">
@@ -237,7 +237,7 @@
                         <p>Check if your employer offers tuition reimbursement for continuing education.</p>
                     </div>
                 </div>
-                
+
                 <div class="tip-category">
                     <h2>💼 Career and Income</h2>
                     <div class="tip">
@@ -254,13 +254,13 @@
                     </div>
                 </div>
             </div>
-            
+
             <div id="noResults" class="no-results" style="display: none;">
                 <p>No tips found matching your search. Try a different term.</p>
             </div>
         </div>
     </div>
-    
+
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             const searchInput = document.getElementById('searchTips');
@@ -268,23 +268,23 @@
             const noResults = document.getElementById('noResults');
             const allTips = document.querySelectorAll('.tip');
             const categories = document.querySelectorAll('.tip-category');
-            
+
             // Search functionality
             searchInput.addEventListener('input', function() {
                 const query = this.value.toLowerCase().trim();
                 let foundResults = false;
-                
+
                 // Reset display
                 categories.forEach(category => {
                     category.style.display = 'block';
                     let visibleTips = 0;
-                    
+
                     // Check each tip in this category
                     const tips = category.querySelectorAll('.tip');
                     tips.forEach(tip => {
                         const tipTitle = tip.querySelector('h3').textContent.toLowerCase();
                         const tipContent = tip.querySelector('p').textContent.toLowerCase();
-                        
+
                         if (query === '' || tipTitle.includes(query) || tipContent.includes(query)) {
                             tip.style.display = 'block';
                             visibleTips++;
@@ -293,13 +293,13 @@
                             tip.style.display = 'none';
                         }
                     });
-                    
+
                     // Hide category if no tips match
                     if (visibleTips === 0) {
                         category.style.display = 'none';
                     }
                 });
-                
+
                 // Show/hide no results message
                 if (!foundResults && query !== '') {
                     tipsContent.style.display = 'none';
@@ -309,27 +309,27 @@
                     noResults.style.display = 'none';
                 }
             });
-            
+
             // Set up navigation menu toggle for mobile
             const menuToggle = document.querySelector('.menu-toggle');
             const navLinks = document.querySelector('.nav-links');
-            
+
             menuToggle.addEventListener('click', () => {
                 navLinks.classList.toggle('active');
             });
         });
-        
+
         // Theme handling
         function getThemePreference(name) {
             const match = document.cookie.match(new RegExp('(^| )' + name + '=([^;]+)'));
             if (!match) return null;
             return match[2];
         }
-        
+
         window.addEventListener('DOMContentLoaded', () => {
             const savedTheme = getThemePreference('theme');
             const body = document.body;
-            
+
             if (savedTheme === 'light') {
                 body.classList.add('light-mode');
             } else if (savedTheme === 'dark') {
