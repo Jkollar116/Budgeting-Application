@@ -13,6 +13,8 @@
    CashClimb has tools that help track day to day information as well. Sometimes it may be difficult to keep track of your day to day expenses. With CashClimb that is no longer a problem, you can upload individual expenses as well as excel spreadsheets from your bank to keep track of all of your expenses on just one page! Want to keep track of your income? You can add both individual and recurring income streams, ensuring you know exactly where your income came from and how much you have earned. 
 
    The tax process can be stressful for everyone, with CashClimbs’ custom tax calculator you can accurately approximate your income taxes for both the state and federal level. This information can help contextualize the process as well as alleviate any stress. With a wide range of tools such as a loan calculator and a currency converter, the same logic applies. 
+
+   CashClimb also offers tools to track and store any investments you may have made, including stocks and crypto. Simply add any information for the respective topic, and you will be able to view all of that information in one interface. 
    
 #### Features
 
