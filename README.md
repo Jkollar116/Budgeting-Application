@@ -103,7 +103,6 @@
 27. **Dashboard Overview**
     - As a user I would like to be able to see a brief overview of my financial information on the dashboard based on what I have entered. -Jack/Efe
 
-
 #### Technologies Used
 
 - **HTML/CSS**: For structuring and styling the user interface, ensuring a clean and modern look.
@@ -165,6 +164,12 @@
 
 <img width="1440" alt="Screen Shot 2025-05-14 at 10 03 57 PM" src="https://github.com/user-attachments/assets/cb1744a7-7bfb-4766-9633-26268e55ec82" />
 
+Authors:
+Jay Patel
+Ian Azimov
+Jack Kollar
+Efe Eyrildiz
+Muhammad Atif
 
 
 
