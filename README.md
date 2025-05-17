@@ -15,6 +15,8 @@
    The tax process can be stressful for everyone, with CashClimbs’ custom tax calculator you can accurately approximate your income taxes for both the state and federal level. This information can help contextualize the process as well as alleviate any stress. With a wide range of tools such as a loan calculator and a currency converter, the same logic applies. 
 
    CashClimb also offers tools to track and store any investments you may have made, including stocks and crypto. Simply add any information for the respective topic, and you will be able to view all of that information in one interface. 
+
+   Keep track of your bills and subscriptions and make sure that you never miss a single payment. With an AI powered chatbot, you can also discuss and ask any relevant questions to it for financial queries. 
    
 #### Features
 
