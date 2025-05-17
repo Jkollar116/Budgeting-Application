@@ -1,6 +1,6 @@
 # Cash Climb - Financial Management Application
 
-Cash Climb is designed to help users manage their finances, track their expenses, and monitor their wealth growth over time. It integrates advanced features like a crypto wallet, personalized financial insights, and secure account management to provide a comprehensive financial tool.
+Welcome to CashClimb! CashClimb is a revolutionary new upstart financial platform, aiming to help prospective users to help improve their financial outlook by providing tools that can aid in saving, investment, and financial tracking.
 
 #### Features
 
