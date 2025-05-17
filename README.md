@@ -1,6 +1,7 @@
 # Cash Climb - Financial Management Application
 
-Welcome to CashClimb! CashClimb is a revolutionary new upstart financial platform, aiming to help prospective users to help improve their financial outlook by providing tools that can aid in saving, investment, and financial tracking.
+    Welcome to CashClimb! CashClimb is a revolutionary new upstart financial platform, aiming to help prospective users to help improve their financial outlook by providing tools that can aid in saving, investment, and financial tracking.
+    With a wide range of financial tools such as stock tracking, crypto tracking, and many other tools to track your expenses you can be on the right track to financial independence. 
 
 #### Features
 
