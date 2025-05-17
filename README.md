@@ -17,6 +17,8 @@
    CashClimb also offers tools to track and store any investments you may have made, including stocks and crypto. Simply add any information for the respective topic, and you will be able to view all of that information in one interface. 
 
    Keep track of your bills and subscriptions and make sure that you never miss a single payment. With an AI powered chatbot, you can also discuss and ask any relevant questions to it for financial queries. 
+
+   All in all, with a simple login you have the power to gain financial freedom with a few clicks of a button. Track all of your data, calculate any information that may help you, and use our available resources to improve your knowledge. Your data will be displayed thoughtfully and cleanly on a sleek dashboard. Join CashClimb today!
    
 #### Features
 
