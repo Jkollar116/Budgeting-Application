@@ -1,8 +1,12 @@
 # Cash Climb - Financial Management Application
 
    Welcome to CashClimb! CashClimb is a revolutionary new upstart financial platform, aiming to help prospective users to help improve their financial outlook by providing tools that can aid in saving, investment, and financial tracking.
+   
    With a wide range of financial tools such as stock tracking, crypto tracking, and many other tools to track your expenses you can be on the right track to financial independence. 
+   
    CashClimb comes with a strong security background. All of your data is protected behind your credentials, ensuring that no one besides you can access your data. Want to change your password? You can do so easily, if your password is ever compromised you can change that in an instant. Want to delete your account? While not recommended, you can delete your account with a click of a button. 
+
+   A personalized experience is something that CashClimb strives to provide. With a custom profile section, you can upload your personal information, such as your career description, so that you can eventually be a part of our very own Net Worth Leaderboard! You can also set the theme for the website, ensuring that the website looks and feels exactly the way you want it to. 
    
 #### Features
 
