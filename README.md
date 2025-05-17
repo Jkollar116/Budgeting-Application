@@ -1,5 +1,12 @@
 # Cash Climb - Financial Management Application
 
+Authors:
+Jay Patel
+Ian Azimov
+Jack Kollar
+Efe Eyrildiz
+Muhammad Atif
+
    Welcome to CashClimb! CashClimb is a revolutionary new upstart financial platform, aiming to help prospective users to help improve their financial outlook by providing tools that can aid in saving, investment, and financial tracking.
    
    With a wide range of financial tools such as stock tracking, crypto tracking, and many other tools to track your expenses you can be on the right track to financial independence. 
@@ -163,14 +170,6 @@
 <img width="1440" alt="Screen Shot 2025-05-14 at 10 03 43 PM" src="https://github.com/user-attachments/assets/cb0debd2-744e-4dcd-97a6-56dbbaab6e61" />
 
 <img width="1440" alt="Screen Shot 2025-05-14 at 10 03 57 PM" src="https://github.com/user-attachments/assets/cb1744a7-7bfb-4766-9633-26268e55ec82" />
-
-Authors:
-Jay Patel
-Ian Azimov
-Jack Kollar
-Efe Eyrildiz
-Muhammad Atif
-
 
 
 
