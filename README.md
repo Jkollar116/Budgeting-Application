@@ -7,6 +7,8 @@
    CashClimb comes with a strong security background. All of your data is protected behind your credentials, ensuring that no one besides you can access your data. Want to change your password? You can do so easily, if your password is ever compromised you can change that in an instant. Want to delete your account? While not recommended, you can delete your account with a click of a button. 
 
    A personalized experience is something that CashClimb strives to provide. With a custom profile section, you can upload your personal information, such as your career description, so that you can eventually be a part of our very own Net Worth Leaderboard! You can also set the theme for the website, ensuring that the website looks and feels exactly the way you want it to. 
+
+   Our asset and liability tracking allows the user to keep track of each respective field. By doing so, CashClimb can help an user track their NetWorth, and also help the user to visualize how their assets and liabilities affect that calculation. 
    
 #### Features
 
