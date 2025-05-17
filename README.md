@@ -9,6 +9,8 @@
    A personalized experience is something that CashClimb strives to provide. With a custom profile section, you can upload your personal information, such as your career description, so that you can eventually be a part of our very own Net Worth Leaderboard! You can also set the theme for the website, ensuring that the website looks and feels exactly the way you want it to. 
 
    Our asset and liability tracking allows the user to keep track of each respective field. By doing so, CashClimb can help an user track their NetWorth, and also help the user to visualize how their assets and liabilities affect that calculation. 
+
+   CashClimb has tools that help track day to day information as well. Sometimes it may be difficult to keep track of your day to day expenses. With CashClimb that is no longer a problem, you can upload individual expenses as well as excel spreadsheets from your bank to keep track of all of your expenses on just one page! Want to keep track of your income? You can add both individual and recurring income streams, ensuring you know exactly where your income came from and how much you have earned. 
    
 #### Features
 
